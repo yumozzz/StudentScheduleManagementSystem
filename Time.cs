@@ -162,7 +162,7 @@
                     {
                         _timeline[offset].RType = RepetitiveType.MultipleDays;
                         _timeline[offset].SType = scheduleType;
-                        _offset += 24;
+                        _offset += 7 * 24;
                     }
                 }
             }
