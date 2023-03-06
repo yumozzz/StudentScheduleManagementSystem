@@ -1,32 +1,25 @@
-﻿namespace StudentScheduleManagementSystem
+﻿namespace StudentScheduleManagementSystem.Schedule
 {
-    internal delegate void ScheduleEventHandler(Schedule schedule, ScheduleEventArgs e);
-
-    internal class ScheduleEventArgs : EventArgs
+    public enum ScheduleType
     {
-        public ScheduleType Type { get; set; }
-        public string Name { get; set; }
-        public Time BeginTime { get; set; }
+        Idle,
+        Course,
+        Exam,
+        Activity,
+        TemporaryAffair,
     }
 
-    internal class Schedule
+    public class ScheduleBase
     {
-        public uint Id { get; init; }
+        public int Id { get; init; }
         public string Name { get; init; }
-        public Time BeginTime { get; init; }
+        public Time.TimePoint BeginTimePoint { get; init; }
         public int Duration { get; init; }
         public bool IsOnline { get; init; }
         public string? Description { get; set; }
-
-        private ScheduleEventHandler _scheduleEventHandler;
-        public event ScheduleEventHandler Notify
-        {
-            add { _scheduleEventHandler += value; }
-            remove { _scheduleEventHandler -= value; }
-        }
     }
 
-    internal class Course : Schedule
+    public class Course : ScheduleBase
     {
         public const ScheduleType @Type = ScheduleType.Course;
         private const int Earliest = 8;
@@ -34,19 +27,19 @@
         public bool IsRecurrent { get; set; } = true;
         public bool IsOnlineCourse { get; set; } = false;
         public string? OnlineClassRoomLink = null;
-        public Location? OfflineClassroomLocation = null;
+        public Map.Location? OfflineClassroomLocation = null;
     }
 
-    internal class Exam : Schedule
+    public class Exam : ScheduleBase
     {
         public const ScheduleType @Type = ScheduleType.Exam;
         private const int Earliest = 8;
         private const int Latest = 20;
         public new const bool IsOnline = false;
-        public Location OfflineClassroomLocation;
+        public Map.Location OfflineClassroomLocation;
     }
 
-    internal class Activity : Schedule
+    internal class Activity : ScheduleBase
     {
         public const ScheduleType @Type = ScheduleType.Activity;
         /*to be continued*/

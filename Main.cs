@@ -1,11 +1,7 @@
-﻿namespace StudentScheduleManagementSystem
+﻿namespace StudentScheduleManagementSystem.MainProgram
 {
     internal class Program
     {
-        private const int Timeout = 1000;
-        private static Time _clock = new();
-        private static bool _timePause = false;
-
         public static void Main(string[] args)
         {
             Thread clockThread = new Thread(Clock);
@@ -14,18 +10,7 @@
             mainThread.Start();
         }
 
-        private static void Clock()
-        {
-            while (true)
-            {
-                Thread.Sleep(Timeout);
-                if (!_timePause)
-                {
-                    Console.WriteLine(_clock.ToString());
-                    _clock++;
-                }
-            }
-        }
+        private static void Clock() { }
 
         public static void AcceptInput()
         {
@@ -34,35 +19,16 @@
         }
     }
 
-    internal enum ScheduleType
+    public class EndOfSemester : Exception { };
+
+    namespace Extension
     {
-        Idle,
-        Course,
-        Exam,
-        Activity,
-        TemporaryAffair,
-    }
-
-    internal enum Day
-    {
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
-        Sunday,
-    }
-
-    internal class EndOfSemester : Exception { };
-
-    internal class Location { }
-
-    internal static class ExtendedEnum
-    {
-        public static int ToInt(this Enum e)
+        public static class ExtendedEnum
         {
-            return e.GetHashCode();
+            public static int ToInt(this Enum e)
+            {
+                return e.GetHashCode();
+            }
         }
     }
 }
