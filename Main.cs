@@ -11,7 +11,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             ApplicationConfiguration.Initialize();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Thread clockThread = new(Time.Timer.Start);
+            Thread clockThread = new(Times.Timer.Start);
             clockThread.Start();
             Thread mainThread = new(AcceptInput);
             mainThread.Start();

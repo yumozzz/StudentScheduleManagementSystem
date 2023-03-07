@@ -1,7 +1,7 @@
-﻿using StudentScheduleManagementSystem.Time;
+﻿using StudentScheduleManagementSystem.Times;
 using System.Windows.Forms;
-using RepetitiveType = StudentScheduleManagementSystem.Time.Alarm.RepetitiveType;
-using Day = StudentScheduleManagementSystem.Time.Day;
+using RepetitiveType = StudentScheduleManagementSystem.Times.Alarm.RepetitiveType;
+using Day = StudentScheduleManagementSystem.Times.Day;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -17,10 +17,10 @@ namespace StudentScheduleManagementSystem.Schedule
     public abstract class ScheduleBase
     {
         public abstract ScheduleType SchType { get; }
-        public Time.Day ActiveDay { get; init; }
+        public Times.Day ActiveDay { get; init; }
         public int Id { get; private set; } = 0;
         public string Name { get; init; } = "default schedule";
-        public Time.TimePoint BeginTimePoint { get; init; }= new() { Week = 1, Day = Day.Monday, Hour = 0 };
+        public Times.Time BeginTime { get; init; }= new() { Week = 1, Day = Day.Monday, Hour = 0 };
         public abstract int Earliest { get; }
         public abstract int Latest { get; }
         public int Duration { get; init; } = 1;
@@ -63,7 +63,7 @@ namespace StudentScheduleManagementSystem.Schedule
         private new static string? OnlineLink = null;
     }
 
-    public class ScheduleManager : Time.Alarm
+    public class ScheduleManager : Times.Alarm
     {
         public static void AddSchedule()
         {

@@ -1,6 +1,7 @@
 ﻿using StudentScheduleManagementSystem.MainProgram.Extension;
+using static StudentScheduleManagementSystem.Times.Alarm;
 
-namespace StudentScheduleManagementSystem.Time
+namespace StudentScheduleManagementSystem.Times
 {
     public enum Day
     {
@@ -13,8 +14,24 @@ namespace StudentScheduleManagementSystem.Time
         Sunday,
     }
 
-    public class TimePoint
+    public class Time
     {
+        protected struct Record
+        {
+            public RepetitiveType RepType { get; set; }
+
+            public int AlarmId { get; set; }
+
+            public int SchId { get; set; }
+
+            public Record()
+            {
+                RepType = RepetitiveType.Null;
+                SchId = 0;
+                AlarmId = 0;
+            }
+        }
+        protected static Record[] Timeline { get; private set; } = new Record[16 * 7 * 24];
         private int _week = 1;
         public int Week
         {
@@ -43,30 +60,30 @@ namespace StudentScheduleManagementSystem.Time
             }
         }
 
-        public static TimePoint operator ++(TimePoint timePoint)
+        public static Time operator ++(Time time)
         {
-            if (timePoint.Hour == 23)
+            if (time.Hour == 23)
             {
-                timePoint.Hour = 0;
-                if (timePoint.Day == Day.Sunday)
+                time.Hour = 0;
+                if (time.Day == Day.Sunday)
                 {
-                    timePoint.Day = Day.Monday;
-                    timePoint.Week++;
-                    if (timePoint.Week > 16)
+                    time.Day = Day.Monday;
+                    time.Week++;
+                    if (time.Week > 16)
                     {
                         throw new MainProgram.EndOfSemester();
                     }
                 }
                 else
                 {
-                    timePoint.Day++;
+                    time.Day++;
                 }
             }
             else
             {
-                timePoint.Hour++;
+                time.Hour++;
             }
-            return timePoint;
+            return time;
         }
 
         public override string ToString()
@@ -80,26 +97,8 @@ namespace StudentScheduleManagementSystem.Time
         }
     }
 
-    public class Alarm
+    public class Alarm : Time
     {
-        public struct Record
-        {
-            public RepetitiveType RepType { get; set; }
-
-            public int AlarmId { get; set; }
-
-            public int SchId { get; set; }
-
-            public Record()
-            {
-                RepType = RepetitiveType.Null;
-                SchId = 0;
-                AlarmId = 0;
-            }
-        }
-
-        protected static Record[] Timeline { get; private set; } = new Record[16 * 7 * 24];
-
         public enum RepetitiveType
         {
             Null,
@@ -108,18 +107,18 @@ namespace StudentScheduleManagementSystem.Time
         }
 
         private static Dictionary<int, Alarm> _alarmList = new();
-        public TimePoint BeginTimePoint { get; private init; }
+        public Time BeginTime { get; private init; }
         public RepetitiveType RepType { get; private init; } = RepetitiveType.Single;
         public Day[]? ActiveDays { get; private init; }
         public int AlarmId { get; private init; } = 0;
 
-        private static int InternalRemoveAlarm(TimePoint baseTimePoint, RepetitiveType repetitiveType,
+        private static int InternalRemoveAlarm(Time baseTime, RepetitiveType repetitiveType,
                                                params Day[] activeDays)
         {
             int alarmId = 0;
             if (repetitiveType == RepetitiveType.Single)
             {
-                int offset = 7 * 24 * (baseTimePoint.Week - 1) + 24 * baseTimePoint.Day.ToInt() + baseTimePoint.Hour;
+                int offset = 7 * 24 * (baseTime.Week - 1) + 24 * baseTime.Day.ToInt() + baseTime.Hour;
                 Timeline[offset].RepType = RepetitiveType.Null;
                 Timeline[offset].SchId = 0;
                 alarmId = Timeline[offset].AlarmId;
@@ -134,7 +133,7 @@ namespace StudentScheduleManagementSystem.Time
                 int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
                 foreach (var dayOffset in dayOffsets)
                 {
-                    int offset = 24 * dayOffset + baseTimePoint.Hour;
+                    int offset = 24 * dayOffset + baseTime.Hour;
                     while (offset < 16 * 7 * 24)
                     {
                         Timeline[offset].RepType = RepetitiveType.Null;
@@ -152,14 +151,14 @@ namespace StudentScheduleManagementSystem.Time
             return alarmId;
         }
 
-        private static int InternalAddAlarm(TimePoint baseTimePoint, RepetitiveType repetitiveType, int scheduleId,
+        private static int InternalAddAlarm(Time baseTime, RepetitiveType repetitiveType, int scheduleId,
                                             params Day[] activeDays)
         {
             Random randomGenerator = new(DateTime.Now.Millisecond);
             int randomId = randomGenerator.Next();
             if (repetitiveType == RepetitiveType.Single)
             {
-                int offset = 7 * 24 * (baseTimePoint.Week - 1) + 24 * baseTimePoint.Day.ToInt() + baseTimePoint.Hour;
+                int offset = 7 * 24 * (baseTime.Week - 1) + 24 * baseTime.Day.ToInt() + baseTime.Hour;
                 Timeline[offset].RepType = RepetitiveType.Single;
                 Timeline[offset].SchId = scheduleId;
                 Timeline[offset].AlarmId = randomId;
@@ -174,7 +173,7 @@ namespace StudentScheduleManagementSystem.Time
 
                 foreach (var dayOffset in dayOffsets)
                 {
-                    int offset = 24 * dayOffset + baseTimePoint.Hour;
+                    int offset = 24 * dayOffset + baseTime.Hour;
                     while (offset < 16 * 7 * 24)
                     {
                         Timeline[offset].RepType = RepetitiveType.MultipleDays;
@@ -191,22 +190,22 @@ namespace StudentScheduleManagementSystem.Time
             return randomId;
         }
 
-        public static void RemoveAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
+        protected static void RemoveAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
                                        params Day[] activeDays)
         {
-            int alarmId = InternalRemoveAlarm(schedule.BeginTimePoint, repetitiveType, activeDays);
+            int alarmId = InternalRemoveAlarm(schedule.BeginTime, repetitiveType, activeDays);
             _alarmList.Remove(alarmId);
         }
 
-        public static void AddAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
+        protected static void AddAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
                                     AlarmEventHandler? onAlarmTimeUp,
                                     params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
 
-            int offset = 7 * 24 * (schedule.BeginTimePoint.Week - 1) +
-                         24 * schedule.BeginTimePoint.Day.ToInt() +
-                         schedule.BeginTimePoint.Hour;
+            int offset = 7 * 24 * (schedule.BeginTime.Week - 1) +
+                         24 * schedule.BeginTime.Day.ToInt() +
+                         schedule.BeginTime.Hour;
             if (Timeline[offset].RepType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
             else if (Timeline[offset].RepType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
             {
@@ -226,12 +225,15 @@ namespace StudentScheduleManagementSystem.Time
 
             #region 添加新闹钟
 
-            int thisAlarmId = InternalAddAlarm(schedule.BeginTimePoint, repetitiveType, schedule.Id, activeDays);
+            int thisAlarmId = InternalAddAlarm(schedule.BeginTime, repetitiveType, schedule.Id, activeDays);
             _alarmList.Add(thisAlarmId,
                            new()
                            {
+                               Week = schedule.BeginTime.Week,
+                               Day = schedule.BeginTime.Day,
+                               Hour = schedule.BeginTime.Hour,
                                AlarmId = thisAlarmId,
-                               BeginTimePoint = schedule.BeginTimePoint,
+                               BeginTime = schedule.BeginTime,
                                RepType = RepetitiveType.Single,
                                ActiveDays = activeDays,
                                _alarmEventHandler = null
@@ -248,7 +250,7 @@ namespace StudentScheduleManagementSystem.Time
             #endregion
         }
 
-        public static void TriggerAlarm(int time)
+        internal static void TriggerAlarm(int time)
         {
             int alarmId = Timeline[time].AlarmId;
             if (alarmId != 0)
@@ -277,10 +279,10 @@ namespace StudentScheduleManagementSystem.Time
     {
         private const int Timeout = 1000;
 
-        private static TimePoint _localTimePoint = new();
+        private static Time _localTime = new();
 
         private static int _offset = 0;
-        public static string LocalTime => _localTimePoint.ToString();
+        public static string LocalTime => _localTime.ToString();
         public static bool Pause { get; set; } = false;
 
         public static void Start()
@@ -292,7 +294,7 @@ namespace StudentScheduleManagementSystem.Time
                 {
                     Console.WriteLine(LocalTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
-                    _localTimePoint++;
+                    _localTime++;
                     _offset++;
                 }
             }
