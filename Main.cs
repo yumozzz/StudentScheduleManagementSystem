@@ -1,22 +1,37 @@
-﻿namespace StudentScheduleManagementSystem.MainProgram
+﻿using System.Runtime.InteropServices;
+
+namespace StudentScheduleManagementSystem.MainProgram
 {
     internal class Program
     {
-        public static void Main(string[] args)
+        [STAThread]
+        public static void Main()
         {
-            Thread clockThread = new Thread(Clock);
+            AllocConsole();
+            ApplicationConfiguration.Initialize();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Thread clockThread = new(Time.Timer.Start);
             clockThread.Start();
-            Thread mainThread = new Thread(AcceptInput);
+            Thread mainThread = new(AcceptInput);
             mainThread.Start();
+            Application.Run(new UI.MainWindow());
+            FreeConsole();
         }
-
-        private static void Clock() { }
 
         public static void AcceptInput()
         {
             Console.ReadLine();
             Console.Write(123);
         }
+        [DllImport("kernel32.dll", SetLastError = true)] 
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
+        // 释放控制台
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool FreeConsole();
     }
 
     public class EndOfSemester : Exception { };

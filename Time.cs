@@ -98,7 +98,7 @@ namespace StudentScheduleManagementSystem.Time
             }
         }
 
-        internal static Record[] Timeline { get; private set; } = new Record[16 * 7 * 24];
+        protected static Record[] Timeline { get; private set; } = new Record[16 * 7 * 24];
 
         public enum RepetitiveType
         {
@@ -291,7 +291,7 @@ namespace StudentScheduleManagementSystem.Time
                 if (!Pause)
                 {
                     Console.WriteLine(LocalTime);
-                    Alarm.TriggerAlarm(_offset);//触发这个时间点的闹钟（如果有的话）
+                    Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTimePoint++;
                     _offset++;
                 }
