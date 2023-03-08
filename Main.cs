@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using StudentScheduleManagementSystem.Times;
+using System.Runtime.InteropServices;
 
 namespace StudentScheduleManagementSystem.MainProgram
 {

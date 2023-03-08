@@ -1,4 +1,5 @@
 ﻿using StudentScheduleManagementSystem.MainProgram.Extension;
+using System.Collections;
 using static StudentScheduleManagementSystem.Times.Alarm;
 
 namespace StudentScheduleManagementSystem.Times
@@ -14,24 +15,23 @@ namespace StudentScheduleManagementSystem.Times
         Sunday,
     }
 
+    public enum RepetitiveType
+    {
+        Null,
+        Single,
+        MultipleDays,
+    }
+
+    internal class RemoveNDefaultItems : Exception { }
+
+    public interface IUniqueRepetitiveEvent
+    {
+        public int Id{ get; init; }
+        public RepetitiveType RepetitiveType{ get; init; }
+    }
+
     public class Time
     {
-        protected struct Record
-        {
-            public RepetitiveType RepType { get; set; }
-
-            public int AlarmId { get; set; }
-
-            public int SchId { get; set; }
-
-            public Record()
-            {
-                RepType = RepetitiveType.Null;
-                SchId = 0;
-                AlarmId = 0;
-            }
-        }
-        protected static Record[] Timeline { get; private set; } = new Record[16 * 7 * 24];
         private int _week = 1;
         public int Week
         {
@@ -95,34 +95,46 @@ namespace StudentScheduleManagementSystem.Times
         {
             return 7 * 24 * (Week - 1) + 24 * Day.ToInt() + Hour;
         }
+
+        public int ToInt()
+        {
+            return GetHashCode();
+        }
     }
 
-    public class Alarm : Time
+    public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
-        public enum RepetitiveType
+        private TRecord[] _timeline = new TRecord[16 * 7 * 24];
+
+        public TRecord this[int index]
         {
-            Null,
-            Single,
-            MultipleDays,
+            get => _timeline[index];
+            private set => _timeline[index] = value;
         }
 
-        private static Dictionary<int, Alarm> _alarmList = new();
-        public Time BeginTime { get; private init; }
-        public RepetitiveType RepType { get; private init; } = RepetitiveType.Single;
-        public Day[]? ActiveDays { get; private init; }
-        public int AlarmId { get; private init; } = 0;
-
-        private static int InternalRemoveAlarm(Time baseTime, RepetitiveType repetitiveType,
-                                               params Day[] activeDays)
+        private void RemoveSingleItem(int offset, TRecord defaultValue = default(TRecord))
         {
-            int alarmId = 0;
+            _timeline[offset] = defaultValue;
+        }
+
+        private void AddSingleItem(int offset, TRecord value)
+        {
+            if (_timeline[offset].Equals(default(TRecord)))
+            {
+                throw new RemoveNDefaultItems();
+            }
+            _timeline[offset] = value;
+        }
+
+        public int RemoveDuplicateItems(Time baseTime, RepetitiveType repetitiveType,
+                                                 params Day[] activeDays)
+        {
+            int id = 0;
             if (repetitiveType == RepetitiveType.Single)
             {
-                int offset = 7 * 24 * (baseTime.Week - 1) + 24 * baseTime.Day.ToInt() + baseTime.Hour;
-                Timeline[offset].RepType = RepetitiveType.Null;
-                Timeline[offset].SchId = 0;
-                alarmId = Timeline[offset].AlarmId;
-                Timeline[offset].AlarmId = 0;
+                int offset = baseTime.ToInt();
+                id = _timeline[offset].Id;
+                RemoveSingleItem(offset);
             }
             else if (repetitiveType == RepetitiveType.MultipleDays)
             {
@@ -136,10 +148,8 @@ namespace StudentScheduleManagementSystem.Times
                     int offset = 24 * dayOffset + baseTime.Hour;
                     while (offset < 16 * 7 * 24)
                     {
-                        Timeline[offset].RepType = RepetitiveType.Null;
-                        Timeline[offset].SchId = 0;
-                        alarmId = Timeline[offset].AlarmId;
-                        Timeline[offset].AlarmId = 0;
+                        id = _timeline[offset].Id;
+                        RemoveSingleItem(offset);
                         offset += 7 * 24;
                     }
                 }
@@ -148,20 +158,17 @@ namespace StudentScheduleManagementSystem.Times
             {
                 throw new ArgumentException(nameof(repetitiveType));
             }
-            return alarmId;
+            return id;
         }
 
-        private static int InternalAddAlarm(Time baseTime, RepetitiveType repetitiveType, int scheduleId,
-                                            params Day[] activeDays)
+        public int AddDuplicateItems(Time baseTime, RepetitiveType repetitiveType, params Day[] activeDays)
         {
             Random randomGenerator = new(DateTime.Now.Millisecond);
             int randomId = randomGenerator.Next();
             if (repetitiveType == RepetitiveType.Single)
             {
-                int offset = 7 * 24 * (baseTime.Week - 1) + 24 * baseTime.Day.ToInt() + baseTime.Hour;
-                Timeline[offset].RepType = RepetitiveType.Single;
-                Timeline[offset].SchId = scheduleId;
-                Timeline[offset].AlarmId = randomId;
+                int offset = baseTime.ToInt();
+                AddSingleItem(offset, new() { RepetitiveType = RepetitiveType.Single, Id = randomId });
             }
             else if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
             {
@@ -176,9 +183,7 @@ namespace StudentScheduleManagementSystem.Times
                     int offset = 24 * dayOffset + baseTime.Hour;
                     while (offset < 16 * 7 * 24)
                     {
-                        Timeline[offset].RepType = RepetitiveType.MultipleDays;
-                        Timeline[offset].SchId = scheduleId;
-                        Timeline[offset].AlarmId = randomId;
+                        RemoveSingleItem(offset, new() { RepetitiveType = RepetitiveType.MultipleDays, Id = randomId });
                         offset += 7 * 24;
                     }
                 }
@@ -189,34 +194,50 @@ namespace StudentScheduleManagementSystem.Times
             }
             return randomId;
         }
+    }
 
-        protected static void RemoveAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
+    public class Alarm
+    {
+        private struct Record : IUniqueRepetitiveEvent
+        {
+            public RepetitiveType @RepetitiveType { get; init; }
+
+            public int Id { get; init; }
+        }
+
+        private static Dictionary<int, Alarm> _alarmList = new();
+
+        private static Timeline<Record> _timeline = new();
+        public Time BeginTime { get; private init; }
+        public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
+        public Day[]? ActiveDays { get; private init; }
+        public int AlarmId { get; private init; } = 0;
+
+        public static void RemoveAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
                                        params Day[] activeDays)
         {
-            int alarmId = InternalRemoveAlarm(schedule.BeginTime, repetitiveType, activeDays);
+            int alarmId = _timeline.RemoveDuplicateItems(schedule.BeginTime, repetitiveType, activeDays);
             _alarmList.Remove(alarmId);
         }
 
-        protected static void AddAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
-                                    AlarmEventHandler? onAlarmTimeUp,
-                                    params Day[] activeDays)
+        public static void AddAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
+                                       AlarmEventHandler? onAlarmTimeUp,
+                                       params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
 
-            int offset = 7 * 24 * (schedule.BeginTime.Week - 1) +
-                         24 * schedule.BeginTime.Day.ToInt() +
-                         schedule.BeginTime.Hour;
-            if (Timeline[offset].RepType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
-            else if (Timeline[offset].RepType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
+            int offset = schedule.BeginTime.ToInt();
+            if (_timeline[offset].RepetitiveType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
+            else if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
             {
                 RemoveAlarm(schedule, RepetitiveType.Single); //删除单次闹钟
             }
             else if (repetitiveType == RepetitiveType.Single) //有重复闹钟而添加单次闹钟
             { } //不用理会
-            else if (Timeline[offset].RepType == RepetitiveType.MultipleDays &&
+            else if (_timeline[offset].RepetitiveType == RepetitiveType.MultipleDays &&
                      repetitiveType == RepetitiveType.MultipleDays) //有重复的闹钟而添加其他重复闹钟
             {
-                Day[] oldActiveDays = _alarmList[Timeline[offset].AlarmId].ActiveDays; //不可能为null
+                Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays; //不可能为null
                 activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
                 RemoveAlarm(schedule, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
             }
@@ -225,19 +246,16 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            int thisAlarmId = InternalAddAlarm(schedule.BeginTime, repetitiveType, schedule.Id, activeDays);
+            int thisAlarmId = _timeline.AddDuplicateItems(schedule.BeginTime, repetitiveType, activeDays);
             _alarmList.Add(thisAlarmId,
                            new()
                            {
-                               Week = schedule.BeginTime.Week,
-                               Day = schedule.BeginTime.Day,
-                               Hour = schedule.BeginTime.Hour,
                                AlarmId = thisAlarmId,
                                BeginTime = schedule.BeginTime,
-                               RepType = RepetitiveType.Single,
+                               RepetitiveType = RepetitiveType.Single,
                                ActiveDays = activeDays,
                                _alarmEventHandler = null
-                           }); //在列表中添加闹钟
+                           }); //内部调用无需创造临时实例，直接向表中添加实例即可
             if (onAlarmTimeUp != null)
             {
                 _alarmList[thisAlarmId].TimeUp += onAlarmTimeUp;
@@ -250,22 +268,17 @@ namespace StudentScheduleManagementSystem.Times
             #endregion
         }
 
-        internal static void TriggerAlarm(int time)
+        public static void TriggerAlarm(int time)
         {
-            int alarmId = Timeline[time].AlarmId;
+            int alarmId = _timeline[time].Id;
             if (alarmId != 0)
             {
                 Alarm alarm = _alarmList[alarmId];
-                alarm._alarmEventHandler?.Invoke(alarmId, new AlarmEventArgs() { SchId = Timeline[time].SchId });
+                alarm._alarmEventHandler?.Invoke(alarmId, EventArgs.Empty);
             }
         }
 
-        public delegate void AlarmEventHandler(int alarmId, AlarmEventArgs e);
-
-        public class AlarmEventArgs : EventArgs
-        {
-            public int SchId { get; set; }
-        }
+        public delegate void AlarmEventHandler(int alarmId, EventArgs e);
 
         private AlarmEventHandler? _alarmEventHandler;
         public event AlarmEventHandler TimeUp
@@ -293,7 +306,7 @@ namespace StudentScheduleManagementSystem.Times
                 if (!Pause)
                 {
                     Console.WriteLine(LocalTime);
-                    Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
+                    TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
                 }
