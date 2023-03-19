@@ -47,14 +47,12 @@ namespace StudentScheduleManagementSystem.Schedule
             _scheduleList.Remove(scheduleId);
         }
 
-        protected void AddScheduleOnTimeline(Times.Alarm.AlarmEventHandler onAlarmTimeUp) //添加单次日程
+        protected void AddScheduleOnTimeline(Times.Alarm.AlarmEventHandler? onAlarmTimeUp) //添加单次日程
         {
-            Times.Alarm.AddAlarm(this, RepetitiveType.Null, onAlarmTimeUp, ActiveDay);
-            AddScheduleOnTimeline();
-        }
-
-        protected void AddScheduleOnTimeline()
-        {
+            if(onAlarmTimeUp != null)
+            {
+                Times.Alarm.AddAlarm(this, RepetitiveType.Null, onAlarmTimeUp, ActiveDay);
+            }
             int offset = BeginTime.ToInt();
             if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次日程而添加重复日程
             {
@@ -66,7 +64,7 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         protected ScheduleBase(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
-                               bool isOnline, string? description)
+                               bool isOnline, string? description, Times.Alarm.AlarmEventHandler? onAlarmTimeUp)
         {
             if (duration is not 1 or 2 or 3)
             {
@@ -83,6 +81,7 @@ namespace StudentScheduleManagementSystem.Schedule
             Duration = duration;
             IsOnline = isOnline;
             Description = description;
+            AddScheduleOnTimeline(onAlarmTimeUp);
         }
     }
 
@@ -97,9 +96,9 @@ namespace StudentScheduleManagementSystem.Schedule
         public Map.Location? OfflineLocation { get; init; } = null;
 
         public Course(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
-                      string? description, string onlineLink) :
+                      string? description, string onlineLink, Times.Alarm.AlarmEventHandler? onAlarmTimeUp) :
             base(repetitiveType, activeDay, name, beginTime, duration,
-                 false, description)
+                 false, description, onAlarmTimeUp)
         {
             if (activeDay is Day.Saturday or Day.Sunday)
             {
@@ -110,9 +109,9 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         public Course(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
-                      string? description, Map.Location offlineLocation) :
+                      string? description, Map.Location offlineLocation, Times.Alarm.AlarmEventHandler? onAlarmTimeUp) :
             base(repetitiveType, activeDay, name, beginTime, duration,
-                 false, description)
+                 false, description, onAlarmTimeUp)
         {
             if (activeDay is Day.Saturday or Day.Sunday)
             {
@@ -133,8 +132,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public Map.Location OfflineLocation { get; init; }
 
         public Exam(Day activeDay, string name, Times.Time beginTime, int duration, string? description,
-                    Map.Location offlineLocation) :
-            base(RepetitiveType.Single, activeDay, name, beginTime, duration, false, description)
+                    Map.Location offlineLocation, Times.Alarm.AlarmEventHandler? onAlarmTimeUp) :
+            base(RepetitiveType.Single, activeDay, name, beginTime, duration, false, description, onAlarmTimeUp)
         {
             if (activeDay is Day.Saturday or Day.Sunday)
             {
@@ -154,21 +153,21 @@ namespace StudentScheduleManagementSystem.Schedule
         public Map.Location? OfflineLocation { get; init; } = null;
 
         protected Activity(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
-                           bool isOnline, string? description) :
+                           bool isOnline, string? description, Times.Alarm.AlarmEventHandler? onAlarmTimeUp) :
             base(repetitiveType, activeDay, name, beginTime, duration,
-                 isOnline, description) { }
+                 isOnline, description, onAlarmTimeUp) { }
 
         public Activity(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
-                        string? description, string onlineLink) :
-            base(repetitiveType, activeDay, name, beginTime, duration, true, description)
+                        string? description, string onlineLink, Times.Alarm.AlarmEventHandler? onAlarmTimeUp) :
+            base(repetitiveType, activeDay, name, beginTime, duration, true, description, onAlarmTimeUp)
         {
             OnlineLink = onlineLink;
             OfflineLocation = null;
         }
 
         public Activity(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
-                        string? description, Map.Location offlineLocation) :
-            base(repetitiveType, activeDay, name, beginTime, duration, false, description)
+                        string? description, Map.Location offlineLocation, Times.Alarm.AlarmEventHandler? onAlarmTimeUp) :
+            base(repetitiveType, activeDay, name, beginTime, duration, false, description, onAlarmTimeUp)
         {
             OnlineLink = null;
             OfflineLocation = offlineLocation;
@@ -181,8 +180,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public new Map.Location[] OfflineLocation { get; init; }
 
         public TemporaryAffairs(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime,
-                                int duration, string? description, Map.Location[] locations) :
-            base(repetitiveType, activeDay, name, beginTime, duration, false, description)
+                                int duration, string? description, Map.Location[] locations, Times.Alarm.AlarmEventHandler? onAlarmTimeUp) :
+            base(repetitiveType, activeDay, name, beginTime, duration, false, description, onAlarmTimeUp)
         {
             OnlineLink = null;
             OfflineLocation = locations;
