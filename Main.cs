@@ -1,8 +1,12 @@
-﻿using StudentScheduleManagementSystem.Times;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace StudentScheduleManagementSystem.MainProgram
 {
+    internal struct arg
+    {
+        public string Name { get; set; }
+        public string? Description { get; set; }
+    }
     internal class Program
     {
         [STAThread]
@@ -16,8 +20,37 @@ namespace StudentScheduleManagementSystem.MainProgram
             clockThread.Start();
             Thread mainThread = new(AcceptInput);
             mainThread.Start();
-            Application.Run(new UI.MainWindow());
-            FreeConsole();
+            Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
+            uiThread.Start();
+            Schedule.TemporaryAffairs affair1 = new(Times.RepetitiveType.MultipleDays,
+                                                   "test1",
+                                                   new() { Hour = 10 },
+                                                   "test1",
+                                                   Array.Empty<Map.Location>(),
+                                                   (id, param) =>
+                                                   {
+                                                       var p = (arg)param;
+                                                       Console.WriteLine(p.Name);
+                                                       Console.WriteLine(p.Description);
+                                                   },
+                                                   (object)new arg(){ Name = "test alarm1"},
+                                                   Times.Day.Monday,
+                                                   Times.Day.Tuesday);
+            Schedule.TemporaryAffairs affair2 = new(Times.RepetitiveType.Single,
+                                                   "test2",
+                                                   new() { Hour = 13 },
+                                                   "test2",
+                                                   Array.Empty<Map.Location>(),
+                                                   (id, param) =>
+                                                   {
+                                                       var p = (arg)param;
+                                                       Console.WriteLine(p.Name);
+                                                       Console.WriteLine(p.Description);
+                                                   },
+                                                   (object)new arg() { Name = "test alarm2" });
+            Schedule.ScheduleBase.RemoveSchedule(affair2.ScheduleId);
+
+            //FreeConsole();
         }
 
         public static void AcceptInput()

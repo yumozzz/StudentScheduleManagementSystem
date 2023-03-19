@@ -104,6 +104,8 @@ namespace StudentScheduleManagementSystem.Times
     {
         private TRecord[] _timeline = new TRecord[16 * 7 * 24];
 
+        private static Random randomGenerator = new(DateTime.Now.Millisecond);
+
         public TRecord this[int index]
         {
             get => _timeline[index];
@@ -117,17 +119,16 @@ namespace StudentScheduleManagementSystem.Times
 
         private void AddSingleItem(int offset, TRecord value)
         {
-            if (_timeline[offset].Equals(default(TRecord)))
+            if (!_timeline[offset].Equals(default(TRecord)))
             {
                 throw new OverrideNondefaultItems();
             }
             _timeline[offset] = value;
         }
 
-        public int RemoveDuplicateItems(Time baseTime, RepetitiveType repetitiveType,
-                                                 params Day[] activeDays)
+        public void RemoveMultipleItems(Time baseTime, RepetitiveType repetitiveType, out int id, params Day[] activeDays)
         {
-            int id = 0;
+            id = -1;
             if (repetitiveType == RepetitiveType.Single)
             {
                 int offset = baseTime.ToInt();
@@ -156,12 +157,10 @@ namespace StudentScheduleManagementSystem.Times
             {
                 throw new ArgumentException(nameof(repetitiveType));
             }
-            return id;
         }
 
-        public void AddDuplicateItems(Time baseTime, RepetitiveType repetitiveType, out int id, params Day[] activeDays)
+        public void AddMultipleItems(Time baseTime, RepetitiveType repetitiveType, out int id, params Day[] activeDays)
         {
-            Random randomGenerator = new(DateTime.Now.Millisecond);
             int randomId = randomGenerator.Next();
             if (repetitiveType == RepetitiveType.Single)
             {
@@ -210,24 +209,21 @@ namespace StudentScheduleManagementSystem.Times
         public Day[]? ActiveDays { get; private init; }
         public int AlarmId { get; private init; } = 0;
 
-        public static void RemoveAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
-                                       params Day[] activeDays)
+        public static void RemoveAlarm(Times.Time beginTime, RepetitiveType repetitiveType, params Day[] activeDays)
         {
-            int alarmId = _timeline.RemoveDuplicateItems(schedule.BeginTime, repetitiveType, activeDays);
+            _timeline.RemoveMultipleItems(beginTime, repetitiveType, out int alarmId, activeDays);
             _alarmList.Remove(alarmId);
         }
 
-        public static void AddAlarm(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
-                                       AlarmEventHandler? onAlarmTimeUp,
-                                       params Day[] activeDays)
+        public static void AddAlarm(Times.Time beginTime, RepetitiveType repetitiveType, AlarmCallback? onAlarmTimeUp, object? callbackParameter, params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
 
-            int offset = schedule.BeginTime.ToInt();
+            int offset = beginTime.ToInt();
             if (_timeline[offset].RepetitiveType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
             else if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
             {
-                RemoveAlarm(schedule, RepetitiveType.Single); //删除单次闹钟
+                RemoveAlarm(beginTime, RepetitiveType.Single); //删除单次闹钟
             }
             else if (repetitiveType == RepetitiveType.Single) //有重复闹钟而添加单次闹钟
             { } //不用理会
@@ -236,28 +232,25 @@ namespace StudentScheduleManagementSystem.Times
             {
                 Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays; //不可能为null
                 activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
-                RemoveAlarm(schedule, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
+                RemoveAlarm(beginTime, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
             }
 
             #endregion
 
             #region 添加新闹钟
 
-            _timeline.AddDuplicateItems(schedule.BeginTime, repetitiveType, out int thisAlarmId, activeDays);
+            _timeline.AddMultipleItems(beginTime, repetitiveType, out int thisAlarmId, activeDays);
             _alarmList.Add(thisAlarmId,
                            new()
                            {
                                AlarmId = thisAlarmId,
-                               BeginTime = schedule.BeginTime,
+                               BeginTime = beginTime,
                                RepetitiveType = RepetitiveType.Single,
                                ActiveDays = activeDays,
-                               _alarmEventHandler = null
+                               _alarmCallback = onAlarmTimeUp,
+                               _callbackParameter = callbackParameter
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
-            if (onAlarmTimeUp != null)
-            {
-                _alarmList[thisAlarmId].TimeUp += onAlarmTimeUp;
-            }
-            else
+            if(onAlarmTimeUp == null)
             {
                 Console.WriteLine("Null onAlarmTimeUp");
             }
@@ -265,24 +258,20 @@ namespace StudentScheduleManagementSystem.Times
             #endregion
         }
 
-        public static void TriggerAlarm(int time)
+        internal static void TriggerAlarm(int time)
         {
             int alarmId = _timeline[time].Id;
             if (alarmId != 0)
             {
-                Alarm alarm = _alarmList[alarmId];
-                alarm._alarmEventHandler?.Invoke(alarmId, EventArgs.Empty);
+                _alarmList[alarmId]._alarmCallback?.Invoke(alarmId, _alarmList[alarmId]._callbackParameter);
             }
         }
 
-        public delegate void AlarmEventHandler(int alarmId, EventArgs e);
+        public delegate void AlarmCallback(int alarmId, object? obj);
 
-        private AlarmEventHandler? _alarmEventHandler;
-        public event AlarmEventHandler TimeUp
-        {
-            add => _alarmEventHandler += value;
-            remove => _alarmEventHandler -= value;
-        }
+        private AlarmCallback? _alarmCallback;
+
+        private object? _callbackParameter;
     }
 
     public static class Timer
