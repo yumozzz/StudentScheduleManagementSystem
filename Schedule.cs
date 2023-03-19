@@ -1,5 +1,4 @@
-﻿using StudentScheduleManagementSystem.Times;
-using RepetitiveType = StudentScheduleManagementSystem.Times.RepetitiveType;
+﻿using RepetitiveType = StudentScheduleManagementSystem.Times.RepetitiveType;
 using Day = StudentScheduleManagementSystem.Times.Day;
 
 namespace StudentScheduleManagementSystem.Schedule
@@ -15,7 +14,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
     public abstract class ScheduleBase
     {
-        protected struct Record : IUniqueRepetitiveEvent
+        protected struct Record : Times.IUniqueRepetitiveEvent
         {
             public RepetitiveType @RepetitiveType { get; init; }
 
@@ -24,56 +23,103 @@ namespace StudentScheduleManagementSystem.Schedule
             public int Id { get; init; }
         }
 
-        protected static Timeline<Record> _timeline = new();
+        protected static Times.Timeline<Record> _timeline = new();
 
         protected static Dictionary<int, ScheduleBase> _scheduleList = new();
 
         public abstract ScheduleType @ScheduleType { get; }
 
-        public virtual RepetitiveType RepetitiveType { get;}
+        public virtual RepetitiveType RepetitiveType { get; }
         public Times.Day ActiveDay { get; init; }
         public int ScheduleId { get; protected set; } = 0;
         public string Name { get; init; } = "default schedule";
-        public Times.Time BeginTime { get; init; }= new() { Week = 1, Day = Day.Monday, Hour = 0 };
+        public Times.Time BeginTime { get; init; } = new() { Week = 1, Day = Day.Monday, Hour = 0 };
         public abstract int Earliest { get; }
         public abstract int Latest { get; }
         public int Duration { get; init; } = 1;
-        public virtual bool IsOnline { get; init; } = false;
+        public bool IsOnline { get; init; } = false;
         public string? Description { get; init; } = null;
 
         public static void RemoveSchedule(Schedule.ScheduleBase schedule, RepetitiveType repetitiveType,
-                                       params Day[] activeDays)
+                                          params Day[] activeDays)
         {
             int scheduleId = _timeline.RemoveDuplicateItems(schedule.BeginTime, repetitiveType, activeDays);
             _scheduleList.Remove(scheduleId);
         }
 
-        public abstract void AddSchedule(bool enableAlarm, Alarm.AlarmEventHandler? onAlarmTimeUp); //添加单次日程
-    }
-
-    public class Course : ScheduleBase
-    {
-        public override ScheduleType @ScheduleType => ScheduleType.Course;
-        public override RepetitiveType @RepetitiveType => RepetitiveType.Single;
-        public override int Earliest => 8;
-        public override int Latest => 20;
-        public string? OnlineLink { get; init; } = null;
-        public Map.Location? OfflineLocation { get; init; } = null;
-
-        public override void AddSchedule(bool enableAlarm, Alarm.AlarmEventHandler? onAlarmTimeUp)
+        protected void AddScheduleOnTimeline(Times.Alarm.AlarmEventHandler onAlarmTimeUp) //添加单次日程
         {
-            if (enableAlarm)
-            {
-                Times.Alarm.AddAlarm(this, RepetitiveType.Null, onAlarmTimeUp, ActiveDay);
-            }
+            Times.Alarm.AddAlarm(this, RepetitiveType.Null, onAlarmTimeUp, ActiveDay);
+            AddScheduleOnTimeline();
+        }
+
+        protected void AddScheduleOnTimeline()
+        {
             int offset = BeginTime.ToInt();
             if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次日程而添加重复日程
             {
                 RemoveSchedule(this, RepetitiveType.Single); //删除单次日程
             }
-            int thisScheduleId = _timeline.AddDuplicateItems(BeginTime, RepetitiveType.Single);
+            _timeline.AddDuplicateItems(BeginTime, RepetitiveType.Single, out int thisScheduleId);
             ScheduleId = thisScheduleId;
             _scheduleList.Add(thisScheduleId, this); //调用前已创造实例
+        }
+
+        protected ScheduleBase(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
+                               bool isOnline, string? description)
+        {
+            if (duration is not 1 or 2 or 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(duration));
+            }
+            if (beginTime.Hour < Earliest || beginTime.Hour > Latest - duration)
+            {
+                throw new ArgumentOutOfRangeException(nameof(beginTime));
+            }
+            RepetitiveType = repetitiveType;
+            ActiveDay = activeDay;
+            Name = name;
+            BeginTime = beginTime;
+            Duration = duration;
+            IsOnline = isOnline;
+            Description = description;
+        }
+    }
+
+    public class Course : ScheduleBase
+    {
+        public override ScheduleType @ScheduleType => ScheduleType.Course;
+        public override RepetitiveType @RepetitiveType => RepetitiveType.MultipleDays;
+        public override int Earliest => 8;
+        public override int Latest => 20;
+        public new const bool IsOnline = false;
+        public string? OnlineLink { get; init; } = null;
+        public Map.Location? OfflineLocation { get; init; } = null;
+
+        public Course(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
+                      string? description, string onlineLink) :
+            base(repetitiveType, activeDay, name, beginTime, duration,
+                 false, description)
+        {
+            if (activeDay is Day.Saturday or Day.Sunday)
+            {
+                throw new ArgumentOutOfRangeException(nameof(activeDay));
+            }
+            OnlineLink = onlineLink;
+            OfflineLocation = null;
+        }
+
+        public Course(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
+                      string? description, Map.Location offlineLocation) :
+            base(repetitiveType, activeDay, name, beginTime, duration,
+                 false, description)
+        {
+            if (activeDay is Day.Saturday or Day.Sunday)
+            {
+                throw new ArgumentOutOfRangeException(nameof(activeDay));
+            }
+            OnlineLink = null;
+            OfflineLocation = offlineLocation;
         }
     }
 
@@ -83,23 +129,18 @@ namespace StudentScheduleManagementSystem.Schedule
         public override RepetitiveType RepetitiveType => RepetitiveType.Single;
         public override int Earliest => 8;
         public override int Latest => 20;
-        public override bool IsOnline => false;
-        public Map.Location OfflineLocation { get; init; } = new();
-        //未完
-        public override void AddSchedule(bool enableAlarm, Alarm.AlarmEventHandler? onAlarmTimeUp)
+        public new const bool IsOnline = false;
+        public Map.Location OfflineLocation { get; init; }
+
+        public Exam(Day activeDay, string name, Times.Time beginTime, int duration, string? description,
+                    Map.Location offlineLocation) :
+            base(RepetitiveType.Single, activeDay, name, beginTime, duration, false, description)
         {
-            if (enableAlarm)
+            if (activeDay is Day.Saturday or Day.Sunday)
             {
-                Times.Alarm.AddAlarm(this, RepetitiveType.Null, onAlarmTimeUp, ActiveDay);
+                throw new ArgumentOutOfRangeException(nameof(activeDay));
             }
-            int offset = BeginTime.ToInt();
-            if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次日程而添加重复日程
-            {
-                RemoveSchedule(this, RepetitiveType.Single); //删除单次日程
-            }
-            int thisScheduleId = _timeline.AddDuplicateItems(BeginTime, RepetitiveType.Single);
-            ScheduleId = thisScheduleId;
-            _scheduleList.Add(thisScheduleId, this); //在列表中添加闹钟
+            OfflineLocation = offlineLocation;
         }
     }
 
@@ -111,28 +152,40 @@ namespace StudentScheduleManagementSystem.Schedule
         public override int Latest => 20;
         public string? OnlineLink { get; init; } = null;
         public Map.Location? OfflineLocation { get; init; } = null;
-        //未完
-        public override void AddSchedule(bool enableAlarm, Alarm.AlarmEventHandler? onAlarmTimeUp)
+
+        protected Activity(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
+                           bool isOnline, string? description) :
+            base(repetitiveType, activeDay, name, beginTime, duration,
+                 isOnline, description) { }
+
+        public Activity(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
+                        string? description, string onlineLink) :
+            base(repetitiveType, activeDay, name, beginTime, duration, true, description)
         {
-            if (enableAlarm)
-            {
-                Times.Alarm.AddAlarm(this, RepetitiveType.Null, onAlarmTimeUp, ActiveDay);
-            }
-            int offset = BeginTime.ToInt();
-            if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次日程而添加重复日程
-            {
-                RemoveSchedule(this, RepetitiveType.Single); //删除单次日程
-            }
-            int thisScheduleId = _timeline.AddDuplicateItems(BeginTime, RepetitiveType.Single);
-            ScheduleId = thisScheduleId;
-            _scheduleList.Add(thisScheduleId, this); //在列表中添加闹钟
+            OnlineLink = onlineLink;
+            OfflineLocation = null;
+        }
+
+        public Activity(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime, int duration,
+                        string? description, Map.Location offlineLocation) :
+            base(repetitiveType, activeDay, name, beginTime, duration, false, description)
+        {
+            OnlineLink = null;
+            OfflineLocation = offlineLocation;
         }
     }
 
     public class TemporaryAffairs : Activity
     {
-        public override bool IsOnline => false;
-        private new static string? OnlineLink = null;
-        public Map.Location[] Locations { get; init; }
+        public new const bool IsOnline = false;
+        public new Map.Location[] OfflineLocation { get; init; }
+
+        public TemporaryAffairs(RepetitiveType repetitiveType, Day activeDay, string name, Times.Time beginTime,
+                                int duration, string? description, Map.Location[] locations) :
+            base(repetitiveType, activeDay, name, beginTime, duration, false, description)
+        {
+            OnlineLink = null;
+            OfflineLocation = locations;
+        }
     }
 }

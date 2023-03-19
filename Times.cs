@@ -1,6 +1,4 @@
 ﻿using StudentScheduleManagementSystem.MainProgram.Extension;
-using System.Collections;
-using static StudentScheduleManagementSystem.Times.Alarm;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -22,7 +20,7 @@ namespace StudentScheduleManagementSystem.Times
         MultipleDays,
     }
 
-    internal class RemoveNDefaultItems : Exception { }
+    internal class OverrideNondefaultItems : Exception { }
 
     public interface IUniqueRepetitiveEvent
     {
@@ -121,7 +119,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             if (_timeline[offset].Equals(default(TRecord)))
             {
-                throw new RemoveNDefaultItems();
+                throw new OverrideNondefaultItems();
             }
             _timeline[offset] = value;
         }
@@ -161,7 +159,7 @@ namespace StudentScheduleManagementSystem.Times
             return id;
         }
 
-        public int AddDuplicateItems(Time baseTime, RepetitiveType repetitiveType, params Day[] activeDays)
+        public void AddDuplicateItems(Time baseTime, RepetitiveType repetitiveType, out int id, params Day[] activeDays)
         {
             Random randomGenerator = new(DateTime.Now.Millisecond);
             int randomId = randomGenerator.Next();
@@ -177,7 +175,6 @@ namespace StudentScheduleManagementSystem.Times
                     throw new ArgumentNullException(nameof(activeDays));
                 }
                 int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
-
                 foreach (var dayOffset in dayOffsets)
                 {
                     int offset = 24 * dayOffset + baseTime.Hour;
@@ -192,7 +189,7 @@ namespace StudentScheduleManagementSystem.Times
             {
                 throw new ArgumentException(nameof(repetitiveType));
             }
-            return randomId;
+            id = randomId;
         }
     }
 
@@ -246,7 +243,7 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            int thisAlarmId = _timeline.AddDuplicateItems(schedule.BeginTime, repetitiveType, activeDays);
+            _timeline.AddDuplicateItems(schedule.BeginTime, repetitiveType, out int thisAlarmId, activeDays);
             _alarmList.Add(thisAlarmId,
                            new()
                            {
@@ -306,7 +303,7 @@ namespace StudentScheduleManagementSystem.Times
                 if (!Pause)
                 {
                     Console.WriteLine(LocalTime);
-                    TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
+                    Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
                 }
