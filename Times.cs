@@ -1,4 +1,5 @@
-﻿using StudentScheduleManagementSystem.MainProgram.Extension;
+﻿using Microsoft.VisualBasic.Devices;
+using StudentScheduleManagementSystem.MainProgram.Extension;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -24,8 +25,8 @@ namespace StudentScheduleManagementSystem.Times
 
     public interface IUniqueRepetitiveEvent
     {
-        public int Id{ get; init; }
-        public RepetitiveType RepetitiveType{ get; init; }
+        public int Id { get; init; }
+        public RepetitiveType RepetitiveType { get; init; }
     }
 
     public class Time
@@ -126,7 +127,8 @@ namespace StudentScheduleManagementSystem.Times
             _timeline[offset] = value;
         }
 
-        public void RemoveMultipleItems(Time baseTime, RepetitiveType repetitiveType, out int id, params Day[] activeDays)
+        public void RemoveMultipleItems(Time baseTime, RepetitiveType repetitiveType, out int id,
+                                        params Day[] activeDays)
         {
             id = -1;
             if (repetitiveType == RepetitiveType.Single)
@@ -215,7 +217,8 @@ namespace StudentScheduleManagementSystem.Times
             _alarmList.Remove(alarmId);
         }
 
-        public static void AddAlarm(Times.Time beginTime, RepetitiveType repetitiveType, AlarmCallback? onAlarmTimeUp, object? callbackParameter, params Day[] activeDays)
+        public static void AddAlarm(Times.Time beginTime, RepetitiveType repetitiveType, AlarmCallback? onAlarmTimeUp,
+                                    object? callbackParameter, params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
 
@@ -250,7 +253,7 @@ namespace StudentScheduleManagementSystem.Times
                                _alarmCallback = onAlarmTimeUp,
                                _callbackParameter = callbackParameter
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
-            if(onAlarmTimeUp == null)
+            if (onAlarmTimeUp == null)
             {
                 Console.WriteLine("Null onAlarmTimeUp");
             }
@@ -286,7 +289,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void Start()
         {
-            while (true)
+            while (!MainProgram.Program.cts.IsCancellationRequested)
             {
                 Thread.Sleep(Timeout);
                 if (!Pause)
@@ -297,6 +300,7 @@ namespace StudentScheduleManagementSystem.Times
                     _offset++;
                 }
             }
+            Console.WriteLine("clock terminate");
         }
     }
 }

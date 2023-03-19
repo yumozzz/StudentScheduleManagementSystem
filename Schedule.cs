@@ -1,6 +1,5 @@
 ﻿using RepetitiveType = StudentScheduleManagementSystem.Times.RepetitiveType;
 using Day = StudentScheduleManagementSystem.Times.Day;
-using StudentScheduleManagementSystem.Times;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -46,14 +45,16 @@ namespace StudentScheduleManagementSystem.Schedule
             ScheduleBase schedule = _scheduleList[scheduleId];
             _scheduleList.Remove(scheduleId);
             _timeline.RemoveMultipleItems(schedule.BeginTime, schedule.RepetitiveType, out _, schedule.ActiveDays);
-            Times.Alarm.RemoveAlarm(schedule.BeginTime,schedule.RepetitiveType,schedule.ActiveDays);
+            Times.Alarm.RemoveAlarm(schedule.BeginTime, schedule.RepetitiveType, schedule.ActiveDays);
         }
 
-        protected void AddScheduleOnTimeline(Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter) //添加单次日程
+        protected void AddScheduleOnTimeline(Times.Alarm.AlarmCallback? alarmTimeUpCallback,
+                                             object? callbackParameter) //添加单次日程
         {
             if (alarmTimeUpCallback != null)
             {
-                Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter, ActiveDays);//默认为本日程的重复时间与启用日期
+                Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter,
+                                     ActiveDays); //默认为本日程的重复时间与启用日期
             }
             int offset = BeginTime.ToInt();
             if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次日程而添加重复日程
@@ -66,10 +67,10 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         protected ScheduleBase(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                               bool isOnline, string? description, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter,
-                               params Day[] activeDays)
+                               bool isOnline, string? description, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
+                               object? callbackParameter, params Day[] activeDays)
         {
-            if (duration is not 1 or 2 or 3)
+            if (duration is not (1 or 2 or 3))
             {
                 throw new ArgumentOutOfRangeException(nameof(duration));
             }
@@ -88,8 +89,9 @@ namespace StudentScheduleManagementSystem.Schedule
             if ((callbackParameter == null && alarmTimeUpCallback != null) ||
                 (callbackParameter != null && alarmTimeUpCallback == null))
             {
-                throw new ArgumentException("Argument \"alarmTimeUpCallback\" is inconsistent with argument \"callbackParameter\"");
-            }    
+                throw new
+                    ArgumentException("Argument \"alarmTimeUpCallback\" is inconsistent with argument \"callbackParameter\"");
+            }
             RepetitiveType = repetitiveType;
             ActiveDays = activeDays;
             Name = name;
@@ -111,11 +113,10 @@ namespace StudentScheduleManagementSystem.Schedule
         public Map.Location? OfflineLocation { get; init; } = null;
 
         public Course(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                      string? description, string onlineLink, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter,
-                      params Day[] activeDays) :
-            base(repetitiveType, name, beginTime, duration,
-                 false, description, alarmTimeUpCallback, callbackParameter,
-                 activeDays)
+                      string? description, string onlineLink, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
+                      object? callbackParameter, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, alarmTimeUpCallback,
+                   callbackParameter, activeDays)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -126,11 +127,10 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         public Course(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                      string? description, Map.Location offlineLocation, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter,
-                      params Day[] activeDays) :
-            base(repetitiveType, name, beginTime, duration,
-                 false, description, alarmTimeUpCallback, callbackParameter,
-                 activeDays)
+                      string? description, Map.Location offlineLocation, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
+                      object? callbackParameter, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, alarmTimeUpCallback,
+                   callbackParameter, activeDays)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -149,15 +149,14 @@ namespace StudentScheduleManagementSystem.Schedule
         public new const bool IsOnline = false;
         public Map.Location OfflineLocation { get; init; }
 
-        public Exam(string name, Times.Time beginTime, int duration, string? description,
-                    Map.Location offlineLocation, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter, params Day[] activeDays) :
-            base(RepetitiveType.Single, name, beginTime, duration,
-                 false, description, alarmTimeUpCallback, callbackParameter,
-                 activeDays)
+        public Exam(string name, Times.Time beginTime, int duration, string? description, Map.Location offlineLocation,
+                    Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter)
+            : base(RepetitiveType.Single, name, beginTime, duration, false, description, alarmTimeUpCallback,
+                   callbackParameter)
         {
-            if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
+            if (beginTime.Day is Day.Saturday or Day.Sunday)
             {
-                throw new ArgumentOutOfRangeException(nameof(activeDays));
+                throw new ArgumentOutOfRangeException(nameof(beginTime));
             }
             OfflineLocation = offlineLocation;
         }
@@ -172,29 +171,27 @@ namespace StudentScheduleManagementSystem.Schedule
         public Map.Location? OfflineLocation { get; init; } = null;
 
         protected Activity(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                           bool isOnline, string? description, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter,
-                           params Day[] activeDays) :
-            base(repetitiveType, name, beginTime, duration,
-                 isOnline, description, alarmTimeUpCallback, callbackParameter,
-                 activeDays) { }
+                           bool isOnline, string? description, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
+                           object? callbackParameter, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, isOnline, description, alarmTimeUpCallback,
+                   callbackParameter, activeDays) { }
 
         public Activity(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                        string? description, string onlineLink, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter, 
-                        params Day[] activeDays) :
-            base(repetitiveType, name, beginTime, duration,
-                 true, description, alarmTimeUpCallback, callbackParameter,
-                 activeDays)
+                        string? description, string onlineLink, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
+                        object? callbackParameter, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, true, description, alarmTimeUpCallback, callbackParameter,
+                   activeDays)
         {
             OnlineLink = onlineLink;
             OfflineLocation = null;
         }
 
         public Activity(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                        string? description, Map.Location offlineLocation, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter, 
-                        params Day[] activeDays) : 
-            base(repetitiveType, name, beginTime, duration,
-                 false, description, alarmTimeUpCallback, callbackParameter,
-                 activeDays)
+                        string? description, Map.Location offlineLocation,
+                        Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter,
+                        params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, alarmTimeUpCallback,
+                   callbackParameter, activeDays)
         {
             OnlineLink = null;
             OfflineLocation = offlineLocation;
@@ -208,10 +205,10 @@ namespace StudentScheduleManagementSystem.Schedule
         public new Map.Location[] OfflineLocation { get; init; }
 
         public TemporaryAffairs(RepetitiveType repetitiveType, string name, Times.Time beginTime, string? description,
-                                Map.Location[] locations, Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter, params Day[] activeDays) :
-            base(repetitiveType, name, beginTime, 1,
-                 false, description, alarmTimeUpCallback, callbackParameter,
-                 activeDays)
+                                Map.Location[] locations, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
+                                object? callbackParameter, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, 1, false, description, alarmTimeUpCallback, callbackParameter,
+                   activeDays)
         {
             OnlineLink = null;
             OfflineLocation = locations;
