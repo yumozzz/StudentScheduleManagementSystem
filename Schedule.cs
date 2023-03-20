@@ -44,31 +44,35 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             ScheduleBase schedule = _scheduleList[scheduleId];
             _scheduleList.Remove(scheduleId);
-            _timeline.RemoveMultipleItems(schedule.BeginTime, schedule.RepetitiveType, out _, schedule.ActiveDays);
-            Times.Alarm.RemoveAlarm(schedule.BeginTime, schedule.RepetitiveType, schedule.ActiveDays);
+            _timeline.RemoveMultipleItems(schedule.BeginTime, schedule.RepetitiveType, out _,
+                                          schedule.ActiveDays ?? Array.Empty<Day>());
+            Times.Alarm.RemoveAlarm(schedule.BeginTime, schedule.RepetitiveType,
+                                    schedule.ActiveDays ?? Array.Empty<Day>());
         }
 
-        protected void AddScheduleOnTimeline(Times.Alarm.AlarmCallback? alarmTimeUpCallback,
-                                             object? callbackParameter) //添加单次日程
+        protected virtual void AddScheduleOnTimeline(Times.Alarm.AlarmCallback alarmTimeUpCallback,
+                                                     object? callbackParameter) //添加日程
         {
-            if (alarmTimeUpCallback != null)
-            {
-                Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter,
-                                     ActiveDays); //默认为本日程的重复时间与启用日期
-            }
+            Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter,
+                                 ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
             int offset = BeginTime.ToInt();
-            if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次日程而添加重复日程
+            if (_timeline[offset].ScheduleType == ScheduleType.Idle) { }
+            else if (_timeline[offset].ScheduleType != ScheduleType.Idle &&
+                     ScheduleType != ScheduleType.TemporaryAffair) //有日程而添加非临时日程（需要选择是否覆盖）
             {
+                Console.WriteLine($"覆盖了日程{0}", _scheduleList[_timeline[offset].Id].Name);
+                //添加删除逻辑
+                _scheduleList.Remove(_timeline[offset].Id);
                 RemoveSchedule(_timeline[offset].Id); //删除单次日程
             }
+            else if (ScheduleType == ScheduleType.TemporaryAffair) { } //交由override函数处理
             _timeline.AddMultipleItems(BeginTime, RepetitiveType.Single, out int thisScheduleId);
             ScheduleId = thisScheduleId;
             _scheduleList.Add(thisScheduleId, this); //调用前已创造实例
         }
 
         protected ScheduleBase(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                               bool isOnline, string? description, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
-                               object? callbackParameter, params Day[] activeDays)
+                               bool isOnline, string? description, params Day[] activeDays)
         {
             if (duration is not (1 or 2 or 3))
             {
@@ -86,12 +90,6 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException("Repetitive type is multipledays but argument \"activeDays\" is null");
             }
-            if ((callbackParameter == null && alarmTimeUpCallback != null) ||
-                (callbackParameter != null && alarmTimeUpCallback == null))
-            {
-                throw new
-                    ArgumentException("Argument \"alarmTimeUpCallback\" is inconsistent with argument \"callbackParameter\"");
-            }
             RepetitiveType = repetitiveType;
             ActiveDays = activeDays;
             Name = name;
@@ -99,11 +97,19 @@ namespace StudentScheduleManagementSystem.Schedule
             Duration = duration;
             IsOnline = isOnline;
             Description = description;
+        }
+
+        public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback, object? callbackParameter)
+        {
+            if (callbackParameter == null)
+            {
+                Console.WriteLine("Null \"callbackParameter\", check twice");
+            }
             AddScheduleOnTimeline(alarmTimeUpCallback, callbackParameter);
         }
     }
 
-    public class Course : ScheduleBase
+    public partial class Course : ScheduleBase
     {
         public override ScheduleType @ScheduleType => ScheduleType.Course;
         public override int Earliest => 8;
@@ -113,10 +119,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public Map.Location? OfflineLocation { get; init; } = null;
 
         public Course(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                      string? description, string onlineLink, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
-                      object? callbackParameter, params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, false, description, alarmTimeUpCallback,
-                   callbackParameter, activeDays)
+                      string? description, string onlineLink, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -127,21 +131,19 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         public Course(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                      string? description, Map.Location offlineLocation, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
-                      object? callbackParameter, params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, false, description, alarmTimeUpCallback,
-                   callbackParameter, activeDays)
+                      string? description, Map.Location location, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
                 throw new ArgumentOutOfRangeException(nameof(activeDays));
             }
             OnlineLink = null;
-            OfflineLocation = offlineLocation;
+            OfflineLocation = location;
         }
     }
 
-    public class Exam : ScheduleBase
+    public partial class Exam : ScheduleBase
     {
         public override ScheduleType @ScheduleType => ScheduleType.Exam;
         public override int Earliest => 8;
@@ -149,10 +151,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public new const bool IsOnline = false;
         public Map.Location OfflineLocation { get; init; }
 
-        public Exam(string name, Times.Time beginTime, int duration, string? description, Map.Location offlineLocation,
-                    Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter)
-            : base(RepetitiveType.Single, name, beginTime, duration, false, description, alarmTimeUpCallback,
-                   callbackParameter)
+        public Exam(string name, Times.Time beginTime, int duration, string? description, Map.Location offlineLocation)
+            : base(RepetitiveType.Single, name, beginTime, duration, false, description)
         {
             if (beginTime.Day is Day.Saturday or Day.Sunday)
             {
@@ -162,7 +162,7 @@ namespace StudentScheduleManagementSystem.Schedule
         }
     }
 
-    public class Activity : ScheduleBase
+    public partial class Activity : ScheduleBase
     {
         public override ScheduleType @ScheduleType => ScheduleType.Activity;
         public override int Earliest => 8;
@@ -171,47 +171,57 @@ namespace StudentScheduleManagementSystem.Schedule
         public Map.Location? OfflineLocation { get; init; } = null;
 
         protected Activity(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                           bool isOnline, string? description, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
-                           object? callbackParameter, params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, isOnline, description, alarmTimeUpCallback,
-                   callbackParameter, activeDays) { }
+                           bool isOnline, string? description, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, isOnline, description) { }
 
         public Activity(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                        string? description, string onlineLink, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
-                        object? callbackParameter, params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, true, description, alarmTimeUpCallback, callbackParameter,
-                   activeDays)
+                        string? description, string onlineLink, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, true, description, activeDays)
         {
             OnlineLink = onlineLink;
             OfflineLocation = null;
         }
 
         public Activity(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
-                        string? description, Map.Location offlineLocation,
-                        Times.Alarm.AlarmCallback? alarmTimeUpCallback, object? callbackParameter,
-                        params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, false, description, alarmTimeUpCallback,
-                   callbackParameter, activeDays)
+                        string? description, Map.Location location, params Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
         {
             OnlineLink = null;
-            OfflineLocation = offlineLocation;
+            OfflineLocation = location;
         }
     }
 
-    public class TemporaryAffairs : Activity
+    public partial class TemporaryAffairs : Activity
     {
         public override ScheduleType @ScheduleType => ScheduleType.TemporaryAffair;
-        public new const bool IsOnline = false;
-        public new Map.Location[] OfflineLocation { get; init; }
 
-        public TemporaryAffairs(RepetitiveType repetitiveType, string name, Times.Time beginTime, string? description,
-                                Map.Location[] locations, Times.Alarm.AlarmCallback? alarmTimeUpCallback,
-                                object? callbackParameter, params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, 1, false, description, alarmTimeUpCallback, callbackParameter,
-                   activeDays)
+        public new const bool IsOnline = false;
+
+        private List<Map.Location> _locations = new();
+
+        public TemporaryAffairs(string name, Times.Time beginTime, string? description, Map.Location location)
+            : base(RepetitiveType.Single, name,
+                   beginTime, 1, false, description, Array.Empty<Times.Day>())
         {
             OnlineLink = null;
-            OfflineLocation = locations;
+            OfflineLocation = location;
+            _locations.Add(location);
+        }
+
+        protected override void AddScheduleOnTimeline(Times.Alarm.AlarmCallback alarmTimeUpCallback,
+                                                      object? callbackParameter)
+        {
+            int offset = BeginTime.ToInt();
+            if (_timeline[offset].ScheduleType is not ScheduleType.TemporaryAffair and not ScheduleType.Idle) //有非临时日程而添加临时日程（不允许）
+            {
+                throw new ArgumentException(); //完善具体异常
+            }
+            else if (_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair) //有临时日程而添加临时日程
+            {
+                ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
+                                                                       .Add(OfflineLocation!); //在原先实例的location上添加元素
+            }
+            base.AddScheduleOnTimeline(alarmTimeUpCallback, callbackParameter);
         }
     }
 }

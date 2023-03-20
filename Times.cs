@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic.Devices;
-using StudentScheduleManagementSystem.MainProgram.Extension;
+﻿using StudentScheduleManagementSystem.MainProgram.Extension;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -171,7 +170,7 @@ namespace StudentScheduleManagementSystem.Times
             }
             else if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
             {
-                if (activeDays == null) //需要给出
+                if (activeDays.Length == 0) //需要给出
                 {
                     throw new ArgumentNullException(nameof(activeDays));
                 }
@@ -206,7 +205,7 @@ namespace StudentScheduleManagementSystem.Times
         private static Dictionary<int, Alarm> _alarmList = new();
 
         private static Timeline<Record> _timeline = new();
-        public Time BeginTime { get; private init; }
+        public Time BeginTime { get; private init; } = new();
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
         public Day[]? ActiveDays { get; private init; }
         public int AlarmId { get; private init; } = 0;
@@ -217,7 +216,7 @@ namespace StudentScheduleManagementSystem.Times
             _alarmList.Remove(alarmId);
         }
 
-        public static void AddAlarm(Times.Time beginTime, RepetitiveType repetitiveType, AlarmCallback? onAlarmTimeUp,
+        public static void AddAlarm(Times.Time beginTime, RepetitiveType repetitiveType, AlarmCallback? alarmTimeUpCallback,
                                     object? callbackParameter, params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
@@ -233,7 +232,7 @@ namespace StudentScheduleManagementSystem.Times
             else if (_timeline[offset].RepetitiveType == RepetitiveType.MultipleDays &&
                      repetitiveType == RepetitiveType.MultipleDays) //有重复的闹钟而添加其他重复闹钟
             {
-                Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays; //不可能为null
+                Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
                 activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
                 RemoveAlarm(beginTime, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
             }
@@ -250,12 +249,12 @@ namespace StudentScheduleManagementSystem.Times
                                BeginTime = beginTime,
                                RepetitiveType = RepetitiveType.Single,
                                ActiveDays = activeDays,
-                               _alarmCallback = onAlarmTimeUp,
+                               _alarmCallback = alarmTimeUpCallback,
                                _callbackParameter = callbackParameter
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
-            if (onAlarmTimeUp == null)
+            if (alarmTimeUpCallback == null)
             {
-                Console.WriteLine("Null onAlarmTimeUp");
+                Console.WriteLine("Null alarmTimeUpCallback");
             }
 
             #endregion
@@ -264,6 +263,7 @@ namespace StudentScheduleManagementSystem.Times
         internal static void TriggerAlarm(int time)
         {
             int alarmId = _timeline[time].Id;
+            //Console.WriteLine(alarmId);
             if (alarmId != 0)
             {
                 _alarmList[alarmId]._alarmCallback?.Invoke(alarmId, _alarmList[alarmId]._callbackParameter);
