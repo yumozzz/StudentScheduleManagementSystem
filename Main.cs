@@ -4,7 +4,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
     {
-        internal static CancellationTokenSource cts = new CancellationTokenSource();
+        internal static CancellationTokenSource cts = new();
         
         [STAThread]
         public static void Main()
@@ -37,7 +37,8 @@ namespace StudentScheduleManagementSystem.MainProgram
                     var p=(string)param!;
                     Console.WriteLine(p);
                 }, "test alarm arg");*/
-
+                affair1.RemoveSchedule();
+                affair2.RemoveSchedule();
                 while (uiThread.IsAlive)
                 {
                     Thread.Sleep(1000);
@@ -50,6 +51,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             finally
             {
                 cts.Cancel();
+                Log.Logger.Close();
                 Console.ReadLine();
                 FreeConsole();
             }

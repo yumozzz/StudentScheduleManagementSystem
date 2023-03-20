@@ -27,6 +27,8 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static Dictionary<int, ScheduleBase> _scheduleList = new();
 
+        protected bool _alarmEnabled = false;
+
         public abstract ScheduleType @ScheduleType { get; }
 
         public RepetitiveType RepetitiveType { get; init; }
@@ -40,17 +42,26 @@ namespace StudentScheduleManagementSystem.Schedule
         public bool IsOnline { get; init; } = false;
         public string? Description { get; init; } = null;
 
-        public static void RemoveSchedule(int scheduleId)
+        public virtual void RemoveSchedule()
+        {
+            RemoveSchedule(ScheduleId);
+        }
+
+        protected static void RemoveSchedule(int scheduleId)
         {
             ScheduleBase schedule = _scheduleList[scheduleId];
             _scheduleList.Remove(scheduleId);
             _timeline.RemoveMultipleItems(schedule.BeginTime, schedule.RepetitiveType, out _,
                                           schedule.ActiveDays ?? Array.Empty<Day>());
-            Times.Alarm.RemoveAlarm(schedule.BeginTime, schedule.RepetitiveType,
-                                    schedule.ActiveDays ?? Array.Empty<Day>());
+            if(schedule._alarmEnabled)
+            {
+                Times.Alarm.RemoveAlarm(schedule.BeginTime,
+                                        schedule.RepetitiveType,
+                                        schedule.ActiveDays ?? Array.Empty<Day>());
+            }
         }
 
-        protected virtual void AddScheduleOnTimeline() //添加日程
+        protected void AddScheduleOnTimeline() //添加日程
         {
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType == ScheduleType.Idle) { }
@@ -95,7 +106,10 @@ namespace StudentScheduleManagementSystem.Schedule
             Duration = duration;
             IsOnline = isOnline;
             Description = description;
-            AddScheduleOnTimeline();
+            if(ScheduleType != ScheduleType.TemporaryAffair)
+            {
+                AddScheduleOnTimeline();
+            }
             Log.Logger.LogMessage(Times.Timer.Now, $"已创建类型为{ScheduleType}的日程{Name}");
         }
 
@@ -108,7 +122,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter,
                                  ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
-            Log.Logger.LogMessage(Times.Timer.Now, "已创建闹钟");
+            _alarmEnabled = true;
         }
     }
 
@@ -200,7 +214,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public new const bool IsOnline = false;
 
-        private List<Map.Location> _locations = new();
+        private List<Map.Location> _locations = new(); //在实例中不维护而在表中维护
 
         public TemporaryAffairs(string name, Times.Time beginTime, string? description, Map.Location location)
             : base(RepetitiveType.Single, name,
@@ -208,23 +222,45 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             OnlineLink = null;
             OfflineLocation = location;
-            _locations.Add(location);
+            AddScheduleOnTimeline();
         }
 
-        protected override void AddScheduleOnTimeline()
+        public override void RemoveSchedule()
+        {
+            int offset = BeginTime.ToInt();
+            var result = ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
+                                                                   .Remove(OfflineLocation!);
+            if (((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Count == 0)
+            {
+                base.RemoveSchedule();
+                Log.Logger.LogMessage(Times.Timer.Now, "已删除全部临时日程");
+            }
+            else
+            {
+                Log.Logger.LogMessage(Times.Timer.Now, "已删除单次临时日程");
+            }
+        }
+
+        protected new void AddScheduleOnTimeline()
         {
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType is not ScheduleType.TemporaryAffair and not ScheduleType.Idle) //有非临时日程而添加临时日程（不允许）
             {
                 throw new ArgumentException(); //完善具体异常
             }
-            else if (_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair) //有临时日程而添加临时日程
+            else if(_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair) //有临时日程而添加临时日程，此时添加的日程与已有日程共享ID和表中的实例
             {
+                ScheduleId = _timeline[offset].Id;
                 ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
                                                                        .Add(OfflineLocation!); //在原先实例的location上添加元素
-                return;
+                Log.Logger.LogMessage(Times.Timer.Now, "已扩充临时日程");
             }
-            base.AddScheduleOnTimeline();
+            else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例
+            {
+                base.AddScheduleOnTimeline();
+                ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
+                                                                       .Add(OfflineLocation!);
+            }
         }
     }
 }
