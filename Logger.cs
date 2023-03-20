@@ -23,7 +23,7 @@ namespace StudentScheduleManagementSystem.Log
 
         public static void Close()
         {
-            stream.Close();
+            stream!.Close();
         }
 
         public static void LogMessage(Times.Time now, string message)
@@ -31,8 +31,8 @@ namespace StudentScheduleManagementSystem.Log
             string log =
                 $"[Log] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{now.ToString()}>: \"{message}\"\n";
             var arr=Encoding.UTF8.GetBytes(log);
-            stream.Write(arr, 0, arr.Length);
-            stream.Flush();
+            stream!.Write(arr, 0, arr.Length);
+            stream!.Flush();
         }
 
         public static void LogWarning(Times.Time now, string message, string? methodName)
@@ -41,8 +41,8 @@ namespace StudentScheduleManagementSystem.Log
                 $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{now.ToString()}>: \"{message}\"" +
                 (methodName != null ? $"in {methodName}\n" : "\n");
             var arr = Encoding.UTF8.GetBytes(log);
-            stream.Write(arr, 0, arr.Length);
-            stream.Flush();
+            stream!.Write(arr, 0, arr.Length);
+            stream!.Flush();
         }
 
         public static void LogError(Times.Time now, Exception ex)
@@ -50,8 +50,8 @@ namespace StudentScheduleManagementSystem.Log
             string log =
                 $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{now.ToString()}>: \"{ex.Message}\"\n{ex.StackTrace}\n";
             var arr = Encoding.UTF8.GetBytes(log);
-            stream.Write(arr, 0, arr.Length);
-            stream.Flush();
+            stream!.Write(arr, 0, arr.Length);
+            stream!.Flush();
         }
     }
 }

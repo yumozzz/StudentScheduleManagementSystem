@@ -32,11 +32,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                         new() { Week = 1, Day = Times.Day.Monday, Hour = 10 },
                                                         "test2",
                                                         new(){PlaceName = "place2"});
-                /*affair2.EnableAlarm((id, param) =>
-                {
-                    var p=(string)param!;
-                    Console.WriteLine(p);
-                }, "test alarm arg");*/
                 affair1.RemoveSchedule();
                 affair2.RemoveSchedule();
                 while (uiThread.IsAlive)
@@ -47,6 +42,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             catch (Exception ex)
             {
                 Task.Run(()=>MessageBox.Show(ex.Message));
+                Log.Logger.LogError(Times.Timer.Now, ex);
             }
             finally
             {

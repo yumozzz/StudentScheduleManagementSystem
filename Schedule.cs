@@ -70,10 +70,11 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
                 Log.Logger.LogWarning(Times.Timer.Now, $"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
-                //添加删除逻辑
+                //TODO:添加确认覆盖逻辑
                 _scheduleList.Remove(_timeline[offset].Id);
                 RemoveSchedule(_timeline[offset].Id); //删除单次日程
             }
+            //TODO:从使用函数传出的ID改为按顺序的编码ID（可能应先于次函数生成或读取）
             _timeline.AddMultipleItems(BeginTime, new Record{RepetitiveType = RepetitiveType.Single, ScheduleType = ScheduleType}, out int thisScheduleId);
             ScheduleId = thisScheduleId;
             _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
@@ -115,6 +116,11 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback, object? callbackParameter)
         {
+            if (_alarmEnabled)
+            {
+                //TODO:细分异常
+                throw new Exception();
+            }
             if (callbackParameter == null)
             {
                 Log.Logger.LogWarning(Times.Timer.Now, "没有传递回调参数", null);
@@ -223,13 +229,13 @@ namespace StudentScheduleManagementSystem.Schedule
             OnlineLink = null;
             OfflineLocation = location;
             AddScheduleOnTimeline();
+            _alarmEnabled = ((TemporaryAffairs)_scheduleList[_timeline[beginTime.ToInt()].Id])._alarmEnabled;//同步闹钟启用情况
         }
 
         public override void RemoveSchedule()
         {
             int offset = BeginTime.ToInt();
-            var result = ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
-                                                                   .Remove(OfflineLocation!);
+            ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Remove(OfflineLocation!);
             if (((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Count == 0)
             {
                 base.RemoveSchedule();
@@ -246,7 +252,8 @@ namespace StudentScheduleManagementSystem.Schedule
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType is not ScheduleType.TemporaryAffair and not ScheduleType.Idle) //有非临时日程而添加临时日程（不允许）
             {
-                throw new ArgumentException(); //完善具体异常
+                //TODO:细分异常
+                throw new ArgumentException();
             }
             else if(_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair) //有临时日程而添加临时日程，此时添加的日程与已有日程共享ID和表中的实例
             {
