@@ -20,7 +20,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
             public ScheduleType @ScheduleType { get; init; }
 
-            public int Id { get; init; }
+            public int Id { get; set; }
         }
 
         protected static Times.Timeline<Record> _timeline = new();
@@ -50,25 +50,23 @@ namespace StudentScheduleManagementSystem.Schedule
                                     schedule.ActiveDays ?? Array.Empty<Day>());
         }
 
-        protected virtual void AddScheduleOnTimeline(Times.Alarm.AlarmCallback alarmTimeUpCallback,
-                                                     object? callbackParameter) //添加日程
+        protected virtual void AddScheduleOnTimeline() //添加日程
         {
-            Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter,
-                                 ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType == ScheduleType.Idle) { }
             else if (_timeline[offset].ScheduleType != ScheduleType.Idle &&
                      ScheduleType != ScheduleType.TemporaryAffair) //有日程而添加非临时日程（需要选择是否覆盖）
             {
-                Console.WriteLine($"覆盖了日程{0}", _scheduleList[_timeline[offset].Id].Name);
+                Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
+                Log.Logger.LogWarning(Times.Timer.Now, $"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
                 //添加删除逻辑
                 _scheduleList.Remove(_timeline[offset].Id);
                 RemoveSchedule(_timeline[offset].Id); //删除单次日程
             }
-            else if (ScheduleType == ScheduleType.TemporaryAffair) { } //交由override函数处理
-            _timeline.AddMultipleItems(BeginTime, RepetitiveType.Single, out int thisScheduleId);
+            _timeline.AddMultipleItems(BeginTime, new Record{RepetitiveType = RepetitiveType.Single, ScheduleType = ScheduleType}, out int thisScheduleId);
             ScheduleId = thisScheduleId;
-            _scheduleList.Add(thisScheduleId, this); //调用前已创造实例
+            _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
+            Log.Logger.LogMessage(Times.Timer.Now, "已在时间轴上添加日程");
         }
 
         protected ScheduleBase(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
@@ -97,15 +95,20 @@ namespace StudentScheduleManagementSystem.Schedule
             Duration = duration;
             IsOnline = isOnline;
             Description = description;
+            AddScheduleOnTimeline();
+            Log.Logger.LogMessage(Times.Timer.Now, $"已创建类型为{ScheduleType}的日程{Name}");
         }
 
         public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback, object? callbackParameter)
         {
             if (callbackParameter == null)
             {
+                Log.Logger.LogWarning(Times.Timer.Now, "没有传递回调参数", null);
                 Console.WriteLine("Null \"callbackParameter\", check twice");
             }
-            AddScheduleOnTimeline(alarmTimeUpCallback, callbackParameter);
+            Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter,
+                                 ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
+            Log.Logger.LogMessage(Times.Timer.Now, "已创建闹钟");
         }
     }
 
@@ -208,8 +211,7 @@ namespace StudentScheduleManagementSystem.Schedule
             _locations.Add(location);
         }
 
-        protected override void AddScheduleOnTimeline(Times.Alarm.AlarmCallback alarmTimeUpCallback,
-                                                      object? callbackParameter)
+        protected override void AddScheduleOnTimeline()
         {
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType is not ScheduleType.TemporaryAffair and not ScheduleType.Idle) //有非临时日程而添加临时日程（不允许）
@@ -220,8 +222,9 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
                                                                        .Add(OfflineLocation!); //在原先实例的location上添加元素
+                return;
             }
-            base.AddScheduleOnTimeline(alarmTimeUpCallback, callbackParameter);
+            base.AddScheduleOnTimeline();
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using StudentScheduleManagementSystem.Schedule;
-using StudentScheduleManagementSystem.Times;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace StudentScheduleManagementSystem.MainProgram
 {
@@ -17,6 +15,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                Log.Logger.Setup();
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -64,11 +63,11 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool AllocConsole();
+        private static extern bool AllocConsole();
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool FreeConsole();
+        private static extern bool FreeConsole();
     }
 
     public class EndOfSemester : Exception { };

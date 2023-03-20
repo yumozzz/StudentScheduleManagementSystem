@@ -24,7 +24,7 @@ namespace StudentScheduleManagementSystem.Times
 
     public interface IUniqueRepetitiveEvent
     {
-        public int Id { get; init; }
+        public int Id { get; set; }
         public RepetitiveType RepetitiveType { get; init; }
     }
 
@@ -160,15 +160,16 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
-        public void AddMultipleItems(Time baseTime, RepetitiveType repetitiveType, out int id, params Day[] activeDays)
+        public void AddMultipleItems(Time timePoint, TRecord record, out int id, params Day[] activeDays)
         {
             int randomId = randomGenerator.Next();
-            if (repetitiveType == RepetitiveType.Single)
+            if (record.RepetitiveType == RepetitiveType.Single)
             {
-                int offset = baseTime.ToInt();
-                AddSingleItem(offset, new() { RepetitiveType = RepetitiveType.Single, Id = randomId });
+                int offset = timePoint.ToInt();
+                record.Id = randomId;
+                AddSingleItem(offset, record);
             }
-            else if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
+            else if (record.RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
             {
                 if (activeDays.Length == 0) //需要给出
                 {
@@ -177,7 +178,7 @@ namespace StudentScheduleManagementSystem.Times
                 int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
                 foreach (var dayOffset in dayOffsets)
                 {
-                    int offset = 24 * dayOffset + baseTime.Hour;
+                    int offset = 24 * dayOffset + timePoint.Hour;
                     while (offset < 16 * 7 * 24)
                     {
                         RemoveSingleItem(offset, new() { RepetitiveType = RepetitiveType.MultipleDays, Id = randomId });
@@ -187,7 +188,7 @@ namespace StudentScheduleManagementSystem.Times
             }
             else //不可能出现
             {
-                throw new ArgumentException(nameof(repetitiveType));
+                throw new ArgumentException(nameof(record));
             }
             id = randomId;
         }
@@ -199,7 +200,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             public RepetitiveType @RepetitiveType { get; init; }
 
-            public int Id { get; init; }
+            public int Id { get; set; }
         }
 
         private static Dictionary<int, Alarm> _alarmList = new();
@@ -241,7 +242,7 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            _timeline.AddMultipleItems(beginTime, repetitiveType, out int thisAlarmId, activeDays);
+            _timeline.AddMultipleItems(beginTime, new Record{RepetitiveType = repetitiveType}, out int thisAlarmId, activeDays);
             _alarmList.Add(thisAlarmId,
                            new()
                            {
@@ -286,6 +287,8 @@ namespace StudentScheduleManagementSystem.Times
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();
         public static bool Pause { get; set; } = false;
+
+        public static Time Now => _localTime;
 
         public static void Start()
         {
