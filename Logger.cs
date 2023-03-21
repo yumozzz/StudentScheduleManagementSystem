@@ -26,29 +26,29 @@ namespace StudentScheduleManagementSystem.Log
             stream!.Close();
         }
 
-        public static void LogMessage(Times.Time now, string message)
+        public static void LogMessage(string message)
         {
             string log =
-                $"[Log] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{now.ToString()}>: \"{message}\"\n";
+                $"[Log] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
             var arr=Encoding.UTF8.GetBytes(log);
             stream!.Write(arr, 0, arr.Length);
             stream!.Flush();
         }
 
-        public static void LogWarning(Times.Time now, string message, string? methodName)
+        public static void LogWarning(string message, string? methodName)
         {
             string log =
-                $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{now.ToString()}>: \"{message}\"" +
+                $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"" +
                 (methodName != null ? $"in {methodName}\n" : "\n");
             var arr = Encoding.UTF8.GetBytes(log);
             stream!.Write(arr, 0, arr.Length);
             stream!.Flush();
         }
 
-        public static void LogError(Times.Time now, Exception ex)
+        public static void LogError(Exception ex)
         {
             string log =
-                $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{now.ToString()}>: \"{ex.Message}\"\n{ex.StackTrace}\n";
+                $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{ex.Message}\"\n{ex.StackTrace}\n";
             var arr = Encoding.UTF8.GetBytes(log);
             stream!.Write(arr, 0, arr.Length);
             stream!.Flush();

@@ -41,8 +41,8 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             catch (Exception ex)
             {
-                Task.Run(()=>MessageBox.Show(ex.Message));
-                Log.Logger.LogError(Times.Timer.Now, ex);
+                Task.Run(() => MessageBox.Show(ex.Message));
+                Log.Logger.LogError(ex);
             }
             finally
             {
