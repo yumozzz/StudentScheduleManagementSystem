@@ -1,5 +1,7 @@
 ﻿using RepetitiveType = StudentScheduleManagementSystem.Times.RepetitiveType;
 using Day = StudentScheduleManagementSystem.Times.Day;
+using Newtonsoft.Json.Linq;
+using StudentScheduleManagementSystem.MainProgram.Extension;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -11,6 +13,8 @@ namespace StudentScheduleManagementSystem.Schedule
         Activity,
         TemporaryAffair,
     }
+
+    public class AlarmAlreadyExisted : Exception { };
 
     public abstract class ScheduleBase
     {
@@ -34,7 +38,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public RepetitiveType RepetitiveType { get; init; }
         public Times.Day[]? ActiveDays { get; init; }
         public int ScheduleId { get; protected set; } = 0;
-        public string Name { get; init; } = "default schedule";
+        public string Name { get; init; }
         public Times.Time BeginTime { get; init; }
         public abstract int Earliest { get; }
         public abstract int Latest { get; }
@@ -61,7 +65,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        protected void AddScheduleOnTimeline() //添加日程
+        protected void AddSchedule() //添加日程
         {
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType == ScheduleType.Idle) { }
@@ -109,17 +113,18 @@ namespace StudentScheduleManagementSystem.Schedule
             Description = description;
             if(ScheduleType != ScheduleType.TemporaryAffair)
             {
-                AddScheduleOnTimeline();
+                AddSchedule();
             }
             Log.Logger.LogMessage($"已创建类型为{ScheduleType}的日程{Name}");
         }
 
         public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback, object? callbackParameter)
         {
+
+        
             if (_alarmEnabled)
             {
-                //TODO:细分异常
-                throw new Exception();
+                throw new AlarmAlreadyExisted();
             }
             if (callbackParameter == null)
             {
@@ -164,6 +169,24 @@ namespace StudentScheduleManagementSystem.Schedule
             OnlineLink = null;
             OfflineLocation = location;
         }
+
+        public static void CreateInstance(List<JObject> allInstanceList)
+        {
+            foreach (JObject instance in allInstanceList)
+            {
+                RepetitiveType repetitiveType = (RepetitiveType)Enum.Parse(typeof(RepetitiveType), instance["RepetitiveType"]!.Value<string>()!);
+                string name = instance["Name"]!.Value<string>()!;
+                Times.Time timeStamp = instance["BeginTime"]!.Value<int>().ToTimeStamp();
+                int duration = instance["Duration"]!.Value<int>();
+                string? description = instance["Description"]?.Value<string>() ?? null;
+                string locationName = instance["Location"]?.Value<string>()!;
+                var locations = Map.Location.getLocationsByName(locationName);
+                Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
+                Day[] activeDays = Array.ConvertAll(JArray.Parse(instance["ActiveDays"]!.ToString()).ToArray(),
+                                                    token => (Day)Enum.Parse(typeof(Day), token.Value<string>()!));
+                new Course(repetitiveType, name, timeStamp, duration, description, location, activeDays);
+            }
+        }
     }
 
     public partial class Exam : ScheduleBase
@@ -182,6 +205,21 @@ namespace StudentScheduleManagementSystem.Schedule
                 throw new ArgumentOutOfRangeException(nameof(beginTime));
             }
             OfflineLocation = offlineLocation;
+        }
+
+        public static void CreateInstance(List<JObject> allInstanceList)
+        {
+            foreach (JObject instance in allInstanceList)
+            {
+                string name = instance["Name"]!.Value<string>()!;
+                Times.Time timeStamp = instance["BeginTime"]!.Value<int>().ToTimeStamp();
+                int duration = instance["Duration"]!.Value<int>();
+                string? description = instance["Description"]?.Value<string>() ?? null;
+                string locationName = instance["Location"]?.Value<string>()!;
+                var locations = Map.Location.getLocationsByName(locationName);
+                Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
+                new Exam(name, timeStamp, duration, description, location);
+            }
         }
     }
 
@@ -212,6 +250,38 @@ namespace StudentScheduleManagementSystem.Schedule
             OnlineLink = null;
             OfflineLocation = location;
         }
+
+        public static void CreateInstance(List<JObject> allInstanceList)
+        {
+            foreach (JObject instance in allInstanceList)
+            {
+                RepetitiveType repetitiveType = (RepetitiveType)Enum.Parse(typeof(RepetitiveType), instance["RepetitiveType"]!.Value<string>()!);
+                string name = instance["Name"]!.Value<string>()!;
+                Times.Time timeStamp = instance["BeginTime"]!.Value<int>().ToTimeStamp();
+                int duration = instance["Duration"]!.Value<int>();
+                string? description = instance["Description"]?.Value<string>() ?? null;
+                string? locationName = instance["Location"]?.Value<string>() ?? null;
+                string? offlineLink = instance["OfflineLink"]?.Value<string>() ?? null;
+                Day[] activeDays = Array.ConvertAll(JArray.Parse(instance["ActiveDays"]!.ToString()).ToArray(),
+                                                    token => (Day)Enum.Parse(typeof(Day), token.Value<string>()!));
+                if (locationName != null)
+                {
+                    var locations = Map.Location.getLocationsByName(locationName);
+                    Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
+                    new Activity(repetitiveType, name, timeStamp, duration, description, location, activeDays);
+                }
+                else
+                {
+                    if (offlineLink == null)
+                    {
+                        //细分异常
+                        throw new Exception();
+                    }
+                    new Activity(repetitiveType, name, timeStamp, duration, description, offlineLink, activeDays);
+                }
+                
+            }
+        }
     }
 
     public partial class TemporaryAffairs : Activity
@@ -228,7 +298,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             OnlineLink = null;
             OfflineLocation = location;
-            AddScheduleOnTimeline();
+            AddSchedule();
             _alarmEnabled = ((TemporaryAffairs)_scheduleList[_timeline[beginTime.ToInt()].Id])._alarmEnabled;//同步闹钟启用情况
         }
 
@@ -247,13 +317,12 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        protected new void AddScheduleOnTimeline()
+        protected new void AddSchedule()
         {
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType is not ScheduleType.TemporaryAffair and not ScheduleType.Idle) //有非临时日程而添加临时日程（不允许）
             {
-                //TODO:细分异常
-                throw new ArgumentException();
+                throw new InvalidOperationException("Cannot add temporary affair when there already exists other kind of schedule");
             }
             else if(_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair) //有临时日程而添加临时日程，此时添加的日程与已有日程共享ID和表中的实例
             {
@@ -264,9 +333,23 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例
             {
-                base.AddScheduleOnTimeline();
+                base.AddSchedule();
                 ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
                                                                        .Add(OfflineLocation!);
+            }
+        }
+
+        public static void CreateInstance(List<JObject> allInstanceList)
+        {
+            foreach (JObject instance in allInstanceList)
+            {
+                string name = instance["Name"]!.Value<string>()!;
+                Times.Time timeStamp = instance["BeginTime"]!.Value<int>().ToTimeStamp();
+                string? description = instance["Description"]?.Value<string>() ?? null;
+                string locationName = instance["Location"]?.Value<string>()!;
+                var locations = Map.Location.getLocationsByName(locationName);
+                Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
+                new TemporaryAffairs(name, timeStamp, description, location);
             }
         }
     }

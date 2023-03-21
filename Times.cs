@@ -20,8 +20,6 @@ namespace StudentScheduleManagementSystem.Times
         MultipleDays,
     }
 
-    internal class OverrideNondefaultItems : Exception { }
-
     public interface IUniqueRepetitiveEvent
     {
         public int Id { get; set; }
@@ -102,6 +100,8 @@ namespace StudentScheduleManagementSystem.Times
 
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
+        public class OverrideNondefaultItems : Exception { }
+
         private TRecord[] _timeline = new TRecord[16 * 7 * 24];
 
         private static Random randomGenerator = new(DateTime.Now.Millisecond);
@@ -160,12 +160,12 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
-        public void AddMultipleItems(Time timePoint, TRecord record, out int id, params Day[] activeDays)
+        public void AddMultipleItems(Time timestamp, TRecord record, out int id, params Day[] activeDays)
         {
             int randomId = randomGenerator.Next();
             if (record.RepetitiveType == RepetitiveType.Single)
             {
-                int offset = timePoint.ToInt();
+                int offset = timestamp.ToInt();
                 record.Id = randomId;
                 AddSingleItem(offset, record);
             }
@@ -178,7 +178,7 @@ namespace StudentScheduleManagementSystem.Times
                 int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
                 foreach (var dayOffset in dayOffsets)
                 {
-                    int offset = 24 * dayOffset + timePoint.Hour;
+                    int offset = 24 * dayOffset + timestamp.Hour;
                     while (offset < 16 * 7 * 24)
                     {
                         RemoveSingleItem(offset, new() { RepetitiveType = RepetitiveType.MultipleDays, Id = randomId });
@@ -264,9 +264,9 @@ namespace StudentScheduleManagementSystem.Times
             #endregion
         }
 
-        internal static void TriggerAlarm(int time)
+        internal static void TriggerAlarm(int offset)
         {
-            int alarmId = _timeline[time].Id;
+            int alarmId = _timeline[offset].Id;
             //Console.WriteLine(alarmId);
             if (alarmId != 0)
             {

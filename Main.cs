@@ -34,6 +34,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                         new(){PlaceName = "place2"});
                 affair1.RemoveSchedule();
                 affair2.RemoveSchedule();
+                FileManagement.FileManager.ReadUserFile(Environment.CurrentDirectory + "/x.json");
                 while (uiThread.IsAlive)
                 {
                     Thread.Sleep(1000);
@@ -77,6 +78,20 @@ namespace StudentScheduleManagementSystem.MainProgram
             public static int ToInt(this Enum e)
             {
                 return e.GetHashCode();
+            }
+        }
+        public static class ExtendedInt
+        {
+            public static Times.Time ToTimeStamp(this int value)
+            {
+                if (value < 0 || value >= 16 * 7 * 24)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                int week = value / (7 * 24) + 1;
+                int day = value % (24 * 7) / 24;
+                int hour = value % 24;
+                return new Times.Time { Week = week, Day = (Times.Day)day, Hour = hour };
             }
         }
     }
