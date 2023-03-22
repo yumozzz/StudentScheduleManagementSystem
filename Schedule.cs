@@ -1,24 +1,13 @@
-﻿using RepetitiveType = StudentScheduleManagementSystem.Times.RepetitiveType;
-using Day = StudentScheduleManagementSystem.Times.Day;
-using StudentScheduleManagementSystem.MainProgram.Extension;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
-    public enum ScheduleType
-    {
-        Idle,
-        Course,
-        Exam,
-        Activity,
-        TemporaryAffair,
-    }
-
-    public class AlarmAlreadyExisted : Exception { };
-
+    [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public abstract class ScheduleBase
     {
-        protected struct Record : Times.IUniqueRepetitiveEvent
+        protected struct Record : IUniqueRepetitiveEvent
         {
             public RepetitiveType @RepetitiveType { get; init; }
 
@@ -27,24 +16,46 @@ namespace StudentScheduleManagementSystem.Schedule
             public int Id { get; set; }
         }
 
+        protected class DeserializedObjectBase
+        {
+            public ScheduleType @ScheduleType { get; set; }
+            public RepetitiveType @RepetitiveType { get; set; }
+            public Day[]? ActiveDays { get; set; }
+            public int ScheduleId { get; set; }
+            public string Name { get; set; }
+            public Times.Time Timestamp { get; set; }
+            public int Duration { get; set; }
+            public bool IsOnline { get; set; }
+            public string? Description { get; set; }
+        }
+
         protected static Times.Timeline<Record> _timeline = new();
 
         protected static Dictionary<int, ScheduleBase> _scheduleList = new();
 
         protected bool _alarmEnabled = false;
 
+        [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public abstract ScheduleType @ScheduleType { get; }
 
+        [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType RepetitiveType { get; init; }
-        public Times.Day[]? ActiveDays { get; init; }
-        public int ScheduleId { get; protected set; } = 0;
-        public string Name { get; init; }
-        public Times.Time BeginTime { get; init; }
+        [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
+        public Day[]? ActiveDays { get; init; }
+        [JsonProperty] public int ScheduleId { get; protected set; } = 0;
+        [JsonProperty] public string Name { get; init; }
+        [JsonProperty(propertyName: "Timestamp")] public Times.Time BeginTime { get; init; }
         public abstract int Earliest { get; }
         public abstract int Latest { get; }
-        public int Duration { get; init; } = 1;
-        public bool IsOnline { get; init; } = false;
-        public string? Description { get; init; } = null;
+        [JsonProperty] public int Duration { get; init; } = 1;
+        [JsonProperty] public bool IsOnline { get; init; } = false;
+        [JsonProperty] public string? Description { get; init; } = null;
+
+        protected static readonly JsonSerializerSettings _setting = new()
+        {
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Include
+        };
 
         public virtual void RemoveSchedule()
         {
@@ -144,16 +155,33 @@ namespace StudentScheduleManagementSystem.Schedule
                                  ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
             _alarmEnabled = true;
         }
+        public static List<JObject> SaveInstance()
+        {
+            List<JObject> list = new();
+            foreach (var instance in _scheduleList)
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(instance.Value, _setting));
+                list.Add(JObject.Parse(JsonConvert.SerializeObject(instance.Value, _setting)));
+            }
+            return list;
+        }
     }
 
-    public sealed partial class Course : ScheduleBase
+    [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+    public sealed partial class Course : ScheduleBase, IJsonConvertible
     {
+        private class DeserializedObject : DeserializedObjectBase
+        {
+            public string? OnlineLink { get; set; }
+            public Map.Location? OfflineLocation { get; set; }
+        }
+        
         public override ScheduleType @ScheduleType => ScheduleType.Course;
         public override int Earliest => 8;
         public override int Latest => 20;
-        public new const bool IsOnline = false;
-        public string? OnlineLink { get; init; } = null;
-        public Map.Location? OfflineLocation { get; init; } = null;
+        [JsonProperty] public new const bool IsOnline = false;
+        [JsonProperty] public string? OnlineLink { get; init; }
+        [JsonProperty] public Map.Location? OfflineLocation { get; init; }
 
         public Course(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
                       string? description, string onlineLink, params Day[] activeDays)
@@ -179,31 +207,58 @@ namespace StudentScheduleManagementSystem.Schedule
             OfflineLocation = location;
         }
 
-        public static void CreateInstance(List<JObject> allInstanceList)
+        public static void CreateInstance(List<JObject> instanceList)
         {
-            foreach (JObject instance in allInstanceList)
+            foreach (JObject obj in instanceList)
             {
-                RepetitiveType repetitiveType = (RepetitiveType)Enum.Parse(typeof(RepetitiveType), instance["RepetitiveType"]!.Value<string>()!);
-                string name = instance["Name"]!.Value<string>()!;
-                Times.Time timeStamp = instance["BeginTime"]!.Value<int>().ToTimeStamp();
-                int duration = instance["Duration"]!.Value<int>();
-                string? description = instance["Description"]?.Value<string>() ?? null;
-                string locationName = instance["Location"]?.Value<string>()!;
-                var locations = Map.Location.getLocationsByName(locationName);
-                Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
-                Day[] activeDays = Array.ConvertAll(JArray.Parse(instance["ActiveDays"]!.ToString()).ToArray(),
-                                                    token => (Day)Enum.Parse(typeof(Day), token.Value<string>()!));
-                new Course(repetitiveType, name, timeStamp, duration, description, location, activeDays);
+                var dobj = JsonConvert.DeserializeObject<DeserializedObject>(obj.ToString(), _setting);
+                if (dobj == null)
+                {
+                    throw new JsonFormatException();
+                }
+                if (dobj.OfflineLocation != null)
+                {
+                    var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                    Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    new Course(dobj.RepetitiveType,
+                               dobj.Name,
+                               dobj.Timestamp,
+                               dobj.Duration,
+                               dobj.Description,
+                               dobj.OfflineLocation,
+                               dobj.ActiveDays ?? Array.Empty<Day>());
+                }
+                else if (dobj.OnlineLink != null)
+                {
+                    new Course(dobj.RepetitiveType,
+                               dobj.Name,
+                               dobj.Timestamp,
+                               dobj.Duration,
+                               dobj.Description,
+                               dobj.OnlineLink,
+                               dobj.ActiveDays ?? Array.Empty<Day>());
+                }
+                else
+                {
+                    throw new JsonFormatException();
+                }
             }
         }
     }
 
-    public sealed partial class Exam : ScheduleBase
+    [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+    public sealed partial class Exam : ScheduleBase, IJsonConvertible
     {
+        private class DeserializedObject : DeserializedObjectBase
+        {
+            public Map.Location OfflineLocation { get; set; }
+        }
+
         public override ScheduleType @ScheduleType => ScheduleType.Exam;
         public override int Earliest => 8;
         public override int Latest => 20;
-        public new const bool IsOnline = false;
+        [JsonProperty] public new const bool IsOnline = false;
+        [JsonProperty]
         public Map.Location OfflineLocation { get; init; }
 
         public Exam(string name, Times.Time beginTime, int duration, string? description, Map.Location offlineLocation)
@@ -216,29 +271,34 @@ namespace StudentScheduleManagementSystem.Schedule
             OfflineLocation = offlineLocation;
         }
 
-        public static void CreateInstance(List<JObject> allInstanceList)
+        public static void CreateInstance(List<JObject> instanceList)
         {
-            foreach (JObject instance in allInstanceList)
+            foreach (JObject obj in instanceList)
             {
-                string name = instance["Name"]!.Value<string>()!;
-                Times.Time timeStamp = instance["BeginTime"]!.Value<int>().ToTimeStamp();
-                int duration = instance["Duration"]!.Value<int>();
-                string? description = instance["Description"]?.Value<string>() ?? null;
-                string locationName = instance["Location"]?.Value<string>()!;
-                var locations = Map.Location.getLocationsByName(locationName);
-                Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
-                new Exam(name, timeStamp, duration, description, location);
+                var dobj = JsonConvert.DeserializeObject<DeserializedObject>(obj.ToString(), _setting);
+                if (dobj == null)
+                {
+                    throw new JsonFormatException();
+                }
+                new Exam(dobj.Name, dobj.Timestamp, dobj.Duration, dobj.Description, dobj.OfflineLocation);
             }
         }
     }
 
-    public partial class Activity : ScheduleBase
+    [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+    public partial class Activity : ScheduleBase, IJsonConvertible
     {
+        private class DeserializedObject : DeserializedObjectBase
+        {
+            public string? OnlineLink { get; set; }
+            public Map.Location? OfflineLocation { get; set; }
+        }
+
         public override ScheduleType @ScheduleType => ScheduleType.Activity;
         public override int Earliest => 8;
         public override int Latest => 20;
-        public string? OnlineLink { get; init; } = null;
-        public Map.Location? OfflineLocation { get; init; } = null;
+        [JsonProperty] public string? OnlineLink { get; init; } = null;
+        [JsonProperty] public Map.Location? OfflineLocation { get; init; } = null;
 
         protected Activity(RepetitiveType repetitiveType, string name, Times.Time beginTime, int duration,
                            bool isOnline, string? description, params Day[] activeDays)
@@ -260,9 +320,9 @@ namespace StudentScheduleManagementSystem.Schedule
             OfflineLocation = location;
         }
 
-        public static void CreateInstance(List<JObject> allInstanceList)
+        public static void CreateInstance(List<JObject> instanceList)
         {
-            foreach (JObject instance in allInstanceList)
+            foreach (JObject instance in instanceList)
             {
                 RepetitiveType repetitiveType = (RepetitiveType)Enum.Parse(typeof(RepetitiveType), instance["RepetitiveType"]!.Value<string>()!);
                 string name = instance["Name"]!.Value<string>()!;
@@ -276,7 +336,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 if (locationName != null)
                 {
                     var locations = Map.Location.getLocationsByName(locationName);
-                    Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
+                    Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                     new Activity(repetitiveType, name, timeStamp, duration, description, location, activeDays);
                 }
                 else
@@ -290,20 +350,62 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 
             }
+            foreach (JObject obj in instanceList)
+            {
+                var dobj = JsonConvert.DeserializeObject<DeserializedObject>(obj.ToString(), _setting);
+                if (dobj == null)
+                {
+                    throw new JsonFormatException();
+                }
+                if (dobj.OfflineLocation != null)
+                {
+                    var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                    Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    new Activity(dobj.RepetitiveType,
+                                 dobj.Name,
+                                 dobj.Timestamp,
+                                 dobj.Duration,
+                                 dobj.Description,
+                                 dobj.OfflineLocation,
+                                 dobj.ActiveDays ?? Array.Empty<Day>());
+                }
+                else if (dobj.OnlineLink != null)
+                {
+                    new Activity(dobj.RepetitiveType,
+                                 dobj.Name,
+                                 dobj.Timestamp,
+                                 dobj.Duration,
+                                 dobj.Description,
+                                 dobj.OnlineLink,
+                                 dobj.ActiveDays ?? Array.Empty<Day>());
+                }
+                else
+                {
+                    throw new JsonFormatException();
+                }
+            }
         }
     }
 
+    [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class TemporaryAffairs : Activity
     {
+        private class DeserializedObject : DeserializedObjectBase
+        {
+            public Map.Location[] Locations { get; set; }
+        }
+
+
         public override ScheduleType @ScheduleType => ScheduleType.TemporaryAffair;
 
-        public new const bool IsOnline = false;
+        [JsonProperty] public new const bool IsOnline = false;
 
+        [JsonProperty(propertyName: "Locations")]
         private List<Map.Location> _locations = new(); //在实例中不维护而在表中维护
 
         public TemporaryAffairs(string name, Times.Time beginTime, string? description, Map.Location location)
             : base(RepetitiveType.Single, name,
-                   beginTime, 1, false, description, Array.Empty<Times.Day>())
+                   beginTime, 1, false, description, Array.Empty<Day>())
         {
             OnlineLink = null;
             OfflineLocation = location;
@@ -348,17 +450,21 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public new static void CreateInstance(List<JObject> allInstanceList)
+        public new static void CreateInstance(List<JObject> instanceList)
         {
-            foreach (JObject instance in allInstanceList)
+            foreach (JObject obj in instanceList)
             {
-                string name = instance["Name"]!.Value<string>()!;
-                Times.Time timeStamp = instance["BeginTime"]!.Value<int>().ToTimeStamp();
-                string? description = instance["Description"]?.Value<string>() ?? null;
-                string locationName = instance["Location"]?.Value<string>()!;
-                var locations = Map.Location.getLocationsByName(locationName);
-                Map.Location location = locations.Length == 1 ? locations[0] : throw new Map.Location.AmbiguousLocationMatch();
-                new TemporaryAffairs(name, timeStamp, description, location);
+                var dobj = JsonConvert.DeserializeObject<DeserializedObject>(obj.ToString(), _setting);
+                if (dobj == null)
+                {
+                    throw new JsonFormatException();
+                }
+                for (int i = 0; i < dobj.Locations.Length; i++)
+                {
+                    var locations = Map.Location.getLocationsByName(dobj.Locations[i].PlaceName);
+                    Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location);
+                }
             }
         }
     }

@@ -2,39 +2,11 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
-using StudentScheduleManagementSystem.MainProgram.Extension;
 using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace StudentScheduleManagementSystem.Times
 {
-    public enum Day
-    {
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
-        Sunday,
-    }
-
-    public enum RepetitiveType
-    {
-        Null,
-        Single,
-        MultipleDays,
-    }
-
-    public interface IUniqueRepetitiveEvent
-    {
-        public int Id { get; set; }
-        public RepetitiveType RepetitiveType { get; init; }
-    }
-
-    public class JsonConvertException : Exception { }
-    public class MethodNotFoundException : Exception { }
-    public class TypeNotFoundOrInvalidException : Exception { }
-
     public class Time
     {
         private int _week = 1;
@@ -77,7 +49,7 @@ namespace StudentScheduleManagementSystem.Times
                     time.Week++;
                     if (time.Week > 16)
                     {
-                        throw new MainProgram.EndOfSemester();
+                        throw new EndOfSemester();
                     }
                 }
                 else
@@ -207,7 +179,7 @@ namespace StudentScheduleManagementSystem.Times
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public partial class Alarm
+    public partial class Alarm : IJsonConvertible
     {
         private struct Record : IUniqueRepetitiveEvent
         {
@@ -318,7 +290,7 @@ namespace StudentScheduleManagementSystem.Times
                 var dobj = JsonConvert.DeserializeObject<DeserializedObject>(obj.ToString(), _setting);
                 if (dobj == null)
                 {
-                    throw new JsonConvertException();
+                    throw new JsonFormatException();
                 }
                 //what if callbackName is null?
                 if (!localMethods.Contains(dobj.CallbackName))
@@ -353,7 +325,7 @@ namespace StudentScheduleManagementSystem.Times
             List<JObject> list = new();
             foreach (var instance in _alarmList)
             {
-                Console.WriteLine(JsonConvert.SerializeObject(instance.Value, _setting));
+                //Console.WriteLine(JsonConvert.SerializeObject(instance.Value, _setting));
                 if (!localMethods.Contains(instance.Value._callbackName))
                 {
                     throw new MethodNotFoundException();
@@ -362,22 +334,12 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     throw new TypeNotFoundOrInvalidException();
                 }
-                /*string activeDaysToString = @$"[{Array.ConvertAll(instance.Value.ActiveDays ?? Array.Empty<Day>(),
-                                                                  day => @$"{{""Value:""{day.ToString()},}}")}]";
-                JObject obj = JObject.Parse(@$"
-                {{
-                    ""RepetitiveType:""{instance.Value.RepetitiveType},
-                    ""BeginTime:""{instance.Value.BeginTime},
-                    ""ActiveDays:""{(instance.Value.ActiveDays != null ? activeDaysToString : "null")},
-                    ""BeginTime:""{instance.Value.BeginTime.ToInt()},
-                    ""CallbackName:""{instance.Value._callbackName},
-                }}");*/
                 list.Add(JObject.Parse(JsonConvert.SerializeObject(instance.Value, _setting)));
             }
             return list;
         }
 
-        private static JsonSerializerSettings _setting = new()
+        private static readonly JsonSerializerSettings _setting = new()
         {
             Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
         };

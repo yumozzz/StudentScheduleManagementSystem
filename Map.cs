@@ -13,8 +13,6 @@
             Console.WriteLine("test");
         }
 
-        public class AmbiguousLocationMatch : Exception { }
-
         public static Location[] getLocationsByName(string name)
         {
             //UNDONE
