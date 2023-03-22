@@ -1,4 +1,9 @@
-﻿using StudentScheduleManagementSystem.MainProgram.Extension;
+﻿using System.Collections;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Converters;
+using StudentScheduleManagementSystem.MainProgram.Extension;
+using System.Reflection;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -26,6 +31,10 @@ namespace StudentScheduleManagementSystem.Times
         public RepetitiveType RepetitiveType { get; init; }
     }
 
+    public class JsonConvertException : Exception { }
+    public class MethodNotFoundException : Exception { }
+    public class TypeNotFoundOrInvalidException : Exception { }
+
     public class Time
     {
         private int _week = 1;
@@ -41,6 +50,7 @@ namespace StudentScheduleManagementSystem.Times
                 _week = value;
             }
         }
+        [JsonConverter(typeof(StringEnumConverter))]
         public Day Day { get; set; } = Day.Monday;
         private int _hour = 0;
         public int Hour
@@ -126,7 +136,9 @@ namespace StudentScheduleManagementSystem.Times
             _timeline[offset] = value;
         }
 
-        public void RemoveMultipleItems(Time baseTime, RepetitiveType repetitiveType, out int id,
+        public void RemoveMultipleItems(Time baseTime,
+                                        RepetitiveType repetitiveType,
+                                        out int id,
                                         params Day[] activeDays)
         {
             id = -1;
@@ -194,7 +206,8 @@ namespace StudentScheduleManagementSystem.Times
         }
     }
 
-    public class Alarm
+    [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+    public partial class Alarm
     {
         private struct Record : IUniqueRepetitiveEvent
         {
@@ -203,13 +216,26 @@ namespace StudentScheduleManagementSystem.Times
             public int Id { get; set; }
         }
 
+        private class DeserializedObject
+        {
+            public object? CallbackParameter { get; set; }
+            public string? CallbackName { get; set; }
+            public string ParameterTypeName { get; set; }
+            public RepetitiveType @RepetitiveType { get; set; }
+            public Day[]? ActiveDays { get; set; }
+            public Time Timestamp { get; set; }
+        }
+
         private static Dictionary<int, Alarm> _alarmList = new();
 
         private static Timeline<Record> _timeline = new();
-        public Time BeginTime { get; private init; } = new();
+        [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
+        [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public Day[]? ActiveDays { get; private init; }
         public int AlarmId { get; private init; } = 0;
+        [JsonProperty(propertyName: "Timestamp", ItemTypeNameHandling = TypeNameHandling.None)]
+        public Time BeginTime { get; private init; } = new();
 
         public static void RemoveAlarm(Times.Time beginTime, RepetitiveType repetitiveType, params Day[] activeDays)
         {
@@ -218,11 +244,16 @@ namespace StudentScheduleManagementSystem.Times
             Log.Logger.LogMessage($"已删除{beginTime}时的闹钟");
         }
 
-        public static void AddAlarm(Times.Time beginTime, RepetitiveType repetitiveType, AlarmCallback? alarmTimeUpCallback,
-                                    object? callbackParameter, params Day[] activeDays)
+        public static void AddAlarm(Times.Time beginTime,
+                                    RepetitiveType repetitiveType,
+                                    AlarmCallback? alarmTimeUpCallback,
+                                    object? callbackParameter,
+                                    Type parameterType,
+                                    params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
 
+            //if(Expression.)
             int offset = beginTime.ToInt();
             if (_timeline[offset].RepetitiveType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
             else if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
@@ -243,16 +274,21 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            _timeline.AddMultipleItems(beginTime, new Record{RepetitiveType = repetitiveType}, out int thisAlarmId, activeDays);
+            _timeline.AddMultipleItems(beginTime,
+                                       new Record { RepetitiveType = repetitiveType },
+                                       out int thisAlarmId,
+                                       activeDays);
             _alarmList.Add(thisAlarmId,
                            new()
                            {
-                               AlarmId = thisAlarmId,
-                               BeginTime = beginTime,
                                RepetitiveType = RepetitiveType.Single,
                                ActiveDays = activeDays,
+                               AlarmId = thisAlarmId,
+                               BeginTime = beginTime,
                                _alarmCallback = alarmTimeUpCallback,
-                               _callbackParameter = callbackParameter
+                               _callbackParameter = callbackParameter,
+                               _callbackName = alarmTimeUpCallback?.Method.Name ?? "null",
+                               _parameterTypeName = parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
             if (alarmTimeUpCallback == null)
             {
@@ -275,11 +311,107 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
+        public static void CreateInstance(List<JObject> instanceList)
+        {
+            foreach (JObject obj in instanceList)
+            {
+                var dobj = JsonConvert.DeserializeObject<DeserializedObject>(obj.ToString(), _setting);
+                if (dobj == null)
+                {
+                    throw new JsonConvertException();
+                }
+                //what if callbackName is null?
+                if (!localMethods.Contains(dobj.CallbackName))
+                {
+                    throw new MethodNotFoundException();
+                }
+                if (!localTypes.Contains(dobj.ParameterTypeName))
+                {
+                    throw new TypeNotFoundOrInvalidException();
+                }
+                Type type = Assembly.GetExecutingAssembly().GetType(dobj.ParameterTypeName)!;
+                var callbackMethodInfos = new[]
+                {
+                    typeof(Alarm).GetMethod(dobj.CallbackName!),
+                    typeof(Schedule.ScheduleBase).GetMethod(dobj.CallbackName!),
+                    typeof(Schedule.Course).GetMethod(dobj.CallbackName!),
+                    typeof(Schedule.Exam).GetMethod(dobj.CallbackName!),
+                    typeof(Schedule.Activity).GetMethod(dobj.CallbackName!),
+                    typeof(Schedule.TemporaryAffairs).GetMethod(dobj.CallbackName!)
+                }.First(methodInfo => methodInfo != null);
+                AddAlarm(dobj.Timestamp,
+                         dobj.RepetitiveType,
+                         (AlarmCallback)Delegate.CreateDelegate(typeof(AlarmCallback), callbackMethodInfos ?? throw new MethodNotFoundException()),
+                         dobj.CallbackParameter,
+                         type,
+                         dobj.ActiveDays ?? Array.Empty<Day>());
+            }
+        }
+
+        public static List<JObject> SaveInstance()
+        {
+            List<JObject> list = new();
+            foreach (var instance in _alarmList)
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(instance.Value, _setting));
+                if (!localMethods.Contains(instance.Value._callbackName))
+                {
+                    throw new MethodNotFoundException();
+                }
+                if (!localTypes.Contains(instance.Value._parameterTypeName))
+                {
+                    throw new TypeNotFoundOrInvalidException();
+                }
+                /*string activeDaysToString = @$"[{Array.ConvertAll(instance.Value.ActiveDays ?? Array.Empty<Day>(),
+                                                                  day => @$"{{""Value:""{day.ToString()},}}")}]";
+                JObject obj = JObject.Parse(@$"
+                {{
+                    ""RepetitiveType:""{instance.Value.RepetitiveType},
+                    ""BeginTime:""{instance.Value.BeginTime},
+                    ""ActiveDays:""{(instance.Value.ActiveDays != null ? activeDaysToString : "null")},
+                    ""BeginTime:""{instance.Value.BeginTime.ToInt()},
+                    ""CallbackName:""{instance.Value._callbackName},
+                }}");*/
+                list.Add(JObject.Parse(JsonConvert.SerializeObject(instance.Value, _setting)));
+            }
+            return list;
+        }
+
+        private static JsonSerializerSettings _setting = new()
+        {
+            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
+        };
+
         public delegate void AlarmCallback(int alarmId, object? obj);
 
         private AlarmCallback? _alarmCallback;
 
+        [JsonProperty(propertyName:"CallbackParameter")]
         private object? _callbackParameter;
+
+        [JsonProperty(propertyName: "CallbackName")]
+        private string _callbackName;
+
+        [JsonProperty(propertyName: "ParameterTypeName")]
+        private string _parameterTypeName;
+
+        private static readonly string[] localMethods = Array
+                                                       .ConvertAll(new[]
+                                                           {
+                                                               typeof(Alarm).GetMethods(),
+                                                               typeof(Schedule.ScheduleBase).GetMethods(),
+                                                               typeof(Schedule.Course).GetMethods(),
+                                                               typeof(Schedule.Exam).GetMethods(),
+                                                               typeof(Schedule.Activity).GetMethods(),
+                                                               typeof(Schedule.TemporaryAffairs).GetMethods()
+                                                           }.Aggregate<IEnumerable<MethodInfo>>((arr, elem) => arr.Union(elem))
+                                                            .Where(methodInfo => methodInfo.IsPublic)
+                                                            .ToArray(), methodInfo => methodInfo.Name)
+                                                       .Distinct()
+                                                       .ToArray();
+
+        private static readonly string[] localTypes =
+            Array.ConvertAll(typeof(Alarm).GetNestedTypes(), type => type.FullName ?? "null");
     }
 
     public static class Timer
@@ -308,6 +440,13 @@ namespace StudentScheduleManagementSystem.Times
                 }
             }
             Console.WriteLine("clock terminate");
+        }
+
+        public static void ChangeTimeTo(Time time)
+        {
+            _localTime = time;
+            _offset = time.ToInt();
+            Log.Logger.LogWarning($"时间已被设定为{_localTime.ToString()}", null);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using StudentScheduleManagementSystem.Times;
+using System.Runtime.InteropServices;
 
 namespace StudentScheduleManagementSystem.MainProgram
 {
@@ -27,13 +28,16 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                         t,
                                                         "test1",
                                                         new(){PlaceName = "place1"});
-                affair1.EnableAlarm(affair1.AlarmCallback, null);
+                //affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,new Times.Alarm.CallbackParameterType{Id=10,Name="aaa"});
+                //affair1.EnableAlarm((id, par) => { Console.WriteLine(333); });
                 Schedule.TemporaryAffairs affair2 = new("test2", 
                                                         new() { Week = 1, Day = Times.Day.Monday, Hour = 10 },
                                                         "test2",
                                                         new(){PlaceName = "place2"});
+                var list = Times.Alarm.SaveInstance();
+                Alarm.RemoveAlarm(affair1.BeginTime, affair1.RepetitiveType);
+                Times.Alarm.CreateInstance(list);
                 affair1.RemoveSchedule();
-                affair2.RemoveSchedule();
                 FileManagement.FileManager.ReadUserFile(Environment.CurrentDirectory + "/x.json");
                 while (uiThread.IsAlive)
                 {
@@ -104,6 +108,24 @@ namespace StudentScheduleManagementSystem.Schedule
         public void AlarmCallback(int id, object? obj)
         {
             Map.Location.ArrangeForRoutes(_locations.ToArray());
+        }
+
+        public static void TestCallback(int id, object? obj)
+        {
+            var p = (StudentScheduleManagementSystem.Times.Alarm.CallbackParameterType)obj!;
+            Console.WriteLine($"{p.Id},{p.Name}");
+    }
+    }
+}
+
+namespace StudentScheduleManagementSystem.Times
+{
+    public partial class Alarm
+    {
+        public struct CallbackParameterType
+        {
+            public int Id;
+            public string Name;
         }
     }
 }

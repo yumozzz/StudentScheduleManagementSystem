@@ -1,7 +1,7 @@
 ﻿using RepetitiveType = StudentScheduleManagementSystem.Times.RepetitiveType;
 using Day = StudentScheduleManagementSystem.Times.Day;
-using Newtonsoft.Json.Linq;
 using StudentScheduleManagementSystem.MainProgram.Extension;
+using Newtonsoft.Json.Linq;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -118,10 +118,15 @@ namespace StudentScheduleManagementSystem.Schedule
             Log.Logger.LogMessage($"已创建类型为{ScheduleType}的日程{Name}");
         }
 
-        public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback, object? callbackParameter)
+        public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
         {
+            EnableAlarm<object>(alarmTimeUpCallback, null);
+        }
 
-        
+        //alarmTimeUpCallback should be a public method in class "Alarm" or derived classes of "ScheduleBase"
+        //T should be a public nested class in class "Alarm"
+        public void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
+        {
             if (_alarmEnabled)
             {
                 throw new AlarmAlreadyExisted();
@@ -131,13 +136,17 @@ namespace StudentScheduleManagementSystem.Schedule
                 Log.Logger.LogWarning("没有传递回调参数", null);
                 Console.WriteLine("Null \"callbackParameter\", check twice");
             }
-            Times.Alarm.AddAlarm(BeginTime, RepetitiveType, alarmTimeUpCallback, callbackParameter,
+            Times.Alarm.AddAlarm(BeginTime,
+                                 RepetitiveType,
+                                 alarmTimeUpCallback,
+                                 callbackParameter,
+                                 typeof(T),
                                  ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
             _alarmEnabled = true;
         }
     }
 
-    public partial class Course : ScheduleBase
+    public sealed partial class Course : ScheduleBase
     {
         public override ScheduleType @ScheduleType => ScheduleType.Course;
         public override int Earliest => 8;
@@ -189,7 +198,7 @@ namespace StudentScheduleManagementSystem.Schedule
         }
     }
 
-    public partial class Exam : ScheduleBase
+    public sealed partial class Exam : ScheduleBase
     {
         public override ScheduleType @ScheduleType => ScheduleType.Exam;
         public override int Earliest => 8;
@@ -284,7 +293,7 @@ namespace StudentScheduleManagementSystem.Schedule
         }
     }
 
-    public partial class TemporaryAffairs : Activity
+    public sealed partial class TemporaryAffairs : Activity
     {
         public override ScheduleType @ScheduleType => ScheduleType.TemporaryAffair;
 
@@ -317,7 +326,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        protected new void AddSchedule()
+        private new void AddSchedule()
         {
             int offset = BeginTime.ToInt();
             if (_timeline[offset].ScheduleType is not ScheduleType.TemporaryAffair and not ScheduleType.Idle) //有非临时日程而添加临时日程（不允许）
@@ -339,7 +348,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public static void CreateInstance(List<JObject> allInstanceList)
+        public new static void CreateInstance(List<JObject> allInstanceList)
         {
             foreach (JObject instance in allInstanceList)
             {
