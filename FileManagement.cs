@@ -28,7 +28,7 @@ namespace StudentScheduleManagementSystem.FileManagement
                 }
                 dic.Add(array.Key, items);
             }
-            Log.Logger.LogMessage($"已读取学号为{userIdString}的用户信息");
+            Log.Information.Log($"已读取学号为{userIdString}的用户信息");
             return dic;
         }
 
@@ -52,7 +52,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             string userIdString = userId.ToString();
             userIdString = userIdString.PadLeft(11 - userIdString.Length, '0');
             File.WriteAllBytes($"{fileFolder}/{userIdString}.json", Encoding.UTF8.GetBytes(jsonSource));
-            Log.Logger.LogMessage($"已保存学号为{userIdString}的用户信息");
+            Log.Information.Log($"已保存学号为{userIdString}的用户信息");
         }
     }
 }

@@ -86,7 +86,7 @@ namespace StudentScheduleManagementSystem.Schedule
                      ScheduleType != ScheduleType.TemporaryAffair) //有日程而添加非临时日程（需要选择是否覆盖）
             {
                 Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
-                Log.Logger.LogWarning($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
+                Log.Warning.Log($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
                 //TODO:添加确认覆盖逻辑
                 _scheduleList.Remove(_timeline[offset].Id);
                 RemoveSchedule(_timeline[offset].Id); //删除单次日程
@@ -100,7 +100,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                        out int thisScheduleId);
             ScheduleId = thisScheduleId;
             _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
-            Log.Logger.LogMessage("已在时间轴上添加日程");
+            Log.Information.Log("已在时间轴上添加日程");
         }
 
         protected ScheduleBase(RepetitiveType repetitiveType,
@@ -138,7 +138,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 AddSchedule();
             }
-            Log.Logger.LogMessage($"已创建类型为{ScheduleType}的日程{Name}");
+            Log.Information.Log($"已创建类型为{ScheduleType}的日程{Name}");
         }
 
         public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
@@ -156,7 +156,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             if (callbackParameter == null)
             {
-                Log.Logger.LogWarning("没有传递回调参数", null);
+                Log.Warning.Log("没有传递回调参数", null);
                 Console.WriteLine("Null \"callbackParameter\", check twice");
             }
             Times.Alarm.AddAlarm(BeginTime,
@@ -470,11 +470,11 @@ namespace StudentScheduleManagementSystem.Schedule
             if (((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Count == 0)
             {
                 base.RemoveSchedule();
-                Log.Logger.LogMessage("已删除全部临时日程");
+                Log.Information.Log("已删除全部临时日程");
             }
             else
             {
-                Log.Logger.LogMessage("已删除单次临时日程");
+                Log.Information.Log("已删除单次临时日程");
             }
         }
 
@@ -493,7 +493,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 ScheduleId = _timeline[offset].Id;
                 ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
                                                                        .Add(OfflineLocation!); //在原先实例的location上添加元素
-                Log.Logger.LogMessage("已扩充临时日程");
+                Log.Information.Log("已扩充临时日程");
             }
             else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例
             {

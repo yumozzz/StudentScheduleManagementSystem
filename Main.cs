@@ -19,7 +19,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Log.Logger.Setup();
+                Log.LogBase.Setup();
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -66,12 +66,12 @@ namespace StudentScheduleManagementSystem.MainProgram
             catch (Exception ex)
             {
                 Task.Run(() => MessageBox.Show(ex.Message));
-                Log.Logger.LogError(ex);
+                Log.Error.Log(ex);
             }
             finally
             {
                 cts.Cancel();
-                Log.Logger.Close();
+                Log.LogBase.Close();
                 Console.ReadLine();
                 FreeConsole();
             }

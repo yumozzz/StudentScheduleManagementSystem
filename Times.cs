@@ -212,7 +212,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             _timeline.RemoveMultipleItems(beginTime, repetitiveType, out int alarmId, activeDays);
             _alarmList.Remove(alarmId);
-            Log.Logger.LogMessage($"已删除{beginTime}时的闹钟");
+            Log.Information.Log($"已删除{beginTime}时的闹钟");
         }
 
         public static void AddAlarm(Times.Time beginTime,
@@ -264,10 +264,10 @@ namespace StudentScheduleManagementSystem.Times
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
             if (alarmTimeUpCallback == null)
             {
-                Log.Logger.LogWarning("没有传递回调方法", null);
+                Log.Warning.Log("没有传递回调方法", null);
                 Console.WriteLine("Null alarmTimeUpCallback");
             }
-            Log.Logger.LogMessage($"已添加{beginTime}时的闹钟");
+            Log.Information.Log($"已添加{beginTime}时的闹钟");
 
             #endregion
         }
@@ -279,7 +279,7 @@ namespace StudentScheduleManagementSystem.Times
             if (alarmId != 0)
             {
                 _alarmList[alarmId]._alarmCallback?.Invoke(alarmId, _alarmList[alarmId]._callbackParameter);
-                Log.Logger.LogMessage($"ID为{alarmId}的闹钟已触发");
+                Log.Information.Log($"ID为{alarmId}的闹钟已触发");
             }
         }
 
@@ -415,7 +415,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             _localTime = time;
             _offset = time.ToInt();
-            Log.Logger.LogWarning($"时间已被设定为{_localTime.ToString()}", null);
+            Log.Warning.Log($"时间已被设定为{_localTime.ToString()}", null);
         }
     }
 }

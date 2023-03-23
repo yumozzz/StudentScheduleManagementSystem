@@ -1,10 +1,11 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 
 namespace StudentScheduleManagementSystem.Log
 {
-    public static class Logger
+    public static class LogBase
     {
-        private static FileStream? stream;
+        public static FileStream? Stream { get; private set; }
 
         private static readonly int random = new Random(DateTime.Now.Millisecond).Next();
 
@@ -12,46 +13,56 @@ namespace StudentScheduleManagementSystem.Log
         {
             Setup(Environment.CurrentDirectory);
         }
+
         public static void Setup(string filePath)
         {
             if (!Directory.Exists(Environment.CurrentDirectory + "/log"))
             {
                 Directory.CreateDirectory(Environment.CurrentDirectory + "/log");
             }
-            stream = new(Environment.CurrentDirectory + $"/log/{random}.log", FileMode.Create);
+            Stream = new(Environment.CurrentDirectory + $"/log/{random}.log", FileMode.Create);
         }
 
         public static void Close()
         {
-            stream!.Close();
+            Stream!.Close();
         }
+    }
 
-        public static void LogMessage(string message)
+    public static class Information
+    {
+        public static void Log(string message)
         {
             string log =
                 $"[Log] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
-            var arr=Encoding.UTF8.GetBytes(log);
-            stream!.Write(arr, 0, arr.Length);
-            stream!.Flush();
+            var arr = Encoding.UTF8.GetBytes(log);
+            LogBase.Stream!.Write(arr, 0, arr.Length);
+            LogBase.Stream!.Flush();
         }
+    }
 
-        public static void LogWarning(string message, string? methodName)
+    public static class Warning
+    {
+        public static void Log(string message, string? methodName)
         {
             string log =
                 $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"" +
                 (methodName != null ? $"in {methodName}\n" : "\n");
             var arr = Encoding.UTF8.GetBytes(log);
-            stream!.Write(arr, 0, arr.Length);
-            stream!.Flush();
+            LogBase.Stream!.Write(arr, 0, arr.Length);
+            LogBase.Stream!.Flush();
         }
+    }
 
-        public static void LogError(Exception ex)
+    public static class Error
+    {
+        public static void Log(Exception ex)
         {
             string log =
                 $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{ex.Message}\"\n{ex.StackTrace}\n";
             var arr = Encoding.UTF8.GetBytes(log);
-            stream!.Write(arr, 0, arr.Length);
-            stream!.Flush();
+            LogBase.Stream!.Write(arr, 0, arr.Length);
+            LogBase.Stream!.Flush();
         }
     }
 }
