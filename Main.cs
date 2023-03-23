@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 [assembly: RequiresPreviewFeatures]
 
@@ -20,6 +21,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Log.LogBase.Setup();
+                Schedule.ScheduleBase.ReadCourseAndExamData();
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -27,20 +29,22 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
                 Times.Time t = new() { Week = 1, Day = Day.Monday, Hour = 10 };
-                Schedule.TemporaryAffairs affair1 = new("test1", t, "test1", new() { PlaceName = "place1" });
+                Schedule.TemporaryAffairs affair1 = new(null, "test1", t, "test1", new());
                 affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,
                                     new Times.Alarm.CallbackParameterType { Id = 10, Name = "aaa" });
-                Schedule.TemporaryAffairs affair2 = new("test2",
+                Schedule.TemporaryAffairs affair2 = new(null,
+                                                        "test2",
                                                         new() { Week = 1, Day = Day.Monday, Hour = 10 },
                                                         "test2",
-                                                        new() { PlaceName = "place2" });
-                Schedule.Exam exam = new("exam1",
+                                                        new());
+                Schedule.Exam exam = new(null,
+                                         "exam1",
                                          new() { Week = 2, Day = Day.Thursday, Hour = 16 },
                                          2,
                                          "test exam",
-                                         new() { Id = 3, PlaceName = "classroom1" });
+                                         new());
 
-                Dictionary<string, List<JObject>> dic = new()
+                Dictionary<string, JArray> dic = new()
                 {
                     { "Alarm", Times.Alarm.SaveInstance() },
                     { "Course", Schedule.Course.SaveInstance() },
@@ -48,22 +52,27 @@ namespace StudentScheduleManagementSystem.MainProgram
                     { "Activity", Schedule.Activity.SaveInstance() },
                     { "TemporaryAffairs", Schedule.TemporaryAffairs.SaveInstance() }
                 };
-                FileManagement.FileManager.SaveToUserFile(dic, 1, Environment.CurrentDirectory + "/users");
+                FileManagement.FileManager.SaveToUserFile(dic, "2021210001", FileManagement.FileManager.UserFileDirectory);
                 affair1.RemoveSchedule();
                 affair2.RemoveSchedule();
                 exam.RemoveSchedule();
-                dic = FileManagement.FileManager.ReadFromUserFile(1, Environment.CurrentDirectory + "/users");
+                dic = FileManagement.FileManager.ReadFromUserFile("2021210001", FileManagement.FileManager.UserFileDirectory);
                 Times.Alarm.CreateInstance(dic["Alarm"]);
                 Schedule.Course.CreateInstance(dic["Course"]);
                 Schedule.Exam.CreateInstance(dic["Exam"]);
                 Schedule.Activity.CreateInstance(dic["Activity"]);
                 Schedule.TemporaryAffairs.CreateInstance(dic["TemporaryAffairs"]);
+                {
+                    Schedule.ScheduleBase.SaveCourseAndExamData();
+                    Log.Information.Log("已更新课程与考试信息");
+                }
                 while (uiThread.IsAlive)
                 {
                     Thread.Sleep(1000);
                 }
+                //exit program
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
                 Task.Run(() => MessageBox.Show(ex.Message));
                 Log.Error.Log(ex);
@@ -104,8 +113,16 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public static void TestCallback(int id, object? obj)
         {
-            var p = (StudentScheduleManagementSystem.Times.Alarm.CallbackParameterType)obj!;
-            Console.WriteLine($"{p.Id},{p.Name}");
+            Times.Alarm.CallbackParameterType param;
+            if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
+            {
+                param = JsonConvert.DeserializeObject<Times.Alarm.CallbackParameterType>(obj!.ToString()!);
+            }
+            else
+            {
+                param = (Times.Alarm.CallbackParameterType)obj!;
+            }
+            Console.WriteLine($"param is {param.Id},{param.Name}");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace StudentScheduleManagementSystem
 { 
@@ -36,13 +37,14 @@ namespace StudentScheduleManagementSystem
 
     public interface IJsonConvertible
     {
-        public abstract static void CreateInstance(List<JObject> instanceList);
+        public abstract static void CreateInstance(JArray instanceList);
 
-        public abstract static List<JObject> SaveInstance();
+        public abstract static JArray SaveInstance();
 
     }
 
-    public class JsonFormatException : Exception { }
+    public class JsonFormatException : JsonException { }
+    public class ScheduleInformationMismatchException : Exception { }
     public class MethodNotFoundException : Exception { }
     public class TypeNotFoundOrInvalidException : Exception { }
     public class AlarmAlreadyExisted : Exception { };

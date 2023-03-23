@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
+using System.Numerics;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -71,6 +72,25 @@ namespace StudentScheduleManagementSystem.Times
         public override int GetHashCode()
         {
             return 7 * 24 * (Week - 1) + 24 * Day.ToInt() + Hour;
+        }
+
+        public static bool operator ==(Time left, Time right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Time left, Time right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            return this.Week == ((Time)obj).Week && this.Day == ((Time)obj).Day && this.Hour == ((Time)obj).Hour;
         }
 
         public int ToInt()
@@ -143,13 +163,27 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
-        public void AddMultipleItems(Time timestamp, TRecord record, out int id, params Day[] activeDays)
+        public void AddMultipleItems(int? specificId, char? beginWith, Time timestamp, TRecord record, out int outId, params Day[] activeDays)
         {
-            int randomId = randomGenerator.Next();
+            int id;
+            if (specificId == null)
+            {
+                id = randomGenerator.Next() % (int)1e9;
+            }
+            else
+            {
+                id = specificId.Value;
+            } 
+            if (beginWith != null)
+            {
+                var str = id.ToString().ToCharArray();
+                str[0] = beginWith.Value;
+                id = int.Parse(new string(str));
+            }
             if (record.RepetitiveType == RepetitiveType.Single)
             {
                 int offset = timestamp.ToInt();
-                record.Id = randomId;
+                record.Id = id;
                 AddSingleItem(offset, record);
             }
             else if (record.RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
@@ -164,7 +198,7 @@ namespace StudentScheduleManagementSystem.Times
                     int offset = 24 * dayOffset + timestamp.Hour;
                     while (offset < 16 * 7 * 24)
                     {
-                        RemoveSingleItem(offset, new() { RepetitiveType = RepetitiveType.MultipleDays, Id = randomId });
+                        RemoveSingleItem(offset, new() { RepetitiveType = RepetitiveType.MultipleDays, Id = id });
                         offset += 7 * 24;
                     }
                 }
@@ -173,7 +207,7 @@ namespace StudentScheduleManagementSystem.Times
             {
                 throw new ArgumentException(nameof(record));
             }
-            id = randomId;
+            outId = id;
         }
     }
 
@@ -245,7 +279,9 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            _timeline.AddMultipleItems(beginTime,
+            _timeline.AddMultipleItems(null,
+                                       null,
+                                       beginTime,
                                        new Record { RepetitiveType = repetitiveType },
                                        out int thisAlarmId,
                                        activeDays);
@@ -283,7 +319,7 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
-        public static void CreateInstance(List<JObject> instanceList)
+        public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
             {
@@ -316,15 +352,15 @@ namespace StudentScheduleManagementSystem.Times
                          (AlarmCallback)Delegate.CreateDelegate(typeof(AlarmCallback),
                                                                 callbackMethodInfos ??
                                                                 throw new MethodNotFoundException()),
-                         dobj.CallbackParameter,
+                         ((JObject?)dobj.CallbackParameter)?.Value<object>() ?? null,
                          type,
                          dobj.ActiveDays ?? Array.Empty<Day>());
             }
         }
 
-        public static List<JObject> SaveInstance()
+        public static JArray SaveInstance()
         {
-            List<JObject> list = new();
+            JArray array = new();
             foreach (var instance in _alarmList)
             {
                 //Console.WriteLine(JsonConvert.SerializeObject(instance.Value, _setting));
@@ -336,9 +372,14 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     throw new TypeNotFoundOrInvalidException();
                 }
-                list.Add(JObject.Parse(JsonConvert.SerializeObject(instance.Value, _setting)));
+                array.Add(JObject.FromObject(instance.Value,
+                                             new()
+                                             {
+                                                 Formatting = Formatting.Indented,
+                                                 NullValueHandling = NullValueHandling.Include
+                                             }));
             }
-            return list;
+            return array;
         }
 
         private static readonly JsonSerializerSettings _setting = new()

@@ -16,11 +16,11 @@ namespace StudentScheduleManagementSystem.Log
 
         public static void Setup(string filePath)
         {
-            if (!Directory.Exists(Environment.CurrentDirectory + "/log"))
+            if (!Directory.Exists(FileManagement.FileManager.LogFileDirectory))
             {
-                Directory.CreateDirectory(Environment.CurrentDirectory + "/log");
+                Directory.CreateDirectory(FileManagement.FileManager.LogFileDirectory);
             }
-            Stream = new(Environment.CurrentDirectory + $"/log/{random}.log", FileMode.Create);
+            Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{random}.log", FileMode.Create);
         }
 
         public static void Close()

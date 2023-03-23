@@ -5,34 +5,31 @@ namespace StudentScheduleManagementSystem.FileManagement
 {
     public static class FileManager
     {
-        //JToken:一个类实例的一个属性或字段
-        //List<JObject>:存储某一类的所有实例信息
-        //Dictionary<(string, List<JObject>)>:存储所有类的所有实例信息，以string标识类名
-        public static Dictionary<string, List<JObject>> ReadFromUserFile(int userId, string fileFolder)
+        public static readonly string UserFileDirectory = Environment.CurrentDirectory + "/users";
+
+        public static readonly string LogFileDirectory = Environment.CurrentDirectory + "/log";
+        
+        //element of JArray:一个类实例的一个属性或字段
+        //JArray:存储某一类的所有实例信息
+        //Dictionary<(string, JArray)>:存储所有类的所有实例信息，以string标识类名
+        public static Dictionary<string, JArray> ReadFromUserFile(string userId, string fileFolder)
         {
             if (!Directory.Exists(fileFolder))
             {
                 throw new DirectoryNotFoundException();
             }
-            string userIdString = userId.ToString();
-            userIdString = userIdString.PadLeft(11 - userIdString.Length, '0');
-            string jsonSource = File.ReadAllText($"{fileFolder}/{userIdString}.json");
+            string jsonSource = File.ReadAllText($"{fileFolder}/{userId}.json");
             JObject obj = JObject.Parse(jsonSource);
-            Dictionary<string, List<JObject>> dic = new();
+            Dictionary<string, JArray> dic = new();
             foreach (var array in obj)
             {
-                List<JObject> items = new();
-                foreach (JObject item in JArray.Parse(array.Value!.ToString()))
-                {
-                    items.Add(item);
-                }
-                dic.Add(array.Key, items);
+                dic.Add(array.Key, (JArray)array.Value!);
             }
-            Log.Information.Log($"已读取学号为{userIdString}的用户信息");
+            Log.Information.Log($"已读取学号为{userId}的用户信息");
             return dic;
         }
 
-        public static void SaveToUserFile(Dictionary<string, List<JObject>> objects, int userId, string fileFolder)
+        public static void SaveToUserFile(Dictionary<string, JArray> objects, string userId, string fileFolder)
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -41,18 +38,11 @@ namespace StudentScheduleManagementSystem.FileManagement
             JObject root = new();
             foreach (var @class in objects)
             {
-                JArray array = new();
-                foreach (var instance in @class.Value)
-                {
-                    array.Add(instance);
-                }
-                root.Add(@class.Key, array);
+                root.Add(@class.Key, @class.Value);
             }
             string jsonSource = root.ToString();
-            string userIdString = userId.ToString();
-            userIdString = userIdString.PadLeft(11 - userIdString.Length, '0');
-            File.WriteAllBytes($"{fileFolder}/{userIdString}.json", Encoding.UTF8.GetBytes(jsonSource));
-            Log.Information.Log($"已保存学号为{userIdString}的用户信息");
+            File.WriteAllBytes($"{fileFolder}/{userId}.json", Encoding.UTF8.GetBytes(jsonSource));
+            Log.Information.Log($"已保存学号为{userId}的用户信息");
         }
     }
 }
