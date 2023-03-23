@@ -28,41 +28,52 @@ namespace StudentScheduleManagementSystem.MainProgram
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-                Times.Time t = new() { Week = 1, Day = Day.Monday, Hour = 10 };
-                Schedule.TemporaryAffairs affair1 = new(null, "test1", t, "test1", new());
+                Schedule.TemporaryAffairs affair1 =
+                    new(null, "test1", new() { Week = 1, Day = Day.Monday, Hour = 14 }, "test1", new());
                 affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,
                                     new Times.Alarm.CallbackParameterType { Id = 10, Name = "aaa" });
-                Schedule.TemporaryAffairs affair2 = new(null,
+                /*Schedule.TemporaryAffairs affair2 = new(null,
                                                         "test2",
                                                         new() { Week = 1, Day = Day.Monday, Hour = 10 },
                                                         "test2",
-                                                        new());
+                                                        new());//被覆盖*/
                 Schedule.Exam exam = new(null,
                                          "exam1",
                                          new() { Week = 2, Day = Day.Thursday, Hour = 16 },
                                          2,
                                          "test exam",
                                          new());
-
-                Dictionary<string, JArray> dic = new()
-                {
-                    { "Alarm", Times.Alarm.SaveInstance() },
-                    { "Course", Schedule.Course.SaveInstance() },
-                    { "Exam", Schedule.Exam.SaveInstance() },
-                    { "Activity", Schedule.Activity.SaveInstance() },
-                    { "TemporaryAffairs", Schedule.TemporaryAffairs.SaveInstance() }
-                };
-                FileManagement.FileManager.SaveToUserFile(dic, "2021210001", FileManagement.FileManager.UserFileDirectory);
-                affair1.RemoveSchedule();
-                affair2.RemoveSchedule();
-                exam.RemoveSchedule();
-                dic = FileManagement.FileManager.ReadFromUserFile("2021210001", FileManagement.FileManager.UserFileDirectory);
-                Times.Alarm.CreateInstance(dic["Alarm"]);
+                Schedule.Exam exam2 = new(null,
+                                         "exam2",
+                                         new() { Week = 2, Day = Day.Friday, Hour = 14 },
+                                         3,
+                                         "test exam2",
+                                         new());
+                Schedule.Course course = new(null,
+                                             RepetitiveType.Single,
+                                             "course1",
+                                             new() { Week = 2, Day = Day.Monday, Hour = 8 },
+                                             2,
+                                             "test course1",
+                                             new Map.Location());
+                Schedule.Course course2 = new(null,
+                                              RepetitiveType.MultipleDays,
+                                              "course2",
+                                              new() { Hour = 10 },
+                                              2,
+                                              "test course2",
+                                              new Map.Location(),
+                                              Day.Monday,
+                                              Day.Thursday);
+                course2.RemoveSchedule();
+                //dic = FileManagement.FileManager.ReadFromUserFile("2021210001", FileManagement.FileManager.UserFileDirectory);
+                /*Times.Alarm.CreateInstance(dic["Alarm"]);
                 Schedule.Course.CreateInstance(dic["Course"]);
                 Schedule.Exam.CreateInstance(dic["Exam"]);
                 Schedule.Activity.CreateInstance(dic["Activity"]);
-                Schedule.TemporaryAffairs.CreateInstance(dic["TemporaryAffairs"]);
+                Schedule.TemporaryAffairs.CreateInstance(dic["TemporaryAffairs"]);*/
                 {
+                    FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
                     Schedule.ScheduleBase.SaveCourseAndExamData();
                     Log.Information.Log("已更新课程与考试信息");
                 }
@@ -99,6 +110,16 @@ namespace StudentScheduleManagementSystem.MainProgram
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool FreeConsole();
+
+        public static Dictionary<string, JArray> CreateInstanceDictionary() =>
+            new()
+            {
+                { "Alarm", Times.Alarm.SaveInstance() },
+                { "Course", Schedule.Course.SaveInstance() },
+                { "Exam", Schedule.Exam.SaveInstance() },
+                { "Activity", Schedule.Activity.SaveInstance() },
+                { "TemporaryAffairs", Schedule.TemporaryAffairs.SaveInstance() }
+            };
     }
 }
 

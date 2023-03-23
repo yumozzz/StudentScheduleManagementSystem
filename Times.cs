@@ -272,6 +272,7 @@ namespace StudentScheduleManagementSystem.Times
             {
                 Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
                 activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
+                //TODO:verify
                 RemoveAlarm(beginTime, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
             }
 
