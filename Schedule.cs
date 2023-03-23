@@ -7,6 +7,8 @@ namespace StudentScheduleManagementSystem.Schedule
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public abstract class ScheduleBase
     {
+        #region structs and classes
+
         protected struct Record : IUniqueRepetitiveEvent
         {
             public RepetitiveType @RepetitiveType { get; init; }
@@ -38,6 +40,10 @@ namespace StudentScheduleManagementSystem.Schedule
             public int Duration { get; set; }
             public Map.Location? Location { get; set; }
         }
+
+        #endregion
+
+        #region protected fields
 
         protected static readonly Times.Timeline<Record> _timeline = new();
 
@@ -75,7 +81,21 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         };
 
+        protected static readonly JsonSerializer _serializer = new()
+        {
+            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
+        };
+
+        protected static readonly JsonSerializerSettings _setting = new()
+        {
+            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
+        };
+
         protected bool _alarmEnabled = false;
+
+        #endregion
+
+        #region public properties
 
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public abstract ScheduleType @ScheduleType { get; }
@@ -94,15 +114,198 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty] public bool IsOnline { get; init; } = false;
         [JsonProperty] public string? Description { get; init; } = null;
 
-        protected static readonly JsonSerializer _serializer = new()
-        {
-            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
-        };
+        #endregion
 
-        protected static readonly JsonSerializerSettings _setting = new()
+        #region ctor
+
+        protected ScheduleBase(RepetitiveType repetitiveType,
+                               string name,
+                               Times.Time beginTime,
+                               int duration,
+                               bool isOnline,
+                               string? description,
+                               params Day[] activeDays)
         {
-            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
-        };
+            if (duration is not (1 or 2 or 3))
+            {
+                throw new ArgumentOutOfRangeException(nameof(duration));
+            }
+            if (beginTime.Hour < Earliest || beginTime.Hour > Latest - duration)
+            {
+                throw new ArgumentOutOfRangeException(nameof(beginTime));
+            }
+            if (repetitiveType == RepetitiveType.Null)
+            {
+                throw new ArgumentOutOfRangeException(nameof(repetitiveType));
+            }
+            if (repetitiveType == RepetitiveType.Single && activeDays.Length != 0)
+            {
+                throw new ArgumentException("Repetitive type is single but argument \"activeDays\" is not null");
+            }
+            if (repetitiveType != RepetitiveType.Single && activeDays.Length == 0)
+            {
+                throw new ArgumentException("Repetitive type is multipledays but argument \"activeDays\" is null");
+            }
+            RepetitiveType = repetitiveType;
+            ActiveDays = activeDays;
+            Name = name;
+            BeginTime = beginTime;
+            Duration = duration;
+            IsOnline = isOnline;
+            Description = description;
+            Log.Information.Log($"已为类型为{ScheduleType}的日程{Name}创建基类");
+        }
+
+        #endregion
+
+        #region API on schedule manipulation
+
+        public virtual void RemoveSchedule()
+        {
+            RemoveSchedule(ScheduleId);
+            if (ScheduleType == ScheduleType.Course)
+            {
+                _courseIdList.Remove(ScheduleId);
+                _correspondenceDictionary.Remove(ScheduleId);
+            }
+            else if (ScheduleType == ScheduleType.Exam)
+            {
+                _examIdList.Remove(ScheduleId);
+                _correspondenceDictionary.Remove(ScheduleId);
+            }
+        }
+
+        protected static void RemoveSchedule(int scheduleId)
+        {
+            ScheduleBase schedule = _scheduleList[scheduleId];
+            _scheduleList.Remove(scheduleId);
+            _timeline.RemoveMultipleItems(schedule.BeginTime,
+                                          schedule.RepetitiveType,
+                                          out _,
+                                          schedule.ActiveDays ?? Array.Empty<Day>());
+            if (schedule._alarmEnabled)
+            {
+                Times.Alarm.RemoveAlarm(schedule.BeginTime,
+                                        schedule.RepetitiveType,
+                                        schedule.ActiveDays ?? Array.Empty<Day>());
+            }
+        }
+
+        protected void AddSchedule(int? specifiedId, char beginWith) //添加日程
+        {
+            int offset = BeginTime.ToInt();
+            if (_timeline[offset].ScheduleType == ScheduleType.Idle) { }
+            else if (_timeline[offset].ScheduleType != ScheduleType.Idle &&
+                     ScheduleType != ScheduleType.TemporaryAffair) //有日程而添加非临时日程（需要选择是否覆盖）
+            {
+                Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
+                Log.Warning.Log($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
+                throw new OverrideExistingScheduleException();
+                RemoveSchedule(_timeline[offset].Id); //删除单次日程
+                _scheduleList.Remove(_timeline[offset].Id);
+            }
+            int thisScheduleId;
+            if (ScheduleType == ScheduleType.Course)
+            {
+                thisScheduleId = specifiedId == null ? GetProperId(_courseIdList) : specifiedId.Value;
+                _timeline.AddMultipleItems(thisScheduleId,
+                                           beginWith,
+                                           BeginTime,
+                                           Duration,
+                                           new Record
+                                           {
+                                               RepetitiveType = this.RepetitiveType,
+                                               ScheduleType = this.ScheduleType
+                                           },
+                                           out _,
+                                           ActiveDays ?? Array.Empty<Day>());
+            }
+            else if (ScheduleType == ScheduleType.Exam)
+            {
+                thisScheduleId = specifiedId == null ? GetProperId(_examIdList) : specifiedId.Value;
+                _timeline.AddMultipleItems(thisScheduleId,
+                                           beginWith,
+                                           BeginTime,
+                                           Duration,
+                                           new Record
+                                           {
+                                               RepetitiveType = RepetitiveType.Single,
+                                               ScheduleType = this.ScheduleType
+                                           },
+                                           out _);
+            }
+            else
+            {
+                _timeline.AddMultipleItems(null,
+                                           beginWith,
+                                           BeginTime,
+                                           Duration,
+                                           new Record
+                                           {
+                                               RepetitiveType = this.RepetitiveType, ScheduleType = ScheduleType
+                                           },
+                                           out thisScheduleId,
+                                           ActiveDays ?? Array.Empty<Day>());
+            }
+            ScheduleId = thisScheduleId;
+            _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
+            Log.Information.Log("已在时间轴与表中添加日程");
+        }
+
+        #endregion
+
+        #region API on alarm manipulation
+
+        public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
+        {
+            EnableAlarm<object>(alarmTimeUpCallback, null);
+        }
+
+        //alarmTimeUpCallback should be a public method in class "Alarm" or derived classes of "ScheduleBase"
+        //T should be a public nested class in class "Alarm"
+        public void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
+        {
+            if (_alarmEnabled)
+            {
+                throw new AlarmAlreadyExisted();
+            }
+            if (callbackParameter == null)
+            {
+                Log.Warning.Log("没有传递回调参数", null);
+                Console.WriteLine("Null \"callbackParameter\", check twice");
+            }
+            Times.Alarm.AddAlarm(BeginTime,
+                                 RepetitiveType,
+                                 alarmTimeUpCallback,
+                                 callbackParameter,
+                                 typeof(T),
+                                 ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
+            _alarmEnabled = true;
+        }
+
+        #endregion
+
+        #region API on save and create instances to/from JSON
+
+        protected static JArray SaveInstance(ScheduleType scheduleType)
+        {
+            JArray array = new();
+            foreach (var instance in _scheduleList)
+            {
+                if (instance.Value.ScheduleType != scheduleType)
+                {
+                    continue;
+                }
+                JsonSerializer serializer = new();
+                array.Add(JObject.FromObject(instance.Value,
+                                             new()
+                                             {
+                                                 Formatting = Formatting.Indented,
+                                                 NullValueHandling = NullValueHandling.Include
+                                             }));
+            }
+            return array;
+        }
 
         public static void ReadCourseAndExamData()
         {
@@ -217,192 +420,23 @@ namespace StudentScheduleManagementSystem.Schedule
                                                       FileManagement.FileManager.UserFileDirectory);
         }
 
-        public virtual void RemoveSchedule()
-        {
-            RemoveSchedule(ScheduleId);
-            if (ScheduleType == ScheduleType.Course)
-            {
-                _courseIdList.Remove(ScheduleId);
-                _correspondenceDictionary.Remove(ScheduleId);
-            }
-            else if (ScheduleType == ScheduleType.Exam)
-            {
-                _examIdList.Remove(ScheduleId);
-                _correspondenceDictionary.Remove(ScheduleId);
-            }
-        }
-
-        protected static void RemoveSchedule(int scheduleId)
-        {
-            ScheduleBase schedule = _scheduleList[scheduleId];
-            _scheduleList.Remove(scheduleId);
-            _timeline.RemoveMultipleItems(schedule.BeginTime,
-                                          schedule.RepetitiveType,
-                                          out _,
-                                          schedule.ActiveDays ?? Array.Empty<Day>());
-            if (schedule._alarmEnabled)
-            {
-                Times.Alarm.RemoveAlarm(schedule.BeginTime,
-                                        schedule.RepetitiveType,
-                                        schedule.ActiveDays ?? Array.Empty<Day>());
-            }
-        }
-
-        protected void AddSchedule(int? specifiedId, char beginWith) //添加日程
-        {
-            int offset = BeginTime.ToInt();
-            if (_timeline[offset].ScheduleType == ScheduleType.Idle) { }
-            else if (_timeline[offset].ScheduleType != ScheduleType.Idle &&
-                     ScheduleType != ScheduleType.TemporaryAffair) //有日程而添加非临时日程（需要选择是否覆盖）
-            {
-                Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
-                Log.Warning.Log($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
-                throw new OverrideExistingScheduleException();
-                RemoveSchedule(_timeline[offset].Id); //删除单次日程
-                _scheduleList.Remove(_timeline[offset].Id);
-            }
-            int thisScheduleId;
-            if (ScheduleType == ScheduleType.Course)
-            {
-                thisScheduleId = specifiedId == null ? GetProperId(_courseIdList) : specifiedId.Value;
-                _timeline.AddMultipleItems(thisScheduleId,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = this.RepetitiveType,
-                                               ScheduleType = this.ScheduleType
-                                           },
-                                           out _,
-                                           ActiveDays ?? Array.Empty<Day>());
-            }
-            else if (ScheduleType == ScheduleType.Exam)
-            {
-                thisScheduleId = specifiedId == null ? GetProperId(_examIdList) : specifiedId.Value;
-                _timeline.AddMultipleItems(thisScheduleId,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = RepetitiveType.Single,
-                                               ScheduleType = this.ScheduleType
-                                           },
-                                           out _);
-            }
-            else
-            {
-                _timeline.AddMultipleItems(null,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = this.RepetitiveType, ScheduleType = ScheduleType
-                                           },
-                                           out thisScheduleId,
-                                           ActiveDays ?? Array.Empty<Day>());
-            }
-            ScheduleId = thisScheduleId;
-            _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
-            Log.Information.Log("已在时间轴与表中添加日程");
-        }
-
-        protected ScheduleBase(RepetitiveType repetitiveType,
-                               string name,
-                               Times.Time beginTime,
-                               int duration,
-                               bool isOnline,
-                               string? description,
-                               params Day[] activeDays)
-        {
-            if (duration is not (1 or 2 or 3))
-            {
-                throw new ArgumentOutOfRangeException(nameof(duration));
-            }
-            if (beginTime.Hour < Earliest || beginTime.Hour > Latest - duration)
-            {
-                throw new ArgumentOutOfRangeException(nameof(beginTime));
-            }
-            if (repetitiveType == RepetitiveType.Null)
-            {
-                throw new ArgumentOutOfRangeException(nameof(repetitiveType));
-            }
-            if (repetitiveType == RepetitiveType.Single && activeDays.Length != 0)
-            {
-                throw new ArgumentException("Repetitive type is single but argument \"activeDays\" is not null");
-            }
-            if (repetitiveType != RepetitiveType.Single && activeDays.Length == 0)
-            {
-                throw new ArgumentException("Repetitive type is multipledays but argument \"activeDays\" is null");
-            }
-            RepetitiveType = repetitiveType;
-            ActiveDays = activeDays;
-            Name = name;
-            BeginTime = beginTime;
-            Duration = duration;
-            IsOnline = isOnline;
-            Description = description;
-            Log.Information.Log($"已为类型为{ScheduleType}的日程{Name}创建基类");
-        }
-
-        public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
-        {
-            EnableAlarm<object>(alarmTimeUpCallback, null);
-        }
-
-        //alarmTimeUpCallback should be a public method in class "Alarm" or derived classes of "ScheduleBase"
-        //T should be a public nested class in class "Alarm"
-        public void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
-        {
-            if (_alarmEnabled)
-            {
-                throw new AlarmAlreadyExisted();
-            }
-            if (callbackParameter == null)
-            {
-                Log.Warning.Log("没有传递回调参数", null);
-                Console.WriteLine("Null \"callbackParameter\", check twice");
-            }
-            Times.Alarm.AddAlarm(BeginTime,
-                                 RepetitiveType,
-                                 alarmTimeUpCallback,
-                                 callbackParameter,
-                                 typeof(T),
-                                 ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
-            _alarmEnabled = true;
-        }
-
-        protected static JArray SaveInstance(ScheduleType scheduleType)
-        {
-            JArray array = new();
-            foreach (var instance in _scheduleList)
-            {
-                if (instance.Value.ScheduleType != scheduleType)
-                {
-                    continue;
-                }
-                JsonSerializer serializer = new();
-                array.Add(JObject.FromObject(instance.Value,
-                                             new()
-                                             {
-                                                 Formatting = Formatting.Indented,
-                                                 NullValueHandling = NullValueHandling.Include
-                                             }));
-            }
-            return array;
-        }
+        #endregion
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class Course : ScheduleBase, IJsonConvertible
     {
+        #region structs and classes
+
         private class DeserializedObject : DeserializedObjectBase
         {
             public string? OnlineLink { get; set; }
             public Map.Location? OfflineLocation { get; set; }
         }
+
+        #endregion
+
+        #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.Course;
         public override int Earliest => 8;
@@ -411,6 +445,10 @@ namespace StudentScheduleManagementSystem.Schedule
         public new const bool IsOnline = false;
         [JsonProperty] public string? OnlineLink { get; init; }
         [JsonProperty] public Map.Location? OfflineLocation { get; init; }
+
+        #endregion
+
+        #region ctor
 
         public Course(int? specifiedId,
                       RepetitiveType repetitiveType,
@@ -490,6 +528,10 @@ namespace StudentScheduleManagementSystem.Schedule
             UpdateCourseAndExamData(this);
         }
 
+        #endregion
+
+        #region API on save and create instances to/from JSON
+
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -556,15 +598,23 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         public static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Course);
+
+        #endregion
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class Exam : ScheduleBase, IJsonConvertible
     {
+        #region structs and classes
+
         private class DeserializedObject : DeserializedObjectBase
         {
             public Map.Location OfflineLocation { get; set; }
         }
+
+        #endregion
+
+        #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.Exam;
         public override int Earliest => 8;
@@ -572,6 +622,10 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty]
         public new const bool IsOnline = false;
         [JsonProperty] public Map.Location OfflineLocation { get; init; }
+
+        #endregion
+
+        #region ctor
 
         public Exam(int? specifiedId,
                     string name,
@@ -600,6 +654,10 @@ namespace StudentScheduleManagementSystem.Schedule
             AddSchedule(specifiedId, '2');
             UpdateCourseAndExamData(this);
         }
+
+        #endregion
+
+        #region API on save and create instances to/from JSON
 
         public static void CreateInstance(JArray instanceList)
         {
@@ -632,22 +690,34 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         public static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Exam);
+
+        #endregion
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public partial class Activity : ScheduleBase, IJsonConvertible
     {
+        #region structs and classes
+
         private class DeserializedObject : DeserializedObjectBase
         {
             public string? OnlineLink { get; set; }
             public Map.Location? OfflineLocation { get; set; }
         }
 
+        #endregion
+
+        #region public properties
+
         public override ScheduleType @ScheduleType => ScheduleType.Activity;
         public override int Earliest => 8;
         public override int Latest => 20;
         [JsonProperty] public string? OnlineLink { get; init; } = null;
         [JsonProperty] public Map.Location? OfflineLocation { get; init; } = null;
+
+        #endregion
+
+        #region ctor
 
         protected Activity(int? specifiedId,
                            RepetitiveType repetitiveType,
@@ -692,6 +762,10 @@ namespace StudentScheduleManagementSystem.Schedule
             AddSchedule(specifiedId, '3');
         }
 
+        #endregion
+
+        #region API on save and create instances to/from JSON
+
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -733,16 +807,23 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         public static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Activity);
+
+        #endregion
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class TemporaryAffairs : Activity
     {
+        #region structs and classes
+
         private class DeserializedObject : DeserializedObjectBase
         {
             public Map.Location[] Locations { get; set; }
         }
 
+        #endregion
+
+        #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.TemporaryAffair;
 
@@ -751,6 +832,10 @@ namespace StudentScheduleManagementSystem.Schedule
 
         [JsonProperty(propertyName: "Locations")]
         private readonly List<Map.Location> _locations = new(); //在实例中不维护而在表中维护
+
+        #endregion
+
+        #region ctor
 
         public TemporaryAffairs(int? specifiedId,
                                 string name,
@@ -764,6 +849,10 @@ namespace StudentScheduleManagementSystem.Schedule
             AddSchedule();
             _alarmEnabled = ((TemporaryAffairs)_scheduleList[_timeline[beginTime.ToInt()].Id])._alarmEnabled; //同步闹钟启用情况
         }
+
+        #endregion
+
+        #region API on schedule manipulation
 
         public override void RemoveSchedule()
         {
@@ -804,6 +893,10 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        #endregion
+
+        #region API on save and create instances to/from JSON
+
         public new static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -823,5 +916,7 @@ namespace StudentScheduleManagementSystem.Schedule
         }
 
         public new static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.TemporaryAffair);
+
+        #endregion
     }
 }

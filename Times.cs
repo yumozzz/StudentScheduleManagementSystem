@@ -161,7 +161,13 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
-        public void AddMultipleItems(int? specificId, char? beginWith, Time timestamp, int duration, TRecord record, out int outId, params Day[] activeDays)
+        public void AddMultipleItems(int? specificId,
+                                     char? beginWith,
+                                     Time timestamp,
+                                     int duration,
+                                     TRecord record,
+                                     out int outId,
+                                     params Day[] activeDays)
         {
             int id;
             if (specificId == null)
@@ -171,7 +177,7 @@ namespace StudentScheduleManagementSystem.Times
             else
             {
                 id = specificId.Value;
-            } 
+            }
             if (beginWith != null)
             {
                 var str = id.ToString().ToCharArray();
@@ -218,6 +224,8 @@ namespace StudentScheduleManagementSystem.Times
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public partial class Alarm : IJsonConvertible
     {
+        #region structs and classes
+
         private struct Record : IUniqueRepetitiveEvent
         {
             public RepetitiveType @RepetitiveType { get; init; }
@@ -235,9 +243,58 @@ namespace StudentScheduleManagementSystem.Times
             public Time Timestamp { get; set; }
         }
 
+        public delegate void AlarmCallback(int alarmId, object? obj);
+
+        #endregion
+
+        #region private fields
+
+        private AlarmCallback? _alarmCallback;
+
+        [JsonProperty(propertyName: "CallbackParameter")]
+        private object? _callbackParameter;
+
+        [JsonProperty(propertyName: "CallbackName")]
+        private string _callbackName;
+
+        [JsonProperty(propertyName: "ParameterTypeName")]
+        private string _parameterTypeName;
+
+        private static readonly string[] localMethods = Array
+                                                       .ConvertAll(new[]
+                                                                       {
+                                                                           typeof(Alarm).GetMethods(),
+                                                                           typeof(Schedule.ScheduleBase).GetMethods(),
+                                                                           typeof(Schedule.Course).GetMethods(),
+                                                                           typeof(Schedule.Exam).GetMethods(),
+                                                                           typeof(Schedule.Activity).GetMethods(),
+                                                                           typeof(Schedule.TemporaryAffairs)
+                                                                              .GetMethods()
+                                                                       }.Aggregate<
+                                                                             IEnumerable<MethodInfo>>((arr, elem) =>
+                                                                             arr.Union(elem))
+                                                                        .Where(methodInfo => methodInfo.IsPublic)
+                                                                        .ToArray(),
+                                                                   methodInfo => methodInfo.Name)
+                                                       .Distinct()
+                                                       .ToArray();
+
+        private static readonly string[] localTypes =
+            Array.ConvertAll(typeof(Alarm).GetNestedTypes(), type => type.FullName ?? "null");
+
         private static readonly Dictionary<int, Alarm> _alarmList = new();
 
+        private static readonly JsonSerializerSettings _setting = new()
+        {
+            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
+        };
+
         private static readonly Timeline<Record> _timeline = new();
+
+        #endregion
+
+        #region public properties
+
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
@@ -245,6 +302,10 @@ namespace StudentScheduleManagementSystem.Times
         public int AlarmId { get; private init; } = 0;
         [JsonProperty(propertyName: "Timestamp", ItemTypeNameHandling = TypeNameHandling.None)]
         public Time BeginTime { get; private init; } = new();
+
+        #endregion
+
+        #region API methods
 
         public static void RemoveAlarm(Times.Time beginTime, RepetitiveType repetitiveType, params Day[] activeDays)
         {
@@ -388,46 +449,7 @@ namespace StudentScheduleManagementSystem.Times
             return array;
         }
 
-        private static readonly JsonSerializerSettings _setting = new()
-        {
-            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
-        };
-
-        public delegate void AlarmCallback(int alarmId, object? obj);
-
-        private AlarmCallback? _alarmCallback;
-
-        [JsonProperty(propertyName: "CallbackParameter")]
-        private object? _callbackParameter;
-
-        [JsonProperty(propertyName: "CallbackName")]
-        private string _callbackName;
-
-        [JsonProperty(propertyName: "ParameterTypeName")]
-        private string _parameterTypeName;
-
-        private static readonly string[] localMethods = Array
-                                                       .ConvertAll(new[]
-                                                                       {
-                                                                           typeof(Alarm).GetMethods(),
-                                                                           typeof(Schedule.ScheduleBase).GetMethods(),
-                                                                           typeof(Schedule.Course).GetMethods(),
-                                                                           typeof(Schedule.Exam).GetMethods(),
-                                                                           typeof(Schedule.Activity).GetMethods(),
-                                                                           typeof(Schedule.TemporaryAffairs)
-                                                                              .GetMethods()
-                                                                       }.Aggregate<IEnumerable<MethodInfo>>
-                                                                        (
-                                                                             (arr, elem) => arr.Union(elem)
-                                                                        )
-                                                                        .Where(methodInfo => methodInfo.IsPublic)
-                                                                        .ToArray(),
-                                                                   methodInfo => methodInfo.Name)
-                                                       .Distinct()
-                                                       .ToArray();
-
-        private static readonly string[] localTypes =
-            Array.ConvertAll(typeof(Alarm).GetNestedTypes(), type => type.FullName ?? "null");
+        #endregion
     }
 
     public static class Timer
