@@ -37,9 +37,9 @@ namespace StudentScheduleManagementSystem
 
     public interface IJsonConvertible
     {
-        public abstract static void CreateInstance(JArray instanceList);
+        public static abstract void CreateInstance(JArray instanceList);
 
-        public abstract static JArray SaveInstance();
+        public static abstract JArray SaveInstance();
 
     }
 
@@ -49,7 +49,8 @@ namespace StudentScheduleManagementSystem
     public class ScheduleInformationMismatchException : Exception { }
     public class MethodNotFoundException : Exception { }
     public class TypeNotFoundOrInvalidException : Exception { }
-    public class AlarmAlreadyExisted : Exception { };
+    public class AlarmAlreadyExistedException : Exception { };
+    public class AlarmNotFoundException : Exception { }
     public class AmbiguousLocationMatch : Exception { }
     public class EndOfSemester : Exception { };
 

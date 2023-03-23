@@ -29,6 +29,7 @@ namespace StudentScheduleManagementSystem.Schedule
             public int Duration { get; set; }
             public bool IsOnline { get; set; }
             public string? Description { get; set; }
+            public bool AlarmEnabled { get; set; }
         }
 
         protected class CourseAndExamRecord
@@ -91,8 +92,6 @@ namespace StudentScheduleManagementSystem.Schedule
             Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
         };
 
-        protected bool _alarmEnabled = false;
-
         #endregion
 
         #region public properties
@@ -111,9 +110,9 @@ namespace StudentScheduleManagementSystem.Schedule
         public abstract int Earliest { get; }
         public abstract int Latest { get; }
         [JsonProperty] public int Duration { get; init; } = 1;
-        [JsonProperty] public bool IsOnline { get; init; } = false;
-        [JsonProperty] public string? Description { get; init; } = null;
-
+        [JsonProperty] public bool IsOnline { get; init; }
+        [JsonProperty] public string? Description { get; init; }
+        [JsonProperty] public bool AlarmEnabled { get; protected set; }
         #endregion
 
         #region ctor
@@ -173,6 +172,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 _examIdList.Remove(ScheduleId);
                 _correspondenceDictionary.Remove(ScheduleId);
             }
+            Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveDays ?? Array.Empty<Day>());
         }
 
         protected static void RemoveSchedule(int scheduleId)
@@ -183,7 +183,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                           schedule.RepetitiveType,
                                           out _,
                                           schedule.ActiveDays ?? Array.Empty<Day>());
-            if (schedule._alarmEnabled)
+            if (schedule.AlarmEnabled)
             {
                 Times.Alarm.RemoveAlarm(schedule.BeginTime,
                                         schedule.RepetitiveType,
@@ -201,8 +201,9 @@ namespace StudentScheduleManagementSystem.Schedule
                 Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
                 Log.Warning.Log($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
                 throw new OverrideExistingScheduleException();
-                RemoveSchedule(_timeline[offset].Id); //删除单次日程
-                _scheduleList.Remove(_timeline[offset].Id);
+                //UNDONE:删除判定
+                /*RemoveSchedule(_timeline[offset].Id); //删除单次日程
+                _scheduleList.Remove(_timeline[offset].Id);*/
             }
             int thisScheduleId;
             if (ScheduleType == ScheduleType.Course)
@@ -265,9 +266,9 @@ namespace StudentScheduleManagementSystem.Schedule
         //T should be a public nested class in class "Alarm"
         public void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
         {
-            if (_alarmEnabled)
+            if (AlarmEnabled)
             {
-                throw new AlarmAlreadyExisted();
+                throw new AlarmAlreadyExistedException();
             }
             if (callbackParameter == null)
             {
@@ -280,7 +281,16 @@ namespace StudentScheduleManagementSystem.Schedule
                                  callbackParameter,
                                  typeof(T),
                                  ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
-            _alarmEnabled = true;
+            AlarmEnabled = true;
+        }
+
+        public void DisableAlarm()
+        {
+            if (!AlarmEnabled)
+            {
+                throw new AlarmNotFoundException();
+            }
+            Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveDays ?? Array.Empty<Day>());
         }
 
         #endregion
@@ -559,7 +569,13 @@ namespace StudentScheduleManagementSystem.Schedule
                         {
                             throw new ScheduleInformationMismatchException();
                         }
-                        new Exam(dobj.ScheduleId, dobj.Name, dobj.Timestamp, dobj.Duration, dobj.Description, location);
+                        _ = new Course(dobj.ScheduleId,
+                                       dobj.RepetitiveType,
+                                       dobj.Name,
+                                       dobj.Timestamp,
+                                       dobj.Duration,
+                                       dobj.Description,
+                                       location) { AlarmEnabled = dobj.AlarmEnabled };
                         Log.Information.Log($"已找到ID为{dobj.ScheduleId}的课程");
                         return;
                     }
@@ -676,7 +692,10 @@ namespace StudentScheduleManagementSystem.Schedule
                         dobj.RepetitiveType == record.RepetitiveType && /*location != record.Location ||*/
                         dobj.Duration == record.Duration && dobj.Timestamp == record.Timestamp) //相同
                     {
-                        new Exam(dobj.ScheduleId, dobj.Name, dobj.Timestamp, dobj.Duration, dobj.Description, location);
+                        _ = new Exam(dobj.ScheduleId, dobj.Name, dobj.Timestamp, dobj.Duration, dobj.Description, location)
+                        {
+                            AlarmEnabled = dobj.AlarmEnabled
+                        };
                         Log.Information.Log($"已找到ID为{dobj.ScheduleId}的考试");
                         return;
                     }
@@ -779,25 +798,25 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
                     Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
-                    new Activity(null,
-                                 dobj.RepetitiveType,
-                                 dobj.Name,
-                                 dobj.Timestamp,
-                                 dobj.Duration,
-                                 dobj.Description,
-                                 dobj.OfflineLocation,
-                                 dobj.ActiveDays ?? Array.Empty<Day>());
+                    _ = new Activity(null,
+                                     dobj.RepetitiveType,
+                                     dobj.Name,
+                                     dobj.Timestamp,
+                                     dobj.Duration,
+                                     dobj.Description,
+                                     dobj.OfflineLocation,
+                                     dobj.ActiveDays ?? Array.Empty<Day>()) { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else if (dobj.OnlineLink != null)
                 {
-                    new Activity(null,
-                                 dobj.RepetitiveType,
-                                 dobj.Name,
-                                 dobj.Timestamp,
-                                 dobj.Duration,
-                                 dobj.Description,
-                                 dobj.OnlineLink,
-                                 dobj.ActiveDays ?? Array.Empty<Day>());
+                    _ = new Activity(null,
+                                     dobj.RepetitiveType,
+                                     dobj.Name,
+                                     dobj.Timestamp,
+                                     dobj.Duration,
+                                     dobj.Description,
+                                     dobj.OnlineLink,
+                                     dobj.ActiveDays ?? Array.Empty<Day>()) { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else
                 {
@@ -847,7 +866,7 @@ namespace StudentScheduleManagementSystem.Schedule
             OnlineLink = null;
             OfflineLocation = location;
             AddSchedule();
-            _alarmEnabled = ((TemporaryAffairs)_scheduleList[_timeline[beginTime.ToInt()].Id])._alarmEnabled; //同步闹钟启用情况
+            AlarmEnabled = ((TemporaryAffairs)_scheduleList[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
         }
 
         #endregion
@@ -910,7 +929,10 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     var locations = Map.Location.getLocationsByName(dobj.Locations[i].PlaceName);
                     Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
-                    new TemporaryAffairs(null, dobj.Name, dobj.Timestamp, dobj.Description, location);
+                    _ = new TemporaryAffairs(null, dobj.Name, dobj.Timestamp, dobj.Description, location)
+                    {
+                        AlarmEnabled = dobj.AlarmEnabled//should be the same
+                    };
                 }
             }
         }
