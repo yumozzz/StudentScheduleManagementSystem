@@ -215,6 +215,16 @@ namespace StudentScheduleManagementSystem.Schedule
         public virtual void RemoveSchedule()
         {
             RemoveSchedule(ScheduleId);
+            if (ScheduleType == ScheduleType.Course)
+            {
+                _courseIdList.Remove(ScheduleId);
+                _correspondenceDictionary.Remove(ScheduleId);
+            }
+            else if (ScheduleType == ScheduleType.Exam)
+            {
+                _examIdList.Remove(ScheduleId);
+                _correspondenceDictionary.Remove(ScheduleId);
+            }
         }
 
         protected static void RemoveSchedule(int scheduleId)
