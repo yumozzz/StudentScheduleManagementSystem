@@ -520,6 +520,6 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public static List<JObject> SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.TemporaryAffair);
+        public new static List<JObject> SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.TemporaryAffair);
     }
 }

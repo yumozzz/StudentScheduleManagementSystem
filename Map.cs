@@ -16,7 +16,7 @@
         public static Location[] getLocationsByName(string name)
         {
             //UNDONE
-            return new Location[1]{new(){Id=0,PlaceName="default match"}};
+            return new Location[1] { new() { Id = 0, PlaceName = "default match" } };
         }
     }
 
