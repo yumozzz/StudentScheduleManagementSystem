@@ -39,15 +39,15 @@ namespace StudentScheduleManagementSystem.Schedule
             public Map.Location? Location { get; set; }
         }
 
-        protected static Times.Timeline<Record> _timeline = new();
+        protected static readonly Times.Timeline<Record> _timeline = new();
 
-        protected static Dictionary<int, ScheduleBase> _scheduleList = new();
+        protected static readonly Dictionary<int, ScheduleBase> _scheduleList = new();
 
-        protected static List<int> _courseIdList = new() { 100000000 };
+        protected static readonly List<int> _courseIdList = new() { 100000000 };
 
-        protected static List<int> _examIdList = new() { 200000000 };
+        protected static readonly List<int> _examIdList = new() { 200000000 };
 
-        protected static Dictionary<int, CourseAndExamRecord> _correspondenceDictionary = new()
+        protected static readonly Dictionary<int, CourseAndExamRecord> _correspondenceDictionary = new()
         {
             {
                 100000000,
@@ -108,7 +108,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             try
             {
-                var dic = FileManagement.FileManager.ReadFromUserFile("0000000001",
+                var dic = FileManagement.FileManager.ReadFromUserFile("0000000000",
                                                                       Environment.CurrentDirectory + "/users");
                 foreach (var item in dic["Course"])
                 {
@@ -213,7 +213,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             }
             FileManagement.FileManager.SaveToUserFile(new() { { "Course", courses }, { "Exam", exams } },
-                                                      "0000000001",
+                                                      "0000000000",
                                                       FileManagement.FileManager.UserFileDirectory);
         }
 
@@ -257,7 +257,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
                 Log.Warning.Log($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}", null);
-                //TODO:添加确认覆盖逻辑
+                throw new OverrideExistingScheduleException();
                 RemoveSchedule(_timeline[offset].Id); //删除单次日程
                 _scheduleList.Remove(_timeline[offset].Id);
             }
@@ -268,6 +268,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 _timeline.AddMultipleItems(thisScheduleId,
                                            beginWith,
                                            BeginTime,
+                                           Duration,
                                            new Record
                                            {
                                                RepetitiveType = this.RepetitiveType,
@@ -282,6 +283,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 _timeline.AddMultipleItems(thisScheduleId,
                                            beginWith,
                                            BeginTime,
+                                           Duration,
                                            new Record
                                            {
                                                RepetitiveType = RepetitiveType.Single,
@@ -294,6 +296,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 _timeline.AddMultipleItems(null,
                                            beginWith,
                                            BeginTime,
+                                           Duration,
                                            new Record
                                            {
                                                RepetitiveType = this.RepetitiveType, ScheduleType = ScheduleType
@@ -496,7 +499,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     throw new JsonFormatException();
                 }
-                var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                var locations = Map.Location.getLocationsByName(dobj.OfflineLocation!.PlaceName);
                 Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                 if (_correspondenceDictionary.TryGetValue(dobj.ScheduleId, out var record)) //字典中已存在（课程或考试）
                 {
@@ -747,7 +750,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public new const bool IsOnline = false;
 
         [JsonProperty(propertyName: "Locations")]
-        private List<Map.Location> _locations = new(); //在实例中不维护而在表中维护
+        private readonly List<Map.Location> _locations = new(); //在实例中不维护而在表中维护
 
         public TemporaryAffairs(int? specifiedId,
                                 string name,

@@ -20,7 +20,7 @@ namespace StudentScheduleManagementSystem.Log
             {
                 Directory.CreateDirectory(FileManagement.FileManager.LogFileDirectory);
             }
-            Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{random}.log", FileMode.Create);
+            Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{DateTime.Now.ToString("dd HH:mm:ss")}_{random}.log", FileMode.Create);
         }
 
         public static void Close()

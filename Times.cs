@@ -101,11 +101,9 @@ namespace StudentScheduleManagementSystem.Times
 
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
-        public class OverrideNondefaultItems : Exception { }
+        private readonly TRecord[] _timeline = new TRecord[16 * 7 * 24];
 
-        private TRecord[] _timeline = new TRecord[16 * 7 * 24];
-
-        private static Random randomGenerator = new(DateTime.Now.Millisecond);
+        private static readonly Random randomGenerator = new(DateTime.Now.Millisecond);
 
         public TRecord this[int index]
         {
@@ -163,7 +161,7 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
-        public void AddMultipleItems(int? specificId, char? beginWith, Time timestamp, TRecord record, out int outId, params Day[] activeDays)
+        public void AddMultipleItems(int? specificId, char? beginWith, Time timestamp, int duration, TRecord record, out int outId, params Day[] activeDays)
         {
             int id;
             if (specificId == null)
@@ -180,11 +178,14 @@ namespace StudentScheduleManagementSystem.Times
                 str[0] = beginWith.Value;
                 id = int.Parse(new string(str));
             }
+            record.Id = id;
             if (record.RepetitiveType == RepetitiveType.Single)
             {
-                int offset = timestamp.ToInt();
-                record.Id = id;
-                AddSingleItem(offset, record);
+                for (int i = 0; i < duration; i++)
+                {
+                    int offset = timestamp.ToInt() + i;
+                    AddSingleItem(offset, record);
+                }
             }
             else if (record.RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
             {
@@ -195,11 +196,14 @@ namespace StudentScheduleManagementSystem.Times
                 int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
                 foreach (var dayOffset in dayOffsets)
                 {
-                    int offset = 24 * dayOffset + timestamp.Hour;
-                    while (offset < 16 * 7 * 24)
+                    for (int i = 0; i < duration; i++)
                     {
-                        RemoveSingleItem(offset, new() { RepetitiveType = RepetitiveType.MultipleDays, Id = id });
-                        offset += 7 * 24;
+                        int offset = 24 * dayOffset + timestamp.Hour + i;
+                        while (offset < 16 * 7 * 24)
+                        {
+                            AddSingleItem(offset, record);
+                            offset += 7 * 24;
+                        }
                     }
                 }
             }
@@ -231,9 +235,9 @@ namespace StudentScheduleManagementSystem.Times
             public Time Timestamp { get; set; }
         }
 
-        private static Dictionary<int, Alarm> _alarmList = new();
+        private static readonly Dictionary<int, Alarm> _alarmList = new();
 
-        private static Timeline<Record> _timeline = new();
+        private static readonly Timeline<Record> _timeline = new();
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
@@ -283,6 +287,7 @@ namespace StudentScheduleManagementSystem.Times
             _timeline.AddMultipleItems(null,
                                        null,
                                        beginTime,
+                                       1,
                                        new Record { RepetitiveType = repetitiveType },
                                        out int thisAlarmId,
                                        activeDays);
