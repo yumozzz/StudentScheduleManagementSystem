@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
-using System.Runtime.Versioning;
 
 namespace StudentScheduleManagementSystem.Times
 {

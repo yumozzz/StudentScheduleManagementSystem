@@ -1,5 +1,4 @@
-﻿using StudentScheduleManagementSystem.Times;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 [assembly: RequiresPreviewFeatures]
@@ -25,7 +24,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-                Times.Time t = new Time() { Week = 1, Day = Day.Monday, Hour = 10 };
+                Times.Time t = new() { Week = 1, Day = Day.Monday, Hour = 10 };
                 Schedule.TemporaryAffairs affair1 = new("test1",
                                                         t,
                                                         "test1",
@@ -39,7 +38,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 /*var list = Times.Alarm.SaveInstance();
                 Alarm.RemoveAlarm(affair1.BeginTime, affair1.RepetitiveType);
                 Times.Alarm.CreateInstance(list);*/
-                var list = Schedule.TemporaryAffairs.SaveInstance();
+                var list = TemporaryAffairs.SaveInstance();
                 affair1.RemoveSchedule();
                 FileManagement.FileManager.ReadUserFile(Environment.CurrentDirectory + "/x.json");
                 while (uiThread.IsAlive)
