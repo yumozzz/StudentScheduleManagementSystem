@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using Newtonsoft.Json.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 [assembly: RequiresPreviewFeatures]
@@ -29,18 +30,35 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                         t,
                                                         "test1",
                                                         new(){PlaceName = "place1"});
-                //affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,new Times.Alarm.CallbackParameterType{Id=10,Name="aaa"});
-                //affair1.EnableAlarm((id, par) => { Console.WriteLine(333); });
+                affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,new Times.Alarm.CallbackParameterType{Id=10,Name="aaa"});
                 Schedule.TemporaryAffairs affair2 = new("test2", 
                                                         new() { Week = 1, Day = Day.Monday, Hour = 10 },
                                                         "test2",
                                                         new(){PlaceName = "place2"});
-                /*var list = Times.Alarm.SaveInstance();
-                Alarm.RemoveAlarm(affair1.BeginTime, affair1.RepetitiveType);
-                Times.Alarm.CreateInstance(list);*/
-                var list = TemporaryAffairs.SaveInstance();
+                Schedule.Exam exam = new("exam1",
+                                         new() { Week = 2, Day = Day.Thursday, Hour = 16 },
+                                         2,
+                                         "test exam",
+                                         new() { Id = 3, PlaceName = "classroom1" });
+
+                Dictionary<string, List<JObject>> dic = new()
+                {
+                    { "Alarm", Times.Alarm.SaveInstance() },
+                    { "Course", Schedule.Course.SaveInstance() },
+                    { "Exam", Schedule.Exam.SaveInstance() },
+                    { "Activity", Schedule.Activity.SaveInstance() },
+                    { "TemporaryAffairs", Schedule.TemporaryAffairs.SaveInstance() }
+                };
+                FileManagement.FileManager.SaveToUserFile(dic, 1, Environment.CurrentDirectory + "/users");
                 affair1.RemoveSchedule();
-                FileManagement.FileManager.ReadUserFile(Environment.CurrentDirectory + "/x.json");
+                affair2.RemoveSchedule();
+                exam.RemoveSchedule();
+                dic = FileManagement.FileManager.ReadUserFile(1, Environment.CurrentDirectory + "/users");
+                Times.Alarm.CreateInstance(dic["Alarm"]);
+                Schedule.Course.CreateInstance(dic["Course"]);
+                Schedule.Exam.CreateInstance(dic["Exam"]);
+                Schedule.Activity.CreateInstance(dic["Activity"]);
+                Schedule.TemporaryAffairs.CreateInstance(dic["TemporaryAffairs"]);
                 while (uiThread.IsAlive)
                 {
                     Thread.Sleep(1000);

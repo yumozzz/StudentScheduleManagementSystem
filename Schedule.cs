@@ -155,12 +155,15 @@ namespace StudentScheduleManagementSystem.Schedule
                                  ActiveDays ?? Array.Empty<Day>()); //默认为本日程的重复时间与启用日期
             _alarmEnabled = true;
         }
-        public static List<JObject> SaveInstance()
+        protected static List<JObject> SaveInstance(ScheduleType scheduleType)
         {
             List<JObject> list = new();
             foreach (var instance in _scheduleList)
             {
-                Console.WriteLine(JsonConvert.SerializeObject(instance.Value, _setting));
+                if (instance.Value.ScheduleType != scheduleType)
+                {
+                    continue;
+                }
                 list.Add(JObject.Parse(JsonConvert.SerializeObject(instance.Value, _setting)));
             }
             return list;
@@ -244,6 +247,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             }
         }
+
+        public static List<JObject> SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Course);
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -280,9 +285,13 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     throw new JsonFormatException();
                 }
-                new Exam(dobj.Name, dobj.Timestamp, dobj.Duration, dobj.Description, dobj.OfflineLocation);
+                var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                new Exam(dobj.Name, dobj.Timestamp, dobj.Duration, dobj.Description, location);
             }
         }
+
+        public static List<JObject> SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Exam);
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -385,6 +394,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             }
         }
+        public static List<JObject> SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Activity);
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -467,5 +477,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             }
         }
+
+        public static List<JObject> SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.TemporaryAffair);
     }
 }
