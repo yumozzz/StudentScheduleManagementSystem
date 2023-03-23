@@ -259,7 +259,8 @@ namespace StudentScheduleManagementSystem.Times
                                _alarmCallback = alarmTimeUpCallback,
                                _callbackParameter = callbackParameter,
                                _callbackName = alarmTimeUpCallback?.Method.Name ?? "null",
-                               _parameterTypeName = parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
+                               _parameterTypeName =
+                                   parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
             if (alarmTimeUpCallback == null)
             {
@@ -312,7 +313,9 @@ namespace StudentScheduleManagementSystem.Times
                 }.First(methodInfo => methodInfo != null);
                 AddAlarm(dobj.Timestamp,
                          dobj.RepetitiveType,
-                         (AlarmCallback)Delegate.CreateDelegate(typeof(AlarmCallback), callbackMethodInfos ?? throw new MethodNotFoundException()),
+                         (AlarmCallback)Delegate.CreateDelegate(typeof(AlarmCallback),
+                                                                callbackMethodInfos ??
+                                                                throw new MethodNotFoundException()),
                          dobj.CallbackParameter,
                          type,
                          dobj.ActiveDays ?? Array.Empty<Day>());
@@ -347,7 +350,7 @@ namespace StudentScheduleManagementSystem.Times
 
         private AlarmCallback? _alarmCallback;
 
-        [JsonProperty(propertyName:"CallbackParameter")]
+        [JsonProperty(propertyName: "CallbackParameter")]
         private object? _callbackParameter;
 
         [JsonProperty(propertyName: "CallbackName")]
@@ -358,16 +361,21 @@ namespace StudentScheduleManagementSystem.Times
 
         private static readonly string[] localMethods = Array
                                                        .ConvertAll(new[]
-                                                           {
-                                                               typeof(Alarm).GetMethods(),
-                                                               typeof(Schedule.ScheduleBase).GetMethods(),
-                                                               typeof(Schedule.Course).GetMethods(),
-                                                               typeof(Schedule.Exam).GetMethods(),
-                                                               typeof(Schedule.Activity).GetMethods(),
-                                                               typeof(Schedule.TemporaryAffairs).GetMethods()
-                                                           }.Aggregate<IEnumerable<MethodInfo>>((arr, elem) => arr.Union(elem))
-                                                            .Where(methodInfo => methodInfo.IsPublic)
-                                                            .ToArray(), methodInfo => methodInfo.Name)
+                                                                       {
+                                                                           typeof(Alarm).GetMethods(),
+                                                                           typeof(Schedule.ScheduleBase).GetMethods(),
+                                                                           typeof(Schedule.Course).GetMethods(),
+                                                                           typeof(Schedule.Exam).GetMethods(),
+                                                                           typeof(Schedule.Activity).GetMethods(),
+                                                                           typeof(Schedule.TemporaryAffairs)
+                                                                              .GetMethods()
+                                                                       }.Aggregate<IEnumerable<MethodInfo>>
+                                                                        (
+                                                                             (arr, elem) => arr.Union(elem)
+                                                                        )
+                                                                        .Where(methodInfo => methodInfo.IsPublic)
+                                                                        .ToArray(),
+                                                                   methodInfo => methodInfo.Name)
                                                        .Distinct()
                                                        .ToArray();
 

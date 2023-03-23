@@ -3,12 +3,13 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 [assembly: RequiresPreviewFeatures]
+
 namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
     {
         internal static CancellationTokenSource cts = new();
-        
+
         [STAThread]
         public static void Main()
         {
@@ -26,15 +27,13 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
                 Times.Time t = new() { Week = 1, Day = Day.Monday, Hour = 10 };
-                Schedule.TemporaryAffairs affair1 = new("test1",
-                                                        t,
-                                                        "test1",
-                                                        new(){PlaceName = "place1"});
-                affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,new Times.Alarm.CallbackParameterType{Id=10,Name="aaa"});
-                Schedule.TemporaryAffairs affair2 = new("test2", 
+                Schedule.TemporaryAffairs affair1 = new("test1", t, "test1", new() { PlaceName = "place1" });
+                affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,
+                                    new Times.Alarm.CallbackParameterType { Id = 10, Name = "aaa" });
+                Schedule.TemporaryAffairs affair2 = new("test2",
                                                         new() { Week = 1, Day = Day.Monday, Hour = 10 },
                                                         "test2",
-                                                        new(){PlaceName = "place2"});
+                                                        new() { PlaceName = "place2" });
                 Schedule.Exam exam = new("exam1",
                                          new() { Week = 2, Day = Day.Thursday, Hour = 16 },
                                          2,
@@ -53,7 +52,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 affair1.RemoveSchedule();
                 affair2.RemoveSchedule();
                 exam.RemoveSchedule();
-                dic = FileManagement.FileManager.ReadUserFile(1, Environment.CurrentDirectory + "/users");
+                dic = FileManagement.FileManager.ReadFromUserFile(1, Environment.CurrentDirectory + "/users");
                 Times.Alarm.CreateInstance(dic["Alarm"]);
                 Schedule.Course.CreateInstance(dic["Course"]);
                 Schedule.Exam.CreateInstance(dic["Exam"]);
@@ -107,7 +106,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             var p = (StudentScheduleManagementSystem.Times.Alarm.CallbackParameterType)obj!;
             Console.WriteLine($"{p.Id},{p.Name}");
-    }
+        }
     }
 }
 

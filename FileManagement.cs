@@ -8,7 +8,7 @@ namespace StudentScheduleManagementSystem.FileManagement
         //JToken:一个类实例的一个属性或字段
         //List<JObject>:存储某一类的所有实例信息
         //Dictionary<(string, List<JObject>)>:存储所有类的所有实例信息，以string标识类名
-        public static Dictionary<string, List<JObject>> ReadUserFile(int userId, string fileFolder)
+        public static Dictionary<string, List<JObject>> ReadFromUserFile(int userId, string fileFolder)
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -28,6 +28,7 @@ namespace StudentScheduleManagementSystem.FileManagement
                 }
                 dic.Add(array.Key, items);
             }
+            Log.Logger.LogMessage($"已读取学号为{userIdString}的用户信息");
             return dic;
         }
 
@@ -51,6 +52,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             string userIdString = userId.ToString();
             userIdString = userIdString.PadLeft(11 - userIdString.Length, '0');
             File.WriteAllBytes($"{fileFolder}/{userIdString}.json", Encoding.UTF8.GetBytes(jsonSource));
+            Log.Logger.LogMessage($"已保存学号为{userIdString}的用户信息");
         }
     }
 }
