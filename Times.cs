@@ -256,7 +256,7 @@ namespace StudentScheduleManagementSystem.Times
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public partial class Alarm : IJsonConvertible
+    public partial class Alarm : IJsonConvertible, IComparable
     {
         #region structs and classes
 
@@ -493,6 +493,22 @@ namespace StudentScheduleManagementSystem.Times
             return list;
         }
 
+        #endregion
+
+        #region override base mathod
+        public int CompareTo(object? obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException();
+            }
+            Alarm alarm = (Alarm)obj;
+            if (RepetitiveType.CompareTo(alarm.RepetitiveType) != 0)
+            {
+                return RepetitiveType.CompareTo(alarm.RepetitiveType);
+            }
+            return BeginTime.ToInt().CompareTo(alarm.BeginTime.ToInt());
+        }
         #endregion
     }
 

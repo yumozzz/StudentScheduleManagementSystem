@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace StudentScheduleManagementSystem.Schedule
 {
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public abstract class ScheduleBase
+    public abstract class ScheduleBase : IComparable
     {
         #region structs and classes
 
@@ -129,7 +129,7 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty] public bool AlarmEnabled { get; protected set; }
         #endregion
 
-        #region ctor
+        #region ctor and override basic method
 
         protected ScheduleBase(RepetitiveType repetitiveType,
                                string name,
@@ -167,6 +167,28 @@ namespace StudentScheduleManagementSystem.Schedule
             IsOnline = isOnline;
             Description = description;
             Log.Information.Log($"已为类型为{ScheduleType}的日程{Name}创建基类");
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if(obj is null)
+            {
+                throw new ArgumentNullException();
+            }
+            ScheduleBase schedule = (ScheduleBase)obj;
+            if (ScheduleType.CompareTo(schedule.ScheduleType) != 0)
+            {
+                return ScheduleType.CompareTo(schedule.ScheduleType);
+            }
+            if (RepetitiveType.CompareTo(schedule.RepetitiveType) != 0)
+            {
+                return RepetitiveType.CompareTo(schedule.RepetitiveType);
+            }
+            if (BeginTime.ToInt() != schedule.BeginTime.ToInt())
+            {
+                return BeginTime.ToInt().CompareTo(schedule.BeginTime.ToInt());
+            }
+            return Duration.CompareTo(schedule.Duration);
         }
 
         #endregion
