@@ -207,17 +207,70 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected void AddSchedule(int? specifiedId, char beginWith) //添加日程
         {
-            int offset = BeginTime.ToInt();
-            if (_timeline[offset].ScheduleType == ScheduleType.Idle) { }
-            else if (_timeline[offset].ScheduleType != ScheduleType.Idle &&
-                     ScheduleType != ScheduleType.TemporaryAffair) //有日程而添加非临时日程（需要选择是否覆盖）
+            int offset = 0;
+            bool willOverrideSchedule = false;
+            if (RepetitiveType == RepetitiveType.Single)
             {
-                Console.WriteLine($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
-                Log.Warning.Log($"覆盖了日程{_scheduleList[_timeline[offset].Id].Name}");
-                throw new OverrideExistingScheduleException();
-                //UNDONE:删除判定
-                /*RemoveSchedule(_timeline[offset].Id); //删除单次日程
-                _scheduleList.Remove(_timeline[offset].Id);*/
+                for (int i = 0; i < Duration; i++)
+                {
+                    offset = BeginTime.ToInt() + i;
+                    if (ScheduleType == ScheduleType.TemporaryAffair)
+                    {
+                        if (_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair)
+                        {
+                            throw new InvalidOperationException("Cannot add temporary affair when there already exists temporary affair (can only modify)");
+                        }
+                    }
+                    else if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（需要选择是否覆盖）
+                    {
+                        willOverrideSchedule = true;
+                        break;
+                    }
+                }
+            }
+            else if (RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
+            {
+                int[] dayOffsets = Array.ConvertAll(ActiveDays!, day => day.ToInt());
+                foreach (var dayOffset in dayOffsets)
+                {
+                    for (int i = 0; i < Duration; i++)
+                    {
+                        offset = 24 * dayOffset + BeginTime.Hour + i;
+                        while (offset < 16 * 7 * 24)
+                        {
+                            if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（自身不可能为临时日程，需要选择是否覆盖）
+                            {
+                                willOverrideSchedule = true;
+                                break;
+                            }
+                            offset += 7 * 24;
+                        }
+                    }
+                }
+            }
+            else //不可能出现
+            {
+                throw new ArgumentException(nameof(RepetitiveType));
+            }
+            //_timeline[offset]记录的是会覆盖的日程
+            if(willOverrideSchedule)
+            {
+                Console.WriteLine($"会覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
+                Log.Warning.Log($"会覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
+                Console.WriteLine("请选择是否覆盖");
+                if (Console.ReadLine() == "true")
+                {
+                    Console.WriteLine("已选择覆盖");
+                    Log.Warning.Log($"已覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
+                    RemoveSchedule(_timeline[offset].Id, !(ScheduleType == ScheduleType.TemporaryAffair)); //删除单次日程
+                    _scheduleList.Remove(_timeline[offset].Id);
+                }
+                else
+                {
+                    Console.WriteLine("未选择覆盖，不添加该日程");
+                    Log.Warning.Log($"未覆盖日程{_scheduleList[_timeline[offset].Id].Name}，日程添加中止");
+                    return;
+                }
             }
             int thisScheduleId;
             if (ScheduleType == ScheduleType.Course)

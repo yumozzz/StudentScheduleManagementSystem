@@ -239,7 +239,7 @@ namespace StudentScheduleManagementSystem.Times
             }
             else //不可能出现
             {
-                throw new ArgumentException(nameof(record));
+                throw new ArgumentException(nameof(record.RepetitiveType));
             }
             outId = id;
         }
@@ -378,41 +378,33 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            try
+            _timeline.AddMultipleItems(null,
+                                       null,
+                                       beginTime,
+                                       1,
+                                       new Record { RepetitiveType = repetitiveType },
+                                       out int thisAlarmId,
+                                       false,
+                                       activeDays); //impossible OverrideNondefaultRecordException here
+            _alarmList.Add(thisAlarmId,
+                           new()
+                           {
+                               RepetitiveType = RepetitiveType.Single,
+                               ActiveDays = activeDays,
+                               AlarmId = thisAlarmId,
+                               BeginTime = beginTime,
+                               _alarmCallback = alarmTimeUpCallback,
+                               _callbackParameter = callbackParameter,
+                               _callbackName = alarmTimeUpCallback?.Method.Name ?? "null",
+                               _parameterTypeName =
+                                   parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
+                           }); //内部调用无需创造临时实例，直接向表中添加实例即可
+            if (alarmTimeUpCallback == null)
             {
-                _timeline.AddMultipleItems(null,
-                                           null,
-                                           beginTime,
-                                           1,
-                                           new Record { RepetitiveType = repetitiveType },
-                                           out int thisAlarmId,
-                                           false,
-                                           activeDays);//possible OverrideNondefaultRecordException here
-                _alarmList.Add(thisAlarmId,
-                               new()
-                               {
-                                   RepetitiveType = RepetitiveType.Single,
-                                   ActiveDays = activeDays,
-                                   AlarmId = thisAlarmId,
-                                   BeginTime = beginTime,
-                                   _alarmCallback = alarmTimeUpCallback,
-                                   _callbackParameter = callbackParameter,
-                                   _callbackName = alarmTimeUpCallback?.Method.Name ?? "null",
-                                   _parameterTypeName =
-                                       parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
-                               }); //内部调用无需创造临时实例，直接向表中添加实例即可
-                if (alarmTimeUpCallback == null)
-                {
-                    Log.Warning.Log("没有传递回调方法");
-                    Console.WriteLine("Null alarmTimeUpCallback");
-                }
-                Log.Information.Log($"已添加{beginTime}时的闹钟");
+                Log.Warning.Log("没有传递回调方法");
+                Console.WriteLine("Null alarmTimeUpCallback");
             }
-            catch (OverrideNondefaultRecordException)
-            {
-                //TODO:revert
-                throw;
-            }
+            Log.Information.Log($"已添加{beginTime}时的闹钟");
 
             #endregion
         }
