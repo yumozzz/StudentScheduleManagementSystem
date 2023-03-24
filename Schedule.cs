@@ -17,7 +17,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
             public ScheduleType @ScheduleType { get; init; }
 
-            public int Id { get; set; }
+            public long Id { get; set; }
         }
 
         protected class DeserializedObjectBase
@@ -25,7 +25,7 @@ namespace StudentScheduleManagementSystem.Schedule
             public ScheduleType @ScheduleType { get; set; }
             public RepetitiveType @RepetitiveType { get; set; }
             public Day[]? ActiveDays { get; set; }
-            public int ScheduleId { get; set; }
+            public long ScheduleId { get; set; }
             public string Name { get; set; }
             public Times.Time Timestamp { get; set; }
             public int Duration { get; set; }
@@ -34,9 +34,9 @@ namespace StudentScheduleManagementSystem.Schedule
             public bool AlarmEnabled { get; set; }
         }
 
-        protected class SharedData
+        public class SharedData
         {
-            public int Id { get; set; }
+            public long Id { get; set; }
             public string Name { get; set; }
             public RepetitiveType @RepetitiveType { get; set; }
             public Times.Time Timestamp { get; set; }
@@ -50,19 +50,21 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static readonly Times.Timeline<Record> _timeline = new();
 
-        protected static readonly Dictionary<int, ScheduleBase> _scheduleList = new();
+        protected static readonly Dictionary<long, ScheduleBase> _scheduleList = new();
 
-        protected static readonly List<int> _courseIdList = new() { 100000000 };
+        protected static readonly List<long> _courseIdList = new() { 1000000000 };
 
-        protected static readonly List<int> _examIdList = new() { 200000000 };
+        protected static readonly List<long> _examIdList = new() { 2000000000 };
 
-        protected static readonly Dictionary<int, SharedData> _correspondenceDictionary = new()
+        protected static readonly List<long> _groupActivityList = new() { 3000000000 };
+
+        protected static readonly Dictionary<long, SharedData> _correspondenceDictionary = new()
         {
             {
-                100000000,
+                1000000000,
                 new()
                 {
-                    Id = 100000000,
+                    Id = 1000000000,
                     Name = "Default Course",
                     RepetitiveType = RepetitiveType.Single,
                     Timestamp = new() { Hour = 12 },
@@ -71,10 +73,10 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             },
             {
-                200000000,
+                2000000000,
                 new()
                 {
-                    Id = 200000000,
+                    Id = 2000000000,
                     Name = "Default Exam",
                     RepetitiveType = RepetitiveType.Single,
                     Timestamp = new() { Hour = 12 },
@@ -83,10 +85,10 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             },
             {
-            300000000,
+            3000000000,
             new()
             {
-                Id = 300000000,
+                Id = 3000000000,
                 Name = "Default Activity",
                 RepetitiveType = RepetitiveType.Single,
                 Timestamp = new() { Hour = 12 },
@@ -114,10 +116,10 @@ namespace StudentScheduleManagementSystem.Schedule
         public abstract ScheduleType @ScheduleType { get; }
 
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
-        public RepetitiveType RepetitiveType { get; init; }
+        public RepetitiveType @RepetitiveType { get; init; }
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public Day[]? ActiveDays { get; init; }
-        [JsonProperty] public int ScheduleId { get; protected set; } = 0;
+        [JsonProperty] public long ScheduleId { get; protected set; } = 0;
         [JsonProperty] public string Name { get; init; }
         [JsonProperty(propertyName: "Timestamp")]
         public Times.Time BeginTime { get; init; }
@@ -211,7 +213,7 @@ namespace StudentScheduleManagementSystem.Schedule
             Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveDays ?? Array.Empty<Day>());
         }
 
-        protected static void RemoveSchedule(int scheduleId, bool reviseElementCount)
+        protected static void RemoveSchedule(long scheduleId, bool reviseElementCount)
         {
             ScheduleBase schedule = _scheduleList[scheduleId];
             _scheduleList.Remove(scheduleId);
@@ -228,7 +230,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        protected void AddSchedule(int? specifiedId, char beginWith) //添加日程
+        protected void AddSchedule(long? specifiedId, char beginWith) //添加日程
         {
             int offset = 0;
             bool willOverrideSchedule = false;
@@ -295,7 +297,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     return;
                 }
             }
-            int thisScheduleId;
+            long thisScheduleId;
             if (ScheduleType == ScheduleType.Course)
             {
                 thisScheduleId = specifiedId == null ? GetProperId(_courseIdList) : specifiedId.Value;
@@ -357,6 +359,30 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             }
             return list;
+        }
+
+        /*private static bool IsSharedSchedule(int id)
+        {
+            if (id % (int)1e8 != 3)
+            {
+                return false;
+            }
+            return _correspondenceDictionary.ContainsKey(id);
+        }*/
+
+        public static List<SharedData> GetShared(ScheduleType type)
+        {
+            var list = type switch
+            {
+                ScheduleType.Course => _courseIdList, ScheduleType.Exam => _examIdList,
+                ScheduleType.Activity => _groupActivityList, _ => throw new ArgumentOutOfRangeException(nameof(type))
+            };
+            List<SharedData> ret = new();
+            foreach (var id in list)
+            {
+                ret.Add(_correspondenceDictionary[id]);
+            }
+            return ret;
         }
 
         #endregion
@@ -426,7 +452,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             try
             {
-                var dic = FileManagement.FileManager.ReadFromUserFile("0000000000", FileManagement.FileManager.UserFileDirectory);
+                var dic = FileManagement.FileManager.ReadFromUserFile("share", FileManagement.FileManager.UserFileDirectory);
                 foreach (var item in dic["Course"])
                 {
                     var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
@@ -434,7 +460,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         throw new JsonFormatException();
                     }
-                    if (dobj.Id != 100000000)
+                    if (dobj.Id != 1000000000)
                     {
                         _courseIdList.Add(dobj.Id);
                         _correspondenceDictionary.Add(dobj.Id, dobj);
@@ -447,7 +473,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         throw new JsonFormatException();
                     }
-                    if (dobj.Id != 200000000)
+                    if (dobj.Id != 2000000000)
                     {
                         _examIdList.Add(dobj.Id);
                         _correspondenceDictionary.Add(dobj.Id, dobj);
@@ -460,11 +486,14 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         throw new JsonFormatException();
                     }
-                    if (dobj.Id != 300000000)
+                    if (dobj.Id != 3000000000)
                     {
+                        _groupActivityList.Add(dobj.Id);
                         _correspondenceDictionary.Add(dobj.Id, dobj);
+
                     }
                 }
+                #if GROUPACTIVITYCONTROL
                 uint[] arr = new uint[16 * 7 * 24];
                 int i = 0;
                 foreach (var item in dic["ScheduleCount"])
@@ -473,6 +502,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     arr[i++] = count;
                 }
                 _timeline.SetTotalElementCount(arr);
+                #endif
             }
             catch (FileNotFoundException) { }
         }
@@ -482,28 +512,31 @@ namespace StudentScheduleManagementSystem.Schedule
             JArray courses = new(), exams = new(), activities = new(), scheduleCount;
             foreach (var item in _correspondenceDictionary)
             {
-                if (item.Key / (int)1e8 == 1) //course
+                if (item.Key / (long)1e9 == 1) //course
                 {
                     JObject obj = JObject.FromObject(item.Value, _serializer);
                     courses.Add(obj);
                 }
-                else if (item.Key / (int)1e8 == 2)
+                else if (item.Key / (long)1e9 == 2)
                 {
                     JObject obj = JObject.FromObject(item.Value, _serializer);
                     exams.Add(obj);
                 }
-                else if (item.Key / (int)1e8 == 3)
+                else if (item.Key / (long)1e9 == 3)
                 {
                     JObject obj = JObject.FromObject(item.Value, _serializer);
                     activities.Add(obj);
                 }
                 else
                 {
-                    Console.WriteLine(item.Key / (int)1e8);
                     throw new FormatException($"Item id {item.Key} is invalid");
                 }
             }
+            #if GROUPACTIVITYCONTROL
             scheduleCount = JArray.FromObject(_timeline.ElementCountArray, _serializer);
+            #else
+            scheduleCount = JArray.FromObject(Array.Empty<uint>(), _serializer);
+            #endif
             FileManagement.FileManager.SaveToUserFile(new()
                                                       {
                                                           { "Course", courses },
@@ -511,13 +544,13 @@ namespace StudentScheduleManagementSystem.Schedule
                                                           { "GroupActivity", activities },
                                                           { "ScheduleCount", scheduleCount }
                                                       },
-                                                      "0000000000",
+                                                      "share",
                                                       FileManagement.FileManager.UserFileDirectory);
         }
 
-        private static int GetProperId(List<int> list)
+        private static long GetProperId(List<long> list)
         {
-            int ret = 0;
+            long ret = 0;
             for (int i = 0; i < list.Count; i++)
             {
                 ret = list[i] + 1;
@@ -597,7 +630,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region ctor
 
-        public Course(int? specifiedId,
+        public Course(long? specifiedId,
                       RepetitiveType repetitiveType,
                       string name,
                       Times.Time beginTime,
@@ -636,7 +669,7 @@ namespace StudentScheduleManagementSystem.Schedule
             UpdateCourseAndExamData(this);
         }
 
-        public Course(int? specifiedId,
+        public Course(long? specifiedId,
                       RepetitiveType repetitiveType,
                       string name,
                       Times.Time beginTime,
@@ -800,7 +833,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region ctor
 
-        public Exam(int? specifiedId,
+        public Exam(long? specifiedId,
                     string name,
                     Times.Time beginTime,
                     int duration,

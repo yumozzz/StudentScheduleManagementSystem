@@ -130,15 +130,15 @@ namespace StudentScheduleManagementSystem.Times
 
         public void RemoveMultipleItems(Time baseTime,
                                         RepetitiveType repetitiveType,
-                                        out int id,
+                                        out long outId,
                                         bool reviseElementCount,
                                         params Day[] activeDays)
         {
-            id = -1;
+            outId = -1;
             if (repetitiveType == RepetitiveType.Single)
             {
                 int offset = baseTime.ToInt();
-                id = RecordArray[offset].Id;
+                outId = RecordArray[offset].Id;
                 RemoveSingleItem(offset);
                 if (reviseElementCount)
                 {
@@ -157,7 +157,7 @@ namespace StudentScheduleManagementSystem.Times
                     int offset = 24 * dayOffset + baseTime.Hour;
                     while (offset < 16 * 7 * 24)
                     {
-                        id = RecordArray[offset].Id;
+                        outId = RecordArray[offset].Id;
                         RemoveSingleItem(offset);
                         if (reviseElementCount)
                         {
@@ -169,39 +169,30 @@ namespace StudentScheduleManagementSystem.Times
             }
             else
             {
-                throw new ArgumentException(nameof(repetitiveType));
+                throw new ArgumentOutOfRangeException(nameof(repetitiveType));
             }
         }
 
-        public void AddMultipleItems(int? specificId,
+        public void AddMultipleItems(long? specificId,
                                      char? beginWith,
                                      Time timestamp,
                                      int duration,
                                      TRecord record,
-                                     out int outId,
+                                     out long outId,
                                      bool reviseElementCount,
                                      params Day[] activeDays)
         {
-            int id;
-            if (specificId == null)
+            outId = (specificId.HasValue, beginWith.HasValue) switch
             {
-                id = _randomGenerator.Next((int)1.1e9, int.MaxValue) % (int)1e9;
-            }
-            else
-            {
-                if (specificId.ToString()!.Length != 9)
-                {
-                    throw new ArgumentException("specifiedId should be a 9-digits number");
-                }
-                id = specificId.Value;
-            }
-            if (beginWith != null)
-            {
-                var str = id.ToString().ToCharArray();
-                str[0] = beginWith.Value;
-                id = int.Parse(new string(str));
-            }
-            record.Id = id;
+                (false, false) => _randomGenerator.Next(1, 9) * (long)1e9 + _randomGenerator.Next(1, 999999999), //完全随机
+                (true, false) => specificId!.Value / (long)1e9 is >= 1 and <= 9
+                                     ? specificId.Value
+                                     : throw new ArgumentException("specifiedId should be a 10-digit number"), //完全指定
+                (false, true) => (beginWith.Value - '0') * (long)1e9 + _randomGenerator.Next(1, 999999999), //指定第一位
+                (true, true) =>
+                    throw new ArgumentException("specifiedId and beginWith can't be notnull at the same time")
+            };
+            record.Id = outId;
             if (record.RepetitiveType == RepetitiveType.Single)
             {
                 for (int i = 0; i < duration; i++)
@@ -242,7 +233,6 @@ namespace StudentScheduleManagementSystem.Times
             {
                 throw new ArgumentException(nameof(record.RepetitiveType));
             }
-            outId = id;
         }
 
         public void SetTotalElementCount(uint[] arr)
@@ -264,7 +254,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             public RepetitiveType @RepetitiveType { get; init; }
 
-            public int Id { get; set; }
+            public long Id { get; set; }
         }
 
         private class DeserializedObject
@@ -277,7 +267,7 @@ namespace StudentScheduleManagementSystem.Times
             public Time Timestamp { get; set; }
         }
 
-        public delegate void AlarmCallback(int alarmId, object? obj);
+        public delegate void AlarmCallback(long alarmId, object? obj);
 
         #endregion
 
@@ -316,7 +306,7 @@ namespace StudentScheduleManagementSystem.Times
         private static readonly string[] localTypes =
             Array.ConvertAll(typeof(Alarm).GetNestedTypes(), type => type.FullName ?? "null");
 
-        private static readonly Dictionary<int, Alarm> _alarmList = new();
+        private static readonly Dictionary<long, Alarm> _alarmList = new();
 
         private static readonly JsonSerializerSettings _setting = new()
         {
@@ -333,7 +323,7 @@ namespace StudentScheduleManagementSystem.Times
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public Day[]? ActiveDays { get; private init; }
-        public int AlarmId { get; private init; } = 0;
+        public long AlarmId { get; private init; } = 0;
         [JsonProperty(propertyName: "Timestamp", ItemTypeNameHandling = TypeNameHandling.None)]
         public Time BeginTime { get; private init; } = new();
 
@@ -343,7 +333,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void RemoveAlarm(Times.Time beginTime, RepetitiveType repetitiveType, params Day[] activeDays)
         {
-            _timeline.RemoveMultipleItems(beginTime, repetitiveType, out int alarmId, false, activeDays);
+            _timeline.RemoveMultipleItems(beginTime, repetitiveType, out long alarmId, false, activeDays);
             _alarmList.Remove(alarmId);
             Log.Information.Log($"已删除{beginTime}时的闹钟");
         }
@@ -384,7 +374,7 @@ namespace StudentScheduleManagementSystem.Times
                                        beginTime,
                                        1,
                                        new Record { RepetitiveType = repetitiveType },
-                                       out int thisAlarmId,
+                                       out long thisAlarmId,
                                        false,
                                        activeDays); //impossible OverrideNondefaultRecordException here
             _alarmList.Add(thisAlarmId,
@@ -412,7 +402,7 @@ namespace StudentScheduleManagementSystem.Times
 
         internal static void TriggerAlarm(int offset)
         {
-            int alarmId = _timeline[offset].Id;
+            long alarmId = _timeline[offset].Id;
             //Console.WriteLine(alarmId);
             if (alarmId != 0)
             {

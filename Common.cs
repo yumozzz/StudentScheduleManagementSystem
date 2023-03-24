@@ -31,7 +31,7 @@ namespace StudentScheduleManagementSystem
 
     public interface IUniqueRepetitiveEvent
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public RepetitiveType RepetitiveType { get; init; }
     }
 

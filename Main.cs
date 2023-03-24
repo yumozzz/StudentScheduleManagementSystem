@@ -82,7 +82,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                              new Map.Location());
                 Schedule.Activity act2 = new(RepetitiveType.Single,
                                              true,
-                                             "test groupactivity2",
+                                             "test groupactivity3",
                                              new() { Hour = 14 },
                                              2,
                                              null,
