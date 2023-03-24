@@ -40,8 +40,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 root.Add(@class.Key, @class.Value);
             }
-            string jsonSource = root.ToString();
-            File.WriteAllBytes($"{fileFolder}/{userId}.json", Encoding.UTF8.GetBytes(jsonSource));
+            File.WriteAllBytes($"{fileFolder}/{userId}.json", Encoding.UTF8.GetBytes(root.ToString()));
             Log.Information.Log($"已保存学号为{userId}的用户信息");
         }
     }

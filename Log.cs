@@ -20,7 +20,7 @@ namespace StudentScheduleManagementSystem.Log
             {
                 Directory.CreateDirectory(FileManagement.FileManager.LogFileDirectory);
             }
-            Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{DateTime.Now.ToString("dd HH:mm:ss")}_{random}.log", FileMode.Create);
+            Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{DateTime.Now.ToString("dd_HHmmss")}_{random}.log", FileMode.Create);
         }
 
         public static void Close()
@@ -43,11 +43,10 @@ namespace StudentScheduleManagementSystem.Log
 
     public static class Warning
     {
-        public static void Log(string message, string? methodName)
+        public static void Log(string message)
         {
             string log =
-                $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"" +
-                (methodName != null ? $"in {methodName}\n" : "\n");
+                $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
             var arr = Encoding.UTF8.GetBytes(log);
             LogBase.Stream!.Write(arr, 0, arr.Length);
             LogBase.Stream!.Flush();

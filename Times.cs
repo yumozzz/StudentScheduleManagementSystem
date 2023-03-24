@@ -101,41 +101,48 @@ namespace StudentScheduleManagementSystem.Times
 
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
-        private readonly TRecord[] _timeline = new TRecord[16 * 7 * 24];
+        public TRecord[] RecordArray { get; } = new TRecord[16 * 7 * 24];
 
-        private static readonly Random randomGenerator = new(DateTime.Now.Millisecond);
+        public uint[] ElementCountArray { get; } = new uint[16 * 7 * 24];
+
+        private static readonly Random _randomGenerator = new(DateTime.Now.Millisecond);
 
         public TRecord this[int index]
         {
-            get => _timeline[index];
-            private set => _timeline[index] = value;
+            get => RecordArray[index];
+            private set => RecordArray[index] = value;
         }
 
         private void RemoveSingleItem(int offset, TRecord defaultValue = default)
         {
-            _timeline[offset] = defaultValue;
+            RecordArray[offset] = defaultValue;
         }
 
         private void AddSingleItem(int offset, TRecord value)
         {
-            if (!_timeline[offset].Equals(default(TRecord)))
+            if (!RecordArray[offset].Equals(default(TRecord)))
             {
-                throw new OverrideNondefaultItems();
+                throw new OverrideNondefaultRecordException();
             }
-            _timeline[offset] = value;
+            RecordArray[offset] = value;
         }
 
         public void RemoveMultipleItems(Time baseTime,
                                         RepetitiveType repetitiveType,
                                         out int id,
+                                        bool reviseElementCount,
                                         params Day[] activeDays)
         {
             id = -1;
             if (repetitiveType == RepetitiveType.Single)
             {
                 int offset = baseTime.ToInt();
-                id = _timeline[offset].Id;
+                id = RecordArray[offset].Id;
                 RemoveSingleItem(offset);
+                if (reviseElementCount)
+                {
+                    ElementCountArray[offset]--;
+                }
             }
             else if (repetitiveType == RepetitiveType.MultipleDays)
             {
@@ -149,8 +156,12 @@ namespace StudentScheduleManagementSystem.Times
                     int offset = 24 * dayOffset + baseTime.Hour;
                     while (offset < 16 * 7 * 24)
                     {
-                        id = _timeline[offset].Id;
+                        id = RecordArray[offset].Id;
                         RemoveSingleItem(offset);
+                        if (reviseElementCount)
+                        {
+                            ElementCountArray[offset]--;
+                        }
                         offset += 7 * 24;
                     }
                 }
@@ -167,15 +178,20 @@ namespace StudentScheduleManagementSystem.Times
                                      int duration,
                                      TRecord record,
                                      out int outId,
+                                     bool reviseElementCount,
                                      params Day[] activeDays)
         {
             int id;
             if (specificId == null)
             {
-                id = randomGenerator.Next() % (int)1e9;
+                id = _randomGenerator.Next((int)1.1e9, int.MaxValue) % (int)1e9;
             }
             else
             {
+                if (specificId.ToString()!.Length != 9)
+                {
+                    throw new ArgumentException("specifiedId should be a 9-digits number");
+                }
                 id = specificId.Value;
             }
             if (beginWith != null)
@@ -191,6 +207,10 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     int offset = timestamp.ToInt() + i;
                     AddSingleItem(offset, record);
+                    if(reviseElementCount)
+                    {
+                        ElementCountArray[offset]++;
+                    }
                 }
             }
             else if (record.RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
@@ -208,6 +228,10 @@ namespace StudentScheduleManagementSystem.Times
                         while (offset < 16 * 7 * 24)
                         {
                             AddSingleItem(offset, record);
+                            if (reviseElementCount)
+                            {
+                                ElementCountArray[offset]++;
+                            }
                             offset += 7 * 24;
                         }
                     }
@@ -218,6 +242,15 @@ namespace StudentScheduleManagementSystem.Times
                 throw new ArgumentException(nameof(record));
             }
             outId = id;
+        }
+
+        public void SetTotalElementCount(uint[] arr)
+        {
+            if (arr.Length != 16 * 7 * 24)
+            {
+                throw new ArgumentException("Array length not match", nameof(arr));
+            }
+            Array.Copy(arr, ElementCountArray, 16 * 7 * 24);
         }
     }
 
@@ -309,7 +342,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void RemoveAlarm(Times.Time beginTime, RepetitiveType repetitiveType, params Day[] activeDays)
         {
-            _timeline.RemoveMultipleItems(beginTime, repetitiveType, out int alarmId, activeDays);
+            _timeline.RemoveMultipleItems(beginTime, repetitiveType, out int alarmId, false, activeDays);
             _alarmList.Remove(alarmId);
             Log.Information.Log($"已删除{beginTime}时的闹钟");
         }
@@ -345,32 +378,41 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            _timeline.AddMultipleItems(null,
-                                       null,
-                                       beginTime,
-                                       1,
-                                       new Record { RepetitiveType = repetitiveType },
-                                       out int thisAlarmId,
-                                       activeDays);
-            _alarmList.Add(thisAlarmId,
-                           new()
-                           {
-                               RepetitiveType = RepetitiveType.Single,
-                               ActiveDays = activeDays,
-                               AlarmId = thisAlarmId,
-                               BeginTime = beginTime,
-                               _alarmCallback = alarmTimeUpCallback,
-                               _callbackParameter = callbackParameter,
-                               _callbackName = alarmTimeUpCallback?.Method.Name ?? "null",
-                               _parameterTypeName =
-                                   parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
-                           }); //内部调用无需创造临时实例，直接向表中添加实例即可
-            if (alarmTimeUpCallback == null)
+            try
             {
-                Log.Warning.Log("没有传递回调方法", null);
-                Console.WriteLine("Null alarmTimeUpCallback");
+                _timeline.AddMultipleItems(null,
+                                           null,
+                                           beginTime,
+                                           1,
+                                           new Record { RepetitiveType = repetitiveType },
+                                           out int thisAlarmId,
+                                           false,
+                                           activeDays);//possible OverrideNondefaultRecordException here
+                _alarmList.Add(thisAlarmId,
+                               new()
+                               {
+                                   RepetitiveType = RepetitiveType.Single,
+                                   ActiveDays = activeDays,
+                                   AlarmId = thisAlarmId,
+                                   BeginTime = beginTime,
+                                   _alarmCallback = alarmTimeUpCallback,
+                                   _callbackParameter = callbackParameter,
+                                   _callbackName = alarmTimeUpCallback?.Method.Name ?? "null",
+                                   _parameterTypeName =
+                                       parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
+                               }); //内部调用无需创造临时实例，直接向表中添加实例即可
+                if (alarmTimeUpCallback == null)
+                {
+                    Log.Warning.Log("没有传递回调方法");
+                    Console.WriteLine("Null alarmTimeUpCallback");
+                }
+                Log.Information.Log($"已添加{beginTime}时的闹钟");
             }
-            Log.Information.Log($"已添加{beginTime}时的闹钟");
+            catch (OverrideNondefaultRecordException)
+            {
+                //TODO:revert
+                throw;
+            }
 
             #endregion
         }
@@ -430,7 +472,6 @@ namespace StudentScheduleManagementSystem.Times
             JArray array = new();
             foreach (var instance in _alarmList)
             {
-                //Console.WriteLine(JsonConvert.SerializeObject(instance.Value, _setting));
                 if (!localMethods.Contains(instance.Value._callbackName))
                 {
                     throw new MethodNotFoundException();
@@ -484,7 +525,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             _localTime = time;
             _offset = time.ToInt();
-            Log.Warning.Log($"时间已被设定为{_localTime.ToString()}", null);
+            Log.Warning.Log($"时间已被设定为{_localTime.ToString()}");
         }
     }
 }

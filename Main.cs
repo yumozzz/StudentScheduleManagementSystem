@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿#define GROUPACTIVITY
+
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -21,23 +23,27 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Log.LogBase.Setup();
-                Schedule.ScheduleBase.ReadCourseAndExamData();
+                Schedule.ScheduleBase.ReadSharedData();
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-                /*Schedule.TemporaryAffairs affair1 =
+                #if TATEST
+                TemporaryAffairs affair1 =
                     new(null, "test1", new() { Week = 1, Day = Day.Monday, Hour = 14 }, "test1", new());
-                affair1.EnableAlarm(Schedule.TemporaryAffairs.TestCallback,
-                                    new Times.Alarm.CallbackParameterType { Id = 10, Name = "aaa" });*/
-                /*Schedule.TemporaryAffairs affair2 = new(null,
-                                                        "test2",
-                                                        new() { Week = 1, Day = Day.Monday, Hour = 10 },
-                                                        "test2",
-                                                        new());//被覆盖*/
-/*                Schedule.Exam exam = new(null,
+                affair1.EnableAlarm(TemporaryAffairs.TestCallback,
+                                    new Alarm.CallbackParameterType { Id = 10, Name = "aaa" });
+                TemporaryAffairs affair2 = new(null,
+                                               "test2",
+                                               new() { Week = 1, Day = Day.Monday, Hour = 10 },
+                                               "test2",
+                                               new()); 
+                #endif
+
+                #if COURSEEXAMTEST
+                Schedule.Exam exam = new(null,
                                          "exam1",
                                          new() { Week = 2, Day = Day.Thursday, Hour = 16 },
                                          2,
@@ -48,27 +54,43 @@ namespace StudentScheduleManagementSystem.MainProgram
                                          new() { Week = 2, Day = Day.Friday, Hour = 14 },
                                          3,
                                          "test exam2",
-                                         new());*/
-                Schedule.Course course = new(null,
-                                             RepetitiveType.Single,
-                                             "course1",
-                                             new() { Week = 2, Day = Day.Monday, Hour = 8 },
+                                         new());
+                Course course = new(null,
+                                    RepetitiveType.Single,
+                                    "course1",
+                                    new() { Week = 2, Day = Day.Monday, Hour = 8 },
+                                    2,
+                                    "test course1",
+                                    new Location());
+                Course course2 = new(null,
+                                     RepetitiveType.MultipleDays,
+                                     "course2",
+                                     new() { Hour = 10 },
+                                     2,
+                                     "test course2",
+                                     new Location(),
+                                     Day.Monday,
+                                     Day.Thursday);
+                #endif
+                #if GROUPACTIVITY
+                Schedule.Activity act1 = new(RepetitiveType.Single,
+                                             true,
+                                             "test groupactivity1",
+                                             new() { Hour = 10 },
                                              2,
-                                             "test course1",
+                                             null,
                                              new Map.Location());
-                Schedule.Course course2 = new(null,
-                                              RepetitiveType.MultipleDays,
-                                              "course2",
-                                              new() { Hour = 10 },
-                                              2,
-                                              "test course2",
-                                              new Map.Location(),
-                                              Day.Monday,
-                                              Day.Thursday);
-                //course2.RemoveSchedule();
+                Schedule.Activity act2 = new(RepetitiveType.Single,
+                                             true,
+                                             "test groupactivity2",
+                                             new() { Hour = 14 },
+                                             2,
+                                             null,
+                                             new Map.Location());
+#endif
                 {
                     FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
-                    Schedule.ScheduleBase.SaveCourseAndExamData();
+                    Schedule.ScheduleBase.SaveSharedData();
                     Log.Information.Log("已更新课程与考试信息");
                 }
                 while (uiThread.IsAlive)

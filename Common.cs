@@ -43,7 +43,7 @@ namespace StudentScheduleManagementSystem
 
     }
 
-    public class OverrideNondefaultItems : InvalidOperationException { }
+    public class OverrideNondefaultRecordException : InvalidOperationException { }
     public class OverrideExistingScheduleException : InvalidOperationException { }
     public class JsonFormatException : JsonException { }
     public class ScheduleInformationMismatchException : Exception { }
