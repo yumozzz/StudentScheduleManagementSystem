@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.IO;
+using System.Collections.Generic;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -321,6 +322,19 @@ namespace StudentScheduleManagementSystem.Schedule
             ScheduleId = thisScheduleId;
             _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
             Log.Information.Log("已在时间轴与表中添加日程");
+        }
+
+        protected static List<ScheduleBase> GetAll(ScheduleType type)
+        {
+            List<ScheduleBase> list = new();
+            foreach (var instance in _scheduleList)
+            {
+                if (instance.Value.ScheduleType == type)
+                {
+                    list.Add(instance.Value);
+                }
+            }
+            return list;
         }
 
         #endregion

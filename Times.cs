@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
 using System.Numerics;
+using StudentScheduleManagementSystem.Schedule;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -480,6 +481,16 @@ namespace StudentScheduleManagementSystem.Times
                                              }));
             }
             return array;
+        }
+
+        public static List<Alarm> GetAll()
+        {
+            List<Alarm> list = new();
+            foreach (var instance in _alarmList)
+            {
+                list.Add(instance.Value);
+            }
+            return list;
         }
 
         #endregion
