@@ -826,12 +826,32 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             OnlineLink = onlineLink;
             OfflineLocation = null;
-            if (ScheduleType == ScheduleType.Activity)
+            foreach (var value in _correspondenceDictionary.Values)
             {
-                AddSchedule(null, '3');
+                if (Name == value.Name && RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                    Duration == value.Duration)
+                {
+                    if ((RepetitiveType == RepetitiveType.Single && BeginTime != value.Timestamp) ||
+                        (RepetitiveType == RepetitiveType.MultipleDays && BeginTime.Hour != value.Timestamp.Hour))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if (isGroupActivity)//重复添加
+                        {
+                            Log.Information.Log("已找到集体活动");
+                            return;
+                        }
+                        else//错误
+                        {
+                            throw new ScheduleInformationMismatchException();
+                        }
+                    }
+                }
             }
+            AddSchedule(null, '3');
             AddGroupActivity(isGroupActivity);
-
         }
 
         public Activity(RepetitiveType repetitiveType,
@@ -846,6 +866,30 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             OnlineLink = null;
             OfflineLocation = location;
+            foreach (var value in _correspondenceDictionary.Values)
+            {
+                if (Name == value.Name && RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                    Duration == value.Duration)
+                {
+                    if ((RepetitiveType == RepetitiveType.Single && BeginTime != value.Timestamp) ||
+                        (RepetitiveType == RepetitiveType.MultipleDays && BeginTime.Hour != value.Timestamp.Hour))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if (isGroupActivity)//重复添加
+                        {
+                            Log.Information.Log("已找到集体活动");
+                            return;
+                        }
+                        else//错误
+                        {
+                            throw new ScheduleInformationMismatchException();
+                        }
+                    }
+                }
+            }
             AddSchedule(null, '3');
             AddGroupActivity(isGroupActivity);
         }
@@ -922,30 +966,6 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private void AddGroupActivity(bool isGroupActivity)
         {
-            foreach (var value in _correspondenceDictionary.Values)
-            {
-                if (Name == value.Name && RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
-                    Duration == value.Duration)
-                {
-                    if ((RepetitiveType == RepetitiveType.Single && BeginTime != value.Timestamp) ||
-                        (RepetitiveType == RepetitiveType.MultipleDays && BeginTime.Hour != value.Timestamp.Hour))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        if (isGroupActivity)//重复添加
-                        {
-                            Log.Information.Log("已找到集体活动");
-                            return;
-                        }
-                        else//错误
-                        {
-                            throw new ScheduleInformationMismatchException();
-                        }
-                    }
-                }
-            }
             if (isGroupActivity)
             {
                 _correspondenceDictionary.Add(ScheduleId,
