@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.IO;
-using System.Collections.Generic;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -11,7 +9,7 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         #region structs and classes
 
-        protected struct Record : IUniqueRepetitiveEvent
+        public struct Record : IUniqueRepetitiveEvent
         {
             public RepetitiveType @RepetitiveType { get; init; }
 
@@ -36,9 +34,11 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public class SharedData
         {
+            public ScheduleType @ScheduleType { get; set; }
             public long Id { get; set; }
             public string Name { get; set; }
             public RepetitiveType @RepetitiveType { get; set; }
+            public Day[]? ActiveDays { get; set; }
             public Times.Time Timestamp { get; set; }
             public int Duration { get; set; }
             public Map.Location? Location { get; set; }
@@ -64,9 +64,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 1000000000,
                 new()
                 {
+                    ScheduleType = ScheduleType.Course,
                     Id = 1000000000,
                     Name = "Default Course",
                     RepetitiveType = RepetitiveType.Single,
+                    ActiveDays = null,
                     Timestamp = new() { Hour = 12 },
                     Duration = 1,
                     Location = new()
@@ -76,36 +78,42 @@ namespace StudentScheduleManagementSystem.Schedule
                 2000000000,
                 new()
                 {
+                    ScheduleType = ScheduleType.Exam,
                     Id = 2000000000,
                     Name = "Default Exam",
                     RepetitiveType = RepetitiveType.Single,
+                    ActiveDays = null,
                     Timestamp = new() { Hour = 12 },
                     Duration = 1,
                     Location = new()
                 }
             },
             {
-            3000000000,
-            new()
-            {
-                Id = 3000000000,
-                Name = "Default Activity",
-                RepetitiveType = RepetitiveType.Single,
-                Timestamp = new() { Hour = 12 },
-                Duration = 1,
-                Location = new()
+                3000000000,
+                new()
+                {
+                    ScheduleType = ScheduleType.Exam,
+                    Id = 3000000000,
+                    Name = "Default Activity",
+                    RepetitiveType = RepetitiveType.Single,
+                    ActiveDays = null,
+                    Timestamp = new() { Hour = 12 },
+                    Duration = 1,
+                    Location = new()
+                }
             }
-        }
         };
 
         protected static readonly JsonSerializer _serializer = new()
         {
-            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Include
         };
 
         protected static readonly JsonSerializerSettings _setting = new()
         {
-            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Include
         };
 
         #endregion
@@ -129,6 +137,7 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty] public bool IsOnline { get; init; }
         [JsonProperty] public string? Description { get; init; }
         [JsonProperty] public bool AlarmEnabled { get; protected set; }
+
         #endregion
 
         #region ctor and override basic method
@@ -173,7 +182,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public int CompareTo(object? obj)
         {
-            if(obj is null)
+            if (obj is null)
             {
                 throw new ArgumentNullException();
             }
@@ -278,7 +287,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 throw new ArgumentException(nameof(RepetitiveType));
             }
             //_timeline[offset]记录的是会覆盖的日程
-            if(willOverrideSchedule)
+            if (willOverrideSchedule)
             {
                 Console.WriteLine($"会覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
                 Log.Warning.Log($"会覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
@@ -337,7 +346,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                            Duration,
                                            new Record
                                            {
-                                               RepetitiveType = this.RepetitiveType, ScheduleType = ScheduleType
+                                               RepetitiveType = this.RepetitiveType,
+                                               ScheduleType = ScheduleType
                                            },
                                            out thisScheduleId,
                                            !(ScheduleType != ScheduleType.Activity),
@@ -374,14 +384,28 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             var list = type switch
             {
-                ScheduleType.Course => _courseIdList, ScheduleType.Exam => _examIdList,
-                ScheduleType.Activity => _groupActivityList, _ => throw new ArgumentOutOfRangeException(nameof(type))
+                ScheduleType.Course => _courseIdList,
+                ScheduleType.Exam => _examIdList,
+                ScheduleType.Activity => _groupActivityList,
+                _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
             List<SharedData> ret = new();
             foreach (var id in list)
             {
                 ret.Add(_correspondenceDictionary[id]);
             }
+            return ret;
+        }
+
+        public static Record GetRecordAt(int offset) => _timeline[offset];
+
+        public static ScheduleBase GetScheduleById(int id) => _scheduleList[id];
+
+        //UNDONE
+        public static List<ScheduleBase> GetSchedulesByName(string name)
+        {
+            List<ScheduleBase> ret = new();
+
             return ret;
         }
 
@@ -493,7 +517,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
                     }
                 }
-                #if GROUPACTIVITYCONTROL
+#if GROUPACTIVITYCONTROL
                 uint[] arr = new uint[16 * 7 * 24];
                 int i = 0;
                 foreach (var item in dic["ScheduleCount"])
@@ -502,7 +526,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     arr[i++] = count;
                 }
                 _timeline.SetTotalElementCount(arr);
-                #endif
+#endif
             }
             catch (FileNotFoundException) { }
         }
@@ -532,11 +556,11 @@ namespace StudentScheduleManagementSystem.Schedule
                     throw new FormatException($"Item id {item.Key} is invalid");
                 }
             }
-            #if GROUPACTIVITYCONTROL
+#if GROUPACTIVITYCONTROL
             scheduleCount = JArray.FromObject(_timeline.ElementCountArray, _serializer);
-            #else
+#else
             scheduleCount = JArray.FromObject(Array.Empty<uint>(), _serializer);
-            #endif
+#endif
             FileManagement.FileManager.SaveToUserFile(new()
                                                       {
                                                           { "Course", courses },
@@ -574,9 +598,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 _correspondenceDictionary.Add(schedule.ScheduleId,
                                               new()
                                               {
+                                                  ScheduleType = ScheduleType.Course,
                                                   Id = schedule.ScheduleId,
                                                   Name = schedule.Name,
                                                   RepetitiveType = schedule.RepetitiveType,
+                                                  ActiveDays = schedule.ActiveDays,
                                                   Timestamp = schedule.BeginTime,
                                                   Location = ((Course)schedule).OfflineLocation,
                                                   Duration = schedule.Duration
@@ -589,9 +615,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 _correspondenceDictionary.Add(schedule.ScheduleId,
                                               new()
                                               {
+                                                  ScheduleType = ScheduleType.Course,
                                                   Id = schedule.ScheduleId,
                                                   Name = schedule.Name,
                                                   RepetitiveType = schedule.RepetitiveType,
+                                                  ActiveDays = schedule.ActiveDays,
                                                   Timestamp = schedule.BeginTime,
                                                   Location = ((Exam)schedule).OfflineLocation,
                                                   Duration = schedule.Duration
@@ -737,9 +765,9 @@ namespace StudentScheduleManagementSystem.Schedule
                         {
                             throw new ScheduleInformationMismatchException();
                         }
-                        if(dobj.OfflineLocation != null)
+                        if (dobj.OfflineLocation != null)
                         {
-                            var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                            var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
                             Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                             _ = new Course(dobj.ScheduleId,
                                            dobj.RepetitiveType,
@@ -747,7 +775,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                            dobj.Timestamp,
                                            dobj.Duration,
                                            dobj.Description,
-                                           location) { AlarmEnabled = dobj.AlarmEnabled };
+                                           location)
+                            { AlarmEnabled = dobj.AlarmEnabled };
                         }
                         else if (dobj.OnlineLink != null)
                         {
@@ -774,7 +803,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 if (dobj.OfflineLocation != null)
                 {
-                    var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                    var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
                     Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                     _ = new Course(null,
                                dobj.RepetitiveType,
@@ -874,7 +903,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     throw new JsonFormatException();
                 }
-                var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
                 Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                 if (_correspondenceDictionary.TryGetValue(dobj.ScheduleId, out var record)) //字典中已存在（课程或考试）
                 {
@@ -1051,7 +1080,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 if (dobj.OfflineLocation != null)
                 {
-                    var locations = Map.Location.getLocationsByName(dobj.OfflineLocation.PlaceName);
+                    var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
                     Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                     _ = new Activity(dobj.RepetitiveType,
                                      isGroupActivity,
@@ -1060,7 +1089,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                      dobj.Duration,
                                      dobj.Description,
                                      location,
-                                     dobj.ActiveDays ?? Array.Empty<Day>()) { AlarmEnabled = dobj.AlarmEnabled };
+                                     dobj.ActiveDays ?? Array.Empty<Day>())
+                    { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else if (dobj.OnlineLink != null)
                 {
@@ -1071,7 +1101,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                      dobj.Duration,
                                      dobj.Description,
                                      dobj.OnlineLink,
-                                     dobj.ActiveDays ?? Array.Empty<Day>()) { AlarmEnabled = dobj.AlarmEnabled };
+                                     dobj.ActiveDays ?? Array.Empty<Day>())
+                    { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else
                 {
@@ -1093,9 +1124,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 _correspondenceDictionary.Add(ScheduleId,
                                               new()
                                               {
+                                                  ScheduleType = ScheduleType.Activity,
                                                   Id = ScheduleId,
                                                   Name = Name,
                                                   RepetitiveType = RepetitiveType,
+                                                  ActiveDays = ActiveDays,
                                                   Timestamp = BeginTime,
                                                   Location = OfflineLocation,
                                                   Duration = Duration
@@ -1207,7 +1240,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 for (int i = 0; i < dobj.Locations.Length; i++)
                 {
-                    var locations = Map.Location.getLocationsByName(dobj.Locations[i].PlaceName);
+                    var locations = Map.Location.GetLocationsByName(dobj.Locations[i].PlaceName);
                     Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                     _ = new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location)
                     {

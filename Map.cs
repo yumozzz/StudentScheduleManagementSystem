@@ -13,10 +13,10 @@
             Console.WriteLine("test");
         }
 
-        public static Location[] getLocationsByName(string name)
+        public static Location[] GetLocationsByName(string name)
         {
             //UNDONE
-            return new Location[1] { new() { Id = 0, PlaceName = "default match" } };
+            return new Location[] { new() { Id = 0, PlaceName = "default match" } };
         }
     }
 

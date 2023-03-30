@@ -87,7 +87,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                              2,
                                              null,
                                              new Map.Location());
-#endif
+                #endif
                 {
                     FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
                     Schedule.ScheduleBase.SaveSharedData();

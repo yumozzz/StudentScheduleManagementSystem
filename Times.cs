@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
-using System.Numerics;
-using StudentScheduleManagementSystem.Schedule;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -188,7 +185,7 @@ namespace StudentScheduleManagementSystem.Times
                 (true, false) => specificId!.Value / (long)1e9 is >= 1 and <= 9
                                      ? specificId.Value
                                      : throw new ArgumentException("specifiedId should be a 10-digit number"), //完全指定
-                (false, true) => (beginWith.Value - '0') * (long)1e9 + _randomGenerator.Next(1, 999999999), //指定第一位
+                (false, true) => (beginWith!.Value - '0') * (long)1e9 + _randomGenerator.Next(1, 999999999), //指定第一位
                 (true, true) =>
                     throw new ArgumentException("specifiedId and beginWith can't be notnull at the same time")
             };
