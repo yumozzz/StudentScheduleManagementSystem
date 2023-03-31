@@ -23,14 +23,24 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Log.LogBase.Setup();
-                Schedule.ScheduleBase.ReadSharedData();
+                //Schedule.ScheduleBase.ReadSharedData();
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
-                Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
-                uiThread.Start();
-                #if TATEST
+                //Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
+
+                //ShowMap _ = new ShowMap();
+                //_.ShowDialog();
+                var point1 = new Map.Location.Point(1, 10, 10, null);
+                var point2 = new Map.Location.Point(2, 100, 500, null);
+
+                Map.Navigate.Show_Map(point1, point2);
+                
+                    
+                
+                //uiThread.Start();
+#if TATEST
                 TemporaryAffairs affair1 =
                     new(null, "test1", new() { Week = 1, Day = Day.Monday, Hour = 14 }, "test1", new());
                 affair1.EnableAlarm(TemporaryAffairs.TestCallback,
@@ -40,9 +50,9 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                new() { Week = 1, Day = Day.Monday, Hour = 10 },
                                                "test2",
                                                new()); 
-                #endif
+#endif
 
-                #if COURSEEXAMTEST
+#if COURSEEXAMTEST
                 Schedule.Exam exam = new(null,
                                          "exam1",
                                          new() { Week = 2, Day = Day.Thursday, Hour = 16 },
@@ -71,32 +81,32 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      new Location(),
                                      Day.Monday,
                                      Day.Thursday);
-                #endif
-                #if GROUPACTIVITY
-                Schedule.Activity act1 = new(RepetitiveType.Single,
+#endif
+#if GROUPACTIVITY
+                /*Schedule.Activity act1 = new(RepetitiveType.Single,
                                              true,
                                              "test groupactivity1",
                                              new() { Hour = 10 },
                                              2,
                                              null,
-                                             new Map.Location());
+                                             new Map.Location.Building());
                 Schedule.Activity act2 = new(RepetitiveType.Single,
                                              true,
                                              "test groupactivity3",
                                              new() { Hour = 14 },
                                              2,
                                              null,
-                                             new Map.Location());
-                #endif
+                                             new Map.Location.Building());*/
+#endif
                 {
-                    FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
+                    /*FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
                     Schedule.ScheduleBase.SaveSharedData();
-                    Log.Information.Log("已更新课程与考试信息");
+                    Log.Information.Log("已更新课程与考试信息");*/
                 }
-                while (uiThread.IsAlive)
+                /*while (uiThread.IsAlive)
                 {
                     Thread.Sleep(1000);
-                }
+                }*/
                 //exit program
             }
             catch (FormatException ex)
@@ -145,7 +155,7 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         public void AlarmCallback(int id, object? obj)
         {
-            Map.Location.ArrangeForRoutes(_locations.ToArray());
+            //Map.Location.GetClosetPath(_locations.ToArray());
         }
 
         public static void TestCallback(int id, object? obj)

@@ -41,7 +41,7 @@ namespace StudentScheduleManagementSystem.Schedule
             public Day[]? ActiveDays { get; set; }
             public Times.Time Timestamp { get; set; }
             public int Duration { get; set; }
-            public Map.Location? Location { get; set; }
+            public Map.Location.Building? Location { get; set; }
         }
 
         #endregion
@@ -89,7 +89,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
             },
             {
-                3000000000,
+                000000000,
                 new()
                 {
                     ScheduleType = ScheduleType.Exam,
@@ -639,7 +639,7 @@ namespace StudentScheduleManagementSystem.Schedule
         private class DeserializedObject : DeserializedObjectBase
         {
             public string? OnlineLink { get; set; }
-            public Map.Location? OfflineLocation { get; set; }
+            public Map.Location.Building? OfflineLocation { get; set; }
         }
 
         #endregion
@@ -652,7 +652,7 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty]
         public new const bool IsOnline = false;
         [JsonProperty] public string? OnlineLink { get; init; }
-        [JsonProperty] public Map.Location? OfflineLocation { get; init; }
+        [JsonProperty] public Map.Location.Building? OfflineLocation { get; init; }
 
         #endregion
 
@@ -703,7 +703,7 @@ namespace StudentScheduleManagementSystem.Schedule
                       Times.Time beginTime,
                       int duration,
                       string? description,
-                      Map.Location location,
+                      Map.Location.Building location,
                       params Day[] activeDays)
             : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
         {
@@ -767,8 +767,8 @@ namespace StudentScheduleManagementSystem.Schedule
                         }
                         if (dobj.OfflineLocation != null)
                         {
-                            var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
-                            Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                            var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
+                            Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                             _ = new Course(dobj.ScheduleId,
                                            dobj.RepetitiveType,
                                            dobj.Name,
@@ -803,8 +803,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 if (dobj.OfflineLocation != null)
                 {
-                    var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
-                    Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
+                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                     _ = new Course(null,
                                dobj.RepetitiveType,
                                dobj.Name,
@@ -844,7 +844,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject : DeserializedObjectBase
         {
-            public Map.Location OfflineLocation { get; set; }
+            public Map.Location.Building OfflineLocation { get; set; }
         }
 
         #endregion
@@ -856,7 +856,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public override int Latest => 20;
         [JsonProperty]
         public new const bool IsOnline = false;
-        [JsonProperty] public Map.Location OfflineLocation { get; init; }
+        [JsonProperty] public Map.Location.Building OfflineLocation { get; init; }
 
         #endregion
 
@@ -867,7 +867,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     Times.Time beginTime,
                     int duration,
                     string? description,
-                    Map.Location offlineLocation)
+                    Map.Location.Building offlineLocation)
             : base(RepetitiveType.Single, name, beginTime, duration, false, description)
         {
             if (beginTime.Day is Day.Saturday or Day.Sunday)
@@ -903,8 +903,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     throw new JsonFormatException();
                 }
-                var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
-                Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
+                Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                 if (_correspondenceDictionary.TryGetValue(dobj.ScheduleId, out var record)) //字典中已存在（课程或考试）
                 {
                     if (dobj.Name == record.Name &&
@@ -940,7 +940,7 @@ namespace StudentScheduleManagementSystem.Schedule
         private class DeserializedObject : DeserializedObjectBase
         {
             public string? OnlineLink { get; set; }
-            public Map.Location? OfflineLocation { get; set; }
+            public Map.Location.Building? OfflineLocation { get; set; }
         }
 
         #endregion
@@ -951,7 +951,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public override int Earliest => 8;
         public override int Latest => 20;
         [JsonProperty] public string? OnlineLink { get; init; } = null;
-        [JsonProperty] public Map.Location? OfflineLocation { get; init; } = null;
+        [JsonProperty] public Map.Location.Building? OfflineLocation { get; init; } = null;
 
         #endregion
 
@@ -1011,7 +1011,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         Times.Time beginTime,
                         int duration,
                         string? description,
-                        Map.Location location,
+                        Map.Location.Building location,
                         params Day[] activeDays)
             : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
         {
@@ -1080,8 +1080,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 if (dobj.OfflineLocation != null)
                 {
-                    var locations = Map.Location.GetLocationsByName(dobj.OfflineLocation.PlaceName);
-                    Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
+                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                     _ = new Activity(dobj.RepetitiveType,
                                      isGroupActivity,
                                      dobj.Name,
@@ -1146,7 +1146,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject : DeserializedObjectBase
         {
-            public Map.Location[] Locations { get; set; }
+            public Map.Location.Building[] Locations { get; set; }
         }
 
         #endregion
@@ -1159,7 +1159,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public new const bool IsOnline = false;
 
         [JsonProperty(propertyName: "Locations")]
-        private readonly List<Map.Location> _locations = new(); //在实例中不维护而在表中维护
+        private readonly List<Map.Location.Building> _locations = new(); //在实例中不维护而在表中维护
 
         #endregion
 
@@ -1168,7 +1168,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public TemporaryAffairs(string name,
                                 Times.Time beginTime,
                                 string? description,
-                                Map.Location location)
+                                Map.Location.Building location)
             : base(RepetitiveType.Single,
                    name,
                    beginTime,
@@ -1189,7 +1189,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public override void RemoveSchedule()
         {
             int offset = BeginTime.ToInt();
-            ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Remove(OfflineLocation!);
+            ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Remove(OfflineLocation!.Value);
             if (((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Count == 0)
             {
                 base.RemoveSchedule();
@@ -1215,13 +1215,13 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 ScheduleId = _timeline[offset].Id;
                 ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
-                                                                       .Add(OfflineLocation!); //在原先实例的location上添加元素
+                                                                       .Add(OfflineLocation!.Value); //在原先实例的location上添加元素
                 Log.Information.Log("已扩充临时日程");
             }
             else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例
             {
                 base.AddSchedule(null, '4');
-                ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Add(OfflineLocation!);
+                ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Add(OfflineLocation!.Value);
             }
         }
 
@@ -1238,10 +1238,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     throw new JsonFormatException();
                 }
+                //TODO:verify
                 for (int i = 0; i < dobj.Locations.Length; i++)
                 {
-                    var locations = Map.Location.GetLocationsByName(dobj.Locations[i].PlaceName);
-                    Map.Location location = locations.Length == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    var locations = Map.Location.GetBuildingsByName(dobj.Locations[i].Name);
+                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
                     _ = new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location)
                     {
                         AlarmEnabled = dobj.AlarmEnabled//should be the same

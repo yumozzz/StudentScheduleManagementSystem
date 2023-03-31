@@ -196,7 +196,7 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     int offset = timestamp.ToInt() + i;
                     AddSingleItem(offset, record);
-                    if(reviseElementCount)
+                    if (reviseElementCount)
                     {
                         ElementCountArray[offset]++;
                     }
@@ -307,7 +307,8 @@ namespace StudentScheduleManagementSystem.Times
 
         private static readonly JsonSerializerSettings _setting = new()
         {
-            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Include
         };
 
         private static readonly Timeline<Record> _timeline = new();
@@ -344,7 +345,6 @@ namespace StudentScheduleManagementSystem.Times
         {
             #region 调用API删除冲突闹钟
 
-            //if(Expression.)
             int offset = beginTime.ToInt();
             if (_timeline[offset].RepetitiveType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
             else if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
@@ -407,6 +407,10 @@ namespace StudentScheduleManagementSystem.Times
                 Log.Information.Log($"ID为{alarmId}的闹钟已触发");
             }
         }
+
+        #endregion
+
+        #region API on save and create instances to/from JSON
 
         public static void CreateInstance(JArray instanceList)
         {
