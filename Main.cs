@@ -30,7 +30,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-                #if TATEST
+#if TATEST
                 TemporaryAffairs affair1 =
                     new(null, "test1", new() { Week = 1, Day = Day.Monday, Hour = 14 }, "test1", new());
                 affair1.EnableAlarm(TemporaryAffairs.TestCallback,
@@ -40,9 +40,9 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                new() { Week = 1, Day = Day.Monday, Hour = 10 },
                                                "test2",
                                                new()); 
-                #endif
+#endif
 
-                #if COURSEEXAMTEST
+#if COURSEEXAMTEST
                 Schedule.Exam exam = new(null,
                                          "exam1",
                                          new() { Week = 2, Day = Day.Thursday, Hour = 16 },
@@ -71,23 +71,23 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      new Location(),
                                      Day.Monday,
                                      Day.Thursday);
-                #endif
-                #if GROUPACTIVITY
+#endif
+#if GROUPACTIVITY
                 Schedule.Activity act1 = new(RepetitiveType.Single,
                                              true,
                                              "test groupactivity1",
                                              new() { Hour = 10 },
                                              2,
                                              null,
-                                             new Map.Location());
+                                             new Map.Location.Building());
                 Schedule.Activity act2 = new(RepetitiveType.Single,
                                              true,
                                              "test groupactivity3",
                                              new() { Hour = 14 },
                                              2,
                                              null,
-                                             new Map.Location());
-                #endif
+                                             new Map.Location.Building());
+#endif
                 {
                     FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
                     Schedule.ScheduleBase.SaveSharedData();
@@ -145,7 +145,7 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         public void AlarmCallback(int id, object? obj)
         {
-            Map.Location.ArrangeForRoutes(_locations.ToArray());
+            //Map.Location.GetClosetPath(_locations.ToArray());
         }
 
         public static void TestCallback(int id, object? obj)
