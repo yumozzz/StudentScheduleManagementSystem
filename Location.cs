@@ -1,86 +1,185 @@
-﻿using System.Numerics;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        private const int INF = 500;
-        private const int MAX = 500;
-        private const int MaxDoor = 4;
-        private const int MaxAffair = 6;
-        private static AdjacencyMatrix _globalMap, _subMap;
+        private static Dictionary<int, Vertex> _verteces = new();
+        private const int MaxDoorCount = 4;
+        private const int MaxAffairCount = 6;
+        private static AdjacencyTable _globalMap, _subMap;
 
-        #region structs
+        #region structs, classes and enums
 
-        private struct Edge //边
+        public struct Edge //边
         {
-            public int Id { get; init; }
-            public int Weight { get; init; } //权重
+            public EdgeType Type { get; init; }
+            public ((int, int), (int, int))? Controls{ get; init; }
+            public int Weight { get; init; }
 
-            public Edge(int id, int weight)
+            public Edge(EdgeType type,((int, int), (int, int))? controls,int weight)
             {
-                Id = id;
+                Type = type;
+                Controls = controls;
                 Weight = weight;
             }
         }
 
-        public struct Point //点
+        public struct Vertex //点
         {
             public int Id { get; init; }
             public int X { get; init; }
             public int Y { get; init; }
-            public string? BuildingName { get; init; }
 
-            public Point(int id, int x, int y, string? buildingName)
+            public Vertex(int id, int x, int y)
             {
                 Id = id;
                 X = x;
                 Y = y;
-                BuildingName = buildingName;
             }
         }
 
-        public struct Building//建筑
+        public struct Building //建筑
         {
             public int Id { get; set; }
-            public int DoorNumber { get; set; }//门的数量
+            public int DoorNumber { get; set; } //门的数量
             public string Name { get; set; }
-            public Point[] Doors { get; set; } = new Point[MaxDoor]; //门所在的点，用来寻路
+            public Vertex[] Doors { get; set; } = new Vertex[MaxDoorCount]; //门所在的点，用来寻路
 
-            public Building(int id, string name, Point[] doors)
+            public Building(int id, string name, Vertex[] doors)
             {
                 Id = id;
                 Name = name;
                 Doors = doors;
-                DoorNumber = doors.Length;
-                if (DoorNumber > MaxDoor)
+                DoorNumber = doors.Sizegth;
+                if (DoorNumber > MaxDoorCount)
                 {
                     throw new ArgumentOutOfRangeException(nameof(DoorNumber));
                 }
             }
-
         }
 
-        private struct AdjacencyMatrix //邻接矩阵
+        private unsafe class AdjacencyTable
         {
-            public int Len { get; set; } //总点数
-            public Point[] Points { get; set; } = new Point[MAX];
-            public Edge[,] Edges { get; set; } = new Edge[MAX, MAX];
-            public bool[,] HasVisited { get; set; } = new bool[MAX, MAX]; //每条边是否走过
-
-            public AdjacencyMatrix(int len, Point[] p, Edge[,] e)
+            private struct Node
             {
-                Len = len;
-                for (int i = 0; i < len; i++)
+                public int adjVexId;
+                public int adjVexDist;
+                public EdgeType edgeType;
+                public ((int, int), (int, int))? controls;
+                public Node* next;
+            }
+
+            public int Size{ get; init; }
+            private Node*[] _array;
+
+            public AdjacencyTable(JArray vertexArray)
+            {
+                Size = vertexArray.Count;
+                _array = new Node*[Size];
+                foreach (JObject vertex in vertexArray)
                 {
-                    Points[i] = p[i];
-                    for (int j = 0; j < len; j++)
+                    int id = vertex["Id"]!.Value<int>();
+                    int x = vertex["X"]!.Value<int>();
+                    int y = vertex["Y"]!.Value<int>();
+                    _verteces.Add(id, new(id, x, y));
+                    JArray nexts = (JArray)vertex["Nexts"]!;
+                    if (nexts.Count == 0)
                     {
-                        Edges[i, j] = e[i, j];
-                        HasVisited[i, j] = false;
+                        continue;
+                    }
+                    Node* cur = _array[id];
+                    foreach (JObject next in nexts)
+                    {
+                        Node node = new()
+                        {
+                            adjVexId = next["Id"]!.Value<int>(),
+                            adjVexDist = next["Distance"]!.Value<int>(),
+                            edgeType = next["EdgeType"]!.Value<string>() switch
+                            {
+                                "Line" => EdgeType.Line, "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
+                                _ => throw new JsonFormatException()
+                            },
+                            controls = null,
+                            next = null
+                        };
+                        if (node.adjVexId >= Size || node.adjVexId <0)
+                        {
+                            throw new JsonFormatException();
+                        }
+                        if (node.edgeType == EdgeType.QuadraticBezierCurve)
+                        {
+                            JArray controls = (JArray)next["Controls"]!;
+                            if (controls.Count != 2)
+                            {
+                                throw new JsonFormatException();
+                            }
+                            var control1 = (x: controls.ElementAt(1)["X"]!.Value<int>(),
+                                            y: controls.ElementAt(1)["Y"]!.Value<int>());
+                            var control2 = (x: controls.ElementAt(2)["X"]!.Value<int>(),
+                                            y: controls.ElementAt(2)["Y"]!.Value<int>());
+                            node.controls = (control1, control2);
+                        }
+                        if (_array[id] == null) //头结点
+                        {
+                            _array[id] = &node;
+                            continue;
+                        }
+                        cur->next = &node; //非头结点
+                        cur = cur->next;
                     }
                 }
             }
+
+            public List<(int,int)> this[int id]
+            {
+                get
+                {
+                    List<(int,int)> list = new();
+                    if (id >= Size||id<0)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(id));
+                    }
+                    Node* cur = _array[id];
+                    while (cur->next != null)
+                    {
+                        list.Add((cur->adjVexId,cur->adjVexDist));
+                        cur = cur->next;
+                    }
+                    return list;
+                }
+            }
+
+            public Edge? this[int fromId, int toId]
+            {
+                get
+                {
+                    if (fromId >= Size || toId >= Size || (fromId, toId) is not ( >= 0, >= 0))
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(fromId) + " or " + nameof(toId));
+                    }
+                    Node* cur = _array[fromId];
+                    bool find = false;
+                    while (cur->next != null)
+                    {
+                        if (cur->adjVexId == toId)
+                        {
+                            find = true;
+                            break;
+                        }
+                        cur = cur->next;
+                    }
+                    return find ? new Edge(cur->edgeType, cur->controls, cur->adjVexDist) : null;
+                }
+            }
+        }
+
+        public enum EdgeType
+        {
+            Line,
+            QuadraticBezierCurve,
         }
 
         #endregion
@@ -90,7 +189,7 @@ namespace StudentScheduleManagementSystem.Map
         public static List<int> GetClosetPath(int startId, int endId) //startId=start.ID, endId=end.ID
         {
             List<int>[] route = new List<int>[100];
-            int pointCount = _globalMap.Len; //点的数量
+            int pointCount = _globalMap.Size; //点的数量
             int[] distance = new int[MAX]; //每个点到初始点的距离
             Array.Fill(distance, INF);
             distance[startId] = 0;
@@ -134,8 +233,8 @@ namespace StudentScheduleManagementSystem.Map
         public static List<int> GetClosetPath(List<int> points) // 0 , {1,2,3,4}
         {
             CreateSubMap(points);
-            int row = _subMap.Len, column = 1 << (row - 1);
-            int[,] dp = new int[MaxAffair, 1 << MaxAffair];
+            int row = _subMap.Size, column = 1 << (row - 1);
+            int[,] dp = new int[MaxAffairCount, 1 << MaxAffairCount];
             List<int> res = new() { points[0] };
 
             for (int i = 0; i < row; i++)
@@ -194,9 +293,9 @@ namespace StudentScheduleManagementSystem.Map
             return res;
         }
 
-        public static int GetClosetPathLength(int startId, int endId) //startId=start.ID, endId=end.ID
+        public static int GetClosetPathSizegth(int startId, int endId) //startId=start.ID, endId=end.ID
         {
-            int pointCount = _globalMap.Len; //点的数量
+            int pointCount = _globalMap.Size; //点的数量
             int[] distance = new int[MAX]; //每个点到初始点的距离
             Array.Fill(distance, INF);
             distance[startId] = 0;
@@ -251,7 +350,7 @@ namespace StudentScheduleManagementSystem.Map
         private static void CreateSubMap(List<int> points)
         {
             int pointCount = points.Count, currentId = 0;
-            Point[] subPoints = new Point[pointCount];
+            Vertex[] subPoints = new Vertex[pointCount];
             Edge[,] subEdges = new Edge[pointCount, pointCount];
             for (int i = 0; i < pointCount; i++)
             {
@@ -259,7 +358,7 @@ namespace StudentScheduleManagementSystem.Map
                 subPoints[i] = new(points[i], 0, 0, null);
                 for (int j = 0; j < pointCount; j++)
                 {
-                    subEdges[i, j] = new(currentId++, i == j ? INF : GetClosetPathLength(points[i], points[j]));
+                    subEdges[i, j] = new(currentId++, i == j ? INF : GetClosetPathSizegth(points[i], points[j]));
                 }
             }
             _subMap = new(pointCount, subPoints, subEdges);
@@ -270,11 +369,10 @@ namespace StudentScheduleManagementSystem.Map
 
     public static class Navigate
     {
-        //to draw the map on the screen
-        public static void Show_Map(Map.Location.Point point1, Map.Location.Point point2)
+        public static void Show(List<int> points)
         {
-            ShowMap _ = new ShowMap(point1, point2);
-            _.ShowDialog();
+            UI.MapWindow mapWindow = new();
+            mapWindow.ShowDialog();
         }
     }
 }
