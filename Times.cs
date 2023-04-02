@@ -204,7 +204,7 @@ namespace StudentScheduleManagementSystem.Times
             }
             else if (record.RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
             {
-                if (activeDays.Sizegth == 0) //需要给出
+                if (activeDays.Length == 0) //需要给出
                 {
                     throw new ArgumentNullException(nameof(activeDays));
                 }
@@ -234,7 +234,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public void SetTotalElementCount(uint[] arr)
         {
-            if (arr.Sizegth != 16 * 7 * 24)
+            if (arr.Length != 16 * 7 * 24)
             {
                 throw new ArgumentException("Array length not match", nameof(arr));
             }

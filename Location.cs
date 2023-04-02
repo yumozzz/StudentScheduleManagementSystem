@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.Numerics;
+using System.Linq;
 
 namespace StudentScheduleManagementSystem.Map
 {
@@ -53,7 +52,7 @@ namespace StudentScheduleManagementSystem.Map
                 Id = id;
                 Name = name;
                 Doors = doors;
-                DoorNumber = doors.Sizegth;
+                DoorNumber = doors.Length;
                 if (DoorNumber > MaxDoorCount)
                 {
                     throw new ArgumentOutOfRangeException(nameof(DoorNumber));
@@ -100,21 +99,21 @@ namespace StudentScheduleManagementSystem.Map
                             edgeType = next["EdgeType"]!.Value<string>() switch
                             {
                                 "Line" => EdgeType.Line, "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
-                                _ => throw new JsonFormatException()
+                                _ => throw new JsonFormatException("Wrong EdgeType")
                             },
                             controls = null,
                             next = null
                         };
                         if (node.adjVexId >= Size || node.adjVexId <0)
                         {
-                            throw new JsonFormatException();
+                            throw new JsonFormatException("Wrong vertex id");
                         }
                         if (node.edgeType == EdgeType.QuadraticBezierCurve)
                         {
                             JArray controls = (JArray)next["Controls"]!;
                             if (controls.Count != 2)
                             {
-                                throw new JsonFormatException();
+                                throw new JsonFormatException("Too many control points");
                             }
                             var control1 = (x: controls.ElementAt(1)["X"]!.Value<int>(),
                                             y: controls.ElementAt(1)["Y"]!.Value<int>());
@@ -129,6 +128,13 @@ namespace StudentScheduleManagementSystem.Map
                         }
                         cur->next = &node; //非头结点
                         cur = cur->next;
+                    }
+                }
+                foreach(var pointer in _array)
+                {
+                    if (pointer == null)
+                    {
+                        throw new JsonFormatException("Id is not continuous");
                     }
                 }
             }
@@ -293,7 +299,7 @@ namespace StudentScheduleManagementSystem.Map
             return res;
         }
 
-        public static int GetClosetPathSizegth(int startId, int endId) //startId=start.ID, endId=end.ID
+        public static int GetClosetPathLength(int startId, int endId) //startId=start.ID, endId=end.ID
         {
             int pointCount = _globalMap.Size; //点的数量
             int[] distance = new int[MAX]; //每个点到初始点的距离
@@ -355,10 +361,10 @@ namespace StudentScheduleManagementSystem.Map
             for (int i = 0; i < pointCount; i++)
             {
                 //endId[i] = new Edge[len];
-                subPoints[i] = new(points[i], 0, 0, null);
+                subPoints[i] = new(points[i], 0, 0);
                 for (int j = 0; j < pointCount; j++)
                 {
-                    subEdges[i, j] = new(currentId++, i == j ? INF : GetClosetPathSizegth(points[i], points[j]));
+                    subEdges[i, j] = new(currentId++, i == j ? INF : GetClosetPathLength(points[i], points[j]));
                 }
             }
             _subMap = new(pointCount, subPoints, subEdges);

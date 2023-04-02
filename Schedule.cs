@@ -162,11 +162,11 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentOutOfRangeException(nameof(repetitiveType));
             }
-            if (repetitiveType == RepetitiveType.Single && activeDays.Sizegth != 0)
+            if (repetitiveType == RepetitiveType.Single && activeDays.Length != 0)
             {
                 throw new ArgumentException("Repetitive type is single but argument \"activeDays\" is not null");
             }
-            if (repetitiveType != RepetitiveType.Single && activeDays.Sizegth == 0)
+            if (repetitiveType != RepetitiveType.Single && activeDays.Length == 0)
             {
                 throw new ArgumentException("Repetitive type is multipledays but argument \"activeDays\" is null");
             }
@@ -791,7 +791,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         }
                         else
                         {
-                            throw new JsonFormatException();
+                            throw new JsonFormatException("Online link and offline location is null at the same time");
                         }
                         Log.Information.Log($"已找到ID为{dobj.ScheduleId}的课程");
                         return;
@@ -827,7 +827,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 else
                 {
-                    throw new JsonFormatException();
+                    throw new JsonFormatException("Online link and offline location is null at the same time");
                 }
             }
         }
@@ -1106,7 +1106,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 else
                 {
-                    throw new JsonFormatException();
+                    throw new JsonFormatException("Online link and offline location is null at the same time");
                 }
             }
         }
@@ -1239,7 +1239,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     throw new JsonFormatException();
                 }
                 //TODO:verify
-                for (int i = 0; i < dobj.Locations.Sizegth; i++)
+                for (int i = 0; i < dobj.Locations.Length; i++)
                 {
                     var locations = Map.Location.GetBuildingsByName(dobj.Locations[i].Name);
                     Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();

@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 
 namespace StudentScheduleManagementSystem
-{ 
+{
     public enum Day
     {
         Monday,
@@ -20,6 +20,7 @@ namespace StudentScheduleManagementSystem
         Single,
         MultipleDays,
     }
+
     public enum ScheduleType
     {
         Idle,
@@ -40,12 +41,20 @@ namespace StudentScheduleManagementSystem
         public static abstract void CreateInstance(JArray instanceList);
 
         public static abstract JArray SaveInstance();
-
     }
 
     public class OverrideNondefaultRecordException : InvalidOperationException { }
     public class OverrideExistingScheduleException : InvalidOperationException { }
-    public class JsonFormatException : JsonException { }
+
+    public class JsonFormatException : JsonException
+    {
+        public JsonFormatException(string message)
+            : base(message) { }
+
+        public JsonFormatException()
+            : base() { }
+    }
+
     public class ScheduleInformationMismatchException : Exception { }
     public class MethodNotFoundException : Exception { }
     public class TypeNotFoundOrInvalidException : Exception { }
@@ -61,6 +70,7 @@ namespace StudentScheduleManagementSystem
             return e.GetHashCode();
         }
     }
+
     public static class ExtendedInt
     {
         public static Times.Time ToTimeStamp(this int value)

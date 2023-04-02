@@ -36,7 +36,7 @@ namespace StudentScheduleManagementSystem.Log
             string log =
                 $"[Log] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
             var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream!.Write(arr, 0, arr.Sizegth);
+            LogBase.Stream!.Write(arr, 0, arr.Length);
             LogBase.Stream!.Flush();
         }
     }
@@ -48,7 +48,7 @@ namespace StudentScheduleManagementSystem.Log
             string log =
                 $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
             var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream!.Write(arr, 0, arr.Sizegth);
+            LogBase.Stream!.Write(arr, 0, arr.Length);
             LogBase.Stream!.Flush();
         }
     }
@@ -60,7 +60,7 @@ namespace StudentScheduleManagementSystem.Log
             string log =
                 $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{ex.Message}\"\n{ex.StackTrace}\n";
             var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream!.Write(arr, 0, arr.Sizegth);
+            LogBase.Stream!.Write(arr, 0, arr.Length);
             LogBase.Stream!.Flush();
         }
     }
