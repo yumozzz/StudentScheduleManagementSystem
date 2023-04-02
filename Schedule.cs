@@ -270,7 +270,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     for (int i = 0; i < Duration; i++)
                     {
                         offset = 24 * dayOffset + BeginTime.Hour + i;
-                        while (offset < 16 * 7 * 24)
+                        while (offset < Times.Time.TotalHours)
                         {
                             if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（自身不可能为临时日程，需要选择是否覆盖）
                             {
@@ -518,7 +518,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                 }
 #if GROUPACTIVITYCONTROL
-                uint[] arr = new uint[16 * 7 * 24];
+                uint[] arr = new uint[TotalHours];
                 int i = 0;
                 foreach (var item in dic["ScheduleCount"])
                 {
@@ -768,7 +768,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         if (dobj.OfflineLocation != null)
                         {
                             var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                            Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                            Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                             _ = new Course(dobj.ScheduleId,
                                            dobj.RepetitiveType,
                                            dobj.Name,
@@ -804,7 +804,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 if (dobj.OfflineLocation != null)
                 {
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                     _ = new Course(null,
                                dobj.RepetitiveType,
                                dobj.Name,
@@ -904,7 +904,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     throw new JsonFormatException();
                 }
                 var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
-                Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                 if (_correspondenceDictionary.TryGetValue(dobj.ScheduleId, out var record)) //字典中已存在（课程或考试）
                 {
                     if (dobj.Name == record.Name &&
@@ -1081,7 +1081,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 if (dobj.OfflineLocation != null)
                 {
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                     _ = new Activity(dobj.RepetitiveType,
                                      isGroupActivity,
                                      dobj.Name,
@@ -1242,7 +1242,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 for (int i = 0; i < dobj.Locations.Length; i++)
                 {
                     var locations = Map.Location.GetBuildingsByName(dobj.Locations[i].Name);
-                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatch();
+                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                     _ = new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location)
                     {
                         AlarmEnabled = dobj.AlarmEnabled//should be the same

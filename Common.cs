@@ -60,7 +60,7 @@ namespace StudentScheduleManagementSystem
     public class TypeNotFoundOrInvalidException : Exception { }
     public class AlarmAlreadyExistedException : Exception { };
     public class AlarmNotFoundException : Exception { }
-    public class AmbiguousLocationMatch : Exception { }
+    public class AmbiguousLocationMatchException : Exception { }
     public class EndOfSemester : Exception { };
 
     public static class ExtendedEnum
@@ -75,7 +75,7 @@ namespace StudentScheduleManagementSystem
     {
         public static Times.Time ToTimeStamp(this int value)
         {
-            if (value < 0 || value >= 16 * 7 * 24)
+            if (value < 0 || value >= Times.Time.TotalHours)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
             }

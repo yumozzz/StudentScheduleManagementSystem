@@ -7,6 +7,7 @@ namespace StudentScheduleManagementSystem.Times
 {
     public class Time
     {
+        public const int TotalHours = 16 * 7 * 24;
         private int _week = 1;
         public int Week
         {
@@ -99,9 +100,9 @@ namespace StudentScheduleManagementSystem.Times
 
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
-        public TRecord[] RecordArray { get; } = new TRecord[16 * 7 * 24];
+        public TRecord[] RecordArray { get; } = new TRecord[Time.TotalHours];
 
-        public uint[] ElementCountArray { get; } = new uint[16 * 7 * 24];
+        public uint[] ElementCountArray { get; } = new uint[Time.TotalHours];
 
         private static readonly Random _randomGenerator = new(DateTime.Now.Millisecond);
 
@@ -152,7 +153,7 @@ namespace StudentScheduleManagementSystem.Times
                 foreach (var dayOffset in dayOffsets)
                 {
                     int offset = 24 * dayOffset + baseTime.Hour;
-                    while (offset < 16 * 7 * 24)
+                    while (offset < Time.TotalHours)
                     {
                         outId = RecordArray[offset].Id;
                         RemoveSingleItem(offset);
@@ -214,7 +215,7 @@ namespace StudentScheduleManagementSystem.Times
                     for (int i = 0; i < duration; i++)
                     {
                         int offset = 24 * dayOffset + timestamp.Hour + i;
-                        while (offset < 16 * 7 * 24)
+                        while (offset < Time.TotalHours)
                         {
                             AddSingleItem(offset, record);
                             if (reviseElementCount)
@@ -234,11 +235,11 @@ namespace StudentScheduleManagementSystem.Times
 
         public void SetTotalElementCount(uint[] arr)
         {
-            if (arr.Length != 16 * 7 * 24)
+            if (arr.Length != Time.TotalHours)
             {
                 throw new ArgumentException("Array length not match", nameof(arr));
             }
-            Array.Copy(arr, ElementCountArray, 16 * 7 * 24);
+            Array.Copy(arr, ElementCountArray, Time.TotalHours);
         }
     }
 

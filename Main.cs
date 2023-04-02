@@ -30,8 +30,8 @@ namespace StudentScheduleManagementSystem.MainProgram
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
-                var point1 = new Map.Location.Vertex(1, 10, 10, null);
-                var point2 = new Map.Location.Vertex(2, 100, 500, null);
+                var point1 = new Map.Location.Vertex(1, 10, 10);
+                var point2 = new Map.Location.Vertex(2, 100, 500);
                 uiThread.Start();
 #if TATEST
                 TemporaryAffairs affair1 =
