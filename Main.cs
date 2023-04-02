@@ -136,6 +136,15 @@ namespace StudentScheduleManagementSystem.MainProgram
                 { "Activity", Schedule.Activity.SaveInstance() },
                 { "TemporaryAffairs", Schedule.TemporaryAffairs.SaveInstance() }
             };
+
+        public static void ReadFromInstanceDictionary(Dictionary<string, JArray> instanceDictionary)
+        {
+            Times.Alarm.CreateInstance(instanceDictionary["Alarm"]);
+            Schedule.Course.CreateInstance(instanceDictionary["Course"]);
+            Schedule.Exam.CreateInstance(instanceDictionary["Exam"]);
+            Schedule.Activity.CreateInstance(instanceDictionary["Activity"]);
+            Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
+        }
     }
 }
 
