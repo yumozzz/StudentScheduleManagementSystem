@@ -267,4 +267,14 @@ namespace StudentScheduleManagementSystem.Map
 
         #endregion
     }
+
+    public static class Navigate
+    {
+        //to draw the map on the screen
+        public static void Show_Map(Map.Location.Point point1, Map.Location.Point point2)
+        {
+            ShowMap _ = new ShowMap(point1, point2);
+            _.ShowDialog();
+        }
+    }
 }
