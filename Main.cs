@@ -29,8 +29,18 @@ namespace StudentScheduleManagementSystem.MainProgram
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
-                Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
-                uiThread.Start();
+                //Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
+
+                //ShowMap _ = new ShowMap();
+                //_.ShowDialog();
+                var point1 = new Map.Location.Point(1, 10, 10, null);
+                var point2 = new Map.Location.Point(2, 100, 500, null);
+
+                Map.Navigate.Show_Map(point1, point2);
+                
+                    
+                
+                //uiThread.Start();
 #if TATEST
                 TemporaryAffairs affair1 =
                     new(null, "test1", new() { Week = 1, Day = Day.Monday, Hour = 14 }, "test1", new());
@@ -74,7 +84,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      Day.Thursday);
 #endif
 #if GROUPACTIVITY
-                Schedule.Activity act1 = new(RepetitiveType.Single,
+                /*Schedule.Activity act1 = new(RepetitiveType.Single,
                                              true,
                                              "test groupactivity1",
                                              new() { Hour = 10 },
@@ -87,17 +97,17 @@ namespace StudentScheduleManagementSystem.MainProgram
                                              new() { Hour = 14 },
                                              2,
                                              null,
-                                             new Map.Location.Building());
+                                             new Map.Location.Building());*/
 #endif
                 {
-                    FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
+                    /*FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
                     Schedule.ScheduleBase.SaveSharedData();
-                    Log.Information.Log("已更新课程与考试信息");
+                    Log.Information.Log("已更新课程与考试信息");*/
                 }
-                while (uiThread.IsAlive)
+                /*while (uiThread.IsAlive)
                 {
                     Thread.Sleep(1000);
-                }
+                }*/
                 //exit program
             }
             catch (FormatException ex)
