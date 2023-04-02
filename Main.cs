@@ -24,6 +24,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.SetCompatibleTextRenderingDefault(false);
                 Log.LogBase.Setup();
                 Schedule.ScheduleBase.ReadSharedData();
+                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile("2021210001", FileManagement.FileManager.UserFileDirectory));
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
