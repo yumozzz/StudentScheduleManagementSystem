@@ -14,10 +14,10 @@ namespace StudentScheduleManagementSystem.Map
         public struct Edge //边
         {
             public EdgeType Type { get; init; }
-            public ((int, int), (int, int))? Controls{ get; init; }
+            public ((int, int), (int, int))? Controls { get; init; }
             public int Weight { get; init; }
 
-            public Edge(EdgeType type,((int, int), (int, int))? controls,int weight)
+            public Edge(EdgeType type, ((int, int), (int, int))? controls, int weight)
             {
                 Type = type;
                 Controls = controls;
@@ -70,7 +70,7 @@ namespace StudentScheduleManagementSystem.Map
                 public Node* next;
             }
 
-            public int Size{ get; init; }
+            public int Size { get; init; }
             private Node*[] _array;
 
             public AdjacencyTable(JArray vertexArray)
@@ -103,7 +103,7 @@ namespace StudentScheduleManagementSystem.Map
                             controls = null,
                             next = null
                         };
-                        if (node.adjVexId >= Size || node.adjVexId <0)
+                        if (node.adjVexId >= Size || node.adjVexId < 0)
                         {
                             throw new JsonFormatException("Wrong vertex id");
                         }
@@ -129,7 +129,7 @@ namespace StudentScheduleManagementSystem.Map
                         cur = cur->next;
                     }
                 }
-                foreach(var pointer in _array)
+                foreach (var pointer in _array)
                 {
                     if (pointer == null)
                     {
@@ -138,19 +138,24 @@ namespace StudentScheduleManagementSystem.Map
                 }
             }
 
-            public List<(int,int)> this[int id]
+            public AdjacencyTable(int[,] adjMatrix)
+            {
+                Size = (int)Math.Sqrt(adjMatrix.Length);
+            }
+
+            public List<(int, int)> this[int id]
             {
                 get
                 {
-                    List<(int,int)> list = new();
-                    if (id >= Size||id<0)
+                    List<(int, int)> list = new();
+                    if (id >= Size || id < 0)
                     {
                         throw new ArgumentOutOfRangeException(nameof(id));
                     }
                     Node* cur = _array[id];
-                    while (cur->next != null)
+                    while (cur != null)
                     {
-                        list.Add((cur->adjVexId,cur->adjVexDist));
+                        list.Add((cur->adjVexId, cur->adjVexDist));
                         cur = cur->next;
                     }
                     return list;
@@ -161,13 +166,13 @@ namespace StudentScheduleManagementSystem.Map
             {
                 get
                 {
-                    if (fromId >= Size || toId >= Size || (fromId, toId) is not ( >= 0, >= 0))
+                    if (fromId >= Size || toId >= Size || (fromId, toId) is not (>= 0, >= 0))
                     {
                         throw new ArgumentOutOfRangeException(nameof(fromId) + " or " + nameof(toId));
                     }
                     Node* cur = _array[fromId];
                     bool find = false;
-                    while (cur->next != null)
+                    while (cur != null)
                     {
                         if (cur->adjVexId == toId)
                         {
@@ -191,42 +196,44 @@ namespace StudentScheduleManagementSystem.Map
 
         #region API on pathfinding
 
-        public static List<int> GetClosetPath(int startId, int endId) //startId=start.ID, endId=end.ID
+        public static List<int> GetClosestPath(int startId, int endId)
         {
-            List<int>[] route = new List<int>[100];
+            //这里需要提一下：遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = _globalMap.Size; //点的数量
-            int[] distance = new int[MAX]; //每个点到初始点的距离
-            Array.Fill(distance, INF);
-            distance[startId] = 0;
-            route[startId].Add(startId); //route是第38行定义的向量
-            int t = startId;
+            List<int>[] route = new List<int>[pointCount];
+            int[] distanceFromStart = new int[_globalMap.Size]; //每个点到初始点的距离
+            Array.Fill(distanceFromStart, int.MaxValue);
+            distanceFromStart[startId] = 0;
+            route[startId].Add(startId);
+            int curId = startId;
 
-            for (int z = 1; z < pointCount; z++) //循环len-1次
+            for (int i = 0; i < pointCount; i++) //循环len-1次
             {
-                //找点的相邻边,该边标记为1，更新边对应的下个点的dist
-                for (int i = 0; i < pointCount; i++)
+                var nexts = _globalMap[i]; //nexts为点[z]
+                int cyc = 0; //遍历的次数，每次循环后++
+                foreach ((int id, int dist) in nexts)
                 {
-                    if (i != t && _globalMap.Edges[t, i].Weight != INF &&
-                        distance[i] > distance[t] + _globalMap.Edges[t, i].Weight)
+                    if (distanceFromStart[i] > distanceFromStart[id] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
-                        distance[i] = distance[t] + _globalMap.Edges[t, i].Weight;
-                        route[i] = route[t];
-                        route[i].Add(i);
+                        distanceFromStart[i] = distanceFromStart[curId] + dist; //替换从出发点到点[z]的最短距离
+
+                        route[cyc] = route[curId];
+                        route[cyc].Add(cyc++); //记录此时的路线在list中,同时temp++
                     }
                 }
 
                 //遍历所有点，寻找下一个距离最近的点
-                int mmin = MAX;
-                int x = -1;
-                for (int i = 0; i < pointCount; i++)
+                int minDistance = int.MaxValue;
+                int tempId = -1;
+                for (int j = 0; j < pointCount; j++)
                 {
-                    if (i != t && distance[i] >= distance[t] && distance[i] < mmin)
+                    if (j != curId && distanceFromStart[j] >= distanceFromStart[curId] && distanceFromStart[j] < minDistance)
                     {
-                        mmin = distance[i];
-                        x = i;
+                        minDistance = distanceFromStart[j];
+                        tempId = j;
                     }
                 }
-                t = x;
+                curId = tempId;
             }
             for (int i = 0; i < route[endId].Count; i++)
             {
@@ -235,23 +242,24 @@ namespace StudentScheduleManagementSystem.Map
             return route[endId];
         }
 
-        public static List<int> GetClosetPath(List<int> points) // 0 , {1,2,3,4}
+        //TODO:verify
+        public static List<int> GetClosestCircuit(List<int> points)
         {
-            CreateSubMap(points);
-            int row = _subMap.Size, column = 1 << (row - 1);
+            (int[,] submap, int[] correspondence) = CreateSubMap(points);
+            int row = (int)Math.Sqrt(submap.Length), column = 1 << (row - 1);
             int[,] dp = new int[MaxAffairCount, 1 << MaxAffairCount];
             List<int> res = new() { points[0] };
 
             for (int i = 0; i < row; i++)
             {
-                dp[i, 0] = _subMap.Edges[i, 0].Weight;
+                dp[i, 0] = submap[i, 0];
             }
 
-            for (int j = 1; j < column; j++) //遍历dp，寻路
+            for (int j = 1; j < column; j++)
             {
                 for (int i = 0; i < row; i++)
                 {
-                    dp[i, j] = INF;
+                    dp[i, j] = int.MaxValue;
                     int bit = j >> (i - 1);
                     if ((bit & 1) == 1)
                     {
@@ -261,75 +269,74 @@ namespace StudentScheduleManagementSystem.Map
                     {
                         int bit2 = j >> (k - 1);
                         int bit3 = j ^ (1 << (k - 1));
-                        if ((bit2 & 1) == 1 && dp[i, j] > _subMap.Edges[i, k].Weight + dp[k, bit3])
+                        if ((bit2 & 1) == 1 && dp[i, j] > submap[i, k] + dp[k, bit3])
                         {
-                            dp[i, j] = _subMap.Edges[i, k].Weight + dp[k, bit3];
+                            dp[i, j] = submap[i, k] + dp[k, bit3];
                         }
                     }
                 }
             }
-            bool[] hasVisited = new bool[MAX];
-            int pt = 0, e = column - 1, temp = 0, u = 0;
-            while (u++ < 10) //防止死循环...
+            bool[] hasVisited = new bool[_globalMap.Size];
+            int p = 0, e = column - 1, t = 0, cyc = 0;
+            while (cyc++ < 10)
             {
-                int min = INF;
+                int min = int.MaxValue;
                 for (int i = 0; i < row; i++)
                 {
                     int bit = 1 << (i - 1);
                     if (!hasVisited[i] && (e & bit) == 1)
                     {
-                        if (min > _globalMap.Edges[_subMap.Points[i].Id, pt].Weight + dp[i, e ^ bit])
+                        if (min > (_globalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
                         {
-                            min = _globalMap.Edges[_subMap.Points[i].Id, pt].Weight + dp[i, e ^ bit];
-                            temp = _subMap.Points[i].Id;
+                            min = _globalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
+                            t = correspondence[i];
                         }
                     }
                 }
-                if (pt == temp)
+                if (p == t)
                 {
                     break;
                 }
-                pt = temp;
-                res.Add(pt);
-                hasVisited[pt] = true;
-                e ^= (1 << (pt - 1));
+                p = t;
+                res.Add(p);
+                hasVisited[p] = true;
+                e ^= (1 << (p - 1));
             }
             res.Add(points[0]);
             return res;
         }
 
-        public static int GetClosetPathLength(int startId, int endId) //startId=start.ID, endId=end.ID
+        public static int GetClosestPathLength(int startId, int endId)
         {
             int pointCount = _globalMap.Size; //点的数量
-            int[] distance = new int[MAX]; //每个点到初始点的距离
-            Array.Fill(distance, INF);
+            int[] distance = new int[_globalMap.Size]; //每个点到初始点的距离
+            Array.Fill(distance, int.MaxValue);
             distance[startId] = 0;
-            int t = startId;
+            int curId = startId;
 
-            for (int z = 1; z < pointCount; z++)
+            for (int i = 1; i < pointCount; i++)
             {
-                //找点的相邻边,该边标记为1，更新边对应的下个点的dist
-                for (int i = 0; i < pointCount; i++)
+                var nexts = _globalMap[i]; //nexts为点[z]
+                foreach ((int id, int dist) in nexts)
                 {
-                    if (i != t && _globalMap.Edges[t, i].Weight != INF &&
-                        distance[i] > distance[t] + _globalMap.Edges[t, i].Weight)
+                    if (distance[i] > distance[id] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
-                        distance[i] = distance[t] + _globalMap.Edges[t, i].Weight;
+                        distance[i] = distance[curId] + dist; //替换从出发点到点[z]的最短距离
                     }
                 }
 
                 //遍历所有点，寻找下一个距离最近的点
-                int mmin = MAX;
-                int x = -1;
-                for (int i = 0; i < pointCount; i++)
+                int minDistance = int.MaxValue;
+                int tempId = -1;
+                for (int j = 0; j < pointCount; j++)
                 {
-                    if (i != t && distance[i] >= distance[t] && distance[i] < mmin)
+                    if (j != curId && distance[j] >= distance[curId] && distance[j] < minDistance)
                     {
-                        mmin = distance[i];
-                        x = i;
+                        minDistance = distance[j];
+                        tempId = j;
                     }
                 }
-                t = x;
+                curId = tempId;
             }
             return distance[endId];
         }
@@ -352,21 +359,19 @@ namespace StudentScheduleManagementSystem.Map
 
         #region private methods
 
-        private static void CreateSubMap(List<int> points)
+        private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要进过的点 + 出发点。
         {
-            int pointCount = points.Count, currentId = 0;
-            Vertex[] subPoints = new Vertex[pointCount];
-            Edge[,] subEdges = new Edge[pointCount, pointCount];
+            int pointCount = criticalPoints.Count;
+            int[,] subEdges = new int[pointCount, pointCount];
+            int[] correspondence = criticalPoints.ToArray();
             for (int i = 0; i < pointCount; i++)
             {
-                //endId[i] = new Edge[len];
-                subPoints[i] = new(points[i], 0, 0);
                 for (int j = 0; j < pointCount; j++)
                 {
-                    subEdges[i, j] = new(currentId++, i == j ? INF : GetClosetPathLength(points[i], points[j]));
+                    subEdges[i, j] = i == j ? int.MaxValue : GetClosestPathLength(criticalPoints[i], criticalPoints[j]);
                 }
             }
-            _subMap = new(pointCount, subPoints, subEdges);
+            return (subEdges, correspondence);
         }
 
         #endregion
@@ -376,8 +381,8 @@ namespace StudentScheduleManagementSystem.Map
     {
         public static void Show(List<int> points)
         {
-            UI.MapWindow mapWindow = new();
-            mapWindow.ShowDialog();
+            /*UI.MapWindow mapWindow = new();
+            mapWindow.ShowDialog();*/
         }
     }
 }
