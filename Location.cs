@@ -138,11 +138,14 @@ namespace StudentScheduleManagementSystem.Map
                 }
             }
 
+            #if DEBUG
+
             public AdjacencyTable(int[,] adjMatrix)
             {
                 Size = (int)Math.Sqrt(adjMatrix.Length);
             }
 
+            #endif
             public List<(int, int)> this[int id]
             {
                 get
@@ -227,7 +230,8 @@ namespace StudentScheduleManagementSystem.Map
                 int tempId = -1;
                 for (int j = 0; j < pointCount; j++)
                 {
-                    if (j != curId && distanceFromStart[j] >= distanceFromStart[curId] && distanceFromStart[j] < minDistance)
+                    if (j != curId && distanceFromStart[j] >= distanceFromStart[curId] &&
+                        distanceFromStart[j] < minDistance)
                     {
                         minDistance = distanceFromStart[j];
                         tempId = j;
