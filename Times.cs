@@ -518,7 +518,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void Start()
         {
-            while (!MainProgram.Program.cts.IsCancellationRequested)
+            while (!MainProgram.Program._cts.IsCancellationRequested)
             {
                 Thread.Sleep(Timeout);
                 if (!Pause)

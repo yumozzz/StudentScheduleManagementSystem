@@ -1214,8 +1214,12 @@ namespace StudentScheduleManagementSystem.Schedule
                      ScheduleType.TemporaryAffair) //有临时日程而添加临时日程，此时添加的日程与已有日程共享ID和表中的实例
             {
                 ScheduleId = _timeline[offset].Id;
-                ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations
-                                                                       .Add(OfflineLocation!.Value); //在原先实例的location上添加元素
+                TemporaryAffairs affairs = (TemporaryAffairs)_scheduleList[_timeline[offset].Id];
+                if (affairs._locations.Count == 10)
+                {
+                    throw new TooManyTemporaryAffairsException();
+                }
+                affairs._locations.Add(OfflineLocation!.Value); //在原先实例的location上添加元素
                 Log.Information.Log("已扩充临时日程");
             }
             else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例

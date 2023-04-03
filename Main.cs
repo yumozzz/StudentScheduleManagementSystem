@@ -11,7 +11,8 @@ namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
     {
-        internal static CancellationTokenSource cts = new();
+        internal static CancellationTokenSource _cts = new();
+        internal static string _username = String.Empty;
 
         [STAThread]
         public static void Main()
@@ -24,7 +25,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.SetCompatibleTextRenderingDefault(false);
                 Log.LogBase.Setup();
                 Schedule.ScheduleBase.ReadSharedData();
-                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile("2021210001", FileManagement.FileManager.UserFileDirectory));
+                LogIn("2021210001");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -92,7 +93,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                              new Map.Location.Building());
 #endif
                 {
-                    FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(), "2021210001", FileManagement.FileManager.UserFileDirectory);
+                    
                     Schedule.ScheduleBase.SaveSharedData();
                     Log.Information.Log("已更新课程与考试信息");
                 }
@@ -109,7 +110,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             finally
             {
-                cts.Cancel();
+                _cts.Cancel();
                 Log.LogBase.Close();
                 Console.ReadLine();
                 FreeConsole();
@@ -130,7 +131,7 @@ namespace StudentScheduleManagementSystem.MainProgram
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool FreeConsole();
 
-        public static Dictionary<string, JArray> CreateInstanceDictionary() =>
+        private static Dictionary<string, JArray> CreateInstanceDictionary() =>
             new()
             {
                 { "Alarm", Times.Alarm.SaveInstance() },
@@ -140,13 +141,34 @@ namespace StudentScheduleManagementSystem.MainProgram
                 { "TemporaryAffairs", Schedule.TemporaryAffairs.SaveInstance() }
             };
 
-        public static void ReadFromInstanceDictionary(Dictionary<string, JArray> instanceDictionary)
+        private static void ReadFromInstanceDictionary(Dictionary<string, JArray> instanceDictionary)
         {
             Times.Alarm.CreateInstance(instanceDictionary["Alarm"]);
             Schedule.Course.CreateInstance(instanceDictionary["Course"]);
             Schedule.Exam.CreateInstance(instanceDictionary["Exam"]);
             Schedule.Activity.CreateInstance(instanceDictionary["Activity"]);
             Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
+        }
+
+        public static void LogIn(string username)
+        {
+            try
+            {
+                _username = username;
+                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(username,
+                                               FileManagement.FileManager.UserFileDirectory));
+            }
+            catch (FileNotFoundException)
+            {
+                Log.Warning.Log("user file not exist");
+            }
+        }
+
+        public static void LogOut(string username)
+        {
+            FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
+                                                      username,
+                                                      FileManagement.FileManager.UserFileDirectory);
         }
     }
 }

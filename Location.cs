@@ -5,9 +5,7 @@ namespace StudentScheduleManagementSystem.Map
     public static class Location
     {
         private static Dictionary<int, Vertex> _verteces = new();
-        private const int MaxDoorCount = 4;
-        private const int MaxAffairCount = 6;
-        private static AdjacencyTable _globalMap, _subMap;
+        private static AdjacencyTable _globalMap;
 
         #region structs, classes and enums
 
@@ -44,7 +42,7 @@ namespace StudentScheduleManagementSystem.Map
             public int Id { get; set; }
             public int DoorNumber { get; set; } //门的数量
             public string Name { get; set; }
-            public Vertex[] Doors { get; set; } = new Vertex[MaxDoorCount]; //门所在的点，用来寻路
+            public Vertex[] Doors { get; set; } = new Vertex[4]; //门所在的点，用来寻路
 
             public Building(int id, string name, Vertex[] doors)
             {
@@ -52,7 +50,7 @@ namespace StudentScheduleManagementSystem.Map
                 Name = name;
                 Doors = doors;
                 DoorNumber = doors.Length;
-                if (DoorNumber > MaxDoorCount)
+                if (DoorNumber > 4)
                 {
                     throw new ArgumentOutOfRangeException(nameof(DoorNumber));
                 }
@@ -140,9 +138,19 @@ namespace StudentScheduleManagementSystem.Map
 
             #if DEBUG
 
-            public AdjacencyTable(int[,] adjMatrix)
+            public AdjacencyTable(int[,] adjMatrix, (int, int)[] location)
             {
-                Size = (int)Math.Sqrt(adjMatrix.Length);
+                if (adjMatrix.GetLength(0) != adjMatrix.GetLength(1))
+                {
+                    throw new ArgumentException("adjacency matrix is not a square matrix");
+                }
+                if (adjMatrix.GetLength(0) != location.Length)
+                {
+                    throw new
+                        ArgumentException("the size of adjacency matrix and the length of location array is not equal");
+                }
+                _array = new Node*[Size];
+                //do the remain jobs
             }
 
             #endif
@@ -186,6 +194,46 @@ namespace StudentScheduleManagementSystem.Map
                     }
                     return find ? new Edge(cur->edgeType, cur->controls, cur->adjVexDist) : null;
                 }
+            }
+
+            public JArray SaveInstance()
+            {
+                JArray root = new();
+                foreach ((_, Vertex vertex) in _verteces)
+                {
+                    JObject obj = new() { { "Id", vertex.Id }, { "X", vertex.X }, { "Y", vertex.Y } };
+                    JArray nexts = new();
+                    Node* cur = _array[vertex.Id];
+                    while (cur != null)
+                    {
+                        JObject next = new()
+                        {
+                            { "Id", cur->adjVexId },
+                            { "Distance", cur->adjVexDist },
+                            { "EdgeType", cur->edgeType == EdgeType.Line ? "Line" : "QuadraticBezierCurve" }
+                        };
+                        JArray controls = new();
+                        if (cur->edgeType == EdgeType.QuadraticBezierCurve)
+                        {
+                            JObject control1 = new()
+                            {
+                                { "X", cur->controls!.Value.Item1.Item1 }, { "Y", cur->controls!.Value.Item1.Item2 }
+                            };
+                            JObject control2 = new()
+                            {
+                                { "X", cur->controls!.Value.Item2.Item1 }, { "Y", cur->controls!.Value.Item2.Item2 }
+                            };
+                            controls.Add(control1);
+                            controls.Add(control2);
+                        }
+                        next.Add(controls);
+                        nexts.Add(next);
+                        cur = cur->next;
+                    }
+                    obj.Add("Nexts", nexts);
+                    root.Add(obj);
+                }
+                return root;
             }
         }
 
@@ -249,9 +297,13 @@ namespace StudentScheduleManagementSystem.Map
         //TODO:verify
         public static List<int> GetClosestCircuit(List<int> points)
         {
+            if (points.Count > 10)
+            {
+                throw new TooManyTemporaryAffairsException();
+            }
             (int[,] submap, int[] correspondence) = CreateSubMap(points);
             int row = (int)Math.Sqrt(submap.Length), column = 1 << (row - 1);
-            int[,] dp = new int[MaxAffairCount, 1 << MaxAffairCount];
+            int[,] dp = new int[10, 1 << 10];
             List<int> res = new() { points[0] };
 
             for (int i = 0; i < row; i++)
