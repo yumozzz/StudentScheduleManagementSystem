@@ -756,7 +756,6 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 if (_correspondenceDictionary.TryGetValue(dobj.ScheduleId, out var record)) //字典中已存在（课程或考试）
                 {
-                    //TODO:添加location判断逻辑
                     if (dobj.Name == record.Name &&
                         dobj.RepetitiveType == record.RepetitiveType && dobj.OfflineLocation.Equals(record.Location) &&
                         dobj.Duration == record.Duration)
@@ -948,6 +947,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject : DeserializedObjectBase
         {
+            public bool IsGroupActivity { get; set; }
             public string? OnlineLink { get; set; }
             public Map.Location.Building? OfflineLocation { get; set; }
         }
@@ -959,6 +959,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public override ScheduleType @ScheduleType => ScheduleType.Activity;
         public override int Earliest => 8;
         public override int Latest => 20;
+        [JsonProperty] public bool IsGroupActivity { get; init; }
         [JsonProperty] public string? OnlineLink { get; init; } = null;
         [JsonProperty] public Map.Location.Building? OfflineLocation { get; init; } = null;
 
@@ -984,6 +985,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         params Day[] activeDays)
             : base(repetitiveType, name, beginTime, duration, true, description, activeDays)
         {
+            IsGroupActivity = isGroupActivity;
             OnlineLink = onlineLink;
             OfflineLocation = null;
             foreach (var value in _correspondenceDictionary.Values)
@@ -1024,6 +1026,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         params Day[] activeDays)
             : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
         {
+            IsGroupActivity = isGroupActivity;
             OnlineLink = null;
             OfflineLocation = location;
             foreach (var value in _correspondenceDictionary.Values)

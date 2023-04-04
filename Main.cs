@@ -158,9 +158,9 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                FileManagement.FileManager.UserFileDirectory));
                 Times.Alarm.AddAlarm(22.ToTimeStamp(),
                                      RepetitiveType.Single,
-                                     Schedule.ScheduleBase.NotifyScheduleInNextDay,
-                                     new Times.Alarm.CallbackParameterType() { startTimestamp = 24.ToTimeStamp() },
-                                     typeof(Times.Alarm.CallbackParameterType));
+                                     Schedule.ScheduleBase.NotifyAllInComingDay,
+                                     new Times.Alarm.CBPForGeneralAlarm() { startTimestamp = 24.ToTimeStamp() },
+                                     typeof(Times.Alarm.CBPForGeneralAlarm));
             }
             catch (FileNotFoundException)
             {
@@ -181,16 +181,16 @@ namespace StudentScheduleManagementSystem.Schedule
 {
     public abstract partial class ScheduleBase
     {
-        public static void NotifyScheduleInNextDay(long id, object? obj)
+        public static void NotifyAllInComingDay(long id, object? obj)
         {
-            Times.Alarm.CallbackParameterType param;
+            Times.Alarm.CBPForGeneralAlarm param;
             if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.CallbackParameterType>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForGeneralAlarm>(obj!.ToString()!);
             }
             else
             {
-                param = (Times.Alarm.CallbackParameterType)obj!;
+                param = (Times.Alarm.CBPForGeneralAlarm)obj!;
             }
             List<(int, string)> schedules = new();
             for (int i = 0; i < 24;)
@@ -215,10 +215,55 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             Times.Alarm.AddAlarm(param.startTimestamp + 22,
                                  RepetitiveType.Single,
-                                 NotifyScheduleInNextDay,
-                                 new Times.Alarm.CallbackParameterType() { startTimestamp = param.startTimestamp + 24 },
-                                 typeof(Times.Alarm.CallbackParameterType));
+                                 NotifyAllInComingDay,
+                                 new Times.Alarm.CBPForGeneralAlarm() { startTimestamp = param.startTimestamp + 24 },
+                                 typeof(Times.Alarm.CBPForGeneralAlarm));
             Times.Alarm.RemoveAlarm(param.startTimestamp - 2, RepetitiveType.Single);
+        }
+    }
+
+    public partial class Course
+    {
+        public void Notify(long id, object? obj)
+        {
+            Times.Alarm.CBPForSpecifiedAlarm param;
+            if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
+            {
+                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForSpecifiedAlarm>(obj!.ToString()!);
+            }
+            else
+            {
+                param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
+            }
+            Course course = (Course)Course._scheduleList[param.scheduleId];
+            Console.WriteLine($"下一个小时有以下课程：\"{course.Name}\"，时长为{course.Duration}小时。");
+            if (course.OfflineLocation.HasValue)
+            {
+                Console.WriteLine($"地点为{course.OfflineLocation!.Value.Name}");
+            }
+            else
+            {
+                Console.WriteLine($"在线地址为{course.OnlineLink!}");
+            }
+        }
+    }
+
+    public partial class Exam
+    {
+        public void Notify(long id, object? obj)
+        {
+            Times.Alarm.CBPForSpecifiedAlarm param;
+            if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
+            {
+                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForSpecifiedAlarm>(obj!.ToString()!);
+            }
+            else
+            {
+                param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
+            }
+            Course course = (Course)Course._scheduleList[param.scheduleId];
+            Console.WriteLine($"下一个小时有以下考试：\"{course.Name}\"，时长为{course.Duration}小时。");
+            Console.WriteLine($"地点为{course.OfflineLocation!.Value.Name}");
         }
     }
 
@@ -236,9 +281,14 @@ namespace StudentScheduleManagementSystem.Times
 {
     public partial class Alarm
     {
-        public struct CallbackParameterType
+        public struct CBPForGeneralAlarm
         {
             public Time startTimestamp;
+        }
+
+        public struct CBPForSpecifiedAlarm
+        {
+            public int scheduleId;
         }
     }
 }
