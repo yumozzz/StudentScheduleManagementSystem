@@ -1,11 +1,13 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
 
 namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
         private static Dictionary<int, Vertex> _verteces = new();
-        private static AdjacencyTable _globalMap;
+        public static AdjacencyTable GlobalMap { get; private set; } =
+            new(FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory));
 
         #region structs, classes and enums
 
@@ -57,7 +59,7 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
-        private unsafe class AdjacencyTable
+        public unsafe class AdjacencyTable
         {
             private struct Node
             {
@@ -149,27 +151,33 @@ namespace StudentScheduleManagementSystem.Map
                     throw new
                         ArgumentException("the size of adjacency matrix and the length of location array is not equal");
                 }
-
-                //do the remain jobs
-                int calculator = 0;
-                Size = (int)Math.Sqrt(adjMatrix.Length);//邻接表的长度
+                int id = 0;
+                Size = adjMatrix.GetLength(0);//邻接表的长度
                 _array = new Node*[Size];//邻接表的数组
                 for (int i = 0; i < Size; i++)
                 {
-                    Node* temp = _array[i];
+                    _verteces.Add(id, new() { Id = id, X = location[i].Item1, Y = location[i].Item2 });
+                    Node* cur = _array[i];
                     for (int j = 0; j < Size; j++)
                     {
-                        if (adjMatrix[i, j] == int.MaxValue)//如果i到j的边不存在，continue
+                        if (adjMatrix[i, j] == 0)//如果i到j的边不存在，continue
+                        {
                             continue;
-                        Node p = new Node();
-                        p.adjVexDist = adjMatrix[i, j];//构造链表
-                        //设置其他参数
-                        p.adjVexId = calculator++;
-                        p.edgeType = EdgeType.Line;
-                        p.controls = null;
-
-                        temp->next = &p;
-                        temp = temp->next;
+                        }
+                        Node node = new()
+                        {
+                            adjVexDist = adjMatrix[i, j],
+                            adjVexId = id++,
+                            edgeType = EdgeType.Line,
+                            controls = null
+                        };
+                        if (_array[i] == null) //头结点
+                        {
+                            _array[i] = &node;
+                            continue;
+                        }
+                        cur->next = &node; //非头结点
+                        cur = cur->next;
                     }
                 }
             }
@@ -271,9 +279,9 @@ namespace StudentScheduleManagementSystem.Map
         public static List<int> GetClosestPath(int startId, int endId)
         {
             //这里需要提一下：遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
-            int pointCount = _globalMap.Size; //点的数量
+            int pointCount = GlobalMap.Size; //点的数量
             List<int>[] route = new List<int>[pointCount];
-            int[] distanceFromStart = new int[_globalMap.Size]; //每个点到初始点的距离
+            int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distanceFromStart, int.MaxValue);
             distanceFromStart[startId] = 0;
             route[startId].Add(startId);
@@ -281,7 +289,7 @@ namespace StudentScheduleManagementSystem.Map
 
             for (int i = 0; i < pointCount; i++) //循环len-1次
             {
-                var nexts = _globalMap[i]; //nexts为点[z]
+                var nexts = GlobalMap[i]; //nexts为点[z]
                 int cyc = 0; //遍历的次数，每次循环后++
                 foreach ((int id, int dist) in nexts)
                 {
@@ -353,7 +361,7 @@ namespace StudentScheduleManagementSystem.Map
                     }
                 }
             }
-            bool[] hasVisited = new bool[_globalMap.Size];
+            bool[] hasVisited = new bool[GlobalMap.Size];
             int p = 0, e = column - 1, t = 0, cyc = 0;
             while (cyc++ < 10)
             {
@@ -363,9 +371,9 @@ namespace StudentScheduleManagementSystem.Map
                     int bit = 1 << (i - 1);
                     if (!hasVisited[i] && (e & bit) == 1)
                     {
-                        if (min > (_globalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
+                        if (min > (GlobalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
                         {
-                            min = _globalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
+                            min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
                             t = correspondence[i];
                         }
                     }
@@ -385,15 +393,15 @@ namespace StudentScheduleManagementSystem.Map
 
         public static int GetClosestPathLength(int startId, int endId)
         {
-            int pointCount = _globalMap.Size; //点的数量
-            int[] distance = new int[_globalMap.Size]; //每个点到初始点的距离
+            int pointCount = GlobalMap.Size; //点的数量
+            int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distance, int.MaxValue);
             distance[startId] = 0;
             int curId = startId;
 
             for (int i = 1; i < pointCount; i++)
             {
-                var nexts = _globalMap[i]; //nexts为点[z]
+                var nexts = GlobalMap[i]; //nexts为点[z]
                 foreach ((int id, int dist) in nexts)
                 {
                     if (distance[i] > distance[id] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离

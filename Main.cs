@@ -12,7 +12,7 @@ namespace StudentScheduleManagementSystem.MainProgram
     public class Program
     {
         internal static CancellationTokenSource _cts = new();
-        internal static string _username = String.Empty;
+        internal static string _userId = String.Empty;
 
         [STAThread]
         public static void Main()
@@ -150,12 +150,12 @@ namespace StudentScheduleManagementSystem.MainProgram
             Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
         }
 
-        public static void LogIn(string username)
+        public static void LogIn(string userId)
         {
             try
             {
-                _username = username;
-                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(username,
+                _userId = userId;
+                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(userId,
                                                FileManagement.FileManager.UserFileDirectory));
             }
             catch (FileNotFoundException)

@@ -506,10 +506,9 @@ namespace StudentScheduleManagementSystem.Times
 
     public static class Timer
     {
-        private const int Timeout = 1000;
-
+        private const int BaseTimeout = 10000;
+        private static int accleration = 1;
         private static Time _localTime = new();
-
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();
         public static bool Pause { get; set; } = false;
@@ -520,7 +519,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             while (!MainProgram.Program._cts.IsCancellationRequested)
             {
-                Thread.Sleep(Timeout);
+                Thread.Sleep(BaseTimeout / accleration);
                 if (!Pause)
                 {
                     Console.WriteLine(LocalTime);
@@ -532,11 +531,32 @@ namespace StudentScheduleManagementSystem.Times
             Console.WriteLine("clock terminate");
         }
 
-        public static void ChangeTimeTo(Time time)
+        public static void ChangeTime(Time time)
         {
             _localTime = time;
             _offset = time.ToInt();
             Log.Warning.Log($"时间已被设定为{_localTime.ToString()}");
+        }
+
+        public static int SetSpeed()
+        {
+            switch (accleration)
+            {
+                case 1:
+                    accleration = 2;
+                    Log.Information.Log("时间流速已设定为2x");
+                    return 2;
+                case 2:
+                    accleration = 5;
+                    Log.Information.Log("时间流速已设定为5x");
+                    return 5;
+                case 5:
+                    accleration = 1;
+                    Log.Information.Log("时间流速已设定为1x");
+                    return 1;
+                default: 
+                    return 0;
+            }
         }
     }
 }

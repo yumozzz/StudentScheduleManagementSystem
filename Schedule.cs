@@ -106,14 +106,12 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static readonly JsonSerializer _serializer = new()
         {
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Include
+            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
         };
 
         protected static readonly JsonSerializerSettings _setting = new()
         {
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Include
+            Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Include
         };
 
         #endregion
@@ -252,7 +250,8 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         if (_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair)
                         {
-                            throw new InvalidOperationException("Cannot add temporary affair when there already exists temporary affair (can only modify)");
+                            throw new
+                                InvalidOperationException("Cannot add temporary affair when there already exists temporary affair (can only modify)");
                         }
                     }
                     else if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（需要选择是否覆盖）
@@ -346,8 +345,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                            Duration,
                                            new Record
                                            {
-                                               RepetitiveType = this.RepetitiveType,
-                                               ScheduleType = ScheduleType
+                                               RepetitiveType = this.RepetitiveType, ScheduleType = ScheduleType
                                            },
                                            out thisScheduleId,
                                            !(ScheduleType != ScheduleType.Activity),
@@ -384,10 +382,8 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             var list = type switch
             {
-                ScheduleType.Course => _courseIdList,
-                ScheduleType.Exam => _examIdList,
-                ScheduleType.Activity => _groupActivityList,
-                _ => throw new ArgumentOutOfRangeException(nameof(type))
+                ScheduleType.Course => _courseIdList, ScheduleType.Exam => _examIdList,
+                ScheduleType.Activity => _groupActivityList, _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
             List<SharedData> ret = new();
             foreach (var id in list)
@@ -476,7 +472,8 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             try
             {
-                var dic = FileManagement.FileManager.ReadFromUserFile("share", FileManagement.FileManager.UserFileDirectory);
+                var dic = FileManagement.FileManager.ReadFromUserFile("share",
+                                                                      FileManagement.FileManager.UserFileDirectory);
                 foreach (var item in dic["Course"])
                 {
                     var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
@@ -514,10 +511,9 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         _groupActivityList.Add(dobj.Id);
                         _correspondenceDictionary.Add(dobj.Id, dobj);
-
                     }
                 }
-#if GROUPACTIVITYCONTROL
+                #if GROUPACTIVITYCONTROL
                 uint[] arr = new uint[TotalHours];
                 int i = 0;
                 foreach (var item in dic["ScheduleCount"])
@@ -526,7 +522,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     arr[i++] = count;
                 }
                 _timeline.SetTotalElementCount(arr);
-#endif
+                #endif
             }
             catch (FileNotFoundException) { }
         }
@@ -534,33 +530,33 @@ namespace StudentScheduleManagementSystem.Schedule
         public static void SaveSharedData()
         {
             JArray courses = new(), exams = new(), activities = new(), scheduleCount;
-            foreach (var item in _correspondenceDictionary)
+            foreach ((long id, var data) in _correspondenceDictionary)
             {
-                if (item.Key / (long)1e9 == 1) //course
+                if (id / (long)1e9 == 1) //course
                 {
-                    JObject obj = JObject.FromObject(item.Value, _serializer);
+                    JObject obj = JObject.FromObject(data, _serializer);
                     courses.Add(obj);
                 }
-                else if (item.Key / (long)1e9 == 2)
+                else if (id / (long)1e9 == 2)
                 {
-                    JObject obj = JObject.FromObject(item.Value, _serializer);
+                    JObject obj = JObject.FromObject(data, _serializer);
                     exams.Add(obj);
                 }
-                else if (item.Key / (long)1e9 == 3)
+                else if (id / (long)1e9 == 3)
                 {
-                    JObject obj = JObject.FromObject(item.Value, _serializer);
+                    JObject obj = JObject.FromObject(data, _serializer);
                     activities.Add(obj);
                 }
                 else
                 {
-                    throw new FormatException($"Item id {item.Key} is invalid");
+                    throw new FormatException($"Item id {id} is invalid");
                 }
             }
-#if GROUPACTIVITYCONTROL
+            #if GROUPACTIVITYCONTROL
             scheduleCount = JArray.FromObject(_timeline.ElementCountArray, _serializer);
-#else
+            #else
             scheduleCount = JArray.FromObject(Array.Empty<uint>(), _serializer);
-#endif
+            #endif
             FileManagement.FileManager.SaveToUserFile(new()
                                                       {
                                                           { "Course", courses },
@@ -768,15 +764,15 @@ namespace StudentScheduleManagementSystem.Schedule
                         if (dobj.OfflineLocation != null)
                         {
                             var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                            Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                            Map.Location.Building location =
+                                locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                             _ = new Course(dobj.ScheduleId,
                                            dobj.RepetitiveType,
                                            dobj.Name,
                                            dobj.Timestamp,
                                            dobj.Duration,
                                            dobj.Description,
-                                           location)
-                            { AlarmEnabled = dobj.AlarmEnabled };
+                                           location) { AlarmEnabled = dobj.AlarmEnabled };
                         }
                         else if (dobj.OnlineLink != null)
                         {
@@ -804,26 +800,27 @@ namespace StudentScheduleManagementSystem.Schedule
                 if (dobj.OfflineLocation != null)
                 {
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                    Map.Location.Building location =
+                        locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                     _ = new Course(null,
-                               dobj.RepetitiveType,
-                               dobj.Name,
-                               dobj.Timestamp,
-                               dobj.Duration,
-                               dobj.Description,
-                               location,
-                               dobj.ActiveDays ?? Array.Empty<Day>());
+                                   dobj.RepetitiveType,
+                                   dobj.Name,
+                                   dobj.Timestamp,
+                                   dobj.Duration,
+                                   dobj.Description,
+                                   location,
+                                   dobj.ActiveDays ?? Array.Empty<Day>());
                 }
                 else if (dobj.OnlineLink != null)
                 {
                     _ = new Course(null,
-                               dobj.RepetitiveType,
-                               dobj.Name,
-                               dobj.Timestamp,
-                               dobj.Duration,
-                               dobj.Description,
-                               dobj.OnlineLink,
-                               dobj.ActiveDays ?? Array.Empty<Day>());
+                                   dobj.RepetitiveType,
+                                   dobj.Name,
+                                   dobj.Timestamp,
+                                   dobj.Duration,
+                                   dobj.Description,
+                                   dobj.OnlineLink,
+                                   dobj.ActiveDays ?? Array.Empty<Day>());
                 }
                 else
                 {
@@ -904,17 +901,20 @@ namespace StudentScheduleManagementSystem.Schedule
                     throw new JsonFormatException();
                 }
                 var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
-                Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                Map.Location.Building location =
+                    locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                 if (_correspondenceDictionary.TryGetValue(dobj.ScheduleId, out var record)) //字典中已存在（课程或考试）
                 {
                     if (dobj.Name == record.Name &&
                         dobj.RepetitiveType == record.RepetitiveType && /*location != record.Location ||*/
                         dobj.Duration == record.Duration && dobj.Timestamp == record.Timestamp) //相同
                     {
-                        _ = new Exam(dobj.ScheduleId, dobj.Name, dobj.Timestamp, dobj.Duration, dobj.Description, location)
-                        {
-                            AlarmEnabled = dobj.AlarmEnabled
-                        };
+                        _ = new Exam(dobj.ScheduleId,
+                                     dobj.Name,
+                                     dobj.Timestamp,
+                                     dobj.Duration,
+                                     dobj.Description,
+                                     location) { AlarmEnabled = dobj.AlarmEnabled };
                         Log.Information.Log($"已找到ID为{dobj.ScheduleId}的考试");
                         return;
                     }
@@ -989,12 +989,12 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     else
                     {
-                        if (isGroupActivity)//重复添加
+                        if (isGroupActivity) //重复添加
                         {
                             Log.Information.Log("已找到集体活动");
                             return;
                         }
-                        else//错误
+                        else //错误
                         {
                             throw new ScheduleInformationMismatchException();
                         }
@@ -1029,12 +1029,12 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     else
                     {
-                        if (isGroupActivity)//重复添加
+                        if (isGroupActivity) //重复添加
                         {
                             Log.Information.Log("已找到集体活动");
                             return;
                         }
-                        else//错误
+                        else //错误
                         {
                             throw new ScheduleInformationMismatchException();
                         }
@@ -1061,11 +1061,13 @@ namespace StudentScheduleManagementSystem.Schedule
                 bool isGroupActivity = false;
                 foreach (var value in _correspondenceDictionary.Values)
                 {
-                    if (dobj.Name == value.Name && dobj.RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                    if (dobj.Name == value.Name &&
+                        dobj.RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
                         dobj.Duration == value.Duration)
                     {
                         if ((dobj.RepetitiveType == RepetitiveType.Single && dobj.Timestamp != value.Timestamp) ||
-                            (dobj.RepetitiveType == RepetitiveType.MultipleDays && dobj.Timestamp.Hour != value.Timestamp.Hour))
+                            (dobj.RepetitiveType == RepetitiveType.MultipleDays &&
+                             dobj.Timestamp.Hour != value.Timestamp.Hour))
                         {
                             continue;
                         }
@@ -1081,7 +1083,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 if (dobj.OfflineLocation != null)
                 {
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                    Map.Location.Building location =
+                        locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                     _ = new Activity(dobj.RepetitiveType,
                                      isGroupActivity,
                                      dobj.Name,
@@ -1089,8 +1092,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                      dobj.Duration,
                                      dobj.Description,
                                      location,
-                                     dobj.ActiveDays ?? Array.Empty<Day>())
-                    { AlarmEnabled = dobj.AlarmEnabled };
+                                     dobj.ActiveDays ?? Array.Empty<Day>()) { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else if (dobj.OnlineLink != null)
                 {
@@ -1101,8 +1103,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                      dobj.Duration,
                                      dobj.Description,
                                      dobj.OnlineLink,
-                                     dobj.ActiveDays ?? Array.Empty<Day>())
-                    { AlarmEnabled = dobj.AlarmEnabled };
+                                     dobj.ActiveDays ?? Array.Empty<Day>()) { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else
                 {
@@ -1136,6 +1137,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 Log.Information.Log("已添加集体活动");
             }
         }
+
         #endregion
     }
 
@@ -1165,16 +1167,8 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region ctor
 
-        public TemporaryAffairs(string name,
-                                Times.Time beginTime,
-                                string? description,
-                                Map.Location.Building location)
-            : base(RepetitiveType.Single,
-                   name,
-                   beginTime,
-                   1,
-                   false,
-                   description)
+        public TemporaryAffairs(string name, Times.Time beginTime, string? description, Map.Location.Building location)
+            : base(RepetitiveType.Single, name, beginTime, 1, false, description)
         {
             OnlineLink = null;
             OfflineLocation = location;
@@ -1246,10 +1240,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 for (int i = 0; i < dobj.Locations.Length; i++)
                 {
                     var locations = Map.Location.GetBuildingsByName(dobj.Locations[i].Name);
-                    Map.Location.Building location = locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                    Map.Location.Building location =
+                        locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
                     _ = new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location)
                     {
-                        AlarmEnabled = dobj.AlarmEnabled//should be the same
+                        AlarmEnabled = dobj.AlarmEnabled //should be the same
                     };
                 }
             }
