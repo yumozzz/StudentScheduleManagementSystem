@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace StudentScheduleManagementSystem.Map
 {
@@ -12,10 +14,10 @@ namespace StudentScheduleManagementSystem.Map
         public struct Edge //边
         {
             public EdgeType Type { get; init; }
-            public ((int, int), (int, int))? Controls { get; init; }
+            public (Point, Point)? Controls { get; init; }
             public int Weight { get; init; }
 
-            public Edge(EdgeType type, ((int, int), (int, int))? controls, int weight)
+            public Edge(EdgeType type, (Point, Point)? controls, int weight)
             {
                 Type = type;
                 Controls = controls;
@@ -65,7 +67,7 @@ namespace StudentScheduleManagementSystem.Map
                 public int adjVexId;
                 public int adjVexDist;
                 public EdgeType edgeType;
-                public ((int, int), (int, int))? controls;
+                public (Point, Point)? controls;
                 public Node* next;
             }
 
@@ -117,10 +119,8 @@ namespace StudentScheduleManagementSystem.Map
                                 {
                                     throw new JsonFormatException("Too many control points");
                                 }
-                                var control1 = (x: controls.ElementAt(1)["X"]!.Value<int>(),
-                                                y: controls.ElementAt(1)["Y"]!.Value<int>());
-                                var control2 = (x: controls.ElementAt(2)["X"]!.Value<int>(),
-                                                y: controls.ElementAt(2)["Y"]!.Value<int>());
+                                var control1 = JsonConvert.DeserializeObject<Point>(controls.ElementAt(1).ToString());
+                                var control2 = JsonConvert.DeserializeObject<Point>(controls.ElementAt(2).ToString());
                                 node.controls = (control1, control2);
                             }
                             if (_adjArray[id] == null) //头结点
@@ -262,14 +262,8 @@ namespace StudentScheduleManagementSystem.Map
                         JArray controls = new();
                         if (cur->edgeType == EdgeType.QuadraticBezierCurve)
                         {
-                            JObject control1 = new()
-                            {
-                                { "X", cur->controls!.Value.Item1.Item1 }, { "Y", cur->controls!.Value.Item1.Item2 }
-                            };
-                            JObject control2 = new()
-                            {
-                                { "X", cur->controls!.Value.Item2.Item1 }, { "Y", cur->controls!.Value.Item2.Item2 }
-                            };
+                            JObject control1 = JObject.FromObject(cur->controls!.Value.Item1);
+                            JObject control2 = JObject.FromObject(cur->controls!.Value.Item2);
                             controls.Add(control1);
                             controls.Add(control2);
                         }
@@ -502,8 +496,31 @@ namespace StudentScheduleManagementSystem.Map
     {
         public static void Show(List<int> points)
         {
-            /*UI.MapWindow mapWindow = new();
-            mapWindow.ShowDialog();*/
+            List<(Location.Vertex, Location.Vertex)> lineEndPointPairs = new();
+            List<(Location.Vertex, Point, Point, Location.Vertex)> bezCurveControlPointTuples = new();
+            if (points.Count <= 1)
+            {
+                throw new ArgumentException("too few points");
+            }
+            int prevId = points[0];
+            for (int i = 1; i < points.Count - 1; i++)
+            {
+                Location.Edge? edge = Location.GlobalMap![prevId, i];
+                if (!edge.HasValue)
+                {
+                    throw new ArgumentException($"there's no edge between vertex {prevId} and {i}");
+                }
+                if (edge.Value.Type == Location.EdgeType.Line)
+                {
+                    lineEndPointPairs.Add((Location.GlobalMap.GetVertex(prevId), Location.GlobalMap.GetVertex(i)));
+                }
+                else
+                {
+                    bezCurveControlPointTuples.Add((Location.GlobalMap.GetVertex(prevId), edge.Value.Controls!.Value.Item1, edge.Value.Controls!.Value.Item2, Location.GlobalMap.GetVertex(i)));
+                }
+            }
+            UI.MapWindow mapWindow = new(lineEndPointPairs, bezCurveControlPointTuples);
+            mapWindow.ShowDialog();
         }
     }
 }
