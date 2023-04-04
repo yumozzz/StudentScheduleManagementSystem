@@ -24,6 +24,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Log.LogBase.Setup();
+                Map.Location.SetUp();
                 Schedule.ScheduleBase.ReadSharedData();
                 LogIn("2021210001");
                 Thread clockThread = new(Times.Timer.Start);

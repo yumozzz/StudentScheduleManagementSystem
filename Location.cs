@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Xml.Linq;
 
 namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        public static AdjacencyTable GlobalMap { get; private set; } =
-            new(FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory));
+        public static List<Building>? Buildings { get; private set; } = new();
+        public static AdjacencyTable? GlobalMap { get; private set; }
 
         #region structs, classes and enums
 
@@ -43,7 +42,7 @@ namespace StudentScheduleManagementSystem.Map
             public int Id { get; set; }
             public int DoorNumber { get; set; } //门的数量
             public string Name { get; set; }
-            public Vertex[] Doors { get; set; } = new Vertex[4]; //门所在的点，用来寻路
+            public Vertex[] Doors { get; set; } //门所在的点，用来寻路
 
             public Building(int id, string name, Vertex[] doors)
             {
@@ -55,6 +54,7 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     throw new ArgumentOutOfRangeException(nameof(DoorNumber));
                 }
+                Doors = doors;
             }
         }
 
@@ -160,8 +160,8 @@ namespace StudentScheduleManagementSystem.Map
                         ArgumentException("the size of adjacency matrix and the length of location array is not equal");
                 }
                 int id = 0;
-                Size = adjMatrix.GetLength(0);//邻接表的长度
-                _adjArray = new Node*[Size];//邻接表的数组
+                Size = adjMatrix.GetLength(0);
+                _adjArray = new Node*[Size];
                 _locations = new (int, int)[Size];
                 try
                 {
@@ -171,7 +171,7 @@ namespace StudentScheduleManagementSystem.Map
                         Node* cur = _adjArray[i];
                         for (int j = 0; j < Size; j++)
                         {
-                            if (adjMatrix[i, j] == 0) //如果i到j的边不存在，continue
+                            if (adjMatrix[i, j] == 0) //i到j的边不存在
                             {
                                 continue;
                             }
@@ -206,7 +206,7 @@ namespace StudentScheduleManagementSystem.Map
                     List<(int, int)> list = new();
                     if (id >= Size || id < 0)
                     {
-                        throw new ArgumentOutOfRangeException(nameof(id));
+                        throw new IndexOutOfRangeException();
                     }
                     Node* cur = _adjArray[id];
                     while (cur != null)
@@ -224,7 +224,7 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     if (fromId >= Size || toId >= Size || (fromId, toId) is not (>= 0, >= 0))
                     {
-                        throw new ArgumentOutOfRangeException(nameof(fromId) + " or " + nameof(toId));
+                        throw new IndexOutOfRangeException();
                     }
                     Node* cur = _adjArray[fromId];
                     bool find = false;
@@ -240,6 +240,8 @@ namespace StudentScheduleManagementSystem.Map
                     return find ? new Edge(cur->edgeType, cur->controls, cur->adjVexDist) : null;
                 }
             }
+
+            public Vertex GetVertex(int id) => new(id, _locations[id].Item1, _locations[id].Item2);
 
             public JArray SaveInstance()
             {
@@ -295,7 +297,7 @@ namespace StudentScheduleManagementSystem.Map
         public static List<int> GetClosestPath(int startId, int endId)
         {
             //这里需要提一下：遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
-            int pointCount = GlobalMap.Size; //点的数量
+            int pointCount = GlobalMap!.Size; //点的数量
             List<int>[] route = new List<int>[pointCount];
             int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distanceFromStart, int.MaxValue);
@@ -339,7 +341,6 @@ namespace StudentScheduleManagementSystem.Map
             return route[endId];
         }
 
-        //TODO:verify
         public static List<int> GetClosestCircuit(List<int> points)
         {
             if (points.Count > 10)
@@ -377,7 +378,7 @@ namespace StudentScheduleManagementSystem.Map
                     }
                 }
             }
-            bool[] hasVisited = new bool[GlobalMap.Size];
+            bool[] hasVisited = new bool[GlobalMap!.Size];
             int p = 0, e = column - 1, t = 0, cyc = 0;
             while (cyc++ < 10)
             {
@@ -409,7 +410,7 @@ namespace StudentScheduleManagementSystem.Map
 
         public static int GetClosestPathLength(int startId, int endId)
         {
-            int pointCount = GlobalMap.Size; //点的数量
+            int pointCount = GlobalMap!.Size; //点的数量
             int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distance, int.MaxValue);
             distance[startId] = 0;
@@ -454,11 +455,7 @@ namespace StudentScheduleManagementSystem.Map
 
         #endregion
 
-        #region API on save and create instances to/from JSON
-
-        #endregion
-
-        #region private methods
+        #region other methods
 
         private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要进过的点 + 出发点。
         {
@@ -474,6 +471,29 @@ namespace StudentScheduleManagementSystem.Map
             }
             return (subEdges, correspondence);
         }
+
+        public static void SetUp()
+        {
+            var information = FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory);
+            GlobalMap = new(information.Item1);
+            foreach (JObject obj in information.Item2)
+            {
+                int id = obj["Id"]!.Value<int>();
+                string name = obj["Name"]!.Value<string>()!;
+                JArray doorsArray = (JArray)obj["Doors"]!;
+                if (doorsArray.Count > 4)
+                {
+                    throw new JsonFormatException("too many doors in one building");
+                }
+                Building building = new(id,
+                                        name,
+                                        Array.ConvertAll(doorsArray.ToArray(),
+                                                         token => GlobalMap.GetVertex(token["Id"]!.Value<int>())));
+                Buildings!.Add(building);
+            }
+        }
+
+        public static JArray SaveBuildings() => new (Buildings!.ToArray());
 
         #endregion
     }

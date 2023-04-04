@@ -47,15 +47,16 @@ namespace StudentScheduleManagementSystem.FileManagement
             Log.Information.Log($"已保存学号为{userId}的用户信息");
         }
 
-        public static JArray ReadFromMapFile(string fileFolder)
+        public static (JArray, JArray) ReadFromMapFile(string fileFolder)
         {
             if (!Directory.Exists(fileFolder))
             {
                 throw new DirectoryNotFoundException();
             }
             string jsonSource = File.ReadAllText($"{fileFolder}/map.json");
+            JObject root = JObject.Parse(jsonSource);
             Log.Information.Log("已读取地图信息");
-            return JArray.Parse(jsonSource);
+            return ((JArray)root["Map"]!, (JArray)root["Buildings"]!);
         }
 
         public static void SaveToMapFile(string fileFolder)
@@ -64,7 +65,10 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
-            JArray root = Map.Location.GlobalMap.SaveInstance();
+            JObject root = new()
+            {
+                { "Map", Map.Location.GlobalMap!.SaveInstance() }, { "Buildings", Map.Location.SaveBuildings() }
+            };
             File.WriteAllBytes($"{fileFolder}/map.json", Encoding.UTF8.GetBytes(root.ToString()));
             Log.Information.Log("已保存地图信息");
         }
