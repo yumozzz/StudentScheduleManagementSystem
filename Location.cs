@@ -149,8 +149,29 @@ namespace StudentScheduleManagementSystem.Map
                     throw new
                         ArgumentException("the size of adjacency matrix and the length of location array is not equal");
                 }
-                _array = new Node*[Size];
+
                 //do the remain jobs
+                int calculator = 0;
+                Size = (int)Math.Sqrt(adjMatrix.Length);//邻接表的长度
+                _array = new Node*[Size];//邻接表的数组
+                for (int i = 0; i < Size; i++)
+                {
+                    Node* temp = _array[i];
+                    for (int j = 0; j < Size; j++)
+                    {
+                        if (adjMatrix[i, j] == int.MaxValue)//如果i到j的边不存在，continue
+                            continue;
+                        Node p = new Node();
+                        p.adjVexDist = adjMatrix[i, j];//构造链表
+                        //设置其他参数
+                        p.adjVexId = calculator++;
+                        p.edgeType = EdgeType.Line;
+                        p.controls = null;
+
+                        temp->next = &p;
+                        temp = temp->next;
+                    }
+                }
             }
 
             #endif
