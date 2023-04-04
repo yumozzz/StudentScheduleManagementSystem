@@ -32,8 +32,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
-                var point1 = new Map.Location.Vertex(1, 10, 10);
-                var point2 = new Map.Location.Vertex(2, 100, 500);
                 uiThread.Start();
 #if TATEST
                 TemporaryAffairs affair1 =
@@ -158,6 +156,11 @@ namespace StudentScheduleManagementSystem.MainProgram
                 _userId = userId;
                 ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(userId,
                                                FileManagement.FileManager.UserFileDirectory));
+                Times.Alarm.AddAlarm(22.ToTimeStamp(),
+                                     RepetitiveType.Single,
+                                     Schedule.ScheduleBase.NotifyScheduleInNextDay,
+                                     new Times.Alarm.CallbackParameterType() { startTimestamp = 24.ToTimeStamp() },
+                                     typeof(Times.Alarm.CallbackParameterType));
             }
             catch (FileNotFoundException)
             {
@@ -176,14 +179,9 @@ namespace StudentScheduleManagementSystem.MainProgram
 
 namespace StudentScheduleManagementSystem.Schedule
 {
-    public partial class TemporaryAffairs
+    public abstract partial class ScheduleBase
     {
-        public void AlarmCallback(int id, object? obj)
-        {
-            //Map.Location.GetClosetPath(_locations.ToArray());
-        }
-
-        public static void TestCallback(int id, object? obj)
+        public static void NotifyScheduleInNextDay(long id, object? obj)
         {
             Times.Alarm.CallbackParameterType param;
             if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
@@ -194,7 +192,42 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 param = (Times.Alarm.CallbackParameterType)obj!;
             }
-            Console.WriteLine($"param is {param.Id},{param.Name}");
+            List<(int, string)> schedules = new();
+            for (int i = 0; i < 24;)
+            {
+                var record = _timeline[param.startTimestamp.ToInt() + i];
+                if (record.ScheduleType is ScheduleType.Course or ScheduleType.Exam)
+                {
+                    schedules.Add((i, _scheduleList[record.Id].Name));
+                    i += _scheduleList[record.Id].Duration;
+                    continue;
+                }
+                i++;
+            }
+            if (schedules.Count == 0)
+            {
+                return;
+            }
+            Console.WriteLine("明天有以下课程或考试：");
+            foreach ((int beginTime, string name) in schedules)
+            {
+                Console.WriteLine($"{beginTime}:00，{name}。");
+            }
+            Times.Alarm.AddAlarm(param.startTimestamp + 22,
+                                 RepetitiveType.Single,
+                                 NotifyScheduleInNextDay,
+                                 new Times.Alarm.CallbackParameterType() { startTimestamp = param.startTimestamp + 24 },
+                                 typeof(Times.Alarm.CallbackParameterType));
+            Times.Alarm.RemoveAlarm(param.startTimestamp - 2, RepetitiveType.Single);
+        }
+    }
+
+    public partial class TemporaryAffairs
+    {
+        public void FindOptimizedRoute(long id, object? obj)
+        {
+            /*var points = Map.Location.GetClosestCircuit();
+            Task.Run(() => Map.Navigate.Show(points));*/
         }
     }
 }
@@ -205,8 +238,7 @@ namespace StudentScheduleManagementSystem.Times
     {
         public struct CallbackParameterType
         {
-            public int Id;
-            public string Name;
+            public Time startTimestamp;
         }
     }
 }

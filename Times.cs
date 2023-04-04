@@ -63,6 +63,10 @@ namespace StudentScheduleManagementSystem.Times
             return time;
         }
 
+        public static Time operator +(Time left, int right) => (left.ToInt() + right).ToTimeStamp();
+
+        public static Time operator -(Time left, int right) => (left.ToInt() - right).ToTimeStamp();
+
         public override string ToString()
         {
             return $"Week {_week}, {Day} {_hour}:00";
@@ -347,20 +351,32 @@ namespace StudentScheduleManagementSystem.Times
             #region 调用API删除冲突闹钟
 
             int offset = beginTime.ToInt();
-            if (_timeline[offset].RepetitiveType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
-            else if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
+            switch ((_timeline[offset].RepetitiveType, repetitiveType))
             {
-                RemoveAlarm(beginTime, RepetitiveType.Single); //删除单次闹钟
-            }
-            else if (repetitiveType == RepetitiveType.Single) //有重复闹钟而添加单次闹钟
-            { } //不用理会
-            else if (_timeline[offset].RepetitiveType == RepetitiveType.MultipleDays &&
-                     repetitiveType == RepetitiveType.MultipleDays) //有重复的闹钟而添加其他重复闹钟
-            {
-                Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
-                activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
-                //TODO:verify
-                RemoveAlarm(beginTime, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
+                case (RepetitiveType.Null, _):
+                    break;
+                case (RepetitiveType.Single, RepetitiveType.Single):
+                    throw new AlarmAlreadyExistedException();
+                case (RepetitiveType.Single, RepetitiveType.MultipleDays):
+                    Console.WriteLine($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
+                    RemoveAlarm(beginTime, RepetitiveType.Single);
+                    break;
+                case (RepetitiveType.MultipleDays, RepetitiveType.Single):
+                    Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟在{beginTime.ToString()}上已被覆盖");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟在{beginTime.ToString()}上已被覆盖");
+                    _timeline.RemoveMultipleItems(beginTime, RepetitiveType.Single, out _, false);
+                    break;
+                case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
+                    Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
+                    activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
+                    Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟已被合并");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟已被合并");
+                    RemoveAlarm(beginTime, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
+                    break;
+                default:
+                    throw new ArgumentException(null, nameof(repetitiveType));
+
             }
 
             #endregion

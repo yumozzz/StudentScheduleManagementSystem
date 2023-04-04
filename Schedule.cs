@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 namespace StudentScheduleManagementSystem.Schedule
 {
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public abstract class ScheduleBase : IComparable
+    public abstract partial class ScheduleBase : IComparable
     {
         #region structs and classes
 
@@ -427,7 +427,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 Log.Warning.Log("没有传递回调参数");
                 Console.WriteLine("Null \"callbackParameter\", check twice");
             }
-            Times.Alarm.AddAlarm(BeginTime,
+            Times.Alarm.AddAlarm(BeginTime - 1,
                                  RepetitiveType,
                                  alarmTimeUpCallback,
                                  callbackParameter,
