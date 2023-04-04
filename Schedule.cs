@@ -240,7 +240,7 @@ namespace StudentScheduleManagementSystem.Schedule
         protected void AddSchedule(long? specifiedId, char beginWith) //添加日程
         {
             int offset = 0;
-            bool willOverrideSchedule = false;
+            RepetitiveType overrideType = RepetitiveType.Null;
             if (RepetitiveType == RepetitiveType.Single)
             {
                 for (int i = 0; i < Duration; i++)
@@ -256,12 +256,12 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     else if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（需要选择是否覆盖）
                     {
-                        willOverrideSchedule = true;
+                        overrideType = _timeline[offset].RepetitiveType;
                         break;
                     }
                 }
             }
-            else if (RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复
+            else if (RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复，则自身不可能为临时日程
             {
                 int[] dayOffsets = Array.ConvertAll(ActiveDays!, day => day.ToInt());
                 foreach (var dayOffset in dayOffsets)
@@ -273,7 +273,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         {
                             if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（自身不可能为临时日程，需要选择是否覆盖）
                             {
-                                willOverrideSchedule = true;
+                                overrideType = _timeline[offset].RepetitiveType;
                                 break;
                             }
                             offset += 7 * 24;
@@ -286,24 +286,27 @@ namespace StudentScheduleManagementSystem.Schedule
                 throw new ArgumentException(nameof(RepetitiveType));
             }
             //_timeline[offset]记录的是会覆盖的日程
-            if (willOverrideSchedule)
+            //TODO:增加删除逻辑
+            switch ((overrideType, RepetitiveType))
             {
-                Console.WriteLine($"会覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
-                Log.Warning.Log($"会覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
-                Console.WriteLine("请选择是否覆盖");
-                if (Console.ReadLine() == "true")
-                {
-                    Console.WriteLine("已选择覆盖");
-                    Log.Warning.Log($"已覆盖日程{_scheduleList[_timeline[offset].Id].Name}");
-                    RemoveSchedule(_timeline[offset].Id, !(ScheduleType == ScheduleType.TemporaryAffair)); //删除单次日程
-                    _scheduleList.Remove(_timeline[offset].Id);
-                }
-                else
-                {
-                    Console.WriteLine("未选择覆盖，不添加该日程");
-                    Log.Warning.Log($"未覆盖日程{_scheduleList[_timeline[offset].Id].Name}，日程添加中止");
-                    return;
-                }
+                case (RepetitiveType.Null, _):
+                    break;
+                case (RepetitiveType.Single, RepetitiveType.Single):
+                    throw new ItemAlreadyExistedException();
+                case (RepetitiveType.Single, RepetitiveType.MultipleDays):
+                    Console.WriteLine($"id为{_timeline[offset].Id}的单次日程已被覆盖");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
+                    RemoveSchedule(_timeline[offset].Id, true);
+                    break;
+                case (RepetitiveType.MultipleDays, RepetitiveType.Single):
+                    Console.WriteLine($"id为{_timeline[offset].Id}的重复日程在{BeginTime.ToString()}上已被覆盖");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的重复日程在{BeginTime.ToString()}上已被覆盖");
+                    _timeline.RemoveMultipleItems(BeginTime, RepetitiveType.Single, out _, false);
+                    break;
+                case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
+                    throw new InvalidOperationException("conflicting multipledays schedule");
+                default:
+                    throw new ArgumentException(null, nameof(RepetitiveType));
             }
             long thisScheduleId;
             if (ScheduleType == ScheduleType.Course)
@@ -420,7 +423,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             if (AlarmEnabled)
             {
-                throw new AlarmAlreadyExistedException();
+                throw new ItemAlreadyExistedException();
             }
             if (callbackParameter == null)
             {
@@ -571,12 +574,18 @@ namespace StudentScheduleManagementSystem.Schedule
         private static long GetProperId(List<long> list)
         {
             long ret = 0;
-            for (int i = 0; i < list.Count; i++)
+            int l = 0, r = list.Count - 1;
+            while (l <= r)
             {
-                ret = list[i] + 1;
-                if (i != list.Count - 1 && ret < list[i + 1])
+                int mid = (l + r) >> 1;
+                if (list[mid] != list[0] + mid)
                 {
-                    break;
+                    r = mid - 1;
+                }
+                else
+                {
+                    l = mid + 1;
+                    ret = list[mid] + 1;
                 }
             }
             return ret;
@@ -672,7 +681,7 @@ namespace StudentScheduleManagementSystem.Schedule
             OfflineLocation = null;
             foreach (var value in _correspondenceDictionary.Values)
             {
-                if (Name == value.Name && RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                if (Name == value.Name && RepetitiveType == value.RepetitiveType && OfflineLocation.Equals(value.Location) &&
                     Duration == value.Duration)
                 {
                     if ((RepetitiveType == RepetitiveType.Single && BeginTime != value.Timestamp) ||
@@ -711,7 +720,7 @@ namespace StudentScheduleManagementSystem.Schedule
             OfflineLocation = location;
             foreach (var value in _correspondenceDictionary.Values)
             {
-                if (Name == value.Name && RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                if (Name == value.Name && RepetitiveType == value.RepetitiveType && OfflineLocation.Equals(value.Location) &&
                     Duration == value.Duration)
                 {
                     if ((RepetitiveType == RepetitiveType.Single && BeginTime != value.Timestamp) ||
@@ -749,7 +758,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     //TODO:添加location判断逻辑
                     if (dobj.Name == record.Name &&
-                        dobj.RepetitiveType == record.RepetitiveType && /*location != record.Location */
+                        dobj.RepetitiveType == record.RepetitiveType && dobj.OfflineLocation.Equals(record.Location) &&
                         dobj.Duration == record.Duration)
                     {
                         if (dobj.RepetitiveType == RepetitiveType.Single && dobj.Timestamp != record.Timestamp)
@@ -906,7 +915,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 if (_correspondenceDictionary.TryGetValue(dobj.ScheduleId, out var record)) //字典中已存在（课程或考试）
                 {
                     if (dobj.Name == record.Name &&
-                        dobj.RepetitiveType == record.RepetitiveType && /*location != record.Location ||*/
+                        dobj.RepetitiveType == record.RepetitiveType && dobj.OfflineLocation.Equals(record.Location) &&
                         dobj.Duration == record.Duration && dobj.Timestamp == record.Timestamp) //相同
                     {
                         _ = new Exam(dobj.ScheduleId,
@@ -979,7 +988,7 @@ namespace StudentScheduleManagementSystem.Schedule
             OfflineLocation = null;
             foreach (var value in _correspondenceDictionary.Values)
             {
-                if (Name == value.Name && RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                if (Name == value.Name && RepetitiveType == value.RepetitiveType && OfflineLocation.Equals(value.Location) &&
                     Duration == value.Duration)
                 {
                     if ((RepetitiveType == RepetitiveType.Single && BeginTime != value.Timestamp) ||
@@ -1019,7 +1028,7 @@ namespace StudentScheduleManagementSystem.Schedule
             OfflineLocation = location;
             foreach (var value in _correspondenceDictionary.Values)
             {
-                if (Name == value.Name && RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                if (Name == value.Name && RepetitiveType == value.RepetitiveType && OfflineLocation.Equals(value.Location) &&
                     Duration == value.Duration)
                 {
                     if ((RepetitiveType == RepetitiveType.Single && BeginTime != value.Timestamp) ||
@@ -1062,7 +1071,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 foreach (var value in _correspondenceDictionary.Values)
                 {
                     if (dobj.Name == value.Name &&
-                        dobj.RepetitiveType == value.RepetitiveType && /*location != value.Location ||*/
+                        dobj.RepetitiveType == value.RepetitiveType && dobj.OfflineLocation.Equals(value.Location) &&
                         dobj.Duration == value.Duration)
                     {
                         if ((dobj.RepetitiveType == RepetitiveType.Single && dobj.Timestamp != value.Timestamp) ||

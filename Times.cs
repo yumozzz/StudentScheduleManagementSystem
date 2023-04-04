@@ -351,12 +351,34 @@ namespace StudentScheduleManagementSystem.Times
             #region 调用API删除冲突闹钟
 
             int offset = beginTime.ToInt();
-            switch ((_timeline[offset].RepetitiveType, repetitiveType))
+            RepetitiveType overrideType = _timeline[offset].RepetitiveType;
+            if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复，则自身不可能为临时日程
+            {
+                int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
+                foreach (var dayOffset in dayOffsets)
+                {
+                    offset = 24 * dayOffset + beginTime.Hour;
+                    while (offset < Times.Time.TotalHours)
+                    {
+                        if (_timeline[offset].RepetitiveType != RepetitiveType.Null)//有闹钟
+                        {
+                            overrideType = _timeline[offset].RepetitiveType;
+                            break;
+                        }
+                        offset += 7 * 24;
+                    }
+                }
+            }
+            else //不可能出现
+            {
+                throw new ArgumentException(nameof(RepetitiveType));
+            }
+            switch ((overrideType, repetitiveType))
             {
                 case (RepetitiveType.Null, _):
                     break;
                 case (RepetitiveType.Single, RepetitiveType.Single):
-                    throw new AlarmAlreadyExistedException();
+                    throw new ItemAlreadyExistedException();
                 case (RepetitiveType.Single, RepetitiveType.MultipleDays):
                     Console.WriteLine($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
@@ -376,7 +398,6 @@ namespace StudentScheduleManagementSystem.Times
                     break;
                 default:
                     throw new ArgumentException(null, nameof(repetitiveType));
-
             }
 
             #endregion

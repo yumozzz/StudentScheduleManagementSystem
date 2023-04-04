@@ -196,7 +196,7 @@ namespace StudentScheduleManagementSystem.Schedule
             for (int i = 0; i < 24;)
             {
                 var record = _timeline[param.startTimestamp.ToInt() + i];
-                if (record.ScheduleType is ScheduleType.Course or ScheduleType.Exam)
+                if (record.ScheduleType is ScheduleType.Course or ScheduleType.Exam or ScheduleType.Activity)
                 {
                     schedules.Add((i, _scheduleList[record.Id].Name));
                     i += _scheduleList[record.Id].Duration;
@@ -208,7 +208,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 return;
             }
-            Console.WriteLine("明天有以下课程或考试：");
+            Console.WriteLine("明天有以下非临时日程：");
             foreach ((int beginTime, string name) in schedules)
             {
                 Console.WriteLine($"{beginTime}:00，{name}。");
