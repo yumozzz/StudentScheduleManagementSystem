@@ -5,7 +5,6 @@ namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        private static Dictionary<int, Vertex> _verteces = new();
         public static AdjacencyTable GlobalMap { get; private set; } =
             new(FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory));
 
@@ -71,70 +70,79 @@ namespace StudentScheduleManagementSystem.Map
             }
 
             public int Size { get; init; }
-            private Node*[] _array;
+            private readonly Node*[] _adjArray;
+            private readonly (int, int)[] _locations;
 
             public AdjacencyTable(JArray vertexArray)
             {
                 Size = vertexArray.Count;
-                _array = new Node*[Size];
-                foreach (JObject vertex in vertexArray)
+                _adjArray = new Node*[Size];
+                _locations = new (int, int)[Size];
+                try
                 {
-                    int id = vertex["Id"]!.Value<int>();
-                    int x = vertex["X"]!.Value<int>();
-                    int y = vertex["Y"]!.Value<int>();
-                    _verteces.Add(id, new(id, x, y));
-                    JArray nexts = (JArray)vertex["Nexts"]!;
-                    if (nexts.Count == 0)
+                    foreach (JObject vertex in vertexArray)
                     {
-                        continue;
-                    }
-                    Node* cur = _array[id];
-                    foreach (JObject next in nexts)
-                    {
-                        Node node = new()
+                        int id = vertex["Id"]!.Value<int>();
+                        int x = vertex["X"]!.Value<int>();
+                        int y = vertex["Y"]!.Value<int>();
+                        JArray nexts = (JArray)vertex["Nexts"]!;
+                        if (nexts.Count == 0)
                         {
-                            adjVexId = next["Id"]!.Value<int>(),
-                            adjVexDist = next["Distance"]!.Value<int>(),
-                            edgeType = next["EdgeType"]!.Value<string>() switch
-                            {
-                                "Line" => EdgeType.Line, "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
-                                _ => throw new JsonFormatException("Wrong EdgeType")
-                            },
-                            controls = null,
-                            next = null
-                        };
-                        if (node.adjVexId >= Size || node.adjVexId < 0)
-                        {
-                            throw new JsonFormatException("Wrong vertex id");
-                        }
-                        if (node.edgeType == EdgeType.QuadraticBezierCurve)
-                        {
-                            JArray controls = (JArray)next["Controls"]!;
-                            if (controls.Count != 2)
-                            {
-                                throw new JsonFormatException("Too many control points");
-                            }
-                            var control1 = (x: controls.ElementAt(1)["X"]!.Value<int>(),
-                                            y: controls.ElementAt(1)["Y"]!.Value<int>());
-                            var control2 = (x: controls.ElementAt(2)["X"]!.Value<int>(),
-                                            y: controls.ElementAt(2)["Y"]!.Value<int>());
-                            node.controls = (control1, control2);
-                        }
-                        if (_array[id] == null) //头结点
-                        {
-                            _array[id] = &node;
                             continue;
                         }
-                        cur->next = &node; //非头结点
-                        cur = cur->next;
+                        Node* cur = _adjArray[id];
+                        _locations[id] = (x, y);
+                        foreach (JObject next in nexts)
+                        {
+                            Node node = new()
+                            {
+                                adjVexId = next["Id"]!.Value<int>(),
+                                adjVexDist = next["Distance"]!.Value<int>(),
+                                edgeType = next["EdgeType"]!.Value<string>() switch
+                                {
+                                    "Line" => EdgeType.Line, "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
+                                    _ => throw new JsonFormatException("Wrong EdgeType")
+                                },
+                                controls = null,
+                                next = null
+                            };
+                            if (node.adjVexId >= Size || node.adjVexId < 0)
+                            {
+                                throw new JsonFormatException("Wrong vertex id");
+                            }
+                            if (node.edgeType == EdgeType.QuadraticBezierCurve)
+                            {
+                                JArray controls = (JArray)next["Controls"]!;
+                                if (controls.Count != 2)
+                                {
+                                    throw new JsonFormatException("Too many control points");
+                                }
+                                var control1 = (x: controls.ElementAt(1)["X"]!.Value<int>(),
+                                                y: controls.ElementAt(1)["Y"]!.Value<int>());
+                                var control2 = (x: controls.ElementAt(2)["X"]!.Value<int>(),
+                                                y: controls.ElementAt(2)["Y"]!.Value<int>());
+                                node.controls = (control1, control2);
+                            }
+                            if (_adjArray[id] == null) //头结点
+                            {
+                                _adjArray[id] = &node;
+                                continue;
+                            }
+                            cur->next = &node; //非头结点
+                            cur = cur->next;
+                        }
+                    }
+                    foreach (var pointer in _adjArray)
+                    {
+                        if (pointer == null)
+                        {
+                            throw new JsonFormatException("Id is not continuous");
+                        }
                     }
                 }
-                foreach (var pointer in _array)
+                catch (IndexOutOfRangeException)
                 {
-                    if (pointer == null)
-                    {
-                        throw new JsonFormatException("Id is not continuous");
-                    }
+                    throw new JsonFormatException("Wrong vertex id");
                 }
             }
 
@@ -153,32 +161,40 @@ namespace StudentScheduleManagementSystem.Map
                 }
                 int id = 0;
                 Size = adjMatrix.GetLength(0);//邻接表的长度
-                _array = new Node*[Size];//邻接表的数组
-                for (int i = 0; i < Size; i++)
+                _adjArray = new Node*[Size];//邻接表的数组
+                _locations = new (int, int)[Size];
+                try
                 {
-                    _verteces.Add(id, new() { Id = id, X = location[i].Item1, Y = location[i].Item2 });
-                    Node* cur = _array[i];
-                    for (int j = 0; j < Size; j++)
+                    for (int i = 0; i < Size; i++)
                     {
-                        if (adjMatrix[i, j] == 0)//如果i到j的边不存在，continue
+                        _locations[id] = (location[i].Item1, location[i].Item2);
+                        Node* cur = _adjArray[i];
+                        for (int j = 0; j < Size; j++)
                         {
-                            continue;
+                            if (adjMatrix[i, j] == 0) //如果i到j的边不存在，continue
+                            {
+                                continue;
+                            }
+                            Node node = new()
+                            {
+                                adjVexDist = adjMatrix[i, j],
+                                adjVexId = id++,
+                                edgeType = EdgeType.Line,
+                                controls = null
+                            };
+                            if (_adjArray[i] == null) //头结点
+                            {
+                                _adjArray[i] = &node;
+                                continue;
+                            }
+                            cur->next = &node; //非头结点
+                            cur = cur->next;
                         }
-                        Node node = new()
-                        {
-                            adjVexDist = adjMatrix[i, j],
-                            adjVexId = id++,
-                            edgeType = EdgeType.Line,
-                            controls = null
-                        };
-                        if (_array[i] == null) //头结点
-                        {
-                            _array[i] = &node;
-                            continue;
-                        }
-                        cur->next = &node; //非头结点
-                        cur = cur->next;
                     }
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    throw new JsonFormatException("Wrong vertex id");
                 }
             }
 
@@ -192,7 +208,7 @@ namespace StudentScheduleManagementSystem.Map
                     {
                         throw new ArgumentOutOfRangeException(nameof(id));
                     }
-                    Node* cur = _array[id];
+                    Node* cur = _adjArray[id];
                     while (cur != null)
                     {
                         list.Add((cur->adjVexId, cur->adjVexDist));
@@ -210,7 +226,7 @@ namespace StudentScheduleManagementSystem.Map
                     {
                         throw new ArgumentOutOfRangeException(nameof(fromId) + " or " + nameof(toId));
                     }
-                    Node* cur = _array[fromId];
+                    Node* cur = _adjArray[fromId];
                     bool find = false;
                     while (cur != null)
                     {
@@ -228,11 +244,11 @@ namespace StudentScheduleManagementSystem.Map
             public JArray SaveInstance()
             {
                 JArray root = new();
-                foreach ((_, Vertex vertex) in _verteces)
+                for (int i = 0; i < Size; i++)
                 {
-                    JObject obj = new() { { "Id", vertex.Id }, { "X", vertex.X }, { "Y", vertex.Y } };
+                    JObject obj = new() { { "Id", i }, { "X", _locations[i].Item1 }, { "Y", _locations[i].Item2 } };
                     JArray nexts = new();
-                    Node* cur = _array[vertex.Id];
+                    Node* cur = _adjArray[i];
                     while (cur != null)
                     {
                         JObject next = new()
