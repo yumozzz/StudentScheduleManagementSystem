@@ -58,7 +58,7 @@ namespace StudentScheduleManagementSystem
     public class ScheduleInformationMismatchException : Exception { }
     public class MethodNotFoundException : Exception { }
     public class TypeNotFoundOrInvalidException : Exception { }
-    public class AlarmAlreadyExistedException : Exception { };
+    public class ItemAlreadyExistedException : Exception { };
     public class AlarmNotFoundException : Exception { }
     public class AmbiguousLocationMatchException : Exception { }
     public class TooManyTemporaryAffairsException : Exception { }

@@ -63,14 +63,13 @@ namespace StudentScheduleManagementSystem.Times
             return time;
         }
 
+        public static Time operator +(Time left, int right) => (left.ToInt() + right).ToTimeStamp();
+
+        public static Time operator -(Time left, int right) => (left.ToInt() - right).ToTimeStamp();
+
         public override string ToString()
         {
             return $"Week {_week}, {Day} {_hour}:00";
-        }
-
-        public override int GetHashCode()
-        {
-            return 7 * 24 * (Week - 1) + 24 * Day.ToInt() + Hour;
         }
 
         public static bool operator ==(Time left, Time right)
@@ -81,6 +80,11 @@ namespace StudentScheduleManagementSystem.Times
         public static bool operator !=(Time left, Time right)
         {
             return !left.Equals(right);
+        }
+
+        public override int GetHashCode()
+        {
+            return 7 * 24 * (Week - 1) + 24 * Day.ToInt() + Hour;
         }
 
         public override bool Equals(object? obj)
@@ -187,8 +191,10 @@ namespace StudentScheduleManagementSystem.Times
                                      ? specificId.Value
                                      : throw new ArgumentException("specifiedId should be a 10-digit number"), //完全指定
                 (false, true) => (beginWith!.Value - '0') * (long)1e9 + _randomGenerator.Next(1, 999999999), //指定第一位
-                (true, true) =>
-                    throw new ArgumentException("specifiedId and beginWith can't be notnull at the same time")
+                (true, true) => specificId!.Value / (long)1e9 == beginWith!.Value - '0'
+                                    ? specificId.Value
+                                    : throw new
+                                          ArgumentException("beginWith is not correspondent with the first letter of specifiedId")
             };
             record.Id = outId;
             if (record.RepetitiveType == RepetitiveType.Single)
@@ -261,7 +267,7 @@ namespace StudentScheduleManagementSystem.Times
             public string? CallbackName { get; set; }
             public string ParameterTypeName { get; set; }
             public RepetitiveType @RepetitiveType { get; set; }
-            public Day[]? ActiveDays { get; set; }
+            public Day[] ActiveDays { get; set; }
             public Time Timestamp { get; set; }
         }
 
@@ -314,6 +320,8 @@ namespace StudentScheduleManagementSystem.Times
 
         private static readonly Timeline<Record> _timeline = new();
 
+        private static long _dailyNotificationAlarmId;
+
         #endregion
 
         #region public properties
@@ -321,7 +329,7 @@ namespace StudentScheduleManagementSystem.Times
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
-        public Day[]? ActiveDays { get; private init; }
+        public Day[] ActiveDays { get; private init; }
         public long AlarmId { get; private init; } = 0;
         [JsonProperty(propertyName: "Timestamp", ItemTypeNameHandling = TypeNameHandling.None)]
         public Time BeginTime { get; private init; } = new();
@@ -342,25 +350,59 @@ namespace StudentScheduleManagementSystem.Times
                                     AlarmCallback? alarmTimeUpCallback,
                                     object? callbackParameter,
                                     Type parameterType,
+                                    bool isDailyNotification,
                                     params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
 
             int offset = beginTime.ToInt();
-            if (_timeline[offset].RepetitiveType == RepetitiveType.Null) { } //没有闹钟而添加闹钟
-            else if (_timeline[offset].RepetitiveType == RepetitiveType.Single) //有单次闹钟而添加重复闹钟
+            RepetitiveType overrideType = _timeline[offset].RepetitiveType;
+            if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复，则自身不可能为临时日程
             {
-                RemoveAlarm(beginTime, RepetitiveType.Single); //删除单次闹钟
+                int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
+                foreach (var dayOffset in dayOffsets)
+                {
+                    offset = 24 * dayOffset + beginTime.Hour;
+                    while (offset < Times.Time.TotalHours)
+                    {
+                        if (_timeline[offset].RepetitiveType != RepetitiveType.Null)//有闹钟
+                        {
+                            overrideType = _timeline[offset].RepetitiveType;
+                            break;
+                        }
+                        offset += 7 * 24;
+                    }
+                }
             }
-            else if (repetitiveType == RepetitiveType.Single) //有重复闹钟而添加单次闹钟
-            { } //不用理会
-            else if (_timeline[offset].RepetitiveType == RepetitiveType.MultipleDays &&
-                     repetitiveType == RepetitiveType.MultipleDays) //有重复的闹钟而添加其他重复闹钟
+            else if (repetitiveType == RepetitiveType.Null)//不可能出现
             {
-                Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
-                activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
-                //TODO:verify
-                RemoveAlarm(beginTime, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
+                throw new ArgumentException(nameof(RepetitiveType));
+            }
+            switch ((overrideType, repetitiveType))
+            {
+                case (RepetitiveType.Null, _):
+                    break;
+                case (RepetitiveType.Single, RepetitiveType.Single):
+                    throw new ItemAlreadyExistedException();
+                case (RepetitiveType.Single, RepetitiveType.MultipleDays):
+                    Console.WriteLine($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
+                    RemoveAlarm(beginTime, RepetitiveType.Single);
+                    break;
+                case (RepetitiveType.MultipleDays, RepetitiveType.Single):
+                    Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟在{beginTime.ToString()}上已被覆盖");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟在{beginTime.ToString()}上已被覆盖");
+                    _timeline.RemoveMultipleItems(beginTime, RepetitiveType.Single, out _, false);
+                    break;
+                case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
+                    Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
+                    activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
+                    Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟已被合并");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟已被合并");
+                    RemoveAlarm(beginTime, RepetitiveType.MultipleDays, oldActiveDays); //删除原重复闹钟
+                    break;
+                default:
+                    throw new ArgumentException(null, nameof(repetitiveType));
             }
 
             #endregion
@@ -374,7 +416,11 @@ namespace StudentScheduleManagementSystem.Times
                                        new Record { RepetitiveType = repetitiveType },
                                        out long thisAlarmId,
                                        false,
-                                       activeDays); //impossible OverrideNondefaultRecordException here
+                                       activeDays);
+            if (isDailyNotification)
+            {
+                _dailyNotificationAlarmId = thisAlarmId;
+            }
             _alarmList.Add(thisAlarmId,
                            new()
                            {
@@ -393,7 +439,21 @@ namespace StudentScheduleManagementSystem.Times
                 Log.Warning.Log("没有传递回调方法");
                 Console.WriteLine("Null alarmTimeUpCallback");
             }
-            Log.Information.Log($"已添加{beginTime}时的闹钟");
+            if(repetitiveType==RepetitiveType.Single)
+            {
+                Log.Information.Log($"已添加{beginTime.ToString()}点的闹钟");
+            }
+            else
+            {
+                string message = "已添加";
+                foreach (var activeDay in activeDays)
+                {
+                    message += activeDay.ToString()+' ';
+                }
+                message = message.Remove(message.Length - 1, 1);
+                message += $"时{beginTime.Hour}点的闹钟";
+                Log.Information.Log(message);
+            }
 
             #endregion
         }
@@ -448,24 +508,29 @@ namespace StudentScheduleManagementSystem.Times
                                                                 throw new MethodNotFoundException()),
                          ((JObject?)dobj.CallbackParameter)?.Value<object>() ?? null,
                          type,
-                         dobj.ActiveDays ?? Array.Empty<Day>());
+                         false,
+                         dobj.ActiveDays);
             }
         }
 
         public static JArray SaveInstance()
         {
             JArray array = new();
-            foreach (var instance in _alarmList)
+            foreach ((long id, Alarm alarm) in _alarmList)
             {
-                if (!localMethods.Contains(instance.Value._callbackName))
+                if (alarm.AlarmId == _dailyNotificationAlarmId)
+                {
+                    continue;
+                }
+                if (!localMethods.Contains(alarm._callbackName))
                 {
                     throw new MethodNotFoundException();
                 }
-                if (!localTypes.Contains(instance.Value._parameterTypeName))
+                if (!localTypes.Contains(alarm._parameterTypeName))
                 {
                     throw new TypeNotFoundOrInvalidException();
                 }
-                array.Add(JObject.FromObject(instance.Value,
+                array.Add(JObject.FromObject(alarm,
                                              new()
                                              {
                                                  Formatting = Formatting.Indented,
@@ -506,10 +571,9 @@ namespace StudentScheduleManagementSystem.Times
 
     public static class Timer
     {
-        private const int Timeout = 1000;
-
+        private const int BaseTimeout = 10000;
+        private static int accleration = 10;
         private static Time _localTime = new();
-
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();
         public static bool Pause { get; set; } = false;
@@ -520,7 +584,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             while (!MainProgram.Program._cts.IsCancellationRequested)
             {
-                Thread.Sleep(Timeout);
+                Thread.Sleep(BaseTimeout / accleration);
                 if (!Pause)
                 {
                     Console.WriteLine(LocalTime);
@@ -532,11 +596,32 @@ namespace StudentScheduleManagementSystem.Times
             Console.WriteLine("clock terminate");
         }
 
-        public static void ChangeTimeTo(Time time)
+        public static void ChangeTime(Time time)
         {
             _localTime = time;
             _offset = time.ToInt();
             Log.Warning.Log($"时间已被设定为{_localTime.ToString()}");
+        }
+
+        public static int SetSpeed()
+        {
+            switch (accleration)
+            {
+                case 1:
+                    accleration = 2;
+                    Log.Information.Log("时间流速已设定为2x");
+                    return 2;
+                case 2:
+                    accleration = 5;
+                    Log.Information.Log("时间流速已设定为5x");
+                    return 5;
+                case 5:
+                    accleration = 1;
+                    Log.Information.Log("时间流速已设定为1x");
+                    return 1;
+                default: 
+                    return 0;
+            }
         }
     }
 }

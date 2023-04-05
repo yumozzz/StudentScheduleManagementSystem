@@ -7,7 +7,7 @@ namespace StudentScheduleManagementSystem.Log
     {
         public static FileStream? Stream { get; private set; }
 
-        private static readonly int random = new Random(DateTime.Now.Millisecond).Next();
+        private static readonly int _random = new Random(DateTime.Now.Millisecond).Next();
 
         public static void Setup()
         {
@@ -20,7 +20,7 @@ namespace StudentScheduleManagementSystem.Log
             {
                 Directory.CreateDirectory(FileManagement.FileManager.LogFileDirectory);
             }
-            Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{DateTime.Now.ToString("dd_HHmmss")}_{random}.log", FileMode.Create);
+            Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{DateTime.Now.ToString("dd_HHmmss")}_{_random}.log", FileMode.Create);
         }
 
         public static void Close()
