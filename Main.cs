@@ -13,10 +13,16 @@ namespace StudentScheduleManagementSystem.MainProgram
     {
         internal static CancellationTokenSource _cts = new();
         internal static string _userId = String.Empty;
-
+        
+        //usersnames and passwords
+        public static Dictionary<string, string> dicstu = new Dictionary<string, string>();
+        public static Dictionary<string, string> dicadmin = new Dictionary<string, string>();
+            
         [STAThread]
         public static void Main()
         {
+            dicstu.Add("2021", "pw");
+            dicadmin.Add("admin", "pw");
             try
             {
                 AllocConsole();

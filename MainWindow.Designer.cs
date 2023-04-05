@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.login = new System.Windows.Forms.Button();
             this.username = new System.Windows.Forms.Label();
             this.password = new System.Windows.Forms.Label();
@@ -40,7 +39,6 @@
             this.welcome = new System.Windows.Forms.Label();
             this.close = new System.Windows.Forms.Button();
             this.move = new System.Windows.Forms.Panel();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // login
@@ -51,6 +49,7 @@
             this.login.TabIndex = 0;
             this.login.Text = "Login";
             this.login.UseVisualStyleBackColor = true;
+            this.login.Click += new System.EventHandler(this.login_Click);
             // 
             // username
             // 
@@ -116,6 +115,7 @@
             this.clear.TabIndex = 8;
             this.clear.Text = "Clear";
             this.clear.UseVisualStyleBackColor = true;
+            this.clear.Click += new System.EventHandler(this.clear_Click);
             // 
             // welcome
             // 
@@ -144,10 +144,7 @@
             this.move.TabIndex = 12;
             this.move.Paint += new System.Windows.Forms.PaintEventHandler(this.move_Paint);
             this.move.MouseDown += new System.Windows.Forms.MouseEventHandler(this.move_MouseDown);
-            // 
-            // timer1
-            // 
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.move.MouseMove += new System.Windows.Forms.MouseEventHandler(this.move_MouseMove);
             // 
             // MainWindow
             // 
@@ -188,6 +185,5 @@
         private Label welcome;
         private Button close;
         private Panel move;
-        private System.Windows.Forms.Timer timer1;
     }
 }
