@@ -34,5 +34,10 @@
                                     new(controlPoints.Item4.X, controlPoints.Item4.Y));
             }
         }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
