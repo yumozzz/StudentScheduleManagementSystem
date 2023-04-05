@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Reflection;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -44,6 +45,55 @@ namespace StudentScheduleManagementSystem.Schedule
             public Day[] ActiveDays { get; set; }
             public Times.Time Timestamp { get; set; }
             public int Duration { get; set; }
+        }
+
+        protected class BuildingJsonConverter : JsonConverter
+        {
+            public override bool CanRead => true;
+            public override bool CanWrite => true;
+
+            public override bool CanConvert(Type objectType)
+            {
+                return objectType == typeof(Map.Location.Building);
+            }
+
+            public override object ReadJson(JsonReader reader,
+                                            Type objectType,
+                                            object? existingValue,
+                                            JsonSerializer serializer)
+            {
+                bool isNullableType = Nullable.GetUnderlyingType(objectType) != null;
+                //Type type = isNullableType ? Nullable.GetUnderlyingType(objectType)! : objectType;
+                if (reader.TokenType == JsonToken.Null)
+                {
+                    if (isNullableType)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        throw new JsonFormatException("cannot convert null token to notnull type");
+                    }
+                }
+                if (reader.TokenType != JsonToken.String)
+                {
+                    throw new JsonFormatException("cannot convert not string token to string");
+                }
+                var locations = Map.Location.GetBuildingsByName(reader.Value!.ToString()!);
+                Map.Location.Building building =
+                    locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                return building;
+            }
+
+            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+            {
+                if (value == null)
+                {
+                    writer.WriteNull();
+                    return;
+                }
+                writer.WriteValue(((Map.Location.Building)value).Name);
+            }
         }
 
         #endregion
@@ -311,7 +361,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     throw new ItemAlreadyExistedException();
                 case (RepetitiveType.Single, RepetitiveType.MultipleDays):
                     Console.WriteLine($"id为{_timeline[offset].Id}的单次日程已被覆盖");
-                    Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
+                    Log.Warning.Log($"id为{_timeline[offset].Id}的单次日程已被覆盖");
                     RemoveSchedule(_timeline[offset].Id, true);
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.Single):
@@ -472,13 +522,13 @@ namespace StudentScheduleManagementSystem.Schedule
         protected static JArray SaveInstance(ScheduleType scheduleType)
         {
             JArray array = new();
-            foreach (var instance in _scheduleList)
+            foreach ((_, ScheduleBase schedule) in _scheduleList)
             {
-                if (instance.Value.ScheduleType != scheduleType)
+                if (schedule.ScheduleType != scheduleType)
                 {
                     continue;
                 }
-                array.Add(JObject.FromObject(instance.Value,
+                array.Add(JObject.FromObject(schedule,
                                              new()
                                              {
                                                  Formatting = Formatting.Indented,
@@ -650,6 +700,7 @@ namespace StudentScheduleManagementSystem.Schedule
         private class DeserializedObject : DeserializedObjectBase
         {
             public string? OnlineLink { get; set; }
+            [JsonConverter(typeof(BuildingJsonConverter))]
             public Map.Location.Building? OfflineLocation { get; set; }
         }
 
@@ -663,7 +714,8 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty]
         public new const bool IsOnline = false;
         [JsonProperty] public string? OnlineLink { get; init; }
-        [JsonProperty] public Map.Location.Building? OfflineLocation { get; init; }
+        [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
+        public Map.Location.Building? OfflineLocation { get; init; }
 
         #endregion
 
@@ -796,6 +848,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject : DeserializedObjectBase
         {
+            [JsonConverter(typeof(BuildingJsonConverter))]
             public Map.Location.Building OfflineLocation { get; set; }
         }
 
@@ -808,7 +861,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public override int Latest => 20;
         [JsonProperty]
         public new const bool IsOnline = false;
-        [JsonProperty] public Map.Location.Building OfflineLocation { get; init; }
+        [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
+        public Map.Location.Building OfflineLocation { get; init; }
 
         #endregion
 
@@ -878,6 +932,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             public bool IsGroupActivity { get; set; }
             public string? OnlineLink { get; set; }
+            [JsonConverter(typeof(BuildingJsonConverter))]
             public Map.Location.Building? OfflineLocation { get; set; }
         }
 
@@ -890,7 +945,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public override int Latest => 20;
         [JsonProperty] public bool IsGroupActivity { get; init; }
         [JsonProperty] public string? OnlineLink { get; init; } = null;
-        [JsonProperty] public Map.Location.Building? OfflineLocation { get; init; } = null;
+        [JsonProperty] public Map.Location.Building? OfflineLocation { get; init; }
 
         #endregion
 
@@ -1042,6 +1097,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject : DeserializedObjectBase
         {
+            [JsonProperty(ItemConverterType = typeof(BuildingJsonConverter))]
             public Map.Location.Building[] Locations { get; set; }
         }
 
@@ -1054,7 +1110,7 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty]
         public new const bool IsOnline = false;
 
-        [JsonProperty(propertyName: "Locations")]
+        [JsonProperty(propertyName: "Locations", ItemConverterType = typeof(BuildingJsonConverter))]
         private readonly List<Map.Location.Building> _locations = new(); //在实例中不维护而在表中维护
 
         #endregion
