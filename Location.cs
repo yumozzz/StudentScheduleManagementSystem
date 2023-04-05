@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace StudentScheduleManagementSystem.Map
 {
@@ -63,10 +64,36 @@ namespace StudentScheduleManagementSystem.Map
                 return left.Equals(right);
             }
 
-
             public static bool operator !=(Building left, Building right)
             {
                 return !left.Equals(right);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int result = 37;
+                    result *= 397;
+                    result += Id.GetHashCode();
+                    result *= 397;
+                    result += DoorNumber.GetHashCode();
+                    result *= 397;
+                    result += Name.GetHashCode();
+                    result *= 397;
+                    result += Doors.GetHashCode();
+                    return result;
+                }
+            }
+
+            public override bool Equals(object? obj)
+            {
+                if (obj == null)
+                {
+                    return false;
+                }
+                return Id == ((Building)obj).Id && Name == ((Building)obj).Name &&
+                       DoorNumber == ((Building)obj).DoorNumber && Doors.SequenceEqual(((Building)obj).Doors);
             }
         }
 

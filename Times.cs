@@ -72,11 +72,6 @@ namespace StudentScheduleManagementSystem.Times
             return $"Week {_week}, {Day} {_hour}:00";
         }
 
-        public override int GetHashCode()
-        {
-            return 7 * 24 * (Week - 1) + 24 * Day.ToInt() + Hour;
-        }
-
         public static bool operator ==(Time left, Time right)
         {
             return left.Equals(right);
@@ -85,6 +80,11 @@ namespace StudentScheduleManagementSystem.Times
         public static bool operator !=(Time left, Time right)
         {
             return !left.Equals(right);
+        }
+
+        public override int GetHashCode()
+        {
+            return 7 * 24 * (Week - 1) + 24 * Day.ToInt() + Hour;
         }
 
         public override bool Equals(object? obj)
