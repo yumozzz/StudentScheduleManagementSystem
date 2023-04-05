@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
 
 namespace StudentScheduleManagementSystem.Map
 {
@@ -41,10 +40,10 @@ namespace StudentScheduleManagementSystem.Map
 
         public struct Building //建筑
         {
-            public int Id { get; set; }
-            public int DoorNumber { get; set; } //门的数量
-            public string Name { get; set; }
-            public Vertex[] Doors { get; set; } //门所在的点，用来寻路
+            public int Id { get; set; } = -1;
+            public int DoorNumber { get; set; } = 0;//门的数量
+            public string Name { get; set; } = String.Empty;
+            public Vertex[] Doors { get; set; } = Array.Empty<Vertex>();//门所在的点，用来寻路
 
             public Building(int id, string name, Vertex[] doors)
             {
@@ -57,6 +56,11 @@ namespace StudentScheduleManagementSystem.Map
                     throw new ArgumentOutOfRangeException(nameof(DoorNumber));
                 }
                 Doors = doors;
+            }
+
+            public Building()
+            {
+                throw new InvalidOperationException("default constructor for struct Building should not be called");
             }
 
             public static bool operator ==(Building left, Building right)

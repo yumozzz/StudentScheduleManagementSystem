@@ -25,7 +25,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.SetCompatibleTextRenderingDefault(false);
                 Log.LogBase.Setup();
                 //Map.Location.SetUp();
-                Schedule.ScheduleBase.ReadSharedData();
+                //Schedule.ScheduleBase.ReadSharedData();
                 LogIn("2021210001");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
@@ -42,7 +42,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                "test2",
                                                new() { Week = 1, Day = Day.Monday, Hour = 10 },
                                                "test2",
-                                               new()); 
+                                               new());
                 #endif
 
                 #if COURSEEXAMTEST
@@ -51,21 +51,22 @@ namespace StudentScheduleManagementSystem.MainProgram
                                          new() { Week = 2, Day = Day.Thursday, Hour = 16 },
                                          2,
                                          "test exam",
-                                         new());
+                                         new(7, "dst building2", Array.Empty<Map.Location.Vertex>()));
                 Schedule.Exam exam2 = new(null,
-                                         "exam2",
-                                         new() { Week = 2, Day = Day.Friday, Hour = 14 },
-                                         3,
-                                         "test exam2",
-                                         new());
-
+                                          "exam2",
+                                          new() { Week = 2, Day = Day.Friday, Hour = 14 },
+                                          3,
+                                          "test exam2",
+                                          new(5, "dst building2", Array.Empty<Map.Location.Vertex>()));
                 Schedule.Course course2 = new(null,
                                               RepetitiveType.MultipleDays,
                                               "course2",
                                               new() { Hour = 10 },
                                               2,
                                               "test course2",
-                                              new Map.Location.Building(3, "dst building2", Array.Empty<Map.Location.Vertex>()),
+                                              new Map.Location.Building(3,
+                                                                        "dst building2",
+                                                                        Array.Empty<Map.Location.Vertex>()),
                                               Day.Monday,
                                               Day.Thursday);
                 /*Schedule.Course course = new(null,
@@ -81,7 +82,9 @@ namespace StudentScheduleManagementSystem.MainProgram
                                               new() { Hour = 8 },
                                               2,
                                               "test course2",
-                                              new Map.Location.Building(3, "dst building3", Array.Empty<Map.Location.Vertex>()),
+                                              new Map.Location.Building(3,
+                                                                        "dst building3",
+                                                                        Array.Empty<Map.Location.Vertex>()),
                                               Day.Tuesday,
                                               Day.Thursday);
                 course2.EnableAlarm(Schedule.Course.Notify,
