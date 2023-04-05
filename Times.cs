@@ -191,8 +191,10 @@ namespace StudentScheduleManagementSystem.Times
                                      ? specificId.Value
                                      : throw new ArgumentException("specifiedId should be a 10-digit number"), //完全指定
                 (false, true) => (beginWith!.Value - '0') * (long)1e9 + _randomGenerator.Next(1, 999999999), //指定第一位
-                (true, true) =>
-                    throw new ArgumentException("specifiedId and beginWith can't be notnull at the same time")
+                (true, true) => specificId!.Value / (long)1e9 == beginWith!.Value - '0'
+                                    ? specificId.Value
+                                    : throw new
+                                          ArgumentException("beginWith is not correspondent with the first letter of specifiedId")
             };
             record.Id = outId;
             if (record.RepetitiveType == RepetitiveType.Single)
@@ -265,7 +267,7 @@ namespace StudentScheduleManagementSystem.Times
             public string? CallbackName { get; set; }
             public string ParameterTypeName { get; set; }
             public RepetitiveType @RepetitiveType { get; set; }
-            public Day[]? ActiveDays { get; set; }
+            public Day[] ActiveDays { get; set; }
             public Time Timestamp { get; set; }
         }
 
@@ -318,6 +320,8 @@ namespace StudentScheduleManagementSystem.Times
 
         private static readonly Timeline<Record> _timeline = new();
 
+        private static long _dailyNotificationAlarmId;
+
         #endregion
 
         #region public properties
@@ -325,7 +329,7 @@ namespace StudentScheduleManagementSystem.Times
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
-        public Day[]? ActiveDays { get; private init; }
+        public Day[] ActiveDays { get; private init; }
         public long AlarmId { get; private init; } = 0;
         [JsonProperty(propertyName: "Timestamp", ItemTypeNameHandling = TypeNameHandling.None)]
         public Time BeginTime { get; private init; } = new();
@@ -346,6 +350,7 @@ namespace StudentScheduleManagementSystem.Times
                                     AlarmCallback? alarmTimeUpCallback,
                                     object? callbackParameter,
                                     Type parameterType,
+                                    bool isDailyNotification,
                                     params Day[] activeDays)
         {
             #region 调用API删除冲突闹钟
@@ -369,7 +374,7 @@ namespace StudentScheduleManagementSystem.Times
                     }
                 }
             }
-            else //不可能出现
+            else if (repetitiveType == RepetitiveType.Null)//不可能出现
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
@@ -411,7 +416,11 @@ namespace StudentScheduleManagementSystem.Times
                                        new Record { RepetitiveType = repetitiveType },
                                        out long thisAlarmId,
                                        false,
-                                       activeDays); //impossible OverrideNondefaultRecordException here
+                                       activeDays);
+            if (isDailyNotification)
+            {
+                _dailyNotificationAlarmId = thisAlarmId;
+            }
             _alarmList.Add(thisAlarmId,
                            new()
                            {
@@ -430,7 +439,21 @@ namespace StudentScheduleManagementSystem.Times
                 Log.Warning.Log("没有传递回调方法");
                 Console.WriteLine("Null alarmTimeUpCallback");
             }
-            Log.Information.Log($"已添加{beginTime}时的闹钟");
+            if(repetitiveType==RepetitiveType.Single)
+            {
+                Log.Information.Log($"已添加{beginTime.ToString()}点的闹钟");
+            }
+            else
+            {
+                string message = "已添加";
+                foreach (var activeDay in activeDays)
+                {
+                    message += activeDay.ToString()+' ';
+                }
+                message = message.Remove(message.Length - 1, 1);
+                message += $"时{beginTime.Hour}点的闹钟";
+                Log.Information.Log(message);
+            }
 
             #endregion
         }
@@ -485,24 +508,29 @@ namespace StudentScheduleManagementSystem.Times
                                                                 throw new MethodNotFoundException()),
                          ((JObject?)dobj.CallbackParameter)?.Value<object>() ?? null,
                          type,
-                         dobj.ActiveDays ?? Array.Empty<Day>());
+                         false,
+                         dobj.ActiveDays);
             }
         }
 
         public static JArray SaveInstance()
         {
             JArray array = new();
-            foreach (var instance in _alarmList)
+            foreach ((long id, Alarm alarm) in _alarmList)
             {
-                if (!localMethods.Contains(instance.Value._callbackName))
+                if (alarm.AlarmId == _dailyNotificationAlarmId)
+                {
+                    continue;
+                }
+                if (!localMethods.Contains(alarm._callbackName))
                 {
                     throw new MethodNotFoundException();
                 }
-                if (!localTypes.Contains(instance.Value._parameterTypeName))
+                if (!localTypes.Contains(alarm._parameterTypeName))
                 {
                     throw new TypeNotFoundOrInvalidException();
                 }
-                array.Add(JObject.FromObject(instance.Value,
+                array.Add(JObject.FromObject(alarm,
                                              new()
                                              {
                                                  Formatting = Formatting.Indented,
@@ -544,7 +572,7 @@ namespace StudentScheduleManagementSystem.Times
     public static class Timer
     {
         private const int BaseTimeout = 10000;
-        private static int accleration = 1;
+        private static int accleration = 10;
         private static Time _localTime = new();
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();

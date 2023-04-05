@@ -57,6 +57,17 @@ namespace StudentScheduleManagementSystem.Map
                 }
                 Doors = doors;
             }
+
+            public static bool operator ==(Building left, Building right)
+            {
+                return left.Equals(right);
+            }
+
+
+            public static bool operator !=(Building left, Building right)
+            {
+                return !left.Equals(right);
+            }
         }
 
         public unsafe class AdjacencyTable
@@ -443,7 +454,7 @@ namespace StudentScheduleManagementSystem.Map
         public static List<Building> GetBuildingsByName(string name)
         {
             //UNDONE
-            return new List<Building>();
+            return new List<Building>() { new(0, "default building", Array.Empty<Vertex>()) };
         }
 
         #endregion
