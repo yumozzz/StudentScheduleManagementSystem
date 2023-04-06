@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Reflection;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -489,7 +488,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             if (AlarmEnabled)
             {
-                throw new ItemAlreadyExistedException();
+                throw new AlarmManipulationException();
             }
             if (callbackParameter == null)
             {
@@ -510,7 +509,7 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             if (!AlarmEnabled)
             {
-                throw new AlarmNotFoundException();
+                throw new AlarmManipulationException();
             }
             Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveDays);
         }
@@ -542,8 +541,8 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             try
             {
-                var dic = FileManagement.FileManager.ReadFromUserFile("share",
-                                                                      FileManagement.FileManager.UserFileDirectory);
+                var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
+                                                                      "share");
                 foreach (var item in dic["Course"])
                 {
                     var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
@@ -634,8 +633,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                                           { "GroupActivity", activities },
                                                           { "ScheduleCount", scheduleCount }
                                                       },
-                                                      "share",
-                                                      FileManagement.FileManager.UserFileDirectory);
+                                                      FileManagement.FileManager.UserFileDirectory,
+                                                      "share");
         }
 
         private static long GetProperId(List<long> list)

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using Microsoft.VisualBasic.ApplicationServices;
 using Newtonsoft.Json.Linq;
 
@@ -15,24 +16,24 @@ namespace StudentScheduleManagementSystem.FileManagement
         //element of JArray:一个类实例的一个属性或字段
         //JArray:存储某一类的所有实例信息
         //Dictionary<(string, JArray)>:存储所有类的所有实例信息，以string标识类名
-        public static Dictionary<string, JArray> ReadFromUserFile(string userId, string fileFolder)
+        public static Dictionary<string, JArray> ReadFromUserFile(string fileFolder, string fileName)
         {
             if (!Directory.Exists(fileFolder))
             {
                 throw new DirectoryNotFoundException();
             }
-            string jsonSource = File.ReadAllText($"{fileFolder}/{userId}.json");
+            string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             JObject obj = JObject.Parse(jsonSource);
             Dictionary<string, JArray> dic = new();
-            foreach (var array in obj)
+            foreach ((string key, JToken? token) in obj)
             {
-                dic.Add(array.Key, (JArray)array.Value!);
+                dic.Add(key, (JArray)token!);
             }
-            Log.Information.Log($"已读取学号为{userId}的用户信息");
+            Log.Information.Log($"已读取学号为{fileName}的用户信息");
             return dic;
         }
 
-        public static void SaveToUserFile(Dictionary<string, JArray> objects, string userId, string fileFolder)
+        public static void SaveToUserFile(Dictionary<string, JArray> objects, string fileFolder, string fileName)
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -43,34 +44,56 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 root.Add(@class.Key, @class.Value);
             }
-            File.WriteAllBytes($"{fileFolder}/{userId}.json", Encoding.UTF8.GetBytes(root.ToString()));
-            Log.Information.Log($"已保存学号为{userId}的用户信息");
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(root.ToString()));
+            Log.Information.Log($"已保存学号为{fileName}的用户信息");
         }
 
-        public static (JArray, JArray) ReadFromMapFile(string fileFolder)
+        public static (JArray, JArray) ReadFromMapFile(string fileFolder, string fileName = "map")
         {
             if (!Directory.Exists(fileFolder))
             {
                 throw new DirectoryNotFoundException();
             }
-            string jsonSource = File.ReadAllText($"{fileFolder}/map.json");
+            string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             JObject root = JObject.Parse(jsonSource);
             Log.Information.Log("已读取地图信息");
             return ((JArray)root["Map"]!, (JArray)root["Buildings"]!);
         }
 
-        public static void SaveToMapFile(string fileFolder)
+        public static void SaveToMapFile(JArray map, JArray buildings, string fileFolder, string fileName = "map")
+        {
+            if (!Directory.Exists(fileFolder))
+            {
+                Directory.CreateDirectory(fileFolder);
+            }
+            JObject root = new()
+            {
+                { "Map", map }, { "Buildings", buildings }
+            };
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(root.ToString()));
+            Log.Information.Log("已保存地图信息");
+        }
+
+        public static List<MainProgram.Program.UserAccountInformation> ReadFromUserAccountFile(string fileFolder, string fileName = "accounts")
         {
             if (!Directory.Exists(fileFolder))
             {
                 throw new DirectoryNotFoundException();
             }
-            JObject root = new()
+            string jsonSource = File.ReadAllText($"{fileFolder}/ {fileName}.json");
+            var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserAccountInformation>>();
+            Log.Information.Log("已读取账号信息");
+            return ret!;
+        }
+
+        public static void SaveToUserAccountFile(List<MainProgram.Program.UserAccountInformation> accounts, string fileFolder, string fileName = "accounts")
+        {
+            if (!Directory.Exists(fileFolder))
             {
-                { "Map", Map.Location.GlobalMap!.SaveInstance() }, { "Buildings", Map.Location.SaveBuildings() }
-            };
-            File.WriteAllBytes($"{fileFolder}/map.json", Encoding.UTF8.GetBytes(root.ToString()));
-            Log.Information.Log("已保存地图信息");
+                Directory.CreateDirectory(fileFolder);
+            }
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(JArray.FromObject(accounts).ToString()));
+            Log.Information.Log("已保存账号信息");
         }
     }
 }

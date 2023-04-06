@@ -584,7 +584,6 @@ namespace StudentScheduleManagementSystem.Times
         {
             while (!MainProgram.Program._cts.IsCancellationRequested)
             {
-                Thread.Sleep(BaseTimeout / accleration);
                 if (!Pause)
                 {
                     Console.WriteLine(LocalTime);
@@ -592,6 +591,7 @@ namespace StudentScheduleManagementSystem.Times
                     _localTime++;
                     _offset++;
                 }
+                Thread.Sleep(BaseTimeout / accleration);
             }
             Console.WriteLine("clock terminate");
         }

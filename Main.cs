@@ -11,8 +11,16 @@ namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
     {
+        public struct UserAccountInformation
+        {
+            public string Password { get; set; }
+            public Identity @Identity { get; set; }
+        }
+
         internal static CancellationTokenSource _cts = new();
-        internal static string _userId = String.Empty;
+        internal static List<UserAccountInformation> _accounts;
+        public static string UserId { get; private set; } = String.Empty;
+        public static string Password { get; private set; } = String.Empty;
 
         [STAThread]
         public static void Main()
@@ -23,9 +31,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Log.LogBase.Setup();
-                //Map.Location.SetUp();
-                //Schedule.ScheduleBase.ReadSharedData();
+                Init();
                 LogIn("2021210001");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
@@ -110,17 +116,16 @@ namespace StudentScheduleManagementSystem.MainProgram
                 #endif
                 while (uiThread.IsAlive)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(100);
                 }
-                LogOut(_userId);
-                Schedule.ScheduleBase.SaveSharedData();
-                Log.Information.Log("已更新课程与考试信息");
+                LogOut(UserId);
+                Exit();
             }
-            catch (FormatException ex)
+            /*catch (Exception ex)
             {
                 Task.Run(() => MessageBox.Show(ex.Message));
-                Log.Error.Log(ex);
-            }
+                Log.Error.Log(null, ex);
+            }*/
             finally
             {
                 _cts.Cancel();
@@ -163,34 +168,56 @@ namespace StudentScheduleManagementSystem.MainProgram
             Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
         }
 
+        //TODO:适配UI
         public static void LogIn(string userId)
         {
-            _userId = userId;
+            UserId = userId;
             try
             {
-                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(userId,
-                                               FileManagement.FileManager.UserFileDirectory));
+                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
+                                                  .UserFileDirectory, userId));
+                Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
+                                     RepetitiveType.Single,
+                                     Schedule.ScheduleBase.NotifyAllInComingDay,
+                                     new Times.Alarm.CBPForGeneralAlarm()
+                                     {
+                                         startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
+                                     },
+                                     typeof(Times.Alarm.CBPForGeneralAlarm),
+                                     true);
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException ex)
             {
-                Log.Warning.Log("用户文件不存在");
+                Log.Error.Log("用户文件不存在，是否需要注册？", ex);
             }
-            Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
-                                 RepetitiveType.Single,
-                                 Schedule.ScheduleBase.NotifyAllInComingDay,
-                                 new Times.Alarm.CBPForGeneralAlarm()
-                                 {
-                                     startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
-                                 },
-                                 typeof(Times.Alarm.CBPForGeneralAlarm),
-                                 true);
         }
+
+        public static void Register(string userId, string password, Identity identity) { }
 
         public static void LogOut(string userId)
         {
             FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
-                                                      userId,
-                                                      FileManagement.FileManager.UserFileDirectory);
+                                                      FileManagement.FileManager.UserFileDirectory,
+                                                      userId);
+        }
+
+        public static void Init()
+        {
+            Log.LogBase.Setup();
+            _accounts =
+                FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+            //Map.Location.SetUp();
+            //Schedule.ScheduleBase.ReadSharedData();
+        }
+
+        public static void Exit()
+        {
+            FileManagement.FileManager.SaveToUserAccountFile(_accounts, FileManagement.FileManager.UserFileDirectory);
+            /*FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap!.SaveInstance(),
+                                                     Map.Location.SaveBuildings(),
+                                                     FileManagement.FileManager.MapFileDirectory);*/
+            Schedule.ScheduleBase.SaveSharedData();
+            Log.Information.Log("已保存信息");
         }
     }
 }
