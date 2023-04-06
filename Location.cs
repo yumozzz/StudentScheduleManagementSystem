@@ -505,7 +505,7 @@ namespace StudentScheduleManagementSystem.Map
             return (int)Math.Sqrt((v1.Y - v2.Y) * (v1.Y - v2.Y) + (v1.X - v2.X) * (v1.X - v2.X));
         }
         
-        //从多个建筑找回路。将建筑转换为点
+        //从多个建筑找回路。将建筑转换为点.
         public static  List<int>getPointFromBuilding(List<Building> buildings)
         {
             int numofVertex = buildings.Count;//要经过的点的数量，出发点因为要回到自身，会算两次
