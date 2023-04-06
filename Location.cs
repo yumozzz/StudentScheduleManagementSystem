@@ -328,6 +328,14 @@ namespace StudentScheduleManagementSystem.Map
         #endregion
 
         #region API on pathfinding
+        //重载
+        public static List<int> GetClostestPath(Building startBuilding, Building endBuilding)
+        {
+            List<Building> buildings = new List<Building>();
+            List<int> path = new List<int>();
+            path = getPointFromBuilding(buildings);
+            return GetClosestPath(path[0], path[1]);
+        }
 
         public static List<int> GetClosestPath(int startId, int endId)
         {
@@ -376,8 +384,11 @@ namespace StudentScheduleManagementSystem.Map
             return route[endId];
         }
 
-        public static List<int> GetClosestCircuit(List<int> points)
+
+        public static List<int> GetClosestCircuit(List<Building> buildings)
         {
+            List<int> points = new List<int>();
+            points = getPointFromBuilding(buildings);
             if (points.Count > 10)
             {
                 throw new TooManyTemporaryAffairsException();
@@ -450,6 +461,15 @@ namespace StudentScheduleManagementSystem.Map
                 }
             }
             return finalCircuit;
+        }
+
+        //重载
+        public static int GetClostestPathLength(Building startBuilding, Building endBuilding)
+        {
+            List<Building> buildings = new List<Building>();
+            List<int> path = new List<int>();
+            path = getPointFromBuilding(buildings);
+            return GetClosestPathLength(path[0], path[1]);
         }
 
         public static int GetClosestPathLength(int startId, int endId)
