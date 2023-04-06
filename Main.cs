@@ -2,6 +2,10 @@
 
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Security.Authentication;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,6 +17,7 @@ namespace StudentScheduleManagementSystem.MainProgram
     {
         public struct UserAccountInformation
         {
+            public string Username { get; set; }
             public string Password { get; set; }
             public Identity @Identity { get; set; }
         }
@@ -20,7 +25,7 @@ namespace StudentScheduleManagementSystem.MainProgram
         internal static CancellationTokenSource _cts = new();
         internal static List<UserAccountInformation> _accounts;
         public static string UserId { get; private set; } = String.Empty;
-        public static string Password { get; private set; } = String.Empty;
+        public static Identity @Identity { get; private set; }
 
         [STAThread]
         public static void Main()
@@ -32,7 +37,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Init();
-                LogIn("2021210001");
+                while(!LogIn("2021210001",Console.ReadLine())) { }
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -169,13 +174,30 @@ namespace StudentScheduleManagementSystem.MainProgram
         }
 
         //TODO:适配UI
-        public static void LogIn(string userId)
+        public static bool LogIn(string inputUserId, string inputPassword)
         {
-            UserId = userId;
             try
             {
+                MD5 md5 = MD5.Create();
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputPassword));
+                string encodedPassword = Convert.ToBase64String(code);
+                bool find = false;
+                foreach (var information in _accounts)
+                {
+                    if (information.Username == inputUserId && information.Password == encodedPassword)
+                    {
+                        Identity = information.Identity;
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find)
+                {
+                    throw new AuthenticationException();
+                }
                 ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
-                                                  .UserFileDirectory, userId));
+                                                  .UserFileDirectory,
+                                               inputUserId));
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
                                      RepetitiveType.Single,
                                      Schedule.ScheduleBase.NotifyAllInComingDay,
@@ -185,14 +207,48 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      },
                                      typeof(Times.Alarm.CBPForGeneralAlarm),
                                      true);
+                UserId = inputUserId;
+                return true;
             }
             catch (FileNotFoundException ex)
             {
                 Log.Error.Log("用户文件不存在，是否需要注册？", ex);
+                return false;
+            }
+            catch (AuthenticationException)
+            {
+                Log.Error.Log("用户名或密码输入错误", null);
+                return false;
             }
         }
 
-        public static void Register(string userId, string password, Identity identity) { }
+        public static bool Register(string userId, string password, Identity identity = Identity.User)
+        {
+            try
+            {
+                Regex idRegex = new("^202\\d21\\d{{3}}$");
+                Regex passwordRegex = new("^\\w{{6,30}}$");
+                if (!idRegex.IsMatch(userId))
+                {
+                    throw new FormatException("id format error");
+                }
+                if (!passwordRegex.IsMatch(userId))
+                {
+                    throw new FormatException("password format error");
+                }
+                MD5 md5 = MD5.Create();
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(password));
+                string encodedPassword = Convert.ToBase64String(code);
+                UserId = userId;
+                _accounts.Add(new() { Password = encodedPassword, Identity = identity });
+                return true;
+            }
+            catch (FormatException)
+            {
+                Log.Error.Log("用户名或密码格式错误", null);
+                return false;
+            }
+        }
 
         public static void LogOut(string userId)
         {
