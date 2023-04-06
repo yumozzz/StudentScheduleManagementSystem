@@ -439,8 +439,17 @@ namespace StudentScheduleManagementSystem.Map
                 hasVisited[p] = true;
                 e ^= (1 << (p - 1));
             }
-            res.Add(points[0]);
-            return res;
+            res.Add(points[0]);//res只是关键的点的路径，并不包含所有点
+            List<int> finalCircuit = new List<int>();//这个list包含所有点
+            for (int i = 1; i < res.Count; i++)
+            {
+                List<int> sectorOfCircuit = GetClosestPath(res[i - 1], res[i]);
+                for (int j = 0; j < sectorOfCircuit.Count; j++)
+                {
+                    finalCircuit.Add(sectorOfCircuit[j]);
+                }
+            }
+            return finalCircuit;
         }
 
         public static int GetClosestPathLength(int startId, int endId)
@@ -491,6 +500,54 @@ namespace StudentScheduleManagementSystem.Map
         #endregion
 
         #region other methods
+        public static int GetDist(Vertex v1, Vertex v2)//返回两点的距离，默认返回int
+        {
+            return (int)Math.Sqrt((v1.Y - v2.Y) * (v1.Y - v2.Y) + (v1.X - v2.X) * (v1.X - v2.X));
+        }
+        
+        //从多个建筑找回路。将建筑转换为点
+        public static  List<int>getPointFromBuilding(List<Building> buildings)
+        {
+            int numofVertex = buildings.Count;//要经过的点的数量，出发点因为要回到自身，会算两次
+            if(numofVertex<3 || numofVertex >12)//点太少（出错）或点太多（处理时间太长）,报错
+                throw new IndexOutOfRangeException();
+            List<int> points = new List<int>();//要返回的所有点
+            for(int i=0;i< numofVertex; i++)
+            {
+                if (buildings[i].DoorNumber == 1)//如果只有一个门
+                {
+                    points.Add(buildings[i].Doors[0].Id);
+                }
+                else if(i != numofVertex - 1)//如果有多个门，且不是最后一点，寻找距离下一个建筑的点最近的门的点
+                {
+                    int MinDist = GetDist(buildings[i].Doors[0], buildings[i + 1].Doors[0]);//两点最短距离
+                    //下面两个变量，指的是，上面最短距离对应的两个门的点，分别是当前建筑的门的点，和下一栋建筑的门的点
+                    int IDofThis = buildings[i].Doors[0].Id;
+                    int IDofNext = buildings[i + 1].Doors[0].Id;
+                    for (int j = 0; j < Buildings[i].DoorNumber; j++)//遍历寻找两建筑最近的两点
+                    {
+                        for (int k = 0; k < Buildings[i+1].DoorNumber; k++)
+                        {
+                            int tempDist = GetDist(buildings[i].Doors[j], buildings[i + 1].Doors[k]);
+                            if(tempDist < MinDist)//替换
+                            {
+                                MinDist = tempDist;
+                                IDofThis = buildings[i].Doors[j].Id;
+                                IDofNext = buildings[i + 1].Doors[k].Id;
+                            }
+                        }
+                    }
+                    points.Add(IDofThis);
+                    points.Add(IDofNext);
+                    i++;//多找了下个建筑的个点，i要多加1
+                }
+                else //如果是最后一个点，并且最后一个点有多个门的点，这个时候要回到出发点，而不是最短的点
+                {
+                    points.Add(points[0]);
+                }
+            }
+            return points;
+        }
 
         private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要进过的点 + 出发点。
         {
