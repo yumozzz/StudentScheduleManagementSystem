@@ -329,11 +329,9 @@ namespace StudentScheduleManagementSystem.Map
 
         #region API on pathfinding
         //重载
-        public static List<int> GetClostestPath(Building startBuilding, Building endBuilding)
+        public static List<int> GetClosestPath(Building startBuilding, Building endBuilding)
         {
-            List<Building> buildings = new List<Building>();
-            List<int> path = new List<int>();
-            path = getPointFromBuilding(buildings);
+            List<int> path = GetAppropriateDoors(new() { startBuilding, endBuilding });
             return GetClosestPath(path[0], path[1]);
         }
 
@@ -387,8 +385,7 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
-            List<int> points = new List<int>();
-            points = getPointFromBuilding(buildings);
+            List<int> points = GetAppropriateDoors(buildings);
             if (points.Count > 10)
             {
                 throw new TooManyTemporaryAffairsException();
@@ -464,11 +461,9 @@ namespace StudentScheduleManagementSystem.Map
         }
 
         //重载
-        public static int GetClostestPathLength(Building startBuilding, Building endBuilding)
+        public static int GetClosestPathLength(Building startBuilding, Building endBuilding)
         {
-            List<Building> buildings = new List<Building>();
-            List<int> path = new List<int>();
-            path = getPointFromBuilding(buildings);
+            List<int> path = GetAppropriateDoors(new() { startBuilding, endBuilding, startBuilding });
             return GetClosestPathLength(path[0], path[1]);
         }
 
@@ -520,45 +515,47 @@ namespace StudentScheduleManagementSystem.Map
         #endregion
 
         #region other methods
-        public static int GetDist(Vertex v1, Vertex v2)//返回两点的距离，默认返回int
+        /*private static int GetDistance(Vertex v1, Vertex v2)
         {
             return (int)Math.Sqrt((v1.Y - v2.Y) * (v1.Y - v2.Y) + (v1.X - v2.X) * (v1.X - v2.X));
-        }
+        }*/
         
         //从多个建筑找回路。将建筑转换为点.
-        public static  List<int>getPointFromBuilding(List<Building> buildings)
+        private static List<int> GetAppropriateDoors(List<Building> buildings)
         {
-            int numofVertex = buildings.Count;//要经过的点的数量，出发点因为要回到自身，会算两次
-            if(numofVertex<3 || numofVertex >12)//点太少（出错）或点太多（处理时间太长）,报错
-                throw new IndexOutOfRangeException();
+            int vertexCount = buildings.Count;//要经过的点的数量，出发点因为要回到自身，会算两次
+            if(vertexCount <= 2 || vertexCount > 20)
+            {
+                throw new ArgumentException("too many or too few buildings");
+            }
             List<int> points = new List<int>();//要返回的所有点
-            for(int i=0;i< numofVertex; i++)
+            for(int i = 0;i < vertexCount; i++)
             {
                 if (buildings[i].DoorNumber == 1)//如果只有一个门
                 {
                     points.Add(buildings[i].Doors[0].Id);
                 }
-                else if(i != numofVertex - 1)//如果有多个门，且不是最后一点，寻找距离下一个建筑的点最近的门的点
+                else if(i != vertexCount - 1)//如果有多个门，且不是最后一点，寻找距离下一个建筑的点最近的门的点
                 {
-                    int MinDist = GetDist(buildings[i].Doors[0], buildings[i + 1].Doors[0]);//两点最短距离
-                    //下面两个变量，指的是，上面最短距离对应的两个门的点，分别是当前建筑的门的点，和下一栋建筑的门的点
-                    int IDofThis = buildings[i].Doors[0].Id;
-                    int IDofNext = buildings[i + 1].Doors[0].Id;
-                    for (int j = 0; j < Buildings[i].DoorNumber; j++)//遍历寻找两建筑最近的两点
+                    int minDistance = GetClosestPathLength(buildings[i].Doors[0].Id, buildings[i + 1].Doors[0].Id);//两点最短距离
+                    //上面最短距离对应的两个门的点，分别是当前建筑的门的点，和下一栋建筑的门的点
+                    int thisId = buildings[i].Doors[0].Id;
+                    int nextId = buildings[i + 1].Doors[0].Id;
+                    for (int j = 0; j < Buildings![i].DoorNumber; j++)//遍历寻找两建筑最近的两点
                     {
                         for (int k = 0; k < Buildings[i+1].DoorNumber; k++)
                         {
-                            int tempDist = GetDist(buildings[i].Doors[j], buildings[i + 1].Doors[k]);
-                            if(tempDist < MinDist)//替换
+                            int distance = GetClosestPathLength(buildings[i].Doors[0].Id, buildings[i + 1].Doors[0].Id);
+                            if (distance < minDistance)//替换
                             {
-                                MinDist = tempDist;
-                                IDofThis = buildings[i].Doors[j].Id;
-                                IDofNext = buildings[i + 1].Doors[k].Id;
+                                minDistance = distance;
+                                thisId = buildings[i].Doors[j].Id;
+                                nextId = buildings[i + 1].Doors[k].Id;
                             }
                         }
                     }
-                    points.Add(IDofThis);
-                    points.Add(IDofNext);
+                    points.Add(thisId);
+                    points.Add(nextId);
                     i++;//多找了下个建筑的个点，i要多加1
                 }
                 else //如果是最后一个点，并且最后一个点有多个门的点，这个时候要回到出发点，而不是最短的点
