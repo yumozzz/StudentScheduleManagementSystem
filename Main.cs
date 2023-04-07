@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using StudentScheduleManagementSystem.Schedule;
 
 [assembly: RequiresPreviewFeatures]
 
@@ -37,88 +38,24 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Init();
-                while(!LogIn("2021210001",Console.ReadLine())) { }
+                UserId = "2021210000";
+                Identity = Identity.User;
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-                #if TATEST
-                TemporaryAffairs affair1 =
-                    new(null, "test1", new() { Week = 1, Day = Day.Monday, Hour = 14 }, "test1", new());
-                affair1.EnableAlarm(TemporaryAffairs.TestCallback,
-                                    new Alarm.CallbackParameterType { Id = 10, Name = "aaa" });
-                TemporaryAffairs affair2 = new(null,
-                                               "test2",
-                                               new() { Week = 1, Day = Day.Monday, Hour = 10 },
-                                               "test2",
-                                               new());
-                #endif
-
-                #if COURSEEXAMTEST
-                Schedule.Exam exam = new(null,
-                                         "exam1",
-                                         new() { Week = 2, Day = Day.Thursday, Hour = 16 },
-                                         2,
-                                         "test exam",
-                                         new(7, "dst building2", Array.Empty<Map.Location.Vertex>()));
-                Schedule.Exam exam2 = new(null,
-                                          "exam2",
-                                          new() { Week = 2, Day = Day.Friday, Hour = 14 },
-                                          3,
-                                          "test exam2",
-                                          new(5, "dst building2", Array.Empty<Map.Location.Vertex>()));
-                Schedule.Course course2 = new(null,
-                                              RepetitiveType.MultipleDays,
-                                              "course2",
-                                              new() { Hour = 10 },
-                                              2,
-                                              "test course2",
-                                              new Map.Location.Building(3,
-                                                                        "dst building2",
-                                                                        Array.Empty<Map.Location.Vertex>()),
-                                              Day.Monday,
-                                              Day.Thursday);
-                /*Schedule.Course course = new(null,
-                                             RepetitiveType.Single,
-                                             "course1",
-                                             new() { Week = 2, Day = Day.Monday, Hour = 9 },
-                                             2,
-                                             "test course1",
-                                             new Map.Location.Building(2, "dst building1", Array.Empty<Map.Location.Vertex>()));*/
-                Schedule.Course course3 = new(null,
-                                              RepetitiveType.MultipleDays,
-                                              "course2",
-                                              new() { Hour = 8 },
-                                              2,
-                                              "test course2",
-                                              new Map.Location.Building(3,
-                                                                        "dst building3",
-                                                                        Array.Empty<Map.Location.Vertex>()),
-                                              Day.Tuesday,
-                                              Day.Thursday);
-                course2.EnableAlarm(Schedule.Course.Notify,
-                                    new Times.Alarm.CBPForSpecifiedAlarm() { scheduleId = course2.ScheduleId });
-                course3.EnableAlarm(Schedule.Course.Notify,
-                                    new Times.Alarm.CBPForSpecifiedAlarm() { scheduleId = course2.ScheduleId });
-                #endif
-                #if GROUPACTIVITY
-                Schedule.Activity act1 = new(RepetitiveType.Single,
-                                             true,
-                                             "test groupactivity1",
-                                             new() { Hour = 10 },
-                                             2,
-                                             null,
-                                             new Map.Location.Building());
-                Schedule.Activity act2 = new(RepetitiveType.Single,
-                                             true,
-                                             "test groupactivity3",
-                                             new() { Hour = 14 },
-                                             2,
-                                             null,
-                                             new Map.Location.Building());
-                #endif
+                Course course = new(null,
+                                    RepetitiveType.Designated,
+                                    "test course*",
+                                    new() { Week = 1, Day = Day.Monday, Hour = 12 },
+                                    2,
+                                    null,
+                                    new Map.Location.Building(1, "test building", Array.Empty<Map.Location.Vertex>()),
+                                    new[] { 1, 2, 3 },
+                                    new[] { Day.Monday, Day.Tuesday });
+                course.RemoveSchedule();
                 while (uiThread.IsAlive)
                 {
                     Thread.Sleep(100);
@@ -206,7 +143,9 @@ namespace StudentScheduleManagementSystem.MainProgram
                                          startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
                                      },
                                      typeof(Times.Alarm.CBPForGeneralAlarm),
-                                     true);
+                                     true,
+                                     Array.Empty<int>(),
+                                     Array.Empty<Day>());
                 UserId = inputUserId;
                 return true;
             }
@@ -255,6 +194,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
                                                       FileManagement.FileManager.UserFileDirectory,
                                                       userId);
+            Log.Information.Log($"用户{userId}已登出");
         }
 
         public static void Init()
@@ -318,8 +258,13 @@ namespace StudentScheduleManagementSystem.Schedule
                                  NotifyAllInComingDay,
                                  new Times.Alarm.CBPForGeneralAlarm() { startTimestamp = param.startTimestamp + 24 },
                                  typeof(Times.Alarm.CBPForGeneralAlarm),
-                                 true);
-            Times.Alarm.RemoveAlarm(param.startTimestamp - 2, RepetitiveType.Single);
+                                 true,
+                                 Array.Empty<int>(),
+                                 Array.Empty<Day>());
+            Times.Alarm.RemoveAlarm(param.startTimestamp - 2,
+                                    RepetitiveType.Single,
+                                    Array.Empty<int>(),
+                                    Array.Empty<Day>());
         }
     }
 

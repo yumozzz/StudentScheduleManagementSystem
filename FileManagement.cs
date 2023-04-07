@@ -80,7 +80,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
-            string jsonSource = File.ReadAllText($"{fileFolder}/ {fileName}.json");
+            string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserAccountInformation>>();
             Log.Information.Log("已读取账号信息");
             return ret!;
