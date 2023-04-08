@@ -41,6 +41,7 @@ namespace StudentScheduleManagementSystem.Map
         public struct Building //建筑
         {
             public int Id { get; set; } = -1;
+            public Vertex center { get; set; } //4月8日新增，表示建筑中心的点
             public int DoorNumber { get; set; } = 0;//门的数量
             public string Name { get; set; } = String.Empty;
             public Vertex[] Doors { get; set; } = Array.Empty<Vertex>();//门所在的点，用来寻路
@@ -331,11 +332,12 @@ namespace StudentScheduleManagementSystem.Map
         //重载
         public static List<int> GetClosestPath(Building startBuilding, Building endBuilding)
         {
-            List<int> path = GetAppropriateDoors(new() { startBuilding, endBuilding });
+            //4月8日晚新增：只需包含两点，且就算是回路也不用在尾部加出发点，因为getcircuit函数的传参List默认第一个是出发点
+            List<int> path = GetCenters(new() { startBuilding, endBuilding });
             return GetClosestPath(path[0], path[1]);
         }
 
-        public static List<int> GetClosestPath(int startId, int endId)
+        public static List<int> GetClosestPath(int startId, int endId)//传参是出发建筑和终点建筑的中心点的id
         {
             //这里需要提一下：遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = GlobalMap!.Size; //点的数量
@@ -385,8 +387,8 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
-            List<int> points = GetAppropriateDoors(buildings);
-            if (points.Count > 20)
+            List<int> points = GetCenters(buildings);
+            if (points.Count<2 || points.Count > 20)//建筑太多或太少，报错
             {
                 throw new TooManyTemporaryAffairsException();
             }
@@ -447,8 +449,9 @@ namespace StudentScheduleManagementSystem.Map
                 hasVisited[p] = true;
                 e ^= (1 << (p - 1));
             }
-            res.Add(points[0]);//res只是关键的点的路径，并不包含所有点
-            List<int> finalCircuit = new List<int>();//这个list包含所有点
+            res.Add(points[0]);//在建筑的关键点的最后添加一个出发点
+            //res只是关键的点的路径，并不包含所有点，下面这个finalCircuit才包含所有点
+            List<int> finalCircuit = new List<int>();
             for (int i = 1; i < res.Count; i++)
             {
                 List<int> sectorOfCircuit = GetClosestPath(res[i - 1], res[i]);
@@ -460,10 +463,12 @@ namespace StudentScheduleManagementSystem.Map
             return finalCircuit;
         }
 
-        //重载
+        //重载，寻找两点最短路径的路径长
         public static int GetClosestPathLength(Building startBuilding, Building endBuilding)
         {
-            List<int> path = GetAppropriateDoors(new() { startBuilding, endBuilding, startBuilding });
+            //4月8日晚新增：只需包含两点，且就算是回路也不用在尾部加出发点，因为getcircuit函数的传参List默认第一个是出发点
+            List<int> path = GetCenters(new() { startBuilding, endBuilding});
+
             return GetClosestPathLength(path[0], path[1]);
         }
 
@@ -517,9 +522,13 @@ namespace StudentScheduleManagementSystem.Map
         #region other methods
 
         //从多个建筑找回路。将建筑转换为点.
-        private static List<int> GetAppropriateDoors(List<Building> buildings)
+        private static List<int> GetCenters(List<Building> buildings)
         {
-            int vertexCount = buildings.Count;//要经过的点的数量，出发点因为要回到自身，会算两次
+            /*4月8日晚新增：该函数对两点路径和回路均适用。我之前理解有误。实际上，对于回路的传参buildings，
+             *             并不需要在buildings的尾部再添加出发点。比如说从有0,1,2，三个点。buildings的序
+             *             列就只需要包含0,1,2三个元素就行，出发点必须是第一个元素，其他途径点可以是乱序的，
+            */
+            int vertexCount = buildings.Count;//要经过的点的数量
             if(vertexCount <= 2 || vertexCount > 20)
             {
                 throw new ArgumentException("too many or too few buildings");
@@ -527,37 +536,7 @@ namespace StudentScheduleManagementSystem.Map
             List<int> points = new List<int>();//要返回的所有点
             for(int i = 0;i < vertexCount; i++)
             {
-                if (buildings[i].DoorNumber == 1)//如果只有一个门
-                {
-                    points.Add(buildings[i].Doors[0].Id);
-                }
-                else if(i != vertexCount - 1)//如果有多个门，且不是最后一点，寻找距离下一个建筑的点最近的门的点
-                {
-                    int minDistance = GetClosestPathLength(buildings[i].Doors[0].Id, buildings[i + 1].Doors[0].Id);//两点最短距离
-                    //上面最短距离对应的两个门的点，分别是当前建筑的门的点，和下一栋建筑的门的点
-                    int thisId = buildings[i].Doors[0].Id;
-                    int nextId = buildings[i + 1].Doors[0].Id;
-                    for (int j = 0; j < Buildings![i].DoorNumber; j++)//遍历寻找两建筑最近的两点
-                    {
-                        for (int k = 0; k < Buildings[i+1].DoorNumber; k++)
-                        {
-                            int distance = GetClosestPathLength(buildings[i].Doors[0].Id, buildings[i + 1].Doors[0].Id);
-                            if (distance < minDistance)//替换
-                            {
-                                minDistance = distance;
-                                thisId = buildings[i].Doors[j].Id;
-                                nextId = buildings[i + 1].Doors[k].Id;
-                            }
-                        }
-                    }
-                    points.Add(thisId);
-                    points.Add(nextId);
-                    i++;//多找了下个建筑的个点，i要多加1
-                }
-                else //如果是最后一个点，并且最后一个点有多个门的点，这个时候要回到出发点，而不是最短的点
-                {
-                    points.Add(points[0]);
-                }
+                points.Add(buildings[i].center.Id);//改为直接添加该建筑中心点vertex的Id，寻路改成按照中心点来找
             }
             return points;
         }
