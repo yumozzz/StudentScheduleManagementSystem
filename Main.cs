@@ -52,7 +52,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                     new() { Week = 1, Day = Day.Monday, Hour = 12 },
                                     2,
                                     null,
-                                    new Map.Location.Building(1, "test building", Array.Empty<Map.Location.Vertex>()),
+                                    new Map.Location.Building(1, "test building", new() { Id = 0, X = 0, Y = 0 }),
                                     new[] { 1, 2, 3 },
                                     new[] { Day.Monday, Day.Tuesday });
                 course.RemoveSchedule();
@@ -362,7 +362,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 param = (Times.Alarm.CBPForTemporaryAffair)obj!;
             }
-            var points = Map.Location.GetClosestCircuit(new(param.locationIds));
+            var points = Map.Location.GetClosestCircuit(new(param.locations));
             Task.Run(() => Map.Navigate.Show(points));
         }
     }
@@ -384,7 +384,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public struct CBPForTemporaryAffair
         {
-            public int[] locationIds;
+            public Map.Location.Building[] locations;
         }
     }
 }
