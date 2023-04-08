@@ -428,7 +428,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 case (RepetitiveType.MultipleDays, RepetitiveType.Single):
                     Console.WriteLine($"id为{_timeline[offset].Id}的重复日程在{BeginTime.ToString()}上已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的重复日程在{BeginTime.ToString()}上已被覆盖");
-                    _timeline.RemoveMultipleItems(offset.ToTimeStamp(), 1,RepetitiveType, out _, Array.Empty<int>(), Array.Empty<Day>());
+                    _timeline.RemoveMultipleItems(offset.ToTimeStamp(), 1, RepetitiveType, out _, Array.Empty<int>(), Array.Empty<Day>());
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
                     throw new InvalidOperationException("conflicting multipledays schedule");
@@ -437,55 +437,33 @@ namespace StudentScheduleManagementSystem.Schedule
                 default:
                     throw new ArgumentException(null, nameof(RepetitiveType));
             }
-            long thisScheduleId;
-            if (ScheduleType == ScheduleType.Course)
+            long? thisScheduleId = (ScheduleType, specifiedId) switch
             {
-                thisScheduleId = specifiedId == null ? GetProperId(_courseIdList) : specifiedId.Value;
-                _timeline.AddMultipleItems(thisScheduleId,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = this.RepetitiveType,
-                                               ScheduleType = this.ScheduleType
-                                           },
-                                           out _,
-                                           ActiveWeeks,
-                                           ActiveDays);
-            }
-            else if (ScheduleType == ScheduleType.Exam)
-            {
-                thisScheduleId = specifiedId == null ? GetProperId(_examIdList) : specifiedId.Value;
-                _timeline.AddMultipleItems(thisScheduleId,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = RepetitiveType.Single,
-                                               ScheduleType = this.ScheduleType
-                                           },
-                                           out _,
-                                           ActiveWeeks,
-                                           ActiveDays);
-            }
-            else
-            {
-                _timeline.AddMultipleItems(null,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = this.RepetitiveType, ScheduleType = ScheduleType
-                                           },
-                                           out thisScheduleId,
-                                           ActiveWeeks,
-                                           ActiveDays);
-            }
-            ScheduleId = thisScheduleId;
-            _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
+                (ScheduleType.Course, null) => GetProperId(_courseIdList),
+                (ScheduleType.Course, _) => specifiedId.Value,
+                (ScheduleType.Exam, null) => GetProperId(_examIdList),
+                (ScheduleType.Exam, _) => specifiedId.Value,
+                (ScheduleType.Activity, null) => ((Activity)this).IsGroupActivity ? GetProperId(_groupActivityList) : null,
+                (ScheduleType.Activity, _) => specifiedId.Value,
+                (ScheduleType.TemporaryAffair, null) => null,
+                (ScheduleType.TemporaryAffair, _) => specifiedId.Value,
+                (_, _) => throw new ArgumentException(null, nameof(ScheduleType)),
+            };
+            _timeline.AddMultipleItems(thisScheduleId,
+                                       beginWith,
+                                       BeginTime,
+                                       Duration,
+                                       new Record
+                                       {
+                                           RepetitiveType = this.RepetitiveType,
+                                           ScheduleType = this.ScheduleType
+                                       },
+                                       out long outScheduleId,
+                                       ActiveWeeks,
+                                       ActiveDays);
+            thisScheduleId ??= outScheduleId;
+            ScheduleId = thisScheduleId.Value;
+            _scheduleList.Add(thisScheduleId.Value, this); //调用前已创建实例
             Log.Information.Log("已在时间轴与表中添加日程");
         }
 
@@ -1232,7 +1210,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 ScheduleId = _timeline[offset].Id;
                 TemporaryAffairs affairs = (TemporaryAffairs)_scheduleList[_timeline[offset].Id];
-                if (affairs._locations.Count == 10)
+                if (affairs._locations.Count == 20)
                 {
                     throw new TooManyTemporaryAffairsException();
                 }

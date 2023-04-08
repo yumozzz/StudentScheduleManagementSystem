@@ -386,13 +386,13 @@ namespace StudentScheduleManagementSystem.Map
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
             List<int> points = GetAppropriateDoors(buildings);
-            if (points.Count > 10)
+            if (points.Count > 20)
             {
                 throw new TooManyTemporaryAffairsException();
             }
             (int[,] submap, int[] correspondence) = CreateSubMap(points);
             int row = (int)Math.Sqrt(submap.Length), column = 1 << (row - 1);
-            int[,] dp = new int[10, 1 << 10];
+            int[,] dp = new int[20, 1 << 20];
             List<int> res = new() { points[0] };
 
             for (int i = 0; i < row; i++)
@@ -515,11 +515,7 @@ namespace StudentScheduleManagementSystem.Map
         #endregion
 
         #region other methods
-        /*private static int GetDistance(Vertex v1, Vertex v2)
-        {
-            return (int)Math.Sqrt((v1.Y - v2.Y) * (v1.Y - v2.Y) + (v1.X - v2.X) * (v1.X - v2.X));
-        }*/
-        
+
         //从多个建筑找回路。将建筑转换为点.
         private static List<int> GetAppropriateDoors(List<Building> buildings)
         {
@@ -566,7 +562,7 @@ namespace StudentScheduleManagementSystem.Map
             return points;
         }
 
-        private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要进过的点 + 出发点。
+        private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要经过的点 + 出发点。
         {
             int pointCount = criticalPoints.Count;
             int[,] subEdges = new int[pointCount, pointCount];
