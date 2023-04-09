@@ -247,6 +247,11 @@ namespace StudentScheduleManagementSystem.Times
             }
             Array.Copy(arr, ElementCountArray, Time.TotalHours);
         }
+
+        public void Clear()
+        {
+            Array.Clear(RecordArray);
+        }
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -458,6 +463,12 @@ namespace StudentScheduleManagementSystem.Times
             #endregion
         }
 
+        public static void ClearAll()
+        {
+            _alarmList.Clear();
+            _timeline.Clear();
+        }
+
         internal static void TriggerAlarm(int offset)
         {
             long alarmId = _timeline[offset].Id;
@@ -584,14 +595,15 @@ namespace StudentScheduleManagementSystem.Times
         {
             while (!MainProgram.Program._cts.IsCancellationRequested)
             {
-                Thread.Sleep(BaseTimeout / accleration);
-                if (!Pause)
+                if (!Pause && UI.MainWindow.StudentSubwindow !=null)
                 {
                     Console.WriteLine(LocalTime);
+                    UI.MainWindow.StudentSubwindow.SetLocalTime(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
                 }
+                Thread.Sleep(BaseTimeout / accleration);
             }
             Console.WriteLine("clock terminate");
         }

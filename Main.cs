@@ -1,9 +1,14 @@
-﻿#define COURSEEXAMTEST
+﻿//#define COURSEEXAMTEST
 
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Security.Authentication;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Converters;
 
 [assembly: RequiresPreviewFeatures]
 
@@ -11,28 +16,29 @@ namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
     {
+        public struct UserAccountInformation
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+            [JsonConverter(typeof(StringEnumConverter))]public Identity @Identity { get; set; }
+        }
+
         internal static CancellationTokenSource _cts = new();
-        internal static string _userId = String.Empty;
-        
-        //usersnames and passwords
-        public static Dictionary<string, string> dicstu = new Dictionary<string, string>();
-        public static Dictionary<string, string> dicadmin = new Dictionary<string, string>();
-            
+        internal static Dictionary<string, UserAccountInformation> _accounts;
+        public static string UserId { get; private set; } = String.Empty;
+        public static Identity @Identity { get; private set; }
+
         [STAThread]
         public static void Main()
         {
-            dicstu.Add("2021", "pw");
-            dicadmin.Add("admin", "pw");
             try
             {
                 AllocConsole();
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Log.LogBase.Setup();
-                //Map.Location.SetUp();
-                //Schedule.ScheduleBase.ReadSharedData();
-                LogIn("2021210001");
+                Init();
+                //while(!LogIn("2021210001",Console.ReadLine())) { }
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -116,17 +122,16 @@ namespace StudentScheduleManagementSystem.MainProgram
                 #endif
                 while (uiThread.IsAlive)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(100);
                 }
-                LogOut(_userId);
-                Schedule.ScheduleBase.SaveSharedData();
-                Log.Information.Log("已更新课程与考试信息");
+                //LogOut(UserId);
+                Exit();
             }
-            catch (FormatException ex)
+            /*catch (Exception ex)
             {
                 Task.Run(() => MessageBox.Show(ex.Message));
-                Log.Error.Log(ex);
-            }
+                Log.Error.Log(null, ex);
+            }*/
             finally
             {
                 _cts.Cancel();
@@ -169,34 +174,118 @@ namespace StudentScheduleManagementSystem.MainProgram
             Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
         }
 
-        public static void LogIn(string userId)
+        //TODO:适配UI
+        public static bool LogIn(string inputUserId, string inputPassword)
         {
-            _userId = userId;
             try
             {
-                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(userId,
-                                               FileManagement.FileManager.UserFileDirectory));
+                MD5 md5 = MD5.Create();
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputPassword));
+                string encodedPassword = Convert.ToBase64String(code);
+                bool find = false;
+                foreach ((_, var information) in _accounts)
+                {
+                    if (information.Username == inputUserId && information.Password == encodedPassword)
+                    {
+                        Identity = information.Identity;
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find)
+                {
+                    throw new AuthenticationException();
+                }
+                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
+                                                  .UserFileDirectory,
+                                               inputUserId));
+                Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
+                                     RepetitiveType.Single,
+                                     Schedule.ScheduleBase.NotifyAllInComingDay,
+                                     new Times.Alarm.CBPForGeneralAlarm()
+                                     {
+                                         startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
+                                     },
+                                     typeof(Times.Alarm.CBPForGeneralAlarm),
+                                     true);
+                UserId = inputUserId;
+                Times.Timer.Pause = false;
+                return true;
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException ex)
             {
-                Log.Warning.Log("用户文件不存在");
+                Log.Error.Log("用户文件不存在，是否需要注册？", ex);
+                return false;
             }
-            Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
-                                 RepetitiveType.Single,
-                                 Schedule.ScheduleBase.NotifyAllInComingDay,
-                                 new Times.Alarm.CBPForGeneralAlarm()
-                                 {
-                                     startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
-                                 },
-                                 typeof(Times.Alarm.CBPForGeneralAlarm),
-                                 true);
+            catch (AuthenticationException)
+            {
+                Log.Error.Log("用户名或密码输入错误", null);
+                return false;
+            }
+        }
+
+        public static bool Register(string userId, string password, Identity identity = Identity.User)
+        {
+            try
+            {
+                Regex idRegex = new(@"^202\d21\d{4}$");
+                Regex passwordRegex = new(@"^\w{6,30}$");
+                if (!idRegex.IsMatch(userId))
+                {
+                    throw new FormatException("id format error");
+                }
+                if (!passwordRegex.IsMatch(password))
+                {
+                    throw new FormatException("password format error");
+                }
+                MD5 md5 = MD5.Create();
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(password));
+                string encodedPassword = Convert.ToBase64String(code);
+                UserId = userId;
+                _accounts.Add(userId, new() { Username = userId, Password = encodedPassword, Identity = identity });
+                Times.Timer.Pause = false;
+                return true;
+            }
+            catch (FormatException)
+            {
+                Log.Error.Log("用户名或密码格式错误", null);
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                Log.Error.Log("用户已存在", null);
+                return false;
+            }
         }
 
         public static void LogOut(string userId)
         {
             FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
-                                                      userId,
-                                                      FileManagement.FileManager.UserFileDirectory);
+                                                      FileManagement.FileManager.UserFileDirectory,
+                                                      userId);
+            Times.Timer.Pause = true;
+            Times.Alarm.ClearAll();
+            Schedule.ScheduleBase.ClearAll();
+            MessageBox.Show("Log out successfully!");
+        }
+
+        public static void Init()
+        {
+            Log.LogBase.Setup();
+            _accounts =
+                FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+            //Map.Location.SetUp();
+            //Schedule.ScheduleBase.ReadSharedData();
+        }
+
+        public static void Exit()
+        {
+            FileManagement.FileManager.SaveToUserAccountFile(_accounts, FileManagement.FileManager.UserFileDirectory);
+            /*FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap!.SaveInstance(),
+                                                     Map.Location.SaveBuildings(),
+                                                     FileManagement.FileManager.MapFileDirectory);*/
+            Schedule.ScheduleBase.SaveSharedData();
+            Log.Information.Log("已保存信息");
         }
     }
 }

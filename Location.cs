@@ -560,7 +560,7 @@ namespace StudentScheduleManagementSystem.Map
                     bezCurveControlPointTuples.Add((Location.GlobalMap.GetVertex(prevId), edge.Value.Controls!.Value.Item1, edge.Value.Controls!.Value.Item2, Location.GlobalMap.GetVertex(i)));
                 }
             }
-            UI.MapWindow mapWindow = new(lineEndPointPairs, bezCurveControlPointTuples);
+            UI.MapSubwindow mapWindow = new(lineEndPointPairs, bezCurveControlPointTuples);
             mapWindow.ShowDialog();
         }
     }

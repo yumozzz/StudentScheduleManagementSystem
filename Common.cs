@@ -30,6 +30,12 @@ namespace StudentScheduleManagementSystem
         TemporaryAffair,
     }
 
+    public enum Identity
+    {
+        User,
+        Administrator,
+    }
+
     public interface IUniqueRepetitiveEvent
     {
         public long Id { get; set; }
@@ -56,12 +62,12 @@ namespace StudentScheduleManagementSystem
     }
 
     public class ScheduleInformationMismatchException : Exception { }
-    public class MethodNotFoundException : Exception { }
-    public class TypeNotFoundOrInvalidException : Exception { }
+    public class MethodNotFoundException : ArgumentException { }
+    public class TypeNotFoundOrInvalidException : ArgumentException { }
     public class ItemAlreadyExistedException : Exception { };
-    public class AlarmNotFoundException : Exception { }
-    public class AmbiguousLocationMatchException : Exception { }
-    public class TooManyTemporaryAffairsException : Exception { }
+    public class AlarmManipulationException : InvalidOperationException { }
+    public class AmbiguousLocationMatchException : JsonException { }
+    public class TooManyTemporaryAffairsException : InvalidOperationException { }
     public class EndOfSemester : Exception { };
 
     public static class ExtendedEnum

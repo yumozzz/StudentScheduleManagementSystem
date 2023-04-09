@@ -2,13 +2,12 @@ namespace StudentScheduleManagementSystem.UI
 {
     public partial class MainWindow : Form
     {
-        public String username_;
-        public String password_;
-        public Boolean usertype_;
+        public static StudentSubwindow? StudentSubwindow { get; private set; } = null;
 
         public MainWindow()
         {
             InitializeComponent();
+            //ÐÞ¸ÄMultiSelectBox´óÐ¡
         }
 
         private void MainWindow_Load(object sender, EventArgs e)
@@ -38,47 +37,25 @@ namespace StudentScheduleManagementSystem.UI
 
         private void login_Click(object sender, EventArgs e)
         {
-            if (username.Text == "" || password.Text == "")
+            if (usernamebox.Text == "" || passwordbox.Text == "")
             {
                 MessageBox.Show("Empty!");
             }
             else
             {
-                log_in();
-            }
-        }
-
-        private void log_in()
-        {
-            if (is_student.Checked == true && 
-                MainProgram.Program.dicstu.ContainsKey(usernamebox.Text) &&
-                MainProgram.Program.dicstu[usernamebox.Text] == passwordbox.Text)
-            {
-                //MessageBox.Show("Successfully login!");
-                username_ = usernamebox.Text;
-                password_ = passwordbox.Text;
-                usertype_ = is_student.Checked; //student true
-
-                StudentWindow studentwindow = new StudentWindow();
-                this.Hide();
-                studentwindow.ShowDialog();
-                this.Show();
-            } else if (is_administrator.Checked == true && 
-                       MainProgram.Program.dicadmin.ContainsKey(usernamebox.Text) &&
-                       MainProgram.Program.dicadmin[usernamebox.Text] == passwordbox.Text)
-            {
-                //MessageBox.Show("Successfully login!");
-                username_ = usernamebox.Text;
-                password_ = passwordbox.Text;
-                usertype_ = is_student.Checked; //admin false
-
-                AdminWindow adminwindow = new AdminWindow();
-                this.Hide();
-                adminwindow.ShowDialog();
-                this.Show();
-            } else
-            {
-                MessageBox.Show("fail!");
+                if (MainProgram.Program.LogIn(usernamebox.Text, passwordbox.Text))
+                {
+                    MessageBox.Show("Successfully login!");
+                    
+                    StudentSubwindow = new StudentSubwindow();
+                    this.Hide();
+                    StudentSubwindow.ShowDialog();
+                    this.Show();
+                }
+                else
+                {
+                    MessageBox.Show("fail!");
+                }
             }
         }
 
@@ -86,6 +63,35 @@ namespace StudentScheduleManagementSystem.UI
         {
             this.usernamebox.Text = "";
             this.passwordbox.Text = "";
+        }
+
+        private void register_Click(object sender, EventArgs e)
+        {
+            if (usernamebox.Text == "" || passwordbox.Text == "")
+            {
+                MessageBox.Show("Empty!");
+            }
+            else
+            {
+                if (MainProgram.Program.Register(usernamebox.Text, passwordbox.Text))
+                {
+                    MessageBox.Show("Successfully register!");
+
+                    StudentSubwindow = new StudentSubwindow();
+                    this.Hide();
+                    StudentSubwindow.ShowDialog();
+                    this.Show();
+                }
+                else
+                {
+                    MessageBox.Show("fail!");
+                }
+            }
+        }
+
+        private void usernamebox_TextChanged(object sender, EventArgs e)
+        {
+            passwordbox.Text = "";
         }
 
         private void move_MouseMove(object sender, MouseEventArgs e)
