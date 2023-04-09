@@ -19,6 +19,7 @@ namespace StudentScheduleManagementSystem
         Null,
         Single,
         MultipleDays,
+        Designated
     }
 
     public enum ScheduleType
@@ -40,6 +41,7 @@ namespace StudentScheduleManagementSystem
     {
         public long Id { get; set; }
         public RepetitiveType RepetitiveType { get; init; }
+        public bool Equal(object? other);
     }
 
     public interface IJsonConvertible
@@ -49,8 +51,7 @@ namespace StudentScheduleManagementSystem
         public static abstract JArray SaveInstance();
     }
 
-    public class OverrideNondefaultRecordException : InvalidOperationException { }
-    public class OverrideExistingScheduleException : InvalidOperationException { }
+    public class RecordOverrideException : InvalidOperationException { }
 
     public class JsonFormatException : JsonException
     {
@@ -70,16 +71,13 @@ namespace StudentScheduleManagementSystem
     public class TooManyTemporaryAffairsException : InvalidOperationException { }
     public class EndOfSemester : Exception { };
 
-    public static class ExtendedEnum
+    public static class Extension
     {
         public static int ToInt(this Enum e)
         {
             return e.GetHashCode();
         }
-    }
 
-    public static class ExtendedInt
-    {
         public static Times.Time ToTimeStamp(this int value)
         {
             if (value is < 0 or >= Times.Time.TotalHours)
@@ -91,5 +89,10 @@ namespace StudentScheduleManagementSystem
             int hour = value % 24;
             return new Times.Time { Week = week, Day = (Day)day, Hour = hour };
         }
+    }
+
+    public static class Constants
+    {
+        public static int[] AllWeeks = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
     }
 }

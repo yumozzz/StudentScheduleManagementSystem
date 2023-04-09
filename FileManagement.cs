@@ -22,6 +22,12 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
+            if (!File.Exists(fileName))
+            {
+                File.Create($"{fileFolder}/{fileName}.json");
+                Log.Warning.Log("不存在用户文件，已新建");
+                return new();
+            }
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             JObject obj = JObject.Parse(jsonSource);
             Dictionary<string, JArray> dic = new();
@@ -80,17 +86,14 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
-            if (!File.Exists($"{fileFolder}/{fileName}.json"))
+            if (!File.Exists(fileName))
             {
+                File.Create($"{fileFolder}/{fileName}.json");
+                Log.Warning.Log("不存在账号文件，已新建");
                 return new();
             }
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
-            var array = JArray.Parse(jsonSource).ToObject<MainProgram.Program.UserAccountInformation[]>();
-            Dictionary<string, MainProgram.Program.UserAccountInformation> ret = new();
-            foreach (var information in array!)
-            {
-                ret.Add(information.Username, information);
-            }
+            var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserAccountInformation>>();
             Log.Information.Log("已读取账号信息");
             return ret;
         }

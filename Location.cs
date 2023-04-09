@@ -1,12 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
+using System.Xml.Linq;
 
 namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        public static List<Building>? Buildings { get; private set; } = new();
-        public static AdjacencyTable? GlobalMap { get; private set; }
+        public static List<Building> Buildings { get; private set; } = new();
+        public static AdjacencyTable GlobalMap { get; private set; }
 
         #region structs, classes and enums
 
@@ -36,26 +38,43 @@ namespace StudentScheduleManagementSystem.Map
                 X = x;
                 Y = y;
             }
+
+            public override bool Equals(object? obj)
+            {
+                if (obj == null)
+                {
+                    return false;
+                }
+                return Id == ((Vertex)obj).Id && X == ((Vertex)obj).X && Y == ((Vertex)obj).Y;
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int result = 37;
+                    result *= 397;
+                    result += Id.GetHashCode();
+                    result *= 397;
+                    result += X.GetHashCode();
+                    result *= 397;
+                    result += Y.GetHashCode();
+                    return result;
+                }
+            }
         }
 
         public struct Building //建筑
         {
             public int Id { get; set; } = -1;
-            public int DoorNumber { get; set; } = 0;//门的数量
             public string Name { get; set; } = String.Empty;
-            public Vertex[] Doors { get; set; } = Array.Empty<Vertex>();//门所在的点，用来寻路
+            public Vertex Center { get; set; }
 
-            public Building(int id, string name, Vertex[] doors)
+            public Building(int id, string name, Vertex center)
             {
                 Id = id;
                 Name = name;
-                Doors = doors;
-                DoorNumber = doors.Length;
-                if (DoorNumber > 4)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(DoorNumber));
-                }
-                Doors = doors;
+                Center = center;
             }
 
             public Building()
@@ -81,11 +100,9 @@ namespace StudentScheduleManagementSystem.Map
                     result *= 397;
                     result += Id.GetHashCode();
                     result *= 397;
-                    result += DoorNumber.GetHashCode();
-                    result *= 397;
                     result += Name.GetHashCode();
                     result *= 397;
-                    result += Doors.GetHashCode();
+                    result += Center.GetHashCode();
                     return result;
                 }
             }
@@ -96,8 +113,7 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     return false;
                 }
-                return Id == ((Building)obj).Id && Name == ((Building)obj).Name &&
-                       DoorNumber == ((Building)obj).DoorNumber && Doors.SequenceEqual(((Building)obj).Doors);
+                return Id == ((Building)obj).Id && Name == ((Building)obj).Name && Center.Equals(((Building)obj).Center);
             }
         }
 
@@ -328,10 +344,128 @@ namespace StudentScheduleManagementSystem.Map
         #endregion
 
         #region API on pathfinding
-
-        public static List<int> GetClosestPath(int startId, int endId)
+        //重载
+        public static List<int> GetClosestPath(Building startBuilding, Building endBuilding)
         {
-            //这里需要提一下：遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
+            return GetClosestPath(startBuilding.Center.Id, endBuilding.Center.Id);
+        }
+
+        public static List<int> GetClosestCircuit(List<Building> buildings)
+        {
+            List<int> points = buildings.ConvertAll(building => building.Center.Id);
+            if (points.Count <=2 || points.Count >= 10)//建筑太多或太少，报错
+            {
+                throw new ArgumentException("too many or too few items in parameter \"buildings\"");
+            }
+            (int[,] submap, int[] correspondence) = CreateSubMap(points);
+            int row = (int)Math.Sqrt(submap.Length), column = 1 << (row - 1);
+            int[,] dp = new int[20, 1 << 20];
+            List<int> res = new() { points[0] };
+
+            for (int i = 0; i < row; i++)
+            {
+                dp[i, 0] = submap[i, 0];
+            }
+
+            for (int j = 1; j < column; j++)
+            {
+                for (int i = 0; i < row; i++)
+                {
+                    dp[i, j] = int.MaxValue;
+                    int bit = j >> (i - 1);
+                    if ((bit & 1) == 1)
+                    {
+                        continue;
+                    }
+                    for (int k = 1; k < row; k++)
+                    {
+                        int bit2 = j >> (k - 1);
+                        int bit3 = j ^ (1 << (k - 1));
+                        if ((bit2 & 1) == 1 && dp[i, j] > submap[i, k] + dp[k, bit3])
+                        {
+                            dp[i, j] = submap[i, k] + dp[k, bit3];
+                        }
+                    }
+                }
+            }
+            bool[] hasVisited = new bool[GlobalMap.Size];
+            int p = 0, e = column - 1, t = 0, cyc = 0;
+            while (cyc++ < 10)
+            {
+                int min = int.MaxValue;
+                for (int i = 0; i < row; i++)
+                {
+                    int bit = 1 << (i - 1);
+                    if (!hasVisited[i] && (e & bit) == 1)
+                    {
+                        if (min > (GlobalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
+                        {
+                            min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
+                            t = correspondence[i];
+                        }
+                    }
+                }
+                if (p == t)
+                {
+                    break;
+                }
+                p = t;
+                res.Add(p);
+                hasVisited[p] = true;
+                e ^= (1 << (p - 1));
+            }
+            res.Add(points[0]);//在建筑的关键点的最后添加一个出发点
+            //res只是关键的点的路径，并不包含所有点，下面这个finalCircuit才包含所有点
+            List<int> finalCircuit = new();
+            for (int i = 1; i < res.Count; i++)
+            {
+                List<int> sector = GetClosestPath(res[i - 1], res[i]);
+                foreach (var vertex in sector)
+                {
+                    finalCircuit.Add(vertex);
+                }
+            }
+            return finalCircuit;
+        }
+
+        //重载，寻找两点最短路径的路径长
+        public static int GetClosestPathLength(Building startBuilding, Building endBuilding)
+        {
+            return GetClosestPathLength(startBuilding.Center.Id, endBuilding.Center.Id);
+        }
+
+        #endregion
+
+        #region API on searching
+
+        public static List<Building> GetBuildingsByName(string name)
+        {
+            //UNDONE
+            return new List<Building>() { new(0, "default building", new() { Id = 0, X = 0, Y = 0 }) };
+        }
+
+        #endregion
+
+        #region other methods
+
+        private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要经过的点 + 出发点。
+        {
+            int pointCount = criticalPoints.Count;
+            int[,] subEdges = new int[pointCount, pointCount];
+            int[] correspondence = criticalPoints.ToArray();
+            for (int i = 0; i < pointCount; i++)
+            {
+                for (int j = 0; j < pointCount; j++)
+                {
+                    subEdges[i, j] = i == j ? int.MaxValue : GetClosestPathLength(criticalPoints[i], criticalPoints[j]);
+                }
+            }
+            return (subEdges, correspondence);
+        }
+
+        private static List<int> GetClosestPath(int startId, int endId)//传参是出发建筑和终点建筑的中心点的id
+        {
+            //遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = GlobalMap!.Size; //点的数量
             List<int>[] route = new List<int>[pointCount];
             int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
@@ -376,76 +510,9 @@ namespace StudentScheduleManagementSystem.Map
             return route[endId];
         }
 
-        public static List<int> GetClosestCircuit(List<int> points)
+        private static int GetClosestPathLength(int startId, int endId)
         {
-            if (points.Count > 10)
-            {
-                throw new TooManyTemporaryAffairsException();
-            }
-            (int[,] submap, int[] correspondence) = CreateSubMap(points);
-            int row = (int)Math.Sqrt(submap.Length), column = 1 << (row - 1);
-            int[,] dp = new int[10, 1 << 10];
-            List<int> res = new() { points[0] };
-
-            for (int i = 0; i < row; i++)
-            {
-                dp[i, 0] = submap[i, 0];
-            }
-
-            for (int j = 1; j < column; j++)
-            {
-                for (int i = 0; i < row; i++)
-                {
-                    dp[i, j] = int.MaxValue;
-                    int bit = j >> (i - 1);
-                    if ((bit & 1) == 1)
-                    {
-                        continue;
-                    }
-                    for (int k = 1; k < row; k++)
-                    {
-                        int bit2 = j >> (k - 1);
-                        int bit3 = j ^ (1 << (k - 1));
-                        if ((bit2 & 1) == 1 && dp[i, j] > submap[i, k] + dp[k, bit3])
-                        {
-                            dp[i, j] = submap[i, k] + dp[k, bit3];
-                        }
-                    }
-                }
-            }
-            bool[] hasVisited = new bool[GlobalMap!.Size];
-            int p = 0, e = column - 1, t = 0, cyc = 0;
-            while (cyc++ < 10)
-            {
-                int min = int.MaxValue;
-                for (int i = 0; i < row; i++)
-                {
-                    int bit = 1 << (i - 1);
-                    if (!hasVisited[i] && (e & bit) == 1)
-                    {
-                        if (min > (GlobalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
-                        {
-                            min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
-                            t = correspondence[i];
-                        }
-                    }
-                }
-                if (p == t)
-                {
-                    break;
-                }
-                p = t;
-                res.Add(p);
-                hasVisited[p] = true;
-                e ^= (1 << (p - 1));
-            }
-            res.Add(points[0]);
-            return res;
-        }
-
-        public static int GetClosestPathLength(int startId, int endId)
-        {
-            int pointCount = GlobalMap!.Size; //点的数量
+            int pointCount = GlobalMap.Size; //点的数量
             int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distance, int.MaxValue);
             distance[startId] = 0;
@@ -478,35 +545,6 @@ namespace StudentScheduleManagementSystem.Map
             return distance[endId];
         }
 
-        #endregion
-
-        #region API on searching
-
-        public static List<Building> GetBuildingsByName(string name)
-        {
-            //UNDONE
-            return new List<Building>() { new(0, "default building", Array.Empty<Vertex>()) };
-        }
-
-        #endregion
-
-        #region other methods
-
-        private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要进过的点 + 出发点。
-        {
-            int pointCount = criticalPoints.Count;
-            int[,] subEdges = new int[pointCount, pointCount];
-            int[] correspondence = criticalPoints.ToArray();
-            for (int i = 0; i < pointCount; i++)
-            {
-                for (int j = 0; j < pointCount; j++)
-                {
-                    subEdges[i, j] = i == j ? int.MaxValue : GetClosestPathLength(criticalPoints[i], criticalPoints[j]);
-                }
-            }
-            return (subEdges, correspondence);
-        }
-
         public static void SetUp()
         {
             var information = FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory);
@@ -515,20 +553,16 @@ namespace StudentScheduleManagementSystem.Map
             {
                 int id = obj["Id"]!.Value<int>();
                 string name = obj["Name"]!.Value<string>()!;
-                JArray doorsArray = (JArray)obj["Doors"]!;
-                if (doorsArray.Count > 4)
-                {
-                    throw new JsonFormatException("too many doors in one building");
-                }
                 Building building = new(id,
                                         name,
-                                        Array.ConvertAll(doorsArray.ToArray(),
-                                                         token => GlobalMap.GetVertex(token["Id"]!.Value<int>())));
-                Buildings!.Add(building);
+                                        GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
+                Buildings.Add(building);
             }
         }
 
-        public static JArray SaveBuildings() => new (Buildings!.ToArray());
+        public static JArray SaveBuildings() =>
+            new(Array.ConvertAll(Buildings.ToArray(),
+                                 building => (Id: building.Id, Name: building.Name, CenterId: building.Center.Id)));
 
         #endregion
     }

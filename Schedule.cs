@@ -11,17 +11,27 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public struct Record : IUniqueRepetitiveEvent
         {
+            public long Id { get; set; }
+
             public RepetitiveType @RepetitiveType { get; init; }
 
             public ScheduleType @ScheduleType { get; init; }
 
-            public long Id { get; set; }
+            public bool Equal(object? other)
+            {
+                if (other == null)
+                {
+                    return false;
+                }
+                return Id == ((Record)other).Id && RepetitiveType == ((Record)other).RepetitiveType && ScheduleType == ((Record)other).ScheduleType;
+            }
         }
 
         protected class DeserializedObjectBase
         {
             public ScheduleType @ScheduleType { get; set; }
             public RepetitiveType @RepetitiveType { get; set; }
+            public int[] ActiveWeeks { get; set; }
             public Day[] ActiveDays { get; set; }
             public long ScheduleId { get; set; }
             public string Name { get; set; }
@@ -40,6 +50,8 @@ namespace StudentScheduleManagementSystem.Schedule
             public string Name { get; set; }
             [JsonConverter(typeof(StringEnumConverter))]
             public RepetitiveType @RepetitiveType { get; set; }
+            [JsonProperty]
+            public int[] ActiveWeeks { get; set; }
             [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
             public Day[] ActiveDays { get; set; }
             public Times.Time Timestamp { get; set; }
@@ -56,10 +68,10 @@ namespace StudentScheduleManagementSystem.Schedule
                 return objectType == typeof(Map.Location.Building);
             }
 
-            public override object ReadJson(JsonReader reader,
-                                            Type objectType,
-                                            object? existingValue,
-                                            JsonSerializer serializer)
+            public override object? ReadJson(JsonReader reader,
+                                             Type objectType,
+                                             object? existingValue,
+                                             JsonSerializer serializer)
             {
                 bool isNullableType = Nullable.GetUnderlyingType(objectType) != null;
                 //Type type = isNullableType ? Nullable.GetUnderlyingType(objectType)! : objectType;
@@ -171,6 +183,8 @@ namespace StudentScheduleManagementSystem.Schedule
 
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; init; }
+        [JsonProperty]
+        public int[] ActiveWeeks { get; init; }
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public Day[] ActiveDays { get; init; }
         [JsonProperty] public long ScheduleId { get; protected set; } = 0;
@@ -194,7 +208,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                int duration,
                                bool isOnline,
                                string? description,
-                               params Day[] activeDays)
+                               int[] activeWeeks,
+                               Day[] activeDays)
         {
             if (duration is not (1 or 2 or 3))
             {
@@ -208,16 +223,43 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentOutOfRangeException(nameof(repetitiveType));
             }
+            if (activeDays.GroupBy(x => x).Any(x => x.Count() > 1))
+            {
+                throw new ArgumentException("duplicate item in argument \"activeDays\"");
+            }
+            if (activeWeeks.GroupBy(x => x).Any(x => x.Count() > 1))
+            {
+                throw new ArgumentException("duplicate item in argument \"activeWeeks\"");
+            }
+            if (activeWeeks.Any(x => x < 1 || x > 16))
+            {
+                throw new ArgumentException("the rank of argument \"activeWeeks\" is out of range");
+            }
             if (repetitiveType == RepetitiveType.Single && activeDays.Length != 0)
             {
-                throw new ArgumentException("Repetitive type is single but argument \"activeDays\" is not null");
+                throw new ArgumentException("repetitive type is single but argument \"activeDays\" is not null");
             }
             if (repetitiveType != RepetitiveType.Single && activeDays.Length == 0)
             {
-                throw new ArgumentException("Repetitive type is multipledays but argument \"activeDays\" is null");
+                throw new ArgumentException("repetitive type is multipledays but argument \"activeDays\" is null");
             }
+            /*if (repetitiveType == RepetitiveType.MultipleDays && !activeDays.Contains(beginTime.Day))
+            {
+                throw new ArgumentException("argument \"activeDays\" do not contain the day that argument \"beginTime\" specifies");
+            }*/
+            if (repetitiveType == RepetitiveType.MultipleDays && !activeWeeks.SequenceEqual(Constants.AllWeeks))
+            {
+                throw new ArgumentException("repetitive type is multipledays but argument \"activeWeeks\" does not contain some weeks");
+            }
+            if (repetitiveType == RepetitiveType.Designated && activeWeeks.Length is 0 or >= 16)
+            {
+                throw new ArgumentException("argument \"activeWeeks\" contains elements that are out of bound");
+            }
+            Array.Sort(activeWeeks);
+            Array.Sort(activeDays);
             RepetitiveType = repetitiveType;
             ActiveDays = activeDays;
+            ActiveWeeks = activeWeeks;
             Name = name;
             BeginTime = beginTime;
             Duration = duration;
@@ -278,7 +320,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public virtual void RemoveSchedule()
         {
-            RemoveSchedule(ScheduleId, !(ScheduleType != ScheduleType.Activity));
+            RemoveSchedule(ScheduleId);
             if (ScheduleType == ScheduleType.Course)
             {
                 _courseIdList.Remove(ScheduleId);
@@ -289,21 +331,26 @@ namespace StudentScheduleManagementSystem.Schedule
                 _examIdList.Remove(ScheduleId);
                 _correspondenceDictionary.Remove(ScheduleId);
             }
-            Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveDays);
+            else if (ScheduleType == ScheduleType.Activity)
+            {
+                _groupActivityList.Remove(ScheduleId);
+                _correspondenceDictionary.Remove(ScheduleId);
+            }
         }
 
-        protected static void RemoveSchedule(long scheduleId, bool reviseElementCount)
+        protected static void RemoveSchedule(long scheduleId)
         {
             ScheduleBase schedule = _scheduleList[scheduleId];
             _scheduleList.Remove(scheduleId);
             _timeline.RemoveMultipleItems(schedule.BeginTime,
+                                          schedule.Duration,
                                           schedule.RepetitiveType,
                                           out _,
-                                          reviseElementCount,
+                                          schedule.ActiveWeeks,
                                           schedule.ActiveDays);
             if (schedule.AlarmEnabled)
             {
-                Times.Alarm.RemoveAlarm(schedule.BeginTime, schedule.RepetitiveType, schedule.ActiveDays);
+                Times.Alarm.RemoveAlarm(schedule.BeginTime, schedule.RepetitiveType, schedule.ActiveWeeks, schedule.ActiveDays);
             }
         }
 
@@ -327,7 +374,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     else if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（需要选择是否覆盖）
                     {
                         overrideType = _timeline[offset].RepetitiveType;
-                        goto deleting_process; //跳出循环
+                        goto delete_process; //跳出循环
                     }
                 }
             }
@@ -344,9 +391,24 @@ namespace StudentScheduleManagementSystem.Schedule
                             if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（自身不可能为临时日程，需要选择是否覆盖）
                             {
                                 overrideType = _timeline[offset].RepetitiveType;
-                                goto deleting_process; //跳出循环
+                                goto delete_process; //跳出循环
                             }
                             offset += 7 * 24;
+                        }
+                    }
+                }
+            }
+            else if (RepetitiveType == RepetitiveType.Designated)
+            {
+                foreach (var activeWeek in ActiveWeeks)
+                {
+                    foreach (var activeDay in ActiveDays)
+                    {
+                        Times.Time activeTime = new() { Week = activeWeek, Day = activeDay, Hour = BeginTime.Hour };
+                        if (_timeline[activeTime.ToInt()].ScheduleType != ScheduleType.Idle)
+                        {
+                            overrideType = _timeline[offset].RepetitiveType;
+                            goto delete_process;//跳出多重循环
                         }
                     }
                 }
@@ -355,7 +417,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
-            deleting_process:
+            delete_process:
             //_timeline[offset]记录的是会覆盖的日程
             //TODO:增加删除逻辑
             switch ((overrideType, RepetitiveType))
@@ -367,66 +429,47 @@ namespace StudentScheduleManagementSystem.Schedule
                 case (RepetitiveType.Single, RepetitiveType.MultipleDays):
                     Console.WriteLine($"id为{_timeline[offset].Id}的单次日程已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的单次日程已被覆盖");
-                    RemoveSchedule(_timeline[offset].Id, true);
+                    RemoveSchedule(_timeline[offset].Id);
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.Single):
                     Console.WriteLine($"id为{_timeline[offset].Id}的重复日程在{BeginTime.ToString()}上已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的重复日程在{BeginTime.ToString()}上已被覆盖");
-                    _timeline.RemoveMultipleItems(offset.ToTimeStamp(), RepetitiveType.Single, out _, false);
+                    _timeline.RemoveMultipleItems(offset.ToTimeStamp(), 1, RepetitiveType, out _, Array.Empty<int>(), Array.Empty<Day>());
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
                     throw new InvalidOperationException("conflicting multipledays schedule");
+                case (RepetitiveType.Designated, _):
+                    throw new InvalidOperationException("cannot automatically override alarm whose repetitive type is designated");
                 default:
                     throw new ArgumentException(null, nameof(RepetitiveType));
             }
-            long thisScheduleId;
-            if (ScheduleType == ScheduleType.Course)
+            long? thisScheduleId = (ScheduleType, specifiedId) switch
             {
-                thisScheduleId = specifiedId == null ? GetProperId(_courseIdList) : specifiedId.Value;
-                _timeline.AddMultipleItems(thisScheduleId,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = this.RepetitiveType,
-                                               ScheduleType = this.ScheduleType
-                                           },
-                                           out _,
-                                           !(ScheduleType != ScheduleType.Activity),
-                                           ActiveDays);
-            }
-            else if (ScheduleType == ScheduleType.Exam)
-            {
-                thisScheduleId = specifiedId == null ? GetProperId(_examIdList) : specifiedId.Value;
-                _timeline.AddMultipleItems(thisScheduleId,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = RepetitiveType.Single,
-                                               ScheduleType = this.ScheduleType
-                                           },
-                                           out _,
-                                           !(ScheduleType != ScheduleType.Activity));
-            }
-            else
-            {
-                _timeline.AddMultipleItems(null,
-                                           beginWith,
-                                           BeginTime,
-                                           Duration,
-                                           new Record
-                                           {
-                                               RepetitiveType = this.RepetitiveType, ScheduleType = ScheduleType
-                                           },
-                                           out thisScheduleId,
-                                           !(ScheduleType != ScheduleType.Activity),
-                                           ActiveDays);
-            }
-            ScheduleId = thisScheduleId;
-            _scheduleList.Add(thisScheduleId, this); //调用前已创建实例
+                (ScheduleType.Course, null) => GetProperId(_courseIdList),
+                (ScheduleType.Course, _) => specifiedId.Value,
+                (ScheduleType.Exam, null) => GetProperId(_examIdList),
+                (ScheduleType.Exam, _) => specifiedId.Value,
+                (ScheduleType.Activity, null) => ((Activity)this).IsGroupActivity ? GetProperId(_groupActivityList) : null,
+                (ScheduleType.Activity, _) => specifiedId.Value,
+                (ScheduleType.TemporaryAffair, null) => null,
+                (ScheduleType.TemporaryAffair, _) => specifiedId.Value,
+                (_, _) => throw new ArgumentException(null, nameof(ScheduleType)),
+            };
+            _timeline.AddMultipleItems(thisScheduleId,
+                                       beginWith,
+                                       BeginTime,
+                                       Duration,
+                                       new Record
+                                       {
+                                           RepetitiveType = this.RepetitiveType,
+                                           ScheduleType = this.ScheduleType
+                                       },
+                                       out long outScheduleId,
+                                       ActiveWeeks,
+                                       ActiveDays);
+            thisScheduleId ??= outScheduleId;
+            ScheduleId = thisScheduleId.Value;
+            _scheduleList.Add(thisScheduleId.Value, this); //调用前已创建实例
             Log.Information.Log("已在时间轴与表中添加日程");
         }
 
@@ -507,6 +550,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                  callbackParameter,
                                  typeof(T),
                                  false,
+                                 ActiveWeeks,
                                  ActiveDays); //默认为本日程的重复时间与启用日期
             AlarmEnabled = true;
         }
@@ -517,7 +561,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new AlarmManipulationException();
             }
-            Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveDays);
+            Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveWeeks, ActiveDays);
         }
 
         #endregion
@@ -599,7 +643,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 _timeline.SetTotalElementCount(arr);
                 #endif
             }
-            catch (FileNotFoundException) { }
+            catch (KeyNotFoundException) { }
         }
 
         public static void SaveSharedData()
@@ -733,8 +777,9 @@ namespace StudentScheduleManagementSystem.Schedule
                       int duration,
                       string? description,
                       string onlineLink,
-                      params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
+                      int[] activeWeeks,
+                      Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -768,8 +813,9 @@ namespace StudentScheduleManagementSystem.Schedule
                       int duration,
                       string? description,
                       Map.Location.Building location,
-                      params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
+                      int[] activeWeeks,
+                      Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -821,6 +867,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                    dobj.Duration,
                                    dobj.Description,
                                    location,
+                                   dobj.ActiveWeeks,
                                    dobj.ActiveDays);
                 }
                 else if (dobj.OnlineLink != null)
@@ -832,6 +879,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                    dobj.Duration,
                                    dobj.Description,
                                    dobj.OnlineLink,
+                                   dobj.ActiveWeeks,
                                    dobj.ActiveDays);
                 }
                 else
@@ -879,7 +927,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     int duration,
                     string? description,
                     Map.Location.Building offlineLocation)
-            : base(RepetitiveType.Single, name, beginTime, duration, false, description)
+            : base(RepetitiveType.Single, name, beginTime, duration, false, description, Array.Empty<int>(), Array.Empty<Day>())
         {
             if (beginTime.Day is Day.Saturday or Day.Sunday)
             {
@@ -962,7 +1010,7 @@ namespace StudentScheduleManagementSystem.Schedule
                            int duration,
                            bool isOnline,
                            string? description)
-            : base(repetitiveType, name, beginTime, duration, isOnline, description) { }
+            : base(repetitiveType, name, beginTime, duration, isOnline, description, Array.Empty<int>(), Array.Empty<Day>()) { }
 
         public Activity(RepetitiveType repetitiveType,
                         string name,
@@ -970,8 +1018,9 @@ namespace StudentScheduleManagementSystem.Schedule
                         int duration,
                         string? description,
                         string onlineLink,
-                        params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, true, description, activeDays)
+                        int[] activeWeeks,
+                        Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, true, description, activeWeeks, activeDays)
         {
             OnlineLink = onlineLink;
             OfflineLocation = null;
@@ -1000,8 +1049,9 @@ namespace StudentScheduleManagementSystem.Schedule
                         int duration,
                         string? description,
                         Map.Location.Building location,
-                        params Day[] activeDays)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeDays)
+                        int[] activeWeeks,
+                        Day[] activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays)
         {
             OnlineLink = null;
             OfflineLocation = location;
@@ -1048,6 +1098,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                      dobj.Duration,
                                      dobj.Description,
                                      location,
+                                     dobj.ActiveWeeks,
                                      dobj.ActiveDays) { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else if (dobj.OnlineLink != null)
@@ -1058,6 +1109,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                      dobj.Duration,
                                      dobj.Description,
                                      dobj.OnlineLink,
+                                     dobj.ActiveWeeks,
                                      dobj.ActiveDays) { AlarmEnabled = dobj.AlarmEnabled };
                 }
                 else
@@ -1164,7 +1216,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 ScheduleId = _timeline[offset].Id;
                 TemporaryAffairs affairs = (TemporaryAffairs)_scheduleList[_timeline[offset].Id];
-                if (affairs._locations.Count == 10)
+                if (affairs._locations.Count == 20)
                 {
                     throw new TooManyTemporaryAffairsException();
                 }
