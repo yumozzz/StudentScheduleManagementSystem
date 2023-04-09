@@ -637,7 +637,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 _timeline.SetTotalElementCount(arr);
                 #endif
             }
-            catch (FileNotFoundException) { }
+            catch (KeyNotFoundException) { }
         }
 
         public static void SaveSharedData()

@@ -103,11 +103,15 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         private static void ReadFromInstanceDictionary(Dictionary<string, JArray> instanceDictionary)
         {
-            Times.Alarm.CreateInstance(instanceDictionary["Alarm"]);
-            Schedule.Course.CreateInstance(instanceDictionary["Course"]);
-            Schedule.Exam.CreateInstance(instanceDictionary["Exam"]);
-            Schedule.Activity.CreateInstance(instanceDictionary["Activity"]);
-            Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
+            try
+            {
+                Times.Alarm.CreateInstance(instanceDictionary["Alarm"]);
+                Schedule.Course.CreateInstance(instanceDictionary["Course"]);
+                Schedule.Exam.CreateInstance(instanceDictionary["Exam"]);
+                Schedule.Activity.CreateInstance(instanceDictionary["Activity"]);
+                Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
+            }
+            catch (KeyNotFoundException) { }
         }
 
         //TODO:适配UI
