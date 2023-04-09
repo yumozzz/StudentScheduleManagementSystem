@@ -1,6 +1,6 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class MapWindow
+    partial class MapSubwindow
     {
         /// <summary>
         /// Required designer variable.
@@ -37,21 +37,22 @@
             this.pictureBox1.Image = global::StudentScheduleManagementSystem.Properties.Resources.SchoolMap;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(738, 1053);
+            this.pictureBox1.Size = new System.Drawing.Size(779, 1145);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
             // 
-            // ShowMap
+            // MapSubwindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(740, 1048);
+            this.ClientSize = new System.Drawing.Size(778, 1144);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Name = "ShowMap";
-            this.Text = "ShowMap";
+            this.Name = "MapSubwindow";
+            this.Text = "Map";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 

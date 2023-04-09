@@ -1,4 +1,4 @@
-﻿#define COURSEEXAMTEST
+﻿//#define COURSEEXAMTEST
 
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using StudentScheduleManagementSystem.Schedule;
+using Newtonsoft.Json.Converters;
 
 [assembly: RequiresPreviewFeatures]
 
@@ -20,11 +20,11 @@ namespace StudentScheduleManagementSystem.MainProgram
         {
             public string Username { get; set; }
             public string Password { get; set; }
-            public Identity @Identity { get; set; }
+            [JsonConverter(typeof(StringEnumConverter))]public Identity @Identity { get; set; }
         }
 
         internal static CancellationTokenSource _cts = new();
-        internal static List<UserAccountInformation> _accounts;
+        internal static Dictionary<string, UserAccountInformation> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static Identity @Identity { get; private set; }
 
@@ -38,15 +38,14 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Init();
-                UserId = "2021210000";
-                Identity = Identity.User;
+                //while(!LogIn("2021210001",Console.ReadLine())) { }
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-                Course course = new(null,
+                Schedule.Course course = new(null,
                                     RepetitiveType.Designated,
                                     "test course*",
                                     new() { Week = 1, Day = Day.Monday, Hour = 12 },
@@ -60,7 +59,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 {
                     Thread.Sleep(100);
                 }
-                LogOut(UserId);
+                //LogOut(UserId);
                 Exit();
             }
             /*catch (Exception ex)
@@ -123,7 +122,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputPassword));
                 string encodedPassword = Convert.ToBase64String(code);
                 bool find = false;
-                foreach (var information in _accounts)
+                foreach ((_, var information) in _accounts)
                 {
                     if (information.Username == inputUserId && information.Password == encodedPassword)
                     {
@@ -151,6 +150,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      Array.Empty<int>(),
                                      Array.Empty<Day>());
                 UserId = inputUserId;
+                Times.Timer.Pause = false;
                 return true;
             }
             catch (FileNotFoundException ex)
@@ -169,13 +169,13 @@ namespace StudentScheduleManagementSystem.MainProgram
         {
             try
             {
-                Regex idRegex = new("^202\\d21\\d{{3}}$");
-                Regex passwordRegex = new("^\\w{{6,30}}$");
+                Regex idRegex = new(@"^202\d21\d{4}$");
+                Regex passwordRegex = new(@"^\w{6,30}$");
                 if (!idRegex.IsMatch(userId))
                 {
                     throw new FormatException("id format error");
                 }
-                if (!passwordRegex.IsMatch(userId))
+                if (!passwordRegex.IsMatch(password))
                 {
                     throw new FormatException("password format error");
                 }
@@ -183,12 +183,18 @@ namespace StudentScheduleManagementSystem.MainProgram
                 byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(password));
                 string encodedPassword = Convert.ToBase64String(code);
                 UserId = userId;
-                _accounts.Add(new() { Password = encodedPassword, Identity = identity });
+                _accounts.Add(userId, new() { Username = userId, Password = encodedPassword, Identity = identity });
+                Times.Timer.Pause = false;
                 return true;
             }
             catch (FormatException)
             {
                 Log.Error.Log("用户名或密码格式错误", null);
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                Log.Error.Log("用户已存在", null);
                 return false;
             }
         }
@@ -198,21 +204,28 @@ namespace StudentScheduleManagementSystem.MainProgram
             FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
                                                       FileManagement.FileManager.UserFileDirectory,
                                                       userId);
+            Times.Timer.Pause = true;
+            Times.Alarm.ClearAll();
+            Schedule.ScheduleBase.ClearAll();
+            MessageBox.Show("Log out successfully!");
             Log.Information.Log($"用户{userId}已登出");
         }
 
         public static void Init()
         {
             Log.LogBase.Setup();
-            _accounts =
-                FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+            var accounts = FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+            foreach(var account in accounts)
+            {
+                _accounts.Add(account.Username, account);
+            }
             //Map.Location.SetUp();
             //Schedule.ScheduleBase.ReadSharedData();
         }
 
         public static void Exit()
         {
-            FileManagement.FileManager.SaveToUserAccountFile(_accounts, FileManagement.FileManager.UserFileDirectory);
+            FileManagement.FileManager.SaveToUserAccountFile(_accounts.Values.ToList(), FileManagement.FileManager.UserFileDirectory);
             /*FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap!.SaveInstance(),
                                                      Map.Location.SaveBuildings(),
                                                      FileManagement.FileManager.MapFileDirectory);*/

@@ -308,6 +308,12 @@ namespace StudentScheduleManagementSystem.Schedule
             return left.Item3.SequenceEqual(right.Item3);
         }
 
+        public static void ClearAll()
+        {
+            _scheduleList.Clear();
+            _timeline.Clear();
+        }
+
         #endregion
 
         #region API on schedule manipulation

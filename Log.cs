@@ -58,10 +58,10 @@ namespace StudentScheduleManagementSystem.Log
         public static void Log(string? message, Exception? ex)
         {
             string log =
-                $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message ?? "No message."}\"";
+                $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message ?? "No message."}\"\n";
             if (ex != null)
             {
-                log += $"\nThe exception is \"{ex.Message}\"\n{ex.StackTrace}\n";
+                log += $"The exception is \"{ex.Message}\"\n{ex.StackTrace}\n";
             }
             var arr = Encoding.UTF8.GetBytes(log);
             LogBase.Stream!.Write(arr, 0, arr.Length);
