@@ -153,6 +153,5 @@
         private Button close;
         private Panel move;
         private Button register;
-        private MultiSelectBox multiSelectBox1;
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using Microsoft.VisualBasic.ApplicationServices;
+﻿using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace StudentScheduleManagementSystem.FileManagement
@@ -80,7 +78,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             Log.Information.Log("已保存地图信息");
         }
 
-        public static Dictionary<string, MainProgram.Program.UserAccountInformation> ReadFromUserAccountFile(string fileFolder, string fileName = "accounts")
+        public static List<MainProgram.Program.UserAccountInformation> ReadFromUserAccountFile(string fileFolder, string fileName = "accounts")
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -95,16 +93,16 @@ namespace StudentScheduleManagementSystem.FileManagement
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserAccountInformation>>();
             Log.Information.Log("已读取账号信息");
-            return ret;
+            return ret!;
         }
 
-        public static void SaveToUserAccountFile(Dictionary<string, MainProgram.Program.UserAccountInformation> accounts, string fileFolder, string fileName = "accounts")
+        public static void SaveToUserAccountFile(List<MainProgram.Program.UserAccountInformation> accounts, string fileFolder, string fileName = "accounts")
         {
             if (!Directory.Exists(fileFolder))
             {
                 Directory.CreateDirectory(fileFolder);
             }
-            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(JArray.FromObject(accounts.Values).ToString()));
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(JArray.FromObject(accounts).ToString()));
             Log.Information.Log("已保存账号信息");
         }
     }

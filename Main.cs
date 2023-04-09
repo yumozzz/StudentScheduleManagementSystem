@@ -24,7 +24,7 @@ namespace StudentScheduleManagementSystem.MainProgram
         }
 
         internal static CancellationTokenSource _cts = new();
-        internal static Dictionary<string, UserAccountInformation> _accounts;
+        internal static Dictionary<string, UserAccountInformation> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static Identity @Identity { get; private set; }
 
@@ -45,7 +45,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 mainThread.Start();*/
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-                Course course = new(null,
+                Schedule.Course course = new(null,
                                     RepetitiveType.Designated,
                                     "test course*",
                                     new() { Week = 1, Day = Day.Monday, Hour = 12 },
@@ -214,15 +214,18 @@ namespace StudentScheduleManagementSystem.MainProgram
         public static void Init()
         {
             Log.LogBase.Setup();
-            _accounts =
-                FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+            var accounts = FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+            foreach(var account in accounts)
+            {
+                _accounts.Add(account.Username, account);
+            }
             //Map.Location.SetUp();
             //Schedule.ScheduleBase.ReadSharedData();
         }
 
         public static void Exit()
         {
-            FileManagement.FileManager.SaveToUserAccountFile(_accounts, FileManagement.FileManager.UserFileDirectory);
+            FileManagement.FileManager.SaveToUserAccountFile(_accounts.Values.ToList(), FileManagement.FileManager.UserFileDirectory);
             /*FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap!.SaveInstance(),
                                                      Map.Location.SaveBuildings(),
                                                      FileManagement.FileManager.MapFileDirectory);*/
