@@ -358,7 +358,7 @@ namespace StudentScheduleManagementSystem.Map
                 throw new ArgumentException("too many or too few items in parameter \"buildings\"");
             }
             (int[,] submap, int[] correspondence) = CreateSubMap(points);
-            int row = (int)Math.Sqrt(submap.Length), column = 1 << (row - 1);
+            int row = submap.GetLength(0), column = 1 << (row - 1);
             int[,] dp = new int[20, 1 << 20];
             List<int> res = new() { points[0] };
 
@@ -396,13 +396,11 @@ namespace StudentScheduleManagementSystem.Map
                 for (int i = 0; i < row; i++)
                 {
                     int bit = 1 << (i - 1);
-                    if (!hasVisited[i] && (e & bit) == 1)
+                    if (!hasVisited[i] && (e & bit) == 1 &&
+                        min > (GlobalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
                     {
-                        if (min > (GlobalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
-                        {
-                            min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
-                            t = correspondence[i];
-                        }
+                        min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
+                        t = correspondence[i];
                     }
                 }
                 if (p == t)
