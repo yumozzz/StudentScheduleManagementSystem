@@ -481,7 +481,7 @@ namespace StudentScheduleManagementSystem.Times
             _alarmList.Add(thisAlarmId,
                            new()
                            {
-                               RepetitiveType = RepetitiveType.Single,
+                               RepetitiveType = repetitiveType,
                                ActiveDays = activeDays,
                                AlarmId = thisAlarmId,
                                BeginTime = timestamp,
@@ -582,7 +582,7 @@ namespace StudentScheduleManagementSystem.Times
             JArray array = new();
             foreach ((long id, Alarm alarm) in _alarmList)
             {
-                if (alarm.AlarmId == _dailyNotificationAlarmId)
+                if (id == _dailyNotificationAlarmId)
                 {
                     continue;
                 }
@@ -636,7 +636,7 @@ namespace StudentScheduleManagementSystem.Times
     public static class Timer
     {
         private const int BaseTimeout = 10000;
-        private static int accleration = 10;
+        private static int _acceleration = 10;
         private static Time _localTime = new();
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();
@@ -656,7 +656,7 @@ namespace StudentScheduleManagementSystem.Times
                     _localTime++;
                     _offset++;
                 }
-                Thread.Sleep(BaseTimeout / accleration);
+                Thread.Sleep(BaseTimeout / _acceleration);
             }
             Console.WriteLine("clock terminate");
         }
@@ -670,18 +670,18 @@ namespace StudentScheduleManagementSystem.Times
 
         public static int SetSpeed()
         {
-            switch (accleration)
+            switch (_acceleration)
             {
                 case 1:
-                    accleration = 2;
+                    _acceleration = 2;
                     Log.Information.Log("时间流速已设定为2x");
                     return 2;
                 case 2:
-                    accleration = 5;
+                    _acceleration = 5;
                     Log.Information.Log("时间流速已设定为5x");
                     return 5;
                 case 5:
-                    accleration = 1;
+                    _acceleration = 1;
                     Log.Information.Log("时间流速已设定为1x");
                     return 1;
                 default: 
