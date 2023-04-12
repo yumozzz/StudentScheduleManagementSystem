@@ -43,7 +43,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                if (MainProgram.Program.LogIn(usernamebox.Text, passwordbox.Text))
+                if (MainProgram.Program.Login(usernamebox.Text, passwordbox.Text))
                 {
                     MessageBox.Show("Successfully login!");
                     

@@ -8,7 +8,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Converters;
 
 [assembly: RequiresPreviewFeatures]
 
@@ -16,15 +15,14 @@ namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
     {
-        public struct UserAccountInformation
+        public struct UserInformation
         {
             public string UserId { get; set; }
             public string Password { get; set; }
-            [JsonConverter(typeof(StringEnumConverter))]public Identity @Identity { get; set; }
         }
 
         internal static CancellationTokenSource _cts = new();
-        internal static Dictionary<string, UserAccountInformation> _accounts = new();
+        internal static Dictionary<string, string> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static string Password { get; private set; } = String.Empty;
         public static Identity @Identity { get; private set; }
@@ -38,7 +36,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Init();
+                InitModules();
                 Encryption.Encrypt.InitRSAProviderWithPassword("yumozzz");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
@@ -115,23 +113,31 @@ namespace StudentScheduleManagementSystem.MainProgram
         }
 
         //TODO:适配UI
-        public static bool LogIn(string inputUserId, string inputPassword)
+        public static bool Login(string inputUserId, string inputPassword)
         {
             try
             {
+                var password = _accounts[inputUserId];
+                Encryption.Encrypt.InitRSAProviderWithPassword(inputPassword);
                 MD5 md5 = MD5.Create();
-                int hashSum = inputPassword.GetHashCode();
-                hashSum |= inputPassword.ToString().GetHashCode();
-                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(hashSum.ToString()));
+                var enc = Encryption.Encrypt.RSAEncrypt("Administrator");
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputUserId + enc));
                 string encodedPassword = Convert.ToBase64String(code);
                 bool find = false;
-                foreach ((_, var information) in _accounts)
+                if (password == encodedPassword)
                 {
-                    if (information.UserId == inputUserId && information.Password == encodedPassword)
+                    Identity = Identity.Administrator;
+                    find = true;
+                }
+                if (!find)
+                {
+                    enc = Encryption.Encrypt.RSAEncrypt("User");
+                    code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputUserId + enc));
+                    encodedPassword = Convert.ToBase64String(code);
+                    if (password == encodedPassword)
                     {
-                        Identity = information.Identity;
+                        Identity = Identity.User;
                         find = true;
-                        break;
                     }
                 }
                 if (!find)
@@ -154,16 +160,15 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      Array.Empty<Day>());
                 UserId = inputUserId;
                 Password = inputPassword;
-                Encryption.Encrypt.InitRSAProviderWithPassword(Password);
                 Times.Timer.Pause = false;
                 return true;
             }
             catch (FileNotFoundException ex)
             {
-                Log.Error.Log("用户文件不存在，是否需要注册？", ex);
+                Log.Error.Log("用户文件不存在，考虑注册", ex);
                 return false;
             }
-            catch (AuthenticationException)
+            catch (Exception ex) when (ex is AuthenticationException or KeyNotFoundException)
             {
                 Log.Error.Log("用户名或密码输入错误", null);
                 return false;
@@ -184,16 +189,15 @@ namespace StudentScheduleManagementSystem.MainProgram
                 {
                     throw new FormatException("password format error");
                 }
+                Encryption.Encrypt.InitRSAProviderWithPassword(password);
                 MD5 md5 = MD5.Create();
-                int hashSum = password.GetHashCode();
-                hashSum |= identity.ToString().GetHashCode();
-                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(hashSum.ToString()));
+                var enc = Encryption.Encrypt.RSAEncrypt(identity.ToString());
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(password + enc));
                 string encodedPassword = Convert.ToBase64String(code);
+                _accounts.Add(userId, encodedPassword);
                 UserId = userId;
                 Password = password;
-                _accounts.Add(userId, new() { UserId = userId, Password = encodedPassword, Identity = identity });
                 Times.Timer.Pause = false;
-                Encryption.Encrypt.InitRSAProviderWithPassword(Password);
                 return true;
             }
             catch (FormatException)
@@ -208,25 +212,25 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
         }
 
-        public static void LogOut(string userId)
+        public static void Logout()
         {
             FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
                                                       FileManagement.FileManager.UserFileDirectory,
-                                                      userId);
+                                                      UserId);
             Times.Timer.Pause = true;
             Times.Alarm.ClearAll();
             Schedule.ScheduleBase.ClearAll();
             MessageBox.Show("Log out successfully!");
-            Log.Information.Log($"用户{userId}已登出");
+            Log.Information.Log($"用户{UserId}已登出");
         }
 
-        public static void Init()
+        public static void InitModules()
         {
-            Log.LogBase.Setup();
+            Log.LogBase.Setup();                  
             var accounts = FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
             foreach(var account in accounts)
             {
-                _accounts.Add(account.UserId, account);
+                _accounts.Add(account.UserId, account.Password);
             }
             //Map.Location.SetUp();
             //Schedule.ScheduleBase.ReadSharedData();
@@ -234,7 +238,13 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         public static void Exit()
         {
-            FileManagement.FileManager.SaveToUserAccountFile(_accounts.Values.ToList(), FileManagement.FileManager.UserFileDirectory);
+            FileManagement.FileManager.SaveToUserAccountFile(_accounts.ToList()
+                                                                      .ConvertAll(kvpair => new UserInformation()
+                                                                       {
+                                                                           UserId = kvpair.Key,
+                                                                           Password = kvpair.Value
+                                                                       }),
+                                                             FileManagement.FileManager.UserFileDirectory);
             /*FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap!.SaveInstance(),
                                                      Map.Location.SaveBuildings(),
                                                      FileManagement.FileManager.MapFileDirectory);*/

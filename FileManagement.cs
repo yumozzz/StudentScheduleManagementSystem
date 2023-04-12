@@ -89,7 +89,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             Log.Information.Log("已保存地图信息");
         }
 
-        public static List<MainProgram.Program.UserAccountInformation> ReadFromUserAccountFile(
+        public static List<MainProgram.Program.UserInformation> ReadFromUserAccountFile(
             string fileFolder,
             string fileName = "accounts")
         {
@@ -104,12 +104,12 @@ namespace StudentScheduleManagementSystem.FileManagement
                 return new();
             }
             string jsonSource = ReadPlain(fileFolder, fileName);
-            var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserAccountInformation>>();
+            var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserInformation>>();
             Log.Information.Log("已读取账号信息");
             return ret!;
         }
 
-        public static void SaveToUserAccountFile(List<MainProgram.Program.UserAccountInformation> accounts,
+        public static void SaveToUserAccountFile(List<MainProgram.Program.UserInformation> accounts,
                                                  string fileFolder,
                                                  string fileName = "accounts")
         {

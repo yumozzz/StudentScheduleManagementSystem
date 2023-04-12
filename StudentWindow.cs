@@ -65,7 +65,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void Logout_Click(object sender, EventArgs e)
         {
-            MainProgram.Program.LogOut(MainProgram.Program.UserId);
+            MainProgram.Program.Logout();
             this.Close();
         }
 
