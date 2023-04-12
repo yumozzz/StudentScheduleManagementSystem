@@ -27,7 +27,7 @@ namespace StudentScheduleManagementSystem.DataStructure
             {
                 Vector<T> localVec = _vec;
 
-                if (_version == localVec._version && ((uint)_index < (uint)localVec.Count))
+                if (_version == localVec._version && _index < localVec.Count)
                 {
                     _current = localVec._array[_index];
                     _index++;

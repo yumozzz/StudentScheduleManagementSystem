@@ -18,7 +18,7 @@ namespace StudentScheduleManagementSystem.MainProgram
     {
         public struct UserAccountInformation
         {
-            public string Username { get; set; }
+            public string UserId { get; set; }
             public string Password { get; set; }
             [JsonConverter(typeof(StringEnumConverter))]public Identity @Identity { get; set; }
         }
@@ -26,6 +26,7 @@ namespace StudentScheduleManagementSystem.MainProgram
         internal static CancellationTokenSource _cts = new();
         internal static Dictionary<string, UserAccountInformation> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
+        public static string Password { get; private set; } = String.Empty;
         public static Identity @Identity { get; private set; }
 
         [STAThread]
@@ -38,7 +39,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Init();
-                //while(!LogIn("2021210001",Console.ReadLine())) { }
+                Encryption.Encrypt.InitRSAProviderWithPassword("yumozzz");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -119,12 +120,14 @@ namespace StudentScheduleManagementSystem.MainProgram
             try
             {
                 MD5 md5 = MD5.Create();
-                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputPassword));
+                int hashSum = inputPassword.GetHashCode();
+                hashSum |= inputPassword.ToString().GetHashCode();
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(hashSum.ToString()));
                 string encodedPassword = Convert.ToBase64String(code);
                 bool find = false;
                 foreach ((_, var information) in _accounts)
                 {
-                    if (information.Username == inputUserId && information.Password == encodedPassword)
+                    if (information.UserId == inputUserId && information.Password == encodedPassword)
                     {
                         Identity = information.Identity;
                         find = true;
@@ -150,6 +153,8 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      Array.Empty<int>(),
                                      Array.Empty<Day>());
                 UserId = inputUserId;
+                Password = inputPassword;
+                Encryption.Encrypt.InitRSAProviderWithPassword(Password);
                 Times.Timer.Pause = false;
                 return true;
             }
@@ -180,11 +185,15 @@ namespace StudentScheduleManagementSystem.MainProgram
                     throw new FormatException("password format error");
                 }
                 MD5 md5 = MD5.Create();
-                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(password));
+                int hashSum = password.GetHashCode();
+                hashSum |= identity.ToString().GetHashCode();
+                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(hashSum.ToString()));
                 string encodedPassword = Convert.ToBase64String(code);
                 UserId = userId;
-                _accounts.Add(userId, new() { Username = userId, Password = encodedPassword, Identity = identity });
+                Password = password;
+                _accounts.Add(userId, new() { UserId = userId, Password = encodedPassword, Identity = identity });
                 Times.Timer.Pause = false;
+                Encryption.Encrypt.InitRSAProviderWithPassword(Password);
                 return true;
             }
             catch (FormatException)
@@ -217,7 +226,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             var accounts = FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
             foreach(var account in accounts)
             {
-                _accounts.Add(account.Username, account);
+                _accounts.Add(account.UserId, account);
             }
             //Map.Location.SetUp();
             //Schedule.ScheduleBase.ReadSharedData();
