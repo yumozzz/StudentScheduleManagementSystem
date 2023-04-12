@@ -72,13 +72,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
-            #if RWINPLAINTEXT
             string jsonSource = ReadPlain(fileFolder, fileName);
-            #elif RWINENCRYPTION
-            string jsonSource = ReadDecrypt(fileFolder, fileName);
-            #else
-            #error macro_not_defined
-            #endif
             JObject root = JObject.Parse(jsonSource);
             Log.Information.Log("已读取地图信息");
             return ((JArray)root["Map"]!, (JArray)root["Buildings"]!);
@@ -91,13 +85,7 @@ namespace StudentScheduleManagementSystem.FileManagement
                 Directory.CreateDirectory(fileFolder);
             }
             JObject root = new() { { "Map", map }, { "Buildings", buildings } };
-            #if RWINPLAINTEXT
             WritePlain(fileFolder, fileName, JArray.FromObject(root).ToString());
-            #elif RWINENCRYPTION
-            WriteEncrypt(fileFolder, fileName, JArray.FromObject(root).ToString());
-            #else
-            #error macro_not_defined
-            #endif
             Log.Information.Log("已保存地图信息");
         }
 
@@ -115,13 +103,7 @@ namespace StudentScheduleManagementSystem.FileManagement
                 Log.Warning.Log("不存在账号文件，已新建");
                 return new();
             }
-            #if RWINPLAINTEXT
             string jsonSource = ReadPlain(fileFolder, fileName);
-            #elif RWINENCRYPTION
-            string jsonSource = ReadDecrypt(fileFolder, fileName);
-            #else
-            #error macro_not_defined
-            #endif
             var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserAccountInformation>>();
             Log.Information.Log("已读取账号信息");
             return ret!;
@@ -135,13 +117,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 Directory.CreateDirectory(fileFolder);
             }
-            #if RWINPLAINTEXT
             WritePlain(fileFolder, fileName, JArray.FromObject(accounts).ToString());
-            #elif RWINENCRYPTION
-            WriteEncrypt(fileFolder, fileName, JArray.FromObject(accounts).ToString());
-            #else
-            #error macro_not_defined
-            #endif
             Log.Information.Log("已保存账号信息");
         }
 
