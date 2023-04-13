@@ -37,13 +37,12 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
-                Encryption.Encrypt.InitRSAProviderWithPassword("yumozzz");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
                 mainThread.Start();*/
-                Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
-                uiThread.Start();
+                /*Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
+                uiThread.Start();*/
                 Schedule.Course course = new(null,
                                     RepetitiveType.Designated,
                                     "test course*",
@@ -53,11 +52,11 @@ namespace StudentScheduleManagementSystem.MainProgram
                                     new Map.Location.Building(1, "test building", new() { Id = 0, X = 0, Y = 0 }),
                                     new[] { 1, 2, 3 },
                                     new[] { Day.Monday, Day.Tuesday });
-                course.RemoveSchedule();
-                while (uiThread.IsAlive)
+                Console.Read();
+                /*while (uiThread.IsAlive)
                 {
                     Thread.Sleep(100);
-                }
+                }*/
                 //LogOut(UserId);
                 Exit();
             }
@@ -117,32 +116,19 @@ namespace StudentScheduleManagementSystem.MainProgram
         {
             try
             {
-                var password = _accounts[inputUserId];
-                Encryption.Encrypt.InitRSAProviderWithPassword(inputPassword);
-                MD5 md5 = MD5.Create();
-                var enc = Encryption.Encrypt.RSAEncrypt("Administrator");
-                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputUserId + enc));
-                string encodedPassword = Convert.ToBase64String(code);
-                bool find = false;
-                if (password == encodedPassword)
-                {
-                    Identity = Identity.Administrator;
-                    find = true;
-                }
-                if (!find)
-                {
-                    enc = Encryption.Encrypt.RSAEncrypt("User");
-                    code = md5.ComputeHash(Encoding.UTF8.GetBytes(inputUserId + enc));
-                    encodedPassword = Convert.ToBase64String(code);
-                    if (password == encodedPassword)
-                    {
-                        Identity = Identity.User;
-                        find = true;
-                    }
-                }
-                if (!find)
+                var md5 = _accounts[inputUserId];
+                if (!Encryption.Encrypt.MD5Verify(UserId, inputPassword, out Identity identity, md5))
                 {
                     throw new AuthenticationException();
+                }
+                UserId = inputUserId;
+                Password = inputPassword;
+                Identity = identity;
+                Encryption.Encrypt.InitRSAProviderWithPassword(inputPassword);
+                Times.Timer.Pause = false;
+                if (Identity == Identity.Administrator)
+                {
+                    return true;
                 }
                 ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
                                                   .UserFileDirectory,
@@ -158,9 +144,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      true,
                                      Array.Empty<int>(),
                                      Array.Empty<Day>());
-                UserId = inputUserId;
-                Password = inputPassword;
-                Times.Timer.Pause = false;
                 return true;
             }
             catch (FileNotFoundException ex)
@@ -189,15 +172,12 @@ namespace StudentScheduleManagementSystem.MainProgram
                 {
                     throw new FormatException("password format error");
                 }
-                Encryption.Encrypt.InitRSAProviderWithPassword(password);
-                MD5 md5 = MD5.Create();
-                var enc = Encryption.Encrypt.RSAEncrypt(identity.ToString());
-                byte[] code = md5.ComputeHash(Encoding.UTF8.GetBytes(password + enc));
-                string encodedPassword = Convert.ToBase64String(code);
-                _accounts.Add(userId, encodedPassword);
                 UserId = userId;
                 Password = password;
+                Encryption.Encrypt.InitRSAProviderWithPassword(password);
                 Times.Timer.Pause = false;
+                var encoded = Encryption.Encrypt.MD5Digest(userId, password, identity);
+                _accounts.Add(userId, encoded);
                 return true;
             }
             catch (FormatException)

@@ -1,4 +1,5 @@
-﻿//#define RWINPLAINTEXT
+﻿#define RWINPLAINTEXT
+
 #define RWINENCRYPTION
 
 using System.Text;
@@ -24,14 +25,13 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             if (!File.Exists(fileName))
             {
-                File.Create($"{fileFolder}/{fileName}.json");
-                Log.Warning.Log("不存在用户文件，已新建");
+                Log.Warning.Log("不存在用户文件，将新建");
                 return new();
             }
             #if RWINPLAINTEXT
-            string jsonSource = ReadPlain(fileFolder, fileName);
+            string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             #elif RWINENCRYPTION
-            string jsonSource = ReadDecrypt(fileFolder, fileName);
+            string jsonSource = Encryption.Encrypt.RSADecrypt(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
             #else
             #error macro_not_defined
             #endif
@@ -57,9 +57,11 @@ namespace StudentScheduleManagementSystem.FileManagement
                 root.Add(@class.Key, @class.Value);
             }
             #if RWINPLAINTEXT
-            WritePlain(fileFolder, fileName, JArray.FromObject(root).ToString());
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json",
+                               Encoding.UTF8.GetBytes(root.ToString()));
             #elif RWINENCRYPTION
-            WriteEncrypt(fileFolder, fileName, JArray.FromObject(root).ToString());
+            File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
+                               Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(root.ToString())));
             #else
             #error macro_not_defined
             #endif
@@ -72,7 +74,13 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
-            string jsonSource = ReadPlain(fileFolder, fileName);
+            #if RWINPLAINTEXT
+            string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
+            #elif RWINENCRYPTION
+            string jsonSource = Encryption.Encrypt.AESDecrypt(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
+            #else
+            #error macro_not_defined
+            #endif
             JObject root = JObject.Parse(jsonSource);
             Log.Information.Log("已读取地图信息");
             return ((JArray)root["Map"]!, (JArray)root["Buildings"]!);
@@ -85,7 +93,16 @@ namespace StudentScheduleManagementSystem.FileManagement
                 Directory.CreateDirectory(fileFolder);
             }
             JObject root = new() { { "Map", map }, { "Buildings", buildings } };
-            WritePlain(fileFolder, fileName, JArray.FromObject(root).ToString());
+            #if RWINPLAINTEXT
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json",
+                               Encoding.UTF8.GetBytes(JArray.FromObject(root).ToString()));
+            #elif RWINENCRYPTION
+            File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
+                               Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(JArray.FromObject(root)
+                                                         .ToString())));
+            #else
+            #error macro_not_defined
+            #endif
             Log.Information.Log("已保存地图信息");
         }
 
@@ -99,11 +116,16 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             if (!File.Exists(fileName))
             {
-                File.Create($"{fileFolder}/{fileName}.json");
-                Log.Warning.Log("不存在账号文件，已新建");
+                Log.Warning.Log("不存在账号文件，将新建");
                 return new();
             }
-            string jsonSource = ReadPlain(fileFolder, fileName);
+            #if RWINPLAINTEXT
+            string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
+            #elif RWINENCRYPTION
+            string jsonSource = Encryption.Encrypt.AESDecrypt(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
+            #else
+            #error macro_not_defined
+            #endif
             var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserInformation>>();
             Log.Information.Log("已读取账号信息");
             return ret!;
@@ -117,29 +139,17 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 Directory.CreateDirectory(fileFolder);
             }
-            WritePlain(fileFolder, fileName, JArray.FromObject(accounts).ToString());
-            Log.Information.Log("已保存账号信息");
-        }
-
-        private static void WritePlain(string fileFolder, string fileName, string content)
-        {
-            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(content));
-        }
-
-        private static void WriteEncrypt(string fileFolder, string fileName, string content)
-        {
+            #if RWINPLAINTEXT
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json",
+                               Encoding.UTF8.GetBytes(JArray.FromObject(accounts).ToString()));
+            #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
-                               Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(content)));
-        }
-
-        private static string ReadPlain(string fileFolder, string fileName)
-        {
-            return File.ReadAllText($"{fileFolder}/{fileName}.json");
-        }
-
-        private static string ReadDecrypt(string fileFolder, string fileName)
-        {
-            return Encryption.Encrypt.RSADecrypt(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
+                               Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(JArray.FromObject(accounts)
+                                                         .ToString())));
+            #else
+            #error macro_not_defined
+            #endif
+            Log.Information.Log("已保存账号信息");
         }
     }
 }
