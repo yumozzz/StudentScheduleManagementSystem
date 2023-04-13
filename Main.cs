@@ -37,6 +37,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
+                Login("2021211408", "Jerry_sly030618");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 /*Thread mainThread = new(AcceptInput);
@@ -57,7 +58,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 {
                     Thread.Sleep(100);
                 }*/
-                //LogOut(UserId);
+                Logout();
                 Exit();
             }
             /*catch (Exception ex)
@@ -117,7 +118,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             try
             {
                 var md5 = _accounts[inputUserId];
-                if (!Encryption.Encrypt.MD5Verify(UserId, inputPassword, out Identity identity, md5))
+                if (!Encryption.Encrypt.MD5Verify(inputUserId, inputPassword, out Identity identity, md5))
                 {
                     throw new AuthenticationException();
                 }
@@ -213,7 +214,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 _accounts.Add(account.UserId, account.Password);
             }
             //Map.Location.SetUp();
-            //Schedule.ScheduleBase.ReadSharedData();
+            Schedule.ScheduleBase.ReadSharedData();
         }
 
         public static void Exit()

@@ -7,7 +7,7 @@ namespace StudentScheduleManagementSystem.Encryption
 {
     public static class Encrypt
     {
-        private static RSACryptoServiceProvider _provider = new();
+        private static RSA _provider = RSA.Create();
         private static MD5 _md5 = MD5.Create();
         private static ICryptoTransform _encryptor, _decryptor;
         
@@ -15,7 +15,7 @@ namespace StudentScheduleManagementSystem.Encryption
         static Encrypt()
         {
             Aes aes = Aes.Create();
-            aes.KeySize = 24;
+            aes.KeySize = 24 * 8;
             aes.Key = Encoding.UTF8.GetBytes("=qw3\\4mT790-tyaSvf8'9Hy ");
             aes.IV = Encoding.UTF8.GetBytes(";'la f.Sdo]0g?9s");
             _encryptor = aes.CreateEncryptor();
@@ -23,11 +23,10 @@ namespace StudentScheduleManagementSystem.Encryption
         }
 
         public static byte[] PublicKey =>
-            Encoding.UTF8
-                    .GetBytes("MIIBCgKCAQEA5TaOlwY4LLktxyLPpKyWi+etcPlEiwXDtrOcJQvctvlvohWrVRblVrx4mdpqMRIHim2rG+qCfy6/ow" +
-                              "iOXYUjkPAd+W0VTo32CsYpKHI3zm5oj0YtTbumhY5hw3mX+MvmUivc6Y7h+XxLv+U4pOyeL4r2xa/a5+HcLVS+QQFu" +
-                              "lDWVTIHpp8tRZU8up0tAWrICjj/kvKHuUc3uFKku7pvd+yEaC+fCL/8hDByDb7AcLoyPgNGQDnIOvcNQ8ENZgj+1Lg" +
-                              "d93l3lrD5QwNDaBE0o1rwPwLlmoJ5drKS1FG8hbZyYT1oGcjBUWF4EvG/Yp640iJFkX1hDHPzMG4Zuk8iS7QIDAQAB");
+            Convert.FromBase64String("MIIBCgKCAQEA5TaOlwY4LLktxyLPpKyWi+etcPlEiwXDtrOcJQvctvlvohWrVRblVrx4mdpqMRIHim2rG+qCfy6/ow" +
+                                     "iOXYUjkPAd+W0VTo32CsYpKHI3zm5oj0YtTbumhY5hw3mX+MvmUivc6Y7h+XxLv+U4pOyeL4r2xa/a5+HcLVS+QQFu" +
+                                     "lDWVTIHpp8tRZU8up0tAWrICjj/kvKHuUc3uFKku7pvd+yEaC+fCL/8hDByDb7AcLoyPgNGQDnIOvcNQ8ENZgj+1Lg" +
+                                     "d93l3lrD5QwNDaBE0o1rwPwLlmoJ5drKS1FG8hbZyYT1oGcjBUWF4EvG/Yp640iJFkX1hDHPzMG4Zuk8iS7QIDAQAB");
         public static byte[] PrivateKey { get; set; } = Array.Empty<byte>();
 
         private static void ExportToPfxFile(string subjectName,
@@ -64,12 +63,12 @@ namespace StudentScheduleManagementSystem.Encryption
             Process process = Process.Start(FileManagement.FileManager.MakecertDirectory, param);
             process.WaitForExit();
             process.Close();
-            _provider.ImportRSAPublicKey(PublicKey.AsSpan(), out _);
-            _provider.ImportRSAPrivateKey(PrivateKey.AsSpan(), out _);
             ExportToPfxFile(keyName, "./SSMS.pfx", password, true);
             X509Certificate2 x509 = new("./SSMS.pfx", password, X509KeyStorageFlags.Exportable);
             var privateKey = x509.GetRSAPrivateKey();
             PrivateKey = privateKey!.ExportRSAPrivateKey();
+            _provider.ImportRSAPublicKey(PublicKey.AsSpan(), out _);
+            _provider.ImportRSAPrivateKey(PrivateKey.AsSpan(), out _);
             File.Delete("./SSMS.pfx");
         }
 
@@ -80,7 +79,7 @@ namespace StudentScheduleManagementSystem.Encryption
 
             if (bytes.Length <= maxBlockSize)
             {
-                return Convert.ToBase64String(_provider.Encrypt(bytes, false));
+                return Convert.ToBase64String(_provider.Encrypt(bytes, RSAEncryptionPadding.Pkcs1));
             }
             using MemoryStream encryptedStream = new(), plainStream = new(bytes);
             byte[] buffer = new byte[maxBlockSize];
@@ -90,7 +89,7 @@ namespace StudentScheduleManagementSystem.Encryption
             {
                 byte[] arrayToEncrypt = new byte[blockSize];
                 Array.Copy(buffer, 0, arrayToEncrypt, 0, blockSize);
-                byte[] arrayEncrypted = _provider.Encrypt(arrayToEncrypt, false);
+                byte[] arrayEncrypted = _provider.Encrypt(arrayToEncrypt, RSAEncryptionPadding.Pkcs1);
                 encryptedStream.Write(arrayEncrypted, 0, arrayEncrypted.Length);
                 blockSize = plainStream.Read(buffer, 0, maxBlockSize);
             }
@@ -105,7 +104,7 @@ namespace StudentScheduleManagementSystem.Encryption
 
             if (bytes.Length <= maxBlockSize)
             {
-                return Convert.ToBase64String(_provider.Decrypt(bytes, false));
+                return Convert.ToBase64String(_provider.Decrypt(bytes, RSAEncryptionPadding.Pkcs1));
             }
             using MemoryStream plainStream = new(), encryptedStream = new(bytes);
             byte[] buffer = new byte[maxBlockSize];
@@ -115,7 +114,7 @@ namespace StudentScheduleManagementSystem.Encryption
             {
                 byte[] arrayToEncrypt = new byte[blockSize];
                 Array.Copy(buffer, 0, arrayToEncrypt, 0, blockSize);
-                byte[] arrayEncrypted = _provider.Decrypt(arrayToEncrypt, false);
+                byte[] arrayEncrypted = _provider.Decrypt(arrayToEncrypt, RSAEncryptionPadding.Pkcs1);
                 plainStream.Write(arrayEncrypted, 0, arrayEncrypted.Length);
                 blockSize = encryptedStream.Read(buffer, 0, maxBlockSize);
             }
@@ -158,20 +157,15 @@ namespace StudentScheduleManagementSystem.Encryption
 
         public static bool MD5Verify(string userId, string password, out Identity identity, string md5)
         {
+            identity = Identity.User;
             string content1 = userId + password + Identity.Administrator.ToString() + "a0avs=i0";
             string content2 = userId + password + Identity.User.ToString() + "a0avs=i0";
-            if(Convert.ToBase64String(_md5.ComputeHash(Encoding.UTF8.GetBytes(content1)))==md5)
+            if (Convert.ToBase64String(_md5.ComputeHash(Encoding.UTF8.GetBytes(content1))) == md5)
             {
                 identity = Identity.Administrator;
                 return true;
             }
-            if (Convert.ToBase64String(_md5.ComputeHash(Encoding.UTF8.GetBytes(content2))) == md5)
-            {
-                identity = Identity.User;
-                return true;
-            }
-            identity = Identity.User;
-            return false;
+            return Convert.ToBase64String(_md5.ComputeHash(Encoding.UTF8.GetBytes(content2))) == md5;
         }
     }
 }

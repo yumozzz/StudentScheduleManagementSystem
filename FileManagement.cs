@@ -23,7 +23,13 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
-            if (!File.Exists(fileName))
+            #if RWINPLAINTEXT
+            if (!File.Exists($"{fileFolder}/{fileName}.json"))
+            #elif RWINENCRYPTION
+            if (!File.Exists($"{fileFolder}/{fileName}.dat"))
+            #else
+            #error macro_not_defined
+            #endif
             {
                 Log.Warning.Log("不存在用户文件，将新建");
                 return new();
@@ -57,8 +63,7 @@ namespace StudentScheduleManagementSystem.FileManagement
                 root.Add(@class.Key, @class.Value);
             }
             #if RWINPLAINTEXT
-            File.WriteAllBytes($"{fileFolder}/{fileName}.json",
-                               Encoding.UTF8.GetBytes(root.ToString()));
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(root.ToString()));
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
                                Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(root.ToString())));
@@ -114,7 +119,13 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 throw new DirectoryNotFoundException();
             }
-            if (!File.Exists(fileName))
+            #if RWINPLAINTEXT
+            if (!File.Exists($"{fileFolder}/{fileName}.json"))
+            #elif RWINENCRYPTION
+            if (!File.Exists($"{fileFolder}/{fileName}.dat"))
+            #else
+            #error macro_not_defined
+            #endif
             {
                 Log.Warning.Log("不存在账号文件，将新建");
                 return new();
@@ -147,7 +158,7 @@ namespace StudentScheduleManagementSystem.FileManagement
                                Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(JArray.FromObject(accounts)
                                                          .ToString())));
             #else
-            #error macro_not_defined
+#error macro_not_defined
             #endif
             Log.Information.Log("已保存账号信息");
         }
