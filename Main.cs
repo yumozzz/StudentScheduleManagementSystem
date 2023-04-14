@@ -3,8 +3,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Authentication;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -19,10 +17,11 @@ namespace StudentScheduleManagementSystem.MainProgram
         {
             public string UserId { get; set; }
             public string Password { get; set; }
+            public string PrivateKey { get; set; }
         }
 
         internal static CancellationTokenSource _cts = new();
-        internal static Dictionary<string, string> _accounts = new();
+        internal static Dictionary<string, (string, string)> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static string Password { get; private set; } = String.Empty;
         public static Identity @Identity { get; private set; }
@@ -59,7 +58,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                     Thread.Sleep(100);
                 }*/
                 Logout();
-                Exit();
             }
             /*catch (Exception ex)
             {
@@ -69,7 +67,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             finally
             {
                 _cts.Cancel();
-                Log.LogBase.Close();
+                Exit();
                 Console.ReadLine();
                 FreeConsole();
             }
@@ -117,7 +115,7 @@ namespace StudentScheduleManagementSystem.MainProgram
         {
             try
             {
-                var md5 = _accounts[inputUserId];
+                (string md5, string privateKey) = _accounts[inputUserId];
                 if (!Encryption.Encrypt.MD5Verify(inputUserId, inputPassword, out Identity identity, md5))
                 {
                     throw new AuthenticationException();
@@ -125,7 +123,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 UserId = inputUserId;
                 Password = inputPassword;
                 Identity = identity;
-                Encryption.Encrypt.InitRSAProviderWithPassword(inputPassword);
+                Encryption.Encrypt.PrivateKey = Convert.FromBase64String(privateKey);
                 Times.Timer.Pause = false;
                 if (Identity == Identity.Administrator)
                 {
@@ -133,7 +131,8 @@ namespace StudentScheduleManagementSystem.MainProgram
                 }
                 ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
                                                   .UserFileDirectory,
-                                               inputUserId));
+                                               inputUserId,
+                                               Encryption.Encrypt.RSADecrypt));
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
                                      RepetitiveType.Single,
                                      Schedule.ScheduleBase.NotifyAllInComingDay,
@@ -178,7 +177,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Encryption.Encrypt.InitRSAProviderWithPassword(password);
                 Times.Timer.Pause = false;
                 var encoded = Encryption.Encrypt.MD5Digest(userId, password, identity);
-                _accounts.Add(userId, encoded);
+                _accounts.Add(userId, (encoded, Convert.ToBase64String(Encryption.Encrypt.PrivateKey)));
                 return true;
             }
             catch (FormatException)
@@ -197,7 +196,8 @@ namespace StudentScheduleManagementSystem.MainProgram
         {
             FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
                                                       FileManagement.FileManager.UserFileDirectory,
-                                                      UserId);
+                                                      UserId,
+                                                      Encryption.Encrypt.RSAEncrypt);
             Times.Timer.Pause = true;
             Times.Alarm.ClearAll();
             Schedule.ScheduleBase.ClearAll();
@@ -211,7 +211,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             var accounts = FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
             foreach(var account in accounts)
             {
-                _accounts.Add(account.UserId, account.Password);
+                _accounts.Add(account.UserId, (account.Password, account.PrivateKey));
             }
             //Map.Location.SetUp();
             Schedule.ScheduleBase.ReadSharedData();
@@ -219,18 +219,21 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         public static void Exit()
         {
-            FileManagement.FileManager.SaveToUserAccountFile(_accounts.ToList()
-                                                                      .ConvertAll(kvpair => new UserInformation()
-                                                                       {
-                                                                           UserId = kvpair.Key,
-                                                                           Password = kvpair.Value
-                                                                       }),
-                                                             FileManagement.FileManager.UserFileDirectory);
             /*FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap!.SaveInstance(),
                                                      Map.Location.SaveBuildings(),
                                                      FileManagement.FileManager.MapFileDirectory);*/
+            FileManagement.FileManager.SaveToUserAccountFile(_accounts.ToList()
+                                                                      .Select(kvpair => new UserInformation()
+                                                                       {
+                                                                           UserId = kvpair.Key,
+                                                                           Password = kvpair.Value.Item1,
+                                                                           PrivateKey = kvpair.Value.Item2
+                                                                       })
+                                                                      .ToList(),
+                                                             FileManagement.FileManager.UserFileDirectory);
             Schedule.ScheduleBase.SaveSharedData();
-            Log.Information.Log("已保存信息");
+            Log.Information.Log("已退出程序");
+            Log.LogBase.Close();
         }
     }
 }

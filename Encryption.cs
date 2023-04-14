@@ -7,7 +7,7 @@ namespace StudentScheduleManagementSystem.Encryption
 {
     public static class Encrypt
     {
-        private static RSA _provider = RSA.Create();
+        private static RSACryptoServiceProvider _provider = new();
         private static MD5 _md5 = MD5.Create();
         private static ICryptoTransform _encryptor, _decryptor;
         
@@ -20,6 +20,8 @@ namespace StudentScheduleManagementSystem.Encryption
             aes.IV = Encoding.UTF8.GetBytes(";'la f.Sdo]0g?9s");
             _encryptor = aes.CreateEncryptor();
             _decryptor = aes.CreateDecryptor();
+            _provider.ImportRSAPublicKey(PublicKey.AsSpan(), out int pkread);
+            Debug.Assert(pkread == PublicKey.Length);
         }
 
         public static byte[] PublicKey =>
@@ -67,19 +69,19 @@ namespace StudentScheduleManagementSystem.Encryption
             X509Certificate2 x509 = new("./SSMS.pfx", password, X509KeyStorageFlags.Exportable);
             var privateKey = x509.GetRSAPrivateKey();
             PrivateKey = privateKey!.ExportRSAPrivateKey();
-            _provider.ImportRSAPublicKey(PublicKey.AsSpan(), out _);
-            _provider.ImportRSAPrivateKey(PrivateKey.AsSpan(), out _);
             File.Delete("./SSMS.pfx");
         }
 
         public static string RSAEncrypt(string content)
         {
+            _provider.ImportRSAPrivateKey(PrivateKey.AsSpan(), out int pvread);
+            Debug.Assert(pvread == PrivateKey.Length);
             byte[] bytes = Encoding.UTF8.GetBytes(content);
             int maxBlockSize = _provider.KeySize / 8 - 11; //加密块最大长度限制
 
             if (bytes.Length <= maxBlockSize)
             {
-                return Convert.ToBase64String(_provider.Encrypt(bytes, RSAEncryptionPadding.Pkcs1));
+                return Convert.ToBase64String(_provider.Encrypt(bytes, false));
             }
             using MemoryStream encryptedStream = new(), plainStream = new(bytes);
             byte[] buffer = new byte[maxBlockSize];
@@ -89,22 +91,24 @@ namespace StudentScheduleManagementSystem.Encryption
             {
                 byte[] arrayToEncrypt = new byte[blockSize];
                 Array.Copy(buffer, 0, arrayToEncrypt, 0, blockSize);
-                byte[] arrayEncrypted = _provider.Encrypt(arrayToEncrypt, RSAEncryptionPadding.Pkcs1);
+                byte[] arrayEncrypted = _provider.Encrypt(arrayToEncrypt, false);
                 encryptedStream.Write(arrayEncrypted, 0, arrayEncrypted.Length);
                 blockSize = plainStream.Read(buffer, 0, maxBlockSize);
             }
 
-            return Convert.ToBase64String(encryptedStream.ToArray(), Base64FormattingOptions.None);
+            return Convert.ToBase64String(encryptedStream.ToArray());
         }
 
         public static string RSADecrypt(string content)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(content);
-            int maxBlockSize = _provider.KeySize / 8 - 11; //加密块最大长度限制
+            _provider.ImportRSAPrivateKey(PrivateKey.AsSpan(), out int pvread);
+            Debug.Assert(pvread == PrivateKey.Length);
+            byte[] bytes = Convert.FromBase64String(content);
+            int maxBlockSize = _provider.KeySize / 8; //加密块最大长度限制
 
             if (bytes.Length <= maxBlockSize)
             {
-                return Convert.ToBase64String(_provider.Decrypt(bytes, RSAEncryptionPadding.Pkcs1));
+                return Encoding.UTF8.GetString(_provider.Decrypt(bytes, false));
             }
             using MemoryStream plainStream = new(), encryptedStream = new(bytes);
             byte[] buffer = new byte[maxBlockSize];
@@ -112,14 +116,14 @@ namespace StudentScheduleManagementSystem.Encryption
 
             while (blockSize > 0)
             {
-                byte[] arrayToEncrypt = new byte[blockSize];
-                Array.Copy(buffer, 0, arrayToEncrypt, 0, blockSize);
-                byte[] arrayEncrypted = _provider.Decrypt(arrayToEncrypt, RSAEncryptionPadding.Pkcs1);
-                plainStream.Write(arrayEncrypted, 0, arrayEncrypted.Length);
+                byte[] arrayToDecrypt = new byte[blockSize];
+                Array.Copy(buffer, 0, arrayToDecrypt, 0, blockSize);
+                byte[] arrayDecrypted = _provider.Decrypt(arrayToDecrypt, false);
+                plainStream.Write(arrayDecrypted, 0, arrayDecrypted.Length);
                 blockSize = encryptedStream.Read(buffer, 0, maxBlockSize);
             }
 
-            return Convert.ToBase64String(plainStream.ToArray());
+            return Encoding.UTF8.GetString(plainStream.ToArray());
         }
 
         public static string AESEncrypt(string content)
@@ -128,11 +132,18 @@ namespace StudentScheduleManagementSystem.Encryption
             {
                 throw new ArgumentNullException(nameof(content));
             }
-            using MemoryStream encryptStream = new();
-            using CryptoStream cryptoStream = new(encryptStream, _encryptor, CryptoStreamMode.Write);
-            using StreamWriter sw = new(cryptoStream);
-            sw.Write(content);
-            byte[] encrypted = encryptStream.ToArray();
+            byte[] encrypted;
+            using (MemoryStream encryptStream = new())
+            {
+                using (CryptoStream cryptoStream = new(encryptStream, _encryptor, CryptoStreamMode.Write))
+                {
+                    using (StreamWriter sw = new(cryptoStream))
+                    {
+                        sw.Write(content);
+                    }
+                    encrypted = encryptStream.ToArray();
+                }
+            }
             return Convert.ToBase64String(encrypted);
         }
 
@@ -142,10 +153,17 @@ namespace StudentScheduleManagementSystem.Encryption
             {
                 throw new ArgumentNullException(nameof(content));
             }
-            using MemoryStream decryptStream = new(Convert.FromBase64String(content));
-            using CryptoStream cryptoStream = new(decryptStream, _decryptor, CryptoStreamMode.Read);
-            using StreamReader sr = new(cryptoStream);
-            string plainText = sr.ReadToEnd();
+            string plainText;
+            using (MemoryStream decryptStream = new(Convert.FromBase64String(content)))
+            {
+                using (CryptoStream cryptoStream = new(decryptStream, _decryptor, CryptoStreamMode.Read))
+                {
+                    using (StreamReader sr = new(cryptoStream))
+                    {
+                        plainText = sr.ReadToEnd();
+                    }
+                }
+            }
             return plainText;
         }
 

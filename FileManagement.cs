@@ -1,5 +1,4 @@
-﻿#define RWINPLAINTEXT
-
+﻿//#define RWINPLAINTEXT
 #define RWINENCRYPTION
 
 using System.Text;
@@ -17,7 +16,7 @@ namespace StudentScheduleManagementSystem.FileManagement
 
         public static readonly string MakecertDirectory = Environment.CurrentDirectory + "/makecert.exe";
 
-        public static Dictionary<string, JArray> ReadFromUserFile(string fileFolder, string fileName)
+        public static Dictionary<string, JArray> ReadFromUserFile(string fileFolder, string fileName, Func<string, string> DecryptFunc)
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -37,7 +36,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             #if RWINPLAINTEXT
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             #elif RWINENCRYPTION
-            string jsonSource = Encryption.Encrypt.RSADecrypt(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
+            string jsonSource = DecryptFunc.Invoke(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
             #else
             #error macro_not_defined
             #endif
@@ -51,7 +50,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             return dic;
         }
 
-        public static void SaveToUserFile(Dictionary<string, JArray> objects, string fileFolder, string fileName)
+        public static void SaveToUserFile(Dictionary<string, JArray> objects, string fileFolder, string fileName, Func<string,string> EncryptFunc)
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -66,7 +65,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(root.ToString()));
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
-                               Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(root.ToString())));
+                               Encoding.UTF8.GetBytes(EncryptFunc.Invoke(root.ToString())));
             #else
             #error macro_not_defined
             #endif
@@ -103,7 +102,7 @@ namespace StudentScheduleManagementSystem.FileManagement
                                Encoding.UTF8.GetBytes(JArray.FromObject(root).ToString()));
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
-                               Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(JArray.FromObject(root)
+                               Encoding.UTF8.GetBytes(Encryption.Encrypt.AESEncrypt(JArray.FromObject(root)
                                                          .ToString())));
             #else
             #error macro_not_defined
@@ -142,7 +141,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             return ret!;
         }
 
-        public static void SaveToUserAccountFile(List<MainProgram.Program.UserInformation> accounts,
+        public static void SaveToUserAccountFile(List<MainProgram.Program.UserInformation> information,
                                                  string fileFolder,
                                                  string fileName = "accounts")
         {
@@ -152,13 +151,13 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             #if RWINPLAINTEXT
             File.WriteAllBytes($"{fileFolder}/{fileName}.json",
-                               Encoding.UTF8.GetBytes(JArray.FromObject(accounts).ToString()));
+                               Encoding.UTF8.GetBytes(JArray.FromObject(information).ToString()));
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
-                               Encoding.UTF8.GetBytes(Encryption.Encrypt.RSAEncrypt(JArray.FromObject(accounts)
+                               Encoding.UTF8.GetBytes(Encryption.Encrypt.AESEncrypt(JArray.FromObject(information)
                                                          .ToString())));
             #else
-#error macro_not_defined
+            #error macro_not_defined
             #endif
             Log.Information.Log("已保存账号信息");
         }

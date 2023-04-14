@@ -602,7 +602,8 @@ namespace StudentScheduleManagementSystem.Schedule
             try
             {
                 var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
-                                                                      "share");
+                                                                      "share",
+                                                                      Encryption.Encrypt.AESDecrypt);
                 foreach (var item in dic["Course"])
                 {
                     var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
@@ -702,7 +703,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                                           { "ScheduleCount", scheduleCount }
                                                       },
                                                       FileManagement.FileManager.UserFileDirectory,
-                                                      "share");
+                                                      "share",
+                                                      Encryption.Encrypt.AESEncrypt);
         }
 
         protected static void UpdateSharedData(ScheduleBase schedule)
