@@ -1,4 +1,4 @@
-﻿//#define RWINPLAINTEXT
+﻿#define RWINPLAINTEXT
 #define RWINENCRYPTION
 
 using System.Text;

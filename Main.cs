@@ -39,10 +39,10 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Login("2021211408", "Jerry_sly030618");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
-                /*Thread mainThread = new(AcceptInput);
-                mainThread.Start();*/
-                /*Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
-                uiThread.Start();*/
+                Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
+                uiThread.Start();
+                #region test
+
                 Schedule.Course course = new(null,
                                     RepetitiveType.Designated,
                                     "test course*",
@@ -52,11 +52,13 @@ namespace StudentScheduleManagementSystem.MainProgram
                                     new Map.Location.Building(1, "test building", new() { Id = 0, X = 0, Y = 0 }),
                                     new[] { 1, 2, 3 },
                                     new[] { Day.Monday, Day.Tuesday });
+
+                #endregion
                 Console.Read();
-                /*while (uiThread.IsAlive)
+                while (uiThread.IsAlive)
                 {
                     Thread.Sleep(100);
-                }*/
+                }
                 Logout();
             }
             /*catch (Exception ex)
@@ -71,12 +73,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Console.ReadLine();
                 FreeConsole();
             }
-        }
-
-        public static void AcceptInput()
-        {
-            Console.ReadLine();
-            Console.Write(123);
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -99,15 +95,11 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         private static void ReadFromInstanceDictionary(Dictionary<string, JArray> instanceDictionary)
         {
-            try
-            {
-                Times.Alarm.CreateInstance(instanceDictionary["Alarm"]);
-                Schedule.Course.CreateInstance(instanceDictionary["Course"]);
-                Schedule.Exam.CreateInstance(instanceDictionary["Exam"]);
-                Schedule.Activity.CreateInstance(instanceDictionary["Activity"]);
-                Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
-            }
-            catch (KeyNotFoundException) { }
+            Times.Alarm.CreateInstance(instanceDictionary["Alarm"]);
+            Schedule.Course.CreateInstance(instanceDictionary["Course"]);
+            Schedule.Exam.CreateInstance(instanceDictionary["Exam"]);
+            Schedule.Activity.CreateInstance(instanceDictionary["Activity"]);
+            Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
         }
 
         //TODO:适配UI
@@ -174,7 +166,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 }
                 UserId = userId;
                 Password = password;
-                Encryption.Encrypt.InitRSAProviderWithPassword(password);
+                Encryption.Encrypt.GeneratePrivateKey(password);
                 Times.Timer.Pause = false;
                 var encoded = Encryption.Encrypt.MD5Digest(userId, password, identity);
                 _accounts.Add(userId, (encoded, Convert.ToBase64String(Encryption.Encrypt.PrivateKey)));

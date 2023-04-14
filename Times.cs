@@ -218,11 +218,12 @@ namespace StudentScheduleManagementSystem.Times
                                           ArgumentException("beginWith is not correspondent with the first letter of specifiedId")
             };
             record.Id = outId;
+            int offset;
             if (record.RepetitiveType == RepetitiveType.Single)
             {
                 for (int i = 0; i < duration; i++)
                 {
-                    int offset = timestamp.ToInt() + i;
+                    offset = timestamp.ToInt() + i;
                     AddSingleItem(offset, record);
                 }
             }
@@ -236,7 +237,7 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     for (int i = 0; i < duration; i++)
                     {
-                        int offset = 24 * dayOffset + timestamp.Hour + i;
+                        offset = 24 * dayOffset + timestamp.Hour + i;
                         while (offset < Time.TotalHours)
                         {
                             AddSingleItem(offset, record);
@@ -259,10 +260,11 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     foreach (var activeDay in activeDays)
                     {
-                        Time activeTime = new() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour };
+                        offset = new Times.Time() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour }.ToInt();
                         for (int i = 0; i < duration; i++)
                         {
-                            AddSingleItem(activeTime.ToInt() + i, record);
+                            AddSingleItem(offset, record);
+                            offset++;
                         }
                     }
                 }
@@ -419,8 +421,8 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     foreach (var activeDay in activeDays)
                     {
-                        Time activeTime = new() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour };
-                        if (_timeline[activeDay.ToInt()].RepetitiveType != RepetitiveType.Null)
+                        offset = new Time() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour }.ToInt();
+                        if (_timeline[offset].RepetitiveType != RepetitiveType.Null)
                         {
                             overrideType = _timeline[offset].RepetitiveType;
                             goto delete_process;//跳出多重循环

@@ -381,11 +381,15 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     foreach (var activeDay in ActiveDays)
                     {
-                        Times.Time activeTime = new() { Week = activeWeek, Day = activeDay, Hour = BeginTime.Hour };
-                        if (_timeline[activeTime.ToInt()].ScheduleType != ScheduleType.Idle)
+                        offset = new Times.Time() { Week = activeWeek, Day = activeDay, Hour = BeginTime.Hour }.ToInt();
+                        for (int i = 0; i < Duration; i++)
                         {
-                            overrideType = _timeline[offset].RepetitiveType;
-                            goto delete_process; //跳出多重循环
+                            if (_timeline[offset].ScheduleType != ScheduleType.Idle)
+                            {
+                                overrideType = _timeline[offset].RepetitiveType;
+                                goto delete_process; //跳出多重循环
+                            }
+                            offset++;
                         }
                     }
                 }
@@ -599,71 +603,67 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public static void ReadSharedData()
         {
-            try
-            {
-                var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
+            var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
                                                                       "share",
                                                                       Encryption.Encrypt.AESDecrypt);
-                foreach (var item in dic["Course"])
+            foreach (var item in dic["Course"])
+            {
+                var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
+                if (dobj == null)
                 {
-                    var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
-                    if (dobj == null)
-                    {
-                        throw new JsonFormatException();
-                    }
-                    if (dobj.Name != "Default")
-                    {
-                        _correspondenceDictionary.Add(dobj.Id, dobj);
-                    }
-                    else
-                    {
-                        _courseIdMax = dobj.Id;
-                    }
+                    throw new JsonFormatException();
                 }
-                foreach (var item in dic["Exam"])
+                if (dobj.Name != "Default")
                 {
-                    var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
-                    if (dobj == null)
-                    {
-                        throw new JsonFormatException();
-                    }
-                    if (dobj.Name != "Default")
-                    {
-                        _correspondenceDictionary.Add(dobj.Id, dobj);
-                    }
-                    else
-                    {
-                        _examIdMax = dobj.Id;
-                    }
+                    _correspondenceDictionary.Add(dobj.Id, dobj);
                 }
-                foreach (var item in dic["GroupActivity"])
+                else
                 {
-                    var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
-                    if (dobj == null)
-                    {
-                        throw new JsonFormatException();
-                    }
-                    if (dobj.Name != "Default")
-                    {
-                        _correspondenceDictionary.Add(dobj.Id, dobj);
-                    }
-                    else
-                    {
-                        _groutActivityIdMax = dobj.Id;
-                    }
+                    _courseIdMax = dobj.Id;
                 }
-                #if GROUPACTIVITYCONTROL
-                uint[] arr = new uint[TotalHours];
-                int i = 0;
-                foreach (var item in dic["ScheduleCount"])
-                {
-                    uint count = (uint)item;
-                    arr[i++] = count;
-                }
-                _timeline.SetTotalElementCount(arr);
-                #endif
             }
-            catch (KeyNotFoundException) { }
+            foreach (var item in dic["Exam"])
+            {
+                var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
+                if (dobj == null)
+                {
+                    throw new JsonFormatException();
+                }
+                if (dobj.Name != "Default")
+                {
+                    _correspondenceDictionary.Add(dobj.Id, dobj);
+                }
+                else
+                {
+                    _examIdMax = dobj.Id;
+                }
+            }
+            foreach (var item in dic["GroupActivity"])
+            {
+                var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
+                if (dobj == null)
+                {
+                    throw new JsonFormatException();
+                }
+                if (dobj.Name != "Default")
+                {
+                    _correspondenceDictionary.Add(dobj.Id, dobj);
+                }
+                else
+                {
+                    _groutActivityIdMax = dobj.Id;
+                }
+            }
+            #if GROUPACTIVITYCONTROL
+            uint[] arr = new uint[TotalHours];
+            int i = 0;
+            foreach (var item in dic["ScheduleCount"])
+            {
+                uint count = (uint)item;
+                arr[i++] = count;
+            }
+            _timeline.SetTotalElementCount(arr);
+            #endif
         }
 
         public static void SaveSharedData()
@@ -758,7 +758,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject
         {
-            public long Id { get; set; }
+            public long ScheduleId { get; set; }
             public string? Description { get; set; }
             public string? OnlineLink { get; set; }
             [JsonConverter(typeof(BuildingJsonConverter))]
@@ -840,13 +840,13 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 try
                 {
-                    var shared = _correspondenceDictionary[dobj.Id];
+                    var shared = _correspondenceDictionary[dobj.ScheduleId];
                     if (dobj.OfflineLocation != null)
                     {
                         var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
                         Map.Location.Building location =
                             locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                        _ = new Course(dobj.Id,
+                        _ = new Course(dobj.ScheduleId,
                                        shared.RepetitiveType,
                                        shared.Name,
                                        shared.Timestamp,
@@ -858,7 +858,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     else if (dobj.OnlineLink != null)
                     {
-                        _ = new Course(dobj.Id,
+                        _ = new Course(dobj.ScheduleId,
                                        shared.RepetitiveType,
                                        shared.Name,
                                        shared.Timestamp,
@@ -872,10 +872,11 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         throw new JsonFormatException("Online link and offline location is null at the same time");
                     }
+                    Log.Information.Log($"已导入ID为{dobj.ScheduleId}的课程");
                 }
                 catch (KeyNotFoundException)
                 {
-                    Log.Error.Log($"ID为{dobj.Id}的课程无效", null);
+                    Log.Error.Log($"ID为{dobj.ScheduleId}的课程无效", null);
                 }
             }
         }
@@ -892,7 +893,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject
         {
-            public long Id { get; set; }
+            public long ScheduleId { get; set; }
             public string? Description { get; set; }
             [JsonConverter(typeof(BuildingJsonConverter))]
             public Map.Location.Building OfflineLocation { get; set; }
@@ -954,18 +955,19 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 try
                 {
-                    var shared = _correspondenceDictionary[dobj.Id];
+                    var shared = _correspondenceDictionary[dobj.ScheduleId];
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
                     Map.Location.Building location =
                         locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                    _ = new Exam(dobj.Id, shared.Name, shared.Timestamp, shared.Duration, dobj.Description, location)
+                    _ = new Exam(dobj.ScheduleId, shared.Name, shared.Timestamp, shared.Duration, dobj.Description, location)
                     {
                         AlarmEnabled = dobj.AlarmEnabled
                     };
+                    Log.Information.Log($"已导入ID为{dobj.ScheduleId}的考试");
                 }
                 catch (KeyNotFoundException)
                 {
-                    Log.Error.Log($"ID为{dobj.Id}的考试无效", null);
+                    Log.Error.Log($"ID为{dobj.ScheduleId}的考试无效", null);
                 }
             }
         }
@@ -982,7 +984,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject
         {
-            public long Id { get; set; }
+            public long ScheduleId { get; set; }
             public RepetitiveType RepetitiveType { get; set; }
             public string Name { get; set; }
             public Times.Time Timestamp { get; set; }
@@ -1082,7 +1084,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     try
                     {
-                        var shared = _correspondenceDictionary[dobj.Id];
+                        var shared = _correspondenceDictionary[dobj.ScheduleId];
                         Debug.Assert((dobj.RepetitiveType, dobj.Name, dobj.Timestamp, dobj.Duration, dobj.ActiveWeeks,
                                       dobj.ActiveDays) ==
                                      (shared.RepetitiveType, shared.Name, shared.Timestamp, shared.Duration,
@@ -1092,7 +1094,7 @@ namespace StudentScheduleManagementSystem.Schedule
                             var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
                             Map.Location.Building location =
                                 locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                            _ = new Activity(dobj.Id,
+                            _ = new Activity(dobj.ScheduleId,
                                              shared.RepetitiveType,
                                              shared.Name,
                                              shared.Timestamp,
@@ -1105,7 +1107,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         }
                         else if (dobj.OnlineLink != null)
                         {
-                            _ = new Activity(dobj.Id,
+                            _ = new Activity(dobj.ScheduleId,
                                              shared.RepetitiveType,
                                              shared.Name,
                                              shared.Timestamp,
@@ -1120,15 +1122,16 @@ namespace StudentScheduleManagementSystem.Schedule
                         {
                             throw new JsonFormatException("Online link and offline location is null at the same time");
                         }
+                        Log.Information.Log($"已导入ID为{dobj.ScheduleId}的集体活动");
                     }
                     catch (KeyNotFoundException)
                     {
-                        Log.Error.Log($"ID为{dobj.Id}的集体活动无效", null);
+                        Log.Error.Log($"ID为{dobj.ScheduleId}的集体活动无效", null);
                     }
                 }
                 else
                 {
-                    Debug.Assert(dobj.Id / (long)1e9 == 4);
+                    Debug.Assert(dobj.ScheduleId / (long)1e9 == 4);
                     if (dobj.OfflineLocation != null)
                     {
                         var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
@@ -1162,6 +1165,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         throw new JsonFormatException("Online link and offline location is null at the same time");
                     }
+                    Log.Information.Log("已导入个人活动");
                 }
             }
         }
@@ -1283,6 +1287,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         AlarmEnabled = dobj.AlarmEnabled //should be the same
                     };
                 }
+                Log.Information.Log("已导入临时事务");
             }
         }
 

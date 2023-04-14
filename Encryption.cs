@@ -58,7 +58,7 @@ namespace StudentScheduleManagementSystem.Encryption
             store.Close();
         }
 
-        public static void InitRSAProviderWithPassword(string password)
+        public static void GeneratePrivateKey(string password)
         {
             string keyName = "SSMS.Licence";
             string param = " -pe -ss my -n \"CN=" + keyName + "\"";
