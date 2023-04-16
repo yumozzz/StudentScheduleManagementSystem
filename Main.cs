@@ -36,7 +36,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
-                Login("2021211408", "Jerry_sly030618");
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
@@ -44,7 +43,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 
                 #region test
 
-                Schedule.Course course = new(null,
+                /*Schedule.Course course = new(null,
                                              RepetitiveType.Designated,
                                              "test course*",
                                              new() { Week = 1, Day = Day.Monday, Hour = 12 },
@@ -54,16 +53,15 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                                        "test building",
                                                                        new() { Id = 0, X = 0, Y = 0 }),
                                              new[] { 1, 2, 3 },
-                                             new[] { Day.Monday, Day.Tuesday });
+                                             new[] { Day.Monday, Day.Tuesday });*/
+                //Array.Empty<Day>();
 
                 #endregion
 
-                Console.Read();
                 while (uiThread.IsAlive)
                 {
                     Thread.Sleep(100);
                 }
-                Logout();
             }
             /*catch (Exception ex)
             {
