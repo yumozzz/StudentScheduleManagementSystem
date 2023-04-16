@@ -638,7 +638,7 @@ namespace StudentScheduleManagementSystem.Times
     public static class Timer
     {
         private const int BaseTimeout = 10000;
-        private static int _acceleration = 10;
+        private static int _acceleration = 1;
         private static Time _localTime = new();
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();

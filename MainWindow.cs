@@ -3,6 +3,7 @@ namespace StudentScheduleManagementSystem.UI
     public partial class MainWindow : Form
     {
         public static StudentSubwindow? StudentSubwindow { get; private set; } = null;
+        public static AdminSubwindow? AdminSubwindow { get; private set; } = null;
 
         public MainWindow()
         {
@@ -47,9 +48,19 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     MessageBox.Show("Successfully login!");
                     
-                    StudentSubwindow = new StudentSubwindow();
+                    
                     this.Hide();
-                    StudentSubwindow.ShowDialog();
+                    if (MainProgram.Program.Identity == Identity.User)
+                    {
+                        StudentSubwindow = new StudentSubwindow();
+                        StudentSubwindow.ShowDialog();
+                    }
+                    else if(MainProgram.Program.Identity == Identity.Administrator)
+                    {
+                        AdminSubwindow = new AdminSubwindow();
+                        AdminSubwindow.ShowDialog();
+                    }
+                    
                     this.Show();
                 }
                 else

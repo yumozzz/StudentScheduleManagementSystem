@@ -18,6 +18,7 @@
         {
             Graphics graphics = e.Graphics;
             Pen pen = new(Color.Red, 2);
+
             foreach (var endPoints in _lineEndPointPairs)
             {
                 graphics.DrawLine(pen,
@@ -32,6 +33,7 @@
                                     controlPoints.Item3,
                                     new(controlPoints.Item4.X, controlPoints.Item4.Y));
             }
+
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
