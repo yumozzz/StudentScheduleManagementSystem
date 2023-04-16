@@ -41,19 +41,23 @@ namespace StudentScheduleManagementSystem.MainProgram
                 clockThread.Start();
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
+
                 #region test
 
                 Schedule.Course course = new(null,
-                                    RepetitiveType.Designated,
-                                    "test course*",
-                                    new() { Week = 1, Day = Day.Monday, Hour = 12 },
-                                    2,
-                                    null,
-                                    new Map.Location.Building(1, "test building", new() { Id = 0, X = 0, Y = 0 }),
-                                    new[] { 1, 2, 3 },
-                                    new[] { Day.Monday, Day.Tuesday });
+                                             RepetitiveType.Designated,
+                                             "test course*",
+                                             new() { Week = 1, Day = Day.Monday, Hour = 12 },
+                                             2,
+                                             null,
+                                             new Map.Location.Building(1,
+                                                                       "test building",
+                                                                       new() { Id = 0, X = 0, Y = 0 }),
+                                             new[] { 1, 2, 3 },
+                                             new[] { Day.Monday, Day.Tuesday });
 
                 #endregion
+
                 Console.Read();
                 while (uiThread.IsAlive)
                 {
@@ -199,9 +203,10 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         public static void InitModules()
         {
-            Log.LogBase.Setup();                  
-            var accounts = FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
-            foreach(var account in accounts)
+            Log.LogBase.Setup();
+            var accounts =
+                FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+            foreach (var account in accounts)
             {
                 _accounts.Add(account.UserId, (account.Password, account.PrivateKey));
             }

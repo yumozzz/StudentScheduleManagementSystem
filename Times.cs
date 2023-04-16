@@ -260,7 +260,7 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     foreach (var activeDay in activeDays)
                     {
-                        offset = new Times.Time() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour }.ToInt();
+                        offset = new Time() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour }.ToInt();
                         for (int i = 0; i < duration; i++)
                         {
                             AddSingleItem(offset, record);
@@ -378,14 +378,14 @@ namespace StudentScheduleManagementSystem.Times
 
         #region API methods
 
-        public static void RemoveAlarm(Times.Time timestamp, RepetitiveType repetitiveType, int[] activeWeeks, Day[] activeDays)
+        public static void RemoveAlarm(Time timestamp, RepetitiveType repetitiveType, int[] activeWeeks, Day[] activeDays)
         {
             _timeline.RemoveMultipleItems(timestamp, 1, repetitiveType, out long alarmId, activeWeeks, activeDays);
             _alarmList.Remove(alarmId);
             Log.Information.Log($"已删除{timestamp}时的闹钟");
         }
 
-        public static void AddAlarm(Times.Time timestamp,
+        public static void AddAlarm(Time timestamp,
                                     RepetitiveType repetitiveType,
                                     AlarmCallback? alarmTimeUpCallback,
                                     object? callbackParameter,
@@ -404,7 +404,7 @@ namespace StudentScheduleManagementSystem.Times
                 foreach (var dayOffset in dayOffsets)
                 {
                     offset = 24 * dayOffset + timestamp.Hour;
-                    while (offset < Times.Time.TotalHours)
+                    while (offset < Time.TotalHours)
                     {
                         if (_timeline[offset].RepetitiveType != RepetitiveType.Null)//有闹钟
                         {

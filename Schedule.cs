@@ -604,8 +604,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public static void ReadSharedData()
         {
             var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
-                                                                      "share",
-                                                                      Encryption.Encrypt.AESDecrypt);
+                                                                  "share",
+                                                                  Encryption.Encrypt.AESDecrypt);
             foreach (var item in dic["Course"])
             {
                 var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
@@ -959,10 +959,12 @@ namespace StudentScheduleManagementSystem.Schedule
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
                     Map.Location.Building location =
                         locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                    _ = new Exam(dobj.ScheduleId, shared.Name, shared.Timestamp, shared.Duration, dobj.Description, location)
-                    {
-                        AlarmEnabled = dobj.AlarmEnabled
-                    };
+                    _ = new Exam(dobj.ScheduleId,
+                                 shared.Name,
+                                 shared.Timestamp,
+                                 shared.Duration,
+                                 dobj.Description,
+                                 location) { AlarmEnabled = dobj.AlarmEnabled };
                     Log.Information.Log($"已导入ID为{dobj.ScheduleId}的考试");
                 }
                 catch (KeyNotFoundException)
