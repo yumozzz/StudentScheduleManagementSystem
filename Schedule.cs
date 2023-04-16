@@ -606,54 +606,70 @@ namespace StudentScheduleManagementSystem.Schedule
             var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
                                                                       "share",
                                                                       Encryption.Encrypt.AESDecrypt);
-            foreach (var item in dic["Course"])
+
+            try
             {
-                var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
-                if (dobj == null)
+                foreach (var item in dic["Course"])
                 {
-                    throw new JsonFormatException();
-                }
-                if (dobj.Name != "Default")
-                {
-                    _correspondenceDictionary.Add(dobj.Id, dobj);
-                }
-                else
-                {
-                    _courseIdMax = dobj.Id;
+                    var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
+                    if (dobj == null)
+                    {
+                        throw new JsonFormatException();
+                    }
+                    if (dobj.Name != "Default")
+                    {
+                        _correspondenceDictionary.Add(dobj.Id, dobj);
+                    }
+                    else
+                    {
+                        _courseIdMax = dobj.Id;
+                    }
                 }
             }
-            foreach (var item in dic["Exam"])
+            catch (KeyNotFoundException) { }
+
+            try
             {
-                var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
-                if (dobj == null)
+                foreach (var item in dic["Exam"])
                 {
-                    throw new JsonFormatException();
-                }
-                if (dobj.Name != "Default")
-                {
-                    _correspondenceDictionary.Add(dobj.Id, dobj);
-                }
-                else
-                {
-                    _examIdMax = dobj.Id;
+                    var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
+                    if (dobj == null)
+                    {
+                        throw new JsonFormatException();
+                    }
+                    if (dobj.Name != "Default")
+                    {
+                        _correspondenceDictionary.Add(dobj.Id, dobj);
+                    }
+                    else
+                    {
+                        _examIdMax = dobj.Id;
+                    }
                 }
             }
-            foreach (var item in dic["GroupActivity"])
+            catch (KeyNotFoundException) { }
+
+            try
             {
-                var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
-                if (dobj == null)
+                foreach (var item in dic["GroupActivity"])
                 {
-                    throw new JsonFormatException();
-                }
-                if (dobj.Name != "Default")
-                {
-                    _correspondenceDictionary.Add(dobj.Id, dobj);
-                }
-                else
-                {
-                    _groutActivityIdMax = dobj.Id;
+                    var dobj = JsonConvert.DeserializeObject<SharedData>(item.ToString());
+                    if (dobj == null)
+                    {
+                        throw new JsonFormatException();
+                    }
+                    if (dobj.Name != "Default")
+                    {
+                        _correspondenceDictionary.Add(dobj.Id, dobj);
+                    }
+                    else
+                    {
+                        _groutActivityIdMax = dobj.Id;
+                    }
                 }
             }
+            catch (KeyNotFoundException) { }
+
             #if GROUPACTIVITYCONTROL
             uint[] arr = new uint[TotalHours];
             int i = 0;
