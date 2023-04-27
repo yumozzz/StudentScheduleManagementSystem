@@ -93,6 +93,9 @@ namespace StudentScheduleManagementSystem
 
     public static class Constants
     {
-        public static int[] AllWeeks = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        public static readonly int[] AllWeeks = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        public static readonly Day[] AllDays = { Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday, Day.Sunday };
+        public static readonly int[] EmptyIntArray = Array.Empty<int>();
+        public static readonly Day[] EmptyDayArray = Array.Empty<Day>();
     }
 }

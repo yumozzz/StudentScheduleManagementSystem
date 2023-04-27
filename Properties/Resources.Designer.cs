@@ -63,6 +63,16 @@ namespace StudentScheduleManagementSystem.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap CourseIcon {
+            get {
+                object obj = ResourceManager.GetObject("CourseIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap LoginBackground {
             get {
                 object obj = ResourceManager.GetObject("LoginBackground", resourceCulture);
@@ -83,9 +93,209 @@ namespace StudentScheduleManagementSystem.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap OPBG {
+            get {
+                object obj = ResourceManager.GetObject("OPBG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap OPBG_Format_ {
+            get {
+                object obj = ResourceManager.GetObject("OPBG(Format)", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap OPBG_Format_1 {
+            get {
+                object obj = ResourceManager.GetObject("OPBG(Format)1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap SchoolMap {
             get {
                 object obj = ResourceManager.GetObject("SchoolMap", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap SubPageBG {
+            get {
+                object obj = ResourceManager.GetObject("SubPageBG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 关闭__ffffff_128 {
+            get {
+                object obj = ResourceManager.GetObject("关闭_#ffffff_128", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 户外实践__ffffff_128_21601017 {
+            get {
+                object obj = ResourceManager.GetObject("户外实践_#ffffff_128_21601017", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 活动__ffffff_128_3505039 {
+            get {
+                object obj = ResourceManager.GetObject("活动_#ffffff_128_3505039", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 活动__ffffff_128_35050391 {
+            get {
+                object obj = ResourceManager.GetObject("活动_#ffffff_128_35050391", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 登出__ffffff_128 {
+            get {
+                object obj = ResourceManager.GetObject("登出_#ffffff_128", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 研究人员__ffffff_128_21601186 {
+            get {
+                object obj = ResourceManager.GetObject("研究人员_#ffffff_128_21601186", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 管理员__515151_128_3504898 {
+            get {
+                object obj = ResourceManager.GetObject("管理员_#515151_128_3504898", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 管理员__ffffff_128_3504898 {
+            get {
+                object obj = ResourceManager.GetObject("管理员_#ffffff_128_3504898", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 考试__ffffff_128_3471133 {
+            get {
+                object obj = ResourceManager.GetObject("考试_#ffffff_128_3471133", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 考试__ffffff_128_34711331 {
+            get {
+                object obj = ResourceManager.GetObject("考试_#ffffff_128_34711331", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 试卷__ffffff_128_21601018 {
+            get {
+                object obj = ResourceManager.GetObject("试卷_#ffffff_128_21601018", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 课程提醒__ffffff_128_3470970 {
+            get {
+                object obj = ResourceManager.GetObject("课程提醒_#ffffff_128_3470970", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 课程提醒__ffffff_128_34709701 {
+            get {
+                object obj = ResourceManager.GetObject("课程提醒_#ffffff_128_34709701", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 课表__ffffff_128_21601021 {
+            get {
+                object obj = ResourceManager.GetObject("课表_#ffffff_128_21601021", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 退出__a880c2_128_3656183 {
+            get {
+                object obj = ResourceManager.GetObject("退出_#a880c2_128_3656183", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 退出__a880c2_128_3661364 {
+            get {
+                object obj = ResourceManager.GetObject("退出_#a880c2_128_3661364", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

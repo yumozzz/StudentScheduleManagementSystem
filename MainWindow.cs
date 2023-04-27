@@ -1,9 +1,12 @@
+using System.Runtime.InteropServices;
+using System.Text;
+
 namespace StudentScheduleManagementSystem.UI
 {
     public partial class MainWindow : Form
     {
-        public static StudentSubwindow? StudentSubwindow { get; private set; } = null;
-        public static AdminSubwindow? AdminSubwindow { get; private set; } = null;
+        public static StudentWindow? StudentSubwindow { get; private set; } = null;
+        public static AdminWindow? AdminSubwindow { get; private set; } = null;
 
         public MainWindow()
         {
@@ -19,6 +22,7 @@ namespace StudentScheduleManagementSystem.UI
         private void close_Click(object sender, EventArgs e)
         {
             this.Close();
+            this.Dispose();
         }
 
         private void move_Paint(object sender, PaintEventArgs e)
@@ -52,12 +56,18 @@ namespace StudentScheduleManagementSystem.UI
                     this.Hide();
                     if (MainProgram.Program.Identity == Identity.User)
                     {
+                        /*
                         StudentSubwindow = new StudentSubwindow();
                         StudentSubwindow.ShowDialog();
+                        //debug
+                        */
+                        AdminSubwindow = new AdminWindow();
+                        AdminSubwindow.ShowDialog();
+                        
                     }
                     else if(MainProgram.Program.Identity == Identity.Administrator)
                     {
-                        AdminSubwindow = new AdminSubwindow();
+                        AdminSubwindow = new AdminWindow();
                         AdminSubwindow.ShowDialog();
                     }
                     
@@ -88,7 +98,7 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     MessageBox.Show("Successfully register!");
 
-                    StudentSubwindow = new StudentSubwindow();
+                    StudentSubwindow = new StudentWindow();
                     this.Hide();
                     StudentSubwindow.ShowDialog();
                     this.Show();
@@ -105,6 +115,7 @@ namespace StudentScheduleManagementSystem.UI
             passwordbox.Text = "";
         }
 
+
         private void move_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -112,6 +123,53 @@ namespace StudentScheduleManagementSystem.UI
                 this.Left += e.Location.X - this.oldX;
                 this.Top += e.Location.Y - this.oldY;
             }
+        }
+
+        public static StringBuilder Continuity(int[] activeWeeks)
+        {
+            int continuity = 0;
+            StringBuilder ret = new("");
+            for (int i = 1; i < activeWeeks.Length; i++)
+            {
+                if (activeWeeks[i] == activeWeeks[i - 1] + 1)
+                {
+                    if (continuity == 0)
+                    {
+                        if (i != 1)
+                        {
+                            ret.Append(", ");
+                        }
+                        ret.Append(activeWeeks[i - 1].ToString());
+                    }
+                    continuity++;
+                }
+                else
+                {
+                    if (continuity == 0)
+                    {
+                        if (i != 1)
+                        {
+                            ret.Append(", ");
+                        }
+                        ret.Append(activeWeeks[i - 1].ToString());
+                    }
+                    else
+                    {
+                        ret.Append("-" + activeWeeks[i - 1].ToString());
+                    }
+                    continuity = 0;
+                }
+            }
+            if (continuity == 0)
+            {
+                ret.Append(", " + activeWeeks[activeWeeks.Length - 1].ToString());
+            }
+            else
+            {
+                ret.Append("-" + activeWeeks[activeWeeks.Length - 1].ToString());
+            }
+
+            return ret;
         }
     }
 }

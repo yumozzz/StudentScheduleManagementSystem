@@ -444,12 +444,12 @@ namespace StudentScheduleManagementSystem.Times
                 case (RepetitiveType.Single, RepetitiveType.MultipleDays):
                     Console.WriteLine($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
-                    RemoveAlarm(timestamp, overrideType, Array.Empty<int>(), Array.Empty<Day>());
+                    RemoveAlarm(timestamp, overrideType, Constants.EmptyIntArray, Constants.EmptyDayArray);
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.Single):
                     Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟在{timestamp.ToString()}上已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟在{timestamp.ToString()}上已被覆盖");
-                    _timeline.RemoveMultipleItems(timestamp, 1, overrideType, out _, Array.Empty<int>(), Array.Empty<Day>());
+                    _timeline.RemoveMultipleItems(timestamp, 1, overrideType, out _, Constants.EmptyIntArray, Constants.EmptyDayArray);
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
                     Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
