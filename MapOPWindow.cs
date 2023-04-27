@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace StudentScheduleManagementSystem.UI
 {
-    public partial class MapOPWindow : StudentScheduleManagementSystem.UI.MapSubwindow
+    public partial class MapOPWindow : StudentScheduleManagementSystem.UI.MapWindow
     {
         /*
         public MapOPWindow()

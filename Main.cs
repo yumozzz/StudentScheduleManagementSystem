@@ -54,7 +54,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                                        new() { Id = 0, X = 0, Y = 0 }),
                                              new[] { 1, 2, 3 },
                                              new[] { Day.Monday, Day.Tuesday });*/
-                //Array.Empty<Day>();
+                //Constants.EmptyDayArray;
 
                 #endregion
 
@@ -123,10 +123,17 @@ namespace StudentScheduleManagementSystem.MainProgram
                 {
                     return true;
                 }
-                ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
-                                                  .UserFileDirectory,
-                                               inputUserId,
-                                               Encryption.Encrypt.RSADecrypt));
+                try
+                {
+                    ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
+                                                      .UserFileDirectory,
+                                                   inputUserId,
+                                                   Encryption.Encrypt.RSADecrypt));
+                }
+                catch (KeyNotFoundException)
+                {
+                    throw new FileNotFoundException();
+                }
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
                                      RepetitiveType.Single,
                                      Schedule.ScheduleBase.NotifyAllInComingDay,
@@ -136,18 +143,20 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      },
                                      typeof(Times.Alarm.CBPForGeneralAlarm),
                                      true,
-                                     Array.Empty<int>(),
-                                     Array.Empty<Day>());
+                                     Constants.EmptyIntArray,
+                                     Constants.EmptyDayArray);
                 return true;
             }
             catch (FileNotFoundException ex)
             {
                 Log.Error.Log("用户文件不存在，考虑注册", ex);
+                MessageBox.Show("用户文件不存在，请先注册！");
                 return false;
             }
             catch (Exception ex) when (ex is AuthenticationException or KeyNotFoundException)
             {
                 Log.Error.Log("用户名或密码输入错误", null);
+                MessageBox.Show("用户名或密码输入错误！");
                 return false;
             }
         }
@@ -177,21 +186,26 @@ namespace StudentScheduleManagementSystem.MainProgram
             catch (FormatException)
             {
                 Log.Error.Log("用户名或密码格式错误", null);
+                MessageBox.Show("用户名或密码格式错误！");
                 return false;
             }
             catch (ArgumentException)
             {
                 Log.Error.Log("用户已存在", null);
+                MessageBox.Show("用户已存在！");
                 return false;
             }
         }
 
         public static void Logout()
         {
-            FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
-                                                      FileManagement.FileManager.UserFileDirectory,
-                                                      UserId,
-                                                      Encryption.Encrypt.RSAEncrypt);
+            if (Identity == Identity.User)
+            {
+                FileManagement.FileManager.SaveToUserFile(CreateInstanceDictionary(),
+                                                          FileManagement.FileManager.UserFileDirectory,
+                                                          UserId,
+                                                          Encryption.Encrypt.RSAEncrypt);
+            }
             Times.Timer.Pause = true;
             Times.Alarm.ClearAll();
             Schedule.ScheduleBase.ClearAll();
@@ -274,12 +288,12 @@ namespace StudentScheduleManagementSystem.Schedule
                                  new Times.Alarm.CBPForGeneralAlarm() { startTimestamp = param.startTimestamp + 24 },
                                  typeof(Times.Alarm.CBPForGeneralAlarm),
                                  true,
-                                 Array.Empty<int>(),
-                                 Array.Empty<Day>());
+                                 Constants.EmptyIntArray,
+                                 Constants.EmptyDayArray);
             Times.Alarm.RemoveAlarm(param.startTimestamp - 2,
                                     RepetitiveType.Single,
-                                    Array.Empty<int>(),
-                                    Array.Empty<Day>());
+                                    Constants.EmptyIntArray,
+                                    Constants.EmptyDayArray);
         }
     }
 
