@@ -47,6 +47,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.DeleteActivity = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ActivityData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -257,11 +258,22 @@
             this.label1.TabIndex = 48;
             this.label1.Text = "Name";
             // 
+            // DeleteActivity
+            // 
+            this.DeleteActivity.Location = new System.Drawing.Point(735, 353);
+            this.DeleteActivity.Name = "DeleteActivity";
+            this.DeleteActivity.Size = new System.Drawing.Size(300, 34);
+            this.DeleteActivity.TabIndex = 53;
+            this.DeleteActivity.Text = "DeleteActivity";
+            this.DeleteActivity.UseVisualStyleBackColor = true;
+            this.DeleteActivity.Click += new System.EventHandler(this.DeleteActivity_Click);
+            // 
             // AdminWindowActivity
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.DeleteActivity);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -306,5 +318,6 @@
         private DataGridViewTextBoxColumn ActivityDGVDay;
         private DataGridViewTextBoxColumn ActivityDGVTime;
         private DataGridViewTextBoxColumn ActivityDGVDuration;
+        private Button DeleteActivity;
     }
 }

@@ -482,7 +482,7 @@ namespace StudentScheduleManagementSystem.Schedule
             return list;
         }
 
-        public static List<SharedData> GetShared(ScheduleType type)
+        public static List<SharedData> GetSharedByType(ScheduleType type)
         {
             int i = type switch
             {
@@ -497,6 +497,29 @@ namespace StudentScheduleManagementSystem.Schedule
                     ret.Add(_correspondenceDictionary[id]);
                 }
             }
+            return ret;
+        }
+
+        public static SharedData? GetSharedById(long id)
+        {
+            if(id is not (>=1000000000 and <= 9999999999))
+            {
+                throw new FormatException("id "+ id.ToString() + " is invalid");
+            }
+            try
+            {
+                return _correspondenceDictionary[id];
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
+        }
+
+        public static List<SharedData> GetSharedByName(string name)
+        {
+            List<SharedData> ret = new();
+
             return ret;
         }
 

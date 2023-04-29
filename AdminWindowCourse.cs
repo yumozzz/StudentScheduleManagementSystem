@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudentScheduleManagementSystem.Schedule;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,6 +18,7 @@ namespace StudentScheduleManagementSystem
             InitializeComponent();
             Generate_MultiSelectBox();
             Generate_Data();
+            //CourseData.Rows[3].Selected = true;
         }
 
         private List<Schedule.ScheduleBase.SharedData> Data = null;
@@ -39,7 +41,7 @@ namespace StudentScheduleManagementSystem
             {
                 CourseData.Columns[i].Width = widths[i];
             }
-            Data = Schedule.ScheduleBase.GetShared(ScheduleType.Course);
+            Data = Schedule.ScheduleBase.GetSharedByType(ScheduleType.Course);
             for (int i = 1; i < Data.Count(); i++)
             {
                 if(Data[i].RepetitiveType == RepetitiveType.Single)
@@ -82,9 +84,19 @@ namespace StudentScheduleManagementSystem
             }
         }
 
+
         private void AddCourse_Click(object sender, EventArgs e)
         {
-            //error
+            AddOneCourse(null);
+        }
+
+        private void DeleteCourse_Click(object sender, EventArgs e)
+        {
+            DeleteOneCourse();
+        }
+
+        private Boolean AddOneCourse(long? ID)
+        {
             StringBuilder error_message = new StringBuilder("");
 
             if (NameBox.Text.Equals(""))
@@ -110,7 +122,7 @@ namespace StudentScheduleManagementSystem
             if (!error_message.Equals(""))
             {
                 MessageBox.Show(error_message.ToString());
-                return;
+                return false;
             }
 
             //Time info
@@ -148,7 +160,6 @@ namespace StudentScheduleManagementSystem
                     aDcnt++;
                 }
             }
-
 
             int beginhour;
             int duration = DurcomboBox.Text[0] - '0';
@@ -222,6 +233,7 @@ namespace StudentScheduleManagementSystem
                     }
                     MessageBox.Show("已成功添加该课程");
                     Generate_Data();
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -234,35 +246,54 @@ namespace StudentScheduleManagementSystem
                 //不加课程
                 MessageBox.Show("已取消添加该课程");
             }
-
-            //Schedule.Course course
-            /*
-            Schedule.Course course = new(null,
-                                             RepetitiveType.Designated,
-                                             "test course*",
-                                             new() { Week = 1, Day = Day.Monday, Hour = 12 },
-                                             2,
-                                             null,
-                                             new Map.Location.Building(1,
-                                                                       "test building",
-                                                                       new() { Id = 0, X = 0, Y = 0 }),
-                                             new[] { 1, 2, 3 },
-                                             new[] { Day.Monday, Day.Tuesday });
-            
-            public Course(long? specifiedId,
-                      RepetitiveType repetitiveType,
-                      string name,
-                      Times.Time beginTime,
-                      int duration,
-                      string? description,
-                      string onlineLink,
-                      int[] activeWeeks,
-                      Day[] activeDays)
-             
-             */
-            //Constants.EmptyDayArray;
+            return false;
         }
 
+        private long DeleteOneCourse()
+        {
+            int cnt = 0, index = 0;
+            for (int i = 1; i < Data.Count(); i++)
+            {
+                if (Convert.ToBoolean(CourseData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                {
+                    cnt++;
+                    index = i;
+                }
+            }
+            if (cnt == 0)
+            {
+                MessageBox.Show("请选择要删除的课程！");
+                return 0;
+            }
+            else if (cnt >= 2)
+            {
+                MessageBox.Show("请一次选择一个课程删除！");
+                return 0;
+            }
 
+            StringBuilder courseDetail = UI.MainWindow.GenerateScheduleDetail(Data[index]);
+
+            if (MessageBox.Show(courseDetail.ToString(), "课程信息", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                try
+                {
+                    long ID = Data[index].Id;
+                    ScheduleBase.DeleteShared(ID);
+                    MessageBox.Show("已成功删除该课程");
+                    Generate_Data();
+                    return ID;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    Log.Error.Log(null, ex);
+                }
+            }
+            else
+            {
+                MessageBox.Show("已取消删除该课程");
+            }
+            return 0;
+        }
     }
 }
