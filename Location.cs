@@ -45,6 +45,10 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     return false;
                 }
+                if(obj is not Vertex)
+                {
+                    return false;
+                }
                 return Id == ((Vertex)obj).Id && X == ((Vertex)obj).X && Y == ((Vertex)obj).Y;
             }
 
@@ -110,6 +114,10 @@ namespace StudentScheduleManagementSystem.Map
             public override bool Equals(object? obj)
             {
                 if (obj == null)
+                {
+                    return false;
+                }
+                if(obj is not Building)
                 {
                     return false;
                 }
@@ -438,8 +446,12 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<Building> GetBuildingsByName(string name)
         {
+            if(name == "default building")
+            {
+                return new List<Building>() { new(-1, "default building", new() { Id = -1, X = 0, Y = 0 }) };
+            }
             //UNDONE
-            return new List<Building>() { new(0, "default building", new() { Id = 0, X = 0, Y = 0 }) };
+            return new List<Building>() { new(0, "random building", new() { Id = 0, X = 0, Y = 0 }) };
         }
 
         #endregion

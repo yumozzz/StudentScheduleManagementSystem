@@ -86,6 +86,8 @@
             // 
             // multiSelectBox1
             // 
+            this.multiSelectBox1.BackColor = System.Drawing.Color.White;
+            this.multiSelectBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.multiSelectBox1.Location = new System.Drawing.Point(140, 3);
             this.multiSelectBox1.Name = "multiSelectBox1";
             this.multiSelectBox1.Size = new System.Drawing.Size(184, 30);
@@ -93,6 +95,8 @@
             // 
             // multiSelectBox2
             // 
+            this.multiSelectBox2.BackColor = System.Drawing.Color.White;
+            this.multiSelectBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.multiSelectBox2.Location = new System.Drawing.Point(140, 39);
             this.multiSelectBox2.Name = "multiSelectBox2";
             this.multiSelectBox2.Size = new System.Drawing.Size(184, 30);
@@ -151,6 +155,8 @@
             // 
             // multiSelectBox3
             // 
+            this.multiSelectBox3.BackColor = System.Drawing.Color.White;
+            this.multiSelectBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.multiSelectBox3.Location = new System.Drawing.Point(140, 76);
             this.multiSelectBox3.Name = "multiSelectBox3";
             this.multiSelectBox3.Size = new System.Drawing.Size(184, 30);

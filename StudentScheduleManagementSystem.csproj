@@ -12,6 +12,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\CourseIcon.png" />
+    <None Remove="Resources\关闭_#ffffff_128.png" />
+    <None Remove="Resources\活动_#ffffff_128_3505039.png" />
+    <None Remove="Resources\活动_#ffffff_128_35050391.png" />
+    <None Remove="Resources\登出_#ffffff_128.png" />
+    <None Remove="Resources\管理员_#515151_128_3504898.png" />
+    <None Remove="Resources\管理员_#ffffff_128_3504898.png" />
+    <None Remove="Resources\考试_#ffffff_128_3471133.png" />
+    <None Remove="Resources\考试_#ffffff_128_34711331.png" />
+    <None Remove="Resources\课程提醒_#ffffff_128_3470970.png" />
+    <None Remove="Resources\课程提醒_#ffffff_128_34709701.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Runtime.Experimental" Version="6.0.2" />
   </ItemGroup>

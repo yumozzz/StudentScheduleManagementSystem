@@ -1,14 +1,16 @@
+using System.Runtime.InteropServices;
+using System.Text;
+
 namespace StudentScheduleManagementSystem.UI
 {
     public partial class MainWindow : Form
     {
-        public static StudentWindow? StudentWindow { get; private set; } = null;
-        public static AdminWindow? AdminWindow { get; private set; } = null;
+        public static StudentWindow? StudentSubwindow { get; private set; } = null;
+        public static AdminWindow? AdminSubwindow { get; private set; } = null;
 
         public MainWindow()
         {
             InitializeComponent();
-            //修改MultiSelectBox大小
         }
 
         private void MainWindow_Load(object sender, EventArgs e)
@@ -19,6 +21,7 @@ namespace StudentScheduleManagementSystem.UI
         private void close_Click(object sender, EventArgs e)
         {
             this.Close();
+            this.Dispose();
         }
 
         private void move_Paint(object sender, PaintEventArgs e)
@@ -52,13 +55,19 @@ namespace StudentScheduleManagementSystem.UI
                     this.Hide();
                     if (MainProgram.Program.Identity == Identity.User)
                     {
-                        StudentWindow = new StudentWindow();
-                        StudentWindow.ShowDialog();
+                        /*
+                        StudentSubwindow = new StudentSubwindow();
+                        StudentSubwindow.ShowDialog();
+                        //debug
+                        */
+                        AdminSubwindow = new AdminWindow();
+                        AdminSubwindow.ShowDialog();
+                        
                     }
                     else if(MainProgram.Program.Identity == Identity.Administrator)
                     {
-                        AdminWindow = new AdminWindow();
-                        AdminWindow.ShowDialog();
+                        AdminSubwindow = new AdminWindow();
+                        AdminSubwindow.ShowDialog();
                     }
                     
                     this.Show();
@@ -88,7 +97,7 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     MessageBox.Show("Successfully register!");
 
-                    StudentWindow = new StudentWindow();
+                    StudentSubwindow = new StudentWindow();
                     this.Hide();
                     StudentWindow.ShowDialog();
                     this.Show();
@@ -105,6 +114,7 @@ namespace StudentScheduleManagementSystem.UI
             passwordbox.Text = "";
         }
 
+
         private void move_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -113,5 +123,122 @@ namespace StudentScheduleManagementSystem.UI
                 this.Top += e.Location.Y - this.oldY;
             }
         }
+
+        public static StringBuilder Continuity(int[] activeWeeks)
+        {
+            if (activeWeeks.Length == 1)
+            {
+                return new StringBuilder(activeWeeks[0].ToString());
+            }
+
+            int continuity = 0;
+            StringBuilder ret = new("");
+            for (int i = 1; i < activeWeeks.Length; i++)
+            {
+                if (activeWeeks[i] == activeWeeks[i - 1] + 1)
+                {
+                    if (continuity == 0)
+                    {
+                        if (i != 1)
+                        {
+                            ret.Append(", ");
+                        }
+                        ret.Append(activeWeeks[i - 1].ToString());
+                    }
+                    continuity++;
+                }
+                else
+                {
+                    if (continuity == 0)
+                    {
+                        if (i != 1)
+                        {
+                            ret.Append(", ");
+                        }
+                        ret.Append(activeWeeks[i - 1].ToString());
+                    }
+                    else
+                    {
+                        ret.Append("-" + activeWeeks[i - 1].ToString());
+                    }
+                    continuity = 0;
+                }
+            }
+            
+            if (continuity == 0)
+            {
+                ret.Append(", " + activeWeeks[activeWeeks.Length - 1].ToString());
+            }
+            else
+            {
+                ret.Append("-" + activeWeeks[activeWeeks.Length - 1].ToString());
+            }
+
+            return ret;
+        }
+
+        
+        public static StringBuilder GenerateScheduleDetail(Schedule.ScheduleBase.SharedData data)
+        {
+            StringBuilder ret = new("");
+            StringBuilder week = new("");
+            StringBuilder day = new("");
+            //ScheduleType.Course
+
+            if (data.RepetitiveType == RepetitiveType.Single)
+            {
+                week.Append(data.Timestamp.Week.ToString());
+                day.Append(data.Timestamp.Day.ToString());
+            }
+            else if (data.RepetitiveType == RepetitiveType.MultipleDays)
+            {
+                week.Append("1-16");
+                for (int j = 0; j < data.ActiveDays.Count(); j++)
+                {
+                    day.Append(data.ActiveDays[j].ToString().Substring(0, 3) + ";");
+                }
+            }
+            else
+            {
+                week = Continuity(data.ActiveWeeks);
+                for (int j = 0; j < data.ActiveDays.Count(); j++)
+                {
+                    day.Append(data.ActiveDays[j].ToString().Substring(0, 3) + ";");
+                }
+            }
+
+            String[] type = new String[2];
+            if(data.ScheduleType == ScheduleType.Course)
+            {
+                type[0] = "课程";
+                type[1] = "上课";
+            }
+            else if (data.ScheduleType == ScheduleType.Activity)
+            {
+                type[0] = "活动";
+                type[1] = "活动";
+            }
+            else
+            {
+                type[0] = "考试";
+                type[1] = "考试";
+            }
+
+            ret.Append(type[0] + "名称：" + data.Name + "\n" + 
+                       type[1] + "周：" + week + "\n" +
+                       type[1] + "日：" + day + "\n" +
+                       "时间: " + data.Timestamp.Hour.ToString() + ":00" + "\n" +
+                       "时长: " + data.Duration.ToString() + "小时" + "\n" +
+                       "ID: " + data.Id.ToString());
+
+            return ret;
+        }
+        
+        /*
+        public void Delete_Click(DataGridView ActivityData)
+        {
+
+        }
+        */
     }
 }
