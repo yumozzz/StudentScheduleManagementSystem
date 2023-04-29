@@ -90,7 +90,7 @@
             this.CourseOP.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.CourseOP.TabIndex = 27;
             this.CourseOP.TabStop = false;
-            this.CourseOP.Click += new System.EventHandler(this.CourseOP_Click);
+            this.CourseOP.Click += new System.EventHandler(this.CourseManagement_Click);
             // 
             // ActivityOP
             // 
@@ -103,7 +103,7 @@
             this.ActivityOP.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.ActivityOP.TabIndex = 28;
             this.ActivityOP.TabStop = false;
-            this.ActivityOP.Click += new System.EventHandler(this.ActivityOP_Click);
+            this.ActivityOP.Click += new System.EventHandler(this.ActivityManagement_Click);
             // 
             // SubPageBG
             // 
@@ -150,7 +150,7 @@
             this.TestOP.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.TestOP.TabIndex = 29;
             this.TestOP.TabStop = false;
-            this.TestOP.Click += new System.EventHandler(this.TestOP_Click);
+            this.TestOP.Click += new System.EventHandler(this.TestManagement_Click);
             // 
             // AdminWindow
             // 

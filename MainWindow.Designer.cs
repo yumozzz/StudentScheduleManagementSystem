@@ -105,7 +105,7 @@
             this.move.Name = "move";
             this.move.Size = new System.Drawing.Size(800, 40);
             this.move.TabIndex = 12;
-            this.move.Paint += new System.Windows.Forms.PaintEventHandler(this.move_Paint);
+            //this.move.Paint += new System.Windows.Forms.PaintEventHandler(this.move_Paint);
             this.move.MouseDown += new System.Windows.Forms.MouseEventHandler(this.move_MouseDown);
             this.move.MouseMove += new System.Windows.Forms.MouseEventHandler(this.move_MouseMove);
             // 
@@ -138,7 +138,7 @@
             this.Name = "MainWindow";
             this.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Text = "Login";
-            this.Load += new System.EventHandler(this.MainWindow_Load);
+            //this.Load += new System.EventHandler(this.MainWindow_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
