@@ -448,7 +448,6 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 Debug.Assert(thisScheduleId == null);
                 this.ScheduleId = thisScheduleId!.Value;
-                _scheduleList.Add(thisScheduleId!.Value, this);
                 Log.Information.Log("已在时间轴与表中添加日程");
                 return;
             }
