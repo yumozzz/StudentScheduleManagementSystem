@@ -1,6 +1,6 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class MapSubwindow
+    partial class MapWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -44,14 +44,14 @@
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
             // 
-            // MapSubwindow
+            // MapWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(778, 1144);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Name = "MapSubwindow";
+            this.Name = "MapWindow";
             this.Text = "Map";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

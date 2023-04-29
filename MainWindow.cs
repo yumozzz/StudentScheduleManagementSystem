@@ -2,8 +2,8 @@ namespace StudentScheduleManagementSystem.UI
 {
     public partial class MainWindow : Form
     {
-        public static StudentSubwindow? StudentSubwindow { get; private set; } = null;
-        public static AdminSubwindow? AdminSubwindow { get; private set; } = null;
+        public static StudentWindow? StudentWindow { get; private set; } = null;
+        public static AdminWindow? AdminWindow { get; private set; } = null;
 
         public MainWindow()
         {
@@ -52,13 +52,13 @@ namespace StudentScheduleManagementSystem.UI
                     this.Hide();
                     if (MainProgram.Program.Identity == Identity.User)
                     {
-                        StudentSubwindow = new StudentSubwindow();
-                        StudentSubwindow.ShowDialog();
+                        StudentWindow = new StudentWindow();
+                        StudentWindow.ShowDialog();
                     }
                     else if(MainProgram.Program.Identity == Identity.Administrator)
                     {
-                        AdminSubwindow = new AdminSubwindow();
-                        AdminSubwindow.ShowDialog();
+                        AdminWindow = new AdminWindow();
+                        AdminWindow.ShowDialog();
                     }
                     
                     this.Show();
@@ -88,9 +88,9 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     MessageBox.Show("Successfully register!");
 
-                    StudentSubwindow = new StudentSubwindow();
+                    StudentWindow = new StudentWindow();
                     this.Hide();
-                    StudentSubwindow.ShowDialog();
+                    StudentWindow.ShowDialog();
                     this.Show();
                 }
                 else

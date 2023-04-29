@@ -1,6 +1,6 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class AdminSubwindow
+    partial class AdminWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -51,14 +51,14 @@
             this.MapOperator.UseVisualStyleBackColor = true;
             this.MapOperator.Click += new System.EventHandler(this.MapOperator_Click);
             // 
-            // AdminSubwindow
+            // AdminWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1083, 669);
             this.Controls.Add(this.MapOperator);
             this.Controls.Add(this.AddSchedule);
-            this.Name = "AdminSubwindow";
+            this.Name = "AdminWindow";
             this.Text = "AdminWindow";
             this.ResumeLayout(false);
 

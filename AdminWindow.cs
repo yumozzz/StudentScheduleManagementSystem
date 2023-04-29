@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace StudentScheduleManagementSystem.UI
 {
-    public partial class AdminSubwindow : Form
+    public partial class AdminWindow : Form
     {
-        public AdminSubwindow()
+        public AdminWindow()
         {
             InitializeComponent();
         }

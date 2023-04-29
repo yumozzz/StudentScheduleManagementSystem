@@ -11,13 +11,13 @@ using System.Windows.Forms;
 namespace StudentScheduleManagementSystem.UI
 {
 
-    public partial class StudentSubwindow : Form
+    public partial class StudentWindow : Form
     {
         public delegate void ChangeLocalTimeCallback(Times.Time time);
 
         public ChangeLocalTimeCallback changeLocalTimeCallback;
 
-        public StudentSubwindow()
+        public StudentWindow()
         {
             InitializeComponent();
             this.multiSelectBox1.Add("wk1");

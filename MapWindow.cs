@@ -1,11 +1,11 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    public partial class MapSubwindow : Form
+    public partial class MapWindow : Form
     {
         private List<(Map.Location.Vertex, Map.Location.Vertex)> _lineEndPointPairs;
         private List<(Map.Location.Vertex, Point, Point, Map.Location.Vertex)> _bezCurveControlPointTuples;
 
-        public MapSubwindow(List<(Map.Location.Vertex, Map.Location.Vertex)> lineEndPointPairs,
+        public MapWindow(List<(Map.Location.Vertex, Map.Location.Vertex)> lineEndPointPairs,
                          List<(Map.Location.Vertex, Point, Point, Map.Location.Vertex)>
                              bezCurveControlPointTuples)
         {

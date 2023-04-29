@@ -1,6 +1,6 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class MapOPWindow
+    partial class MapEditWindow
     {
         /// <summary>
         /// Required designer variable.

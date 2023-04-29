@@ -1,6 +1,6 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class StudentSubwindow
+    partial class StudentWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -156,7 +156,7 @@
             this.multiSelectBox3.Size = new System.Drawing.Size(184, 30);
             this.multiSelectBox3.TabIndex = 11;
             // 
-            // StudentSubwindow
+            // StudentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -165,7 +165,7 @@
             this.Controls.Add(this.CurrentTime);
             this.Controls.Add(this.move);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "StudentSubwindow";
+            this.Name = "StudentWindow";
             this.Text = "StudentWindow";
             this.move.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
