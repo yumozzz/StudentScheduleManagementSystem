@@ -22,7 +22,7 @@ namespace StudentScheduleManagementSystem
         public String[] NameofCkbox;
         public Boolean browse_show = false;
 
-        public CheckBox[] CBs;
+        private CheckBox[] CBs;
         public MultiSelectBox()
         {
             InitializeComponent();
@@ -72,7 +72,7 @@ namespace StudentScheduleManagementSystem
             pictureBox2.Hide();
         }
 
-        public void Update_textBox()
+        private void Update_textBox()
         {
             valid = 0;
             textBox.Text = "";
@@ -87,22 +87,14 @@ namespace StudentScheduleManagementSystem
             }
         }
 
-        public void Select_All_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void Select_All_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            for (int i = 0; i < items_cnt; i++)
-            {
-                CBs[i].Checked = true;
-            }
-            Update_textBox();
+            SetAllValid();
         }
 
-        public void Cancel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void Cancel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            for (int i = 0; i < items_cnt; i++)
-            {
-                CBs[i].Checked = false;
-            }
-            Update_textBox();
+            ClearBox();
         }
 
         private void MultiSelectBox_Load(object sender, EventArgs e)
@@ -148,6 +140,38 @@ namespace StudentScheduleManagementSystem
                 browse_show = true;
                 pictureBox2.Show();
             }
+        }
+
+        public Boolean SelectCheckBox(int index)
+        {
+            if(index >= this.items_cnt)
+            {
+                return false;
+            }
+
+            Selects[index] = true;
+            CBs[index].Checked = true;
+            Update_textBox();
+
+            return true;
+        }
+
+        public void ClearBox()
+        {
+            for (int i = 0; i < items_cnt; i++)
+            {
+                CBs[i].Checked = false;
+            }
+            Update_textBox();
+        }
+
+        public void SetAllValid()
+        {
+            for (int i = 0; i < items_cnt; i++)
+            {
+                CBs[i].Checked = true;
+            }
+            Update_textBox();
         }
     }
 }

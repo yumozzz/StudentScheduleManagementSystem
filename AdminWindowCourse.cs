@@ -87,12 +87,26 @@ namespace StudentScheduleManagementSystem
 
         private void AddCourse_Click(object sender, EventArgs e)
         {
+            if (reviseCourse)
+            {
+                MessageBox.Show("请先修改课程！");
+                return;
+            }
             AddOneCourse(null);
         }
 
         private void DeleteCourse_Click(object sender, EventArgs e)
         {
-            DeleteOneCourse();
+            if (reviseCourse)
+            {
+                MessageBox.Show("请先修改课程！");
+                return;
+            }
+            int index = FindValidIndex();
+            if(index != -1)
+            {
+                DeleteOneCourse(index);
+            }
         }
 
         private Boolean AddOneCourse(long? ID)
@@ -249,28 +263,8 @@ namespace StudentScheduleManagementSystem
             return false;
         }
 
-        private long DeleteOneCourse()
+        private long DeleteOneCourse(int index)
         {
-            int cnt = 0, index = 0;
-            for (int i = 1; i < Data.Count(); i++)
-            {
-                if (Convert.ToBoolean(CourseData.Rows[i - 1].Cells[0].EditedFormattedValue))
-                {
-                    cnt++;
-                    index = i;
-                }
-            }
-            if (cnt == 0)
-            {
-                MessageBox.Show("请选择要删除的课程！");
-                return 0;
-            }
-            else if (cnt >= 2)
-            {
-                MessageBox.Show("请一次选择一个课程删除！");
-                return 0;
-            }
-
             StringBuilder courseDetail = UI.MainWindow.GenerateScheduleDetail(Data[index]);
 
             if (MessageBox.Show(courseDetail.ToString(), "课程信息", MessageBoxButtons.OKCancel) == DialogResult.OK)
@@ -294,6 +288,129 @@ namespace StudentScheduleManagementSystem
                 MessageBox.Show("已取消删除该课程");
             }
             return 0;
+        }
+
+        private int FindValidIndex()
+        {
+            int cnt = 0, index = -1;
+            for (int i = 1; i < Data.Count(); i++)
+            {
+                if (Convert.ToBoolean(CourseData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                {
+                    cnt++;
+                    index = i;
+                }
+            }
+            if (cnt == 0)
+            {
+                index = -1;
+                MessageBox.Show("请选择要删除的考试！");
+            }
+            else if (cnt >= 2)
+            {
+                index = -1;
+                MessageBox.Show("请一次选择一个考试删除！");
+            }
+            return index;
+        }
+
+        private Boolean reviseCourse = false;
+        private long tempID;
+        private void ReviseCourse_Click(object sender, EventArgs e)
+        {
+            if (!reviseCourse)
+            {
+                int index = FindValidIndex();
+                if (index != -1)
+                {
+                    Schedule.ScheduleBase.SharedData data = Data[index];
+                    tempID = DeleteOneCourse(index);
+
+                    if (tempID != 0)
+                    {
+                        /*
+                        this.NameBox.Text = data.Name;
+                        this.WeekcomboBox.Text = "Week" + data.Timestamp.Week.ToString();
+                        this.DaycomboBox.Text = data.Timestamp.Day.ToString();
+                        this.HourcomboBox.Text = data.Timestamp.Hour.ToString() + ":00";
+                        this.DurcomboBox.Text = data.Duration.ToString() + "小时";
+                        reviseExam = true;
+                        return;
+                        */
+                        this.NameBox.Text = data.Name;
+                        this.HourcomboBox.Text = data.Timestamp.Hour.ToString() + ":00";
+                        this.DurcomboBox.Text = data.Duration.ToString() + "小时";
+
+                        if(data.RepetitiveType == RepetitiveType.Single)
+                        {
+                            this.WeekSelectBox.SelectCheckBox(data.Timestamp.Week - 1);
+                            this.DaySelectBox.SelectCheckBox(((int)data.Timestamp.Day) - 1);
+                        } 
+                        else if(data.RepetitiveType == RepetitiveType.MultipleDays)
+                        {
+                            this.WeekSelectBox.SetAllValid();
+                            int dayindex = 0;
+                            for(int i = 0; i < Constants.AllDays.Length; i++)
+                            {
+                                if (data.ActiveDays[dayindex] == Constants.AllDays[i])
+                                {
+                                    DaySelectBox.SelectCheckBox(i);
+                                    dayindex++;
+                                    if(dayindex == data.ActiveDays.Length)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        } 
+                        else
+                        {
+                            int weekindex = 0;
+                            for(int i = 0; i < data.ActiveWeeks.Length; i++)
+                            {
+                                if (data.ActiveWeeks[weekindex] == Constants.AllWeeks[i])
+                                {
+                                    WeekSelectBox.SelectCheckBox(i);
+                                    weekindex++;
+                                    if(weekindex == data.ActiveWeeks.Length)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                            int dayindex = 0;
+                            for (int i = 0; i < Constants.AllDays.Length; i++)
+                            {
+                                if (data.ActiveDays[dayindex] == Constants.AllDays[i])
+                                {
+                                    DaySelectBox.SelectCheckBox(i);
+                                    dayindex++;
+                                    if (dayindex == data.ActiveDays.Length)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        reviseCourse = true;
+                        return;
+                    }
+                    return;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (AddOneCourse(tempID))
+                {
+                    reviseCourse = false;
+                }
+                return;
+            }
         }
     }
 }

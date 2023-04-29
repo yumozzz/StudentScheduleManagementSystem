@@ -650,7 +650,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             while (!MainProgram.Program._cts.IsCancellationRequested)
             {
-                if (!Pause && UI.MainWindow.StudentSubwindow !=null)
+                if (!Pause && UI.MainWindow.StudentSubwindow != null)
                 {
                     Console.WriteLine(LocalTime);
                     UI.MainWindow.StudentSubwindow.SetLocalTime(_localTime);

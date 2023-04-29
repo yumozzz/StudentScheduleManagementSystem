@@ -43,6 +43,11 @@ namespace StudentScheduleManagementSystem
 
         private void AddExam_Click(object sender, EventArgs e)
         {
+            if (reviseExam)
+            {
+                MessageBox.Show("请先修改课程！");
+                return;
+            }
             AddOneExam(null);
         }
 
@@ -129,6 +134,13 @@ namespace StudentScheduleManagementSystem
 
                     MessageBox.Show("已成功添加该考试");
                     Generate_Data();
+
+                    this.NameBox.Text = "";
+                    this.WeekcomboBox.Text = "";
+                    this.DaycomboBox.Text = "";
+                    this.HourcomboBox.Text = "";
+                    this.DurcomboBox.Text = "";
+
                     return true;
                 }
                 catch (Exception ex)
@@ -146,8 +158,16 @@ namespace StudentScheduleManagementSystem
 
         private void DeleteExam_Click(object sender, EventArgs e)
         {
+            if (reviseExam)
+            {
+                MessageBox.Show("请先修改课程！");
+                return;
+            }
             int index = FindValidIndex();
-            DeleteOneExam(index);
+            if (index != -1)
+            {
+                DeleteOneExam(index);
+            }
         }
 
         private long DeleteOneExam(int index)
