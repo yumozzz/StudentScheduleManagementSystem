@@ -1,11 +1,11 @@
-﻿namespace StudentScheduleManagementSystem
+﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class AdminWindowActivity
+    partial class AdminSubwindowBase
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        protected System.ComponentModel.IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -26,52 +26,52 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
+        protected void InitializeComponent()
         {
-            this.ActivityData = new System.Windows.Forms.DataGridView();
+            this.ScheduleData = new System.Windows.Forms.DataGridView();
             this.CourseDGVCheck = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.ActivityDGVName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ActivityDGVWeek = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ActivityDGVDay = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ActivityDGVTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ActivityDGVDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScheduleDGVName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScheduleDGVWeek = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScheduleDGVDay = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScheduleDGVTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScheduleDGVDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.WeekSelectBox = new StudentScheduleManagementSystem.MultiSelectBox();
             this.DaySelectBox = new StudentScheduleManagementSystem.MultiSelectBox();
             this.DurcomboBox = new System.Windows.Forms.ComboBox();
             this.HourcomboBox = new System.Windows.Forms.ComboBox();
             this.NameBox = new System.Windows.Forms.TextBox();
-            this.AddActivity = new System.Windows.Forms.Button();
+            this.AddSchedule = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.DeleteActivity = new System.Windows.Forms.Button();
-            this.ReviseActivity = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.ActivityData)).BeginInit();
+            this.DeleteSchedule = new System.Windows.Forms.Button();
+            this.ReviseSchedule = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.ScheduleData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
-            // ActivityData
+            // ScheduleData
             // 
-            this.ActivityData.AllowUserToAddRows = false;
-            this.ActivityData.BackgroundColor = System.Drawing.Color.White;
-            this.ActivityData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ActivityData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ScheduleData.AllowUserToAddRows = false;
+            this.ScheduleData.BackgroundColor = System.Drawing.Color.White;
+            this.ScheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ScheduleData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.CourseDGVCheck,
-            this.ActivityDGVName,
-            this.ActivityDGVWeek,
-            this.ActivityDGVDay,
-            this.ActivityDGVTime,
-            this.ActivityDGVDuration});
-            this.ActivityData.Location = new System.Drawing.Point(5, 2);
-            this.ActivityData.Name = "ActivityData";
-            this.ActivityData.RowHeadersVisible = false;
-            this.ActivityData.RowHeadersWidth = 62;
-            this.ActivityData.RowTemplate.Height = 32;
-            this.ActivityData.Size = new System.Drawing.Size(714, 651);
-            this.ActivityData.TabIndex = 41;
+            this.ScheduleDGVName,
+            this.ScheduleDGVWeek,
+            this.ScheduleDGVDay,
+            this.ScheduleDGVTime,
+            this.ScheduleDGVDuration});
+            this.ScheduleData.Location = new System.Drawing.Point(5, 2);
+            this.ScheduleData.Name = "ScheduleData";
+            this.ScheduleData.RowHeadersVisible = false;
+            this.ScheduleData.RowHeadersWidth = 62;
+            this.ScheduleData.RowTemplate.Height = 32;
+            this.ScheduleData.Size = new System.Drawing.Size(714, 651);
+            this.ScheduleData.TabIndex = 41;
             // 
             // CourseDGVCheck
             // 
@@ -81,50 +81,50 @@
             this.CourseDGVCheck.Name = "CourseDGVCheck";
             this.CourseDGVCheck.Width = 30;
             // 
-            // ActivityDGVName
+            // ScheduleDGVName
             // 
-            this.ActivityDGVName.Frozen = true;
-            this.ActivityDGVName.HeaderText = "活动名称";
-            this.ActivityDGVName.MinimumWidth = 8;
-            this.ActivityDGVName.Name = "ActivityDGVName";
-            this.ActivityDGVName.ReadOnly = true;
-            this.ActivityDGVName.Width = 180;
+            this.ScheduleDGVName.Frozen = true;
+            this.ScheduleDGVName.HeaderText = "日程名称";
+            this.ScheduleDGVName.MinimumWidth = 8;
+            this.ScheduleDGVName.Name = "ScheduleDGVName";
+            this.ScheduleDGVName.ReadOnly = true;
+            this.ScheduleDGVName.Width = 180;
             // 
-            // ActivityDGVWeek
+            // ScheduleDGVWeek
             // 
-            this.ActivityDGVWeek.Frozen = true;
-            this.ActivityDGVWeek.HeaderText = "活动周";
-            this.ActivityDGVWeek.MinimumWidth = 8;
-            this.ActivityDGVWeek.Name = "ActivityDGVWeek";
-            this.ActivityDGVWeek.ReadOnly = true;
-            this.ActivityDGVWeek.Width = 120;
+            this.ScheduleDGVWeek.Frozen = true;
+            this.ScheduleDGVWeek.HeaderText = "日程周";
+            this.ScheduleDGVWeek.MinimumWidth = 8;
+            this.ScheduleDGVWeek.Name = "ScheduleDGVWeek";
+            this.ScheduleDGVWeek.ReadOnly = true;
+            this.ScheduleDGVWeek.Width = 120;
             // 
-            // ActivityDGVDay
+            // ScheduleDGVDay
             // 
-            this.ActivityDGVDay.Frozen = true;
-            this.ActivityDGVDay.HeaderText = "活动日";
-            this.ActivityDGVDay.MinimumWidth = 8;
-            this.ActivityDGVDay.Name = "ActivityDGVDay";
-            this.ActivityDGVDay.ReadOnly = true;
-            this.ActivityDGVDay.Width = 120;
+            this.ScheduleDGVDay.Frozen = true;
+            this.ScheduleDGVDay.HeaderText = "日程日";
+            this.ScheduleDGVDay.MinimumWidth = 8;
+            this.ScheduleDGVDay.Name = "ScheduleDGVDay";
+            this.ScheduleDGVDay.ReadOnly = true;
+            this.ScheduleDGVDay.Width = 120;
             // 
-            // ActivityDGVTime
+            // ScheduleDGVTime
             // 
-            this.ActivityDGVTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.ActivityDGVTime.HeaderText = "时间";
-            this.ActivityDGVTime.MinimumWidth = 8;
-            this.ActivityDGVTime.Name = "ActivityDGVTime";
-            this.ActivityDGVTime.ReadOnly = true;
-            this.ActivityDGVTime.Width = 150;
+            this.ScheduleDGVTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.ScheduleDGVTime.HeaderText = "时间";
+            this.ScheduleDGVTime.MinimumWidth = 8;
+            this.ScheduleDGVTime.Name = "ScheduleDGVTime";
+            this.ScheduleDGVTime.ReadOnly = true;
+            this.ScheduleDGVTime.Width = 150;
             // 
-            // ActivityDGVDuration
+            // ScheduleDGVDuration
             // 
-            this.ActivityDGVDuration.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.ActivityDGVDuration.HeaderText = "时长";
-            this.ActivityDGVDuration.MinimumWidth = 8;
-            this.ActivityDGVDuration.Name = "ActivityDGVDuration";
-            this.ActivityDGVDuration.ReadOnly = true;
-            this.ActivityDGVDuration.Width = 150;
+            this.ScheduleDGVDuration.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.ScheduleDGVDuration.HeaderText = "时长";
+            this.ScheduleDGVDuration.MinimumWidth = 8;
+            this.ScheduleDGVDuration.Name = "ScheduleDGVDuration";
+            this.ScheduleDGVDuration.ReadOnly = true;
+            this.ScheduleDGVDuration.Width = 150;
             // 
             // WeekSelectBox
             // 
@@ -192,17 +192,17 @@
             this.NameBox.Size = new System.Drawing.Size(300, 30);
             this.NameBox.TabIndex = 38;
             // 
-            // AddActivity
+            // AddSchedule
             // 
-            this.AddActivity.BackColor = System.Drawing.Color.White;
-            this.AddActivity.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.AddActivity.Location = new System.Drawing.Point(735, 272);
-            this.AddActivity.Name = "AddActivity";
-            this.AddActivity.Size = new System.Drawing.Size(300, 35);
-            this.AddActivity.TabIndex = 35;
-            this.AddActivity.Text = "AddActivity";
-            this.AddActivity.UseVisualStyleBackColor = false;
-            this.AddActivity.Click += new System.EventHandler(this.AddActivity_Click);
+            this.AddSchedule.BackColor = System.Drawing.Color.White;
+            this.AddSchedule.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.AddSchedule.Location = new System.Drawing.Point(735, 272);
+            this.AddSchedule.Name = "AddSchedule";
+            this.AddSchedule.Size = new System.Drawing.Size(300, 35);
+            this.AddSchedule.TabIndex = 35;
+            this.AddSchedule.Text = "AddSchedule";
+            this.AddSchedule.UseVisualStyleBackColor = false;
+            this.AddSchedule.Click += new System.EventHandler(this.AddSchedule_Click);
             // 
             // pictureBox1
             // 
@@ -259,50 +259,50 @@
             this.label1.TabIndex = 48;
             this.label1.Text = "Name";
             // 
-            // DeleteActivity
+            // DeleteSchedule
             // 
-            this.DeleteActivity.Location = new System.Drawing.Point(735, 353);
-            this.DeleteActivity.Name = "DeleteActivity";
-            this.DeleteActivity.Size = new System.Drawing.Size(300, 34);
-            this.DeleteActivity.TabIndex = 53;
-            this.DeleteActivity.Text = "DeleteActivity";
-            this.DeleteActivity.UseVisualStyleBackColor = true;
-            this.DeleteActivity.Click += new System.EventHandler(this.DeleteActivity_Click);
+            this.DeleteSchedule.Location = new System.Drawing.Point(735, 353);
+            this.DeleteSchedule.Name = "DeleteSchedule";
+            this.DeleteSchedule.Size = new System.Drawing.Size(300, 34);
+            this.DeleteSchedule.TabIndex = 53;
+            this.DeleteSchedule.Text = "DeleteSchedule";
+            this.DeleteSchedule.UseVisualStyleBackColor = true;
+            this.DeleteSchedule.Click += new System.EventHandler(this.DeleteSchedule_Click);
             // 
-            // ReviseActivity
+            // ReviseSchedule
             // 
-            this.ReviseActivity.Location = new System.Drawing.Point(735, 410);
-            this.ReviseActivity.Name = "ReviseActivity";
-            this.ReviseActivity.Size = new System.Drawing.Size(300, 34);
-            this.ReviseActivity.TabIndex = 54;
-            this.ReviseActivity.Text = "ReviseActivity";
-            this.ReviseActivity.UseVisualStyleBackColor = true;
-            this.ReviseActivity.Click += new System.EventHandler(this.ReviseActivity_Click);
+            this.ReviseSchedule.Location = new System.Drawing.Point(735, 410);
+            this.ReviseSchedule.Name = "ReviseSchedule";
+            this.ReviseSchedule.Size = new System.Drawing.Size(300, 34);
+            this.ReviseSchedule.TabIndex = 54;
+            this.ReviseSchedule.Text = "ReviseSchedule";
+            this.ReviseSchedule.UseVisualStyleBackColor = true;
+            this.ReviseSchedule.Click += new System.EventHandler(this.ReviseSchedule_Click);
             // 
-            // AdminWindowActivity
+            // AdminWindowSchedule
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
-            this.Controls.Add(this.ReviseActivity);
-            this.Controls.Add(this.DeleteActivity);
+            this.Controls.Add(this.ReviseSchedule);
+            this.Controls.Add(this.DeleteSchedule);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.ActivityData);
+            this.Controls.Add(this.ScheduleData);
             this.Controls.Add(this.WeekSelectBox);
             this.Controls.Add(this.DaySelectBox);
             this.Controls.Add(this.DurcomboBox);
             this.Controls.Add(this.HourcomboBox);
             this.Controls.Add(this.NameBox);
-            this.Controls.Add(this.AddActivity);
+            this.Controls.Add(this.AddSchedule);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "AdminWindowActivity";
+            this.Name = "AdminWindowSchedule";
             this.Text = ",";
-            ((System.ComponentModel.ISupportInitialize)(this.ActivityData)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ScheduleData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -311,26 +311,26 @@
 
         #endregion
 
-        private DataGridView ActivityData;
-        private MultiSelectBox WeekSelectBox;
-        private MultiSelectBox DaySelectBox;
-        private ComboBox DurcomboBox;
-        private ComboBox HourcomboBox;
-        private TextBox NameBox;
-        private Button AddActivity;
-        private PictureBox pictureBox1;
-        private Label label5;
-        private Label label4;
-        private Label label3;
-        private Label label2;
-        private Label label1;
-        private DataGridViewCheckBoxColumn CourseDGVCheck;
-        private DataGridViewTextBoxColumn ActivityDGVName;
-        private DataGridViewTextBoxColumn ActivityDGVWeek;
-        private DataGridViewTextBoxColumn ActivityDGVDay;
-        private DataGridViewTextBoxColumn ActivityDGVTime;
-        private DataGridViewTextBoxColumn ActivityDGVDuration;
-        private Button DeleteActivity;
-        private Button ReviseActivity;
+        protected DataGridView ScheduleData;
+        protected MultiSelectBox WeekSelectBox;
+        protected MultiSelectBox DaySelectBox;
+        protected ComboBox DurcomboBox;
+        protected ComboBox HourcomboBox;
+        protected TextBox NameBox;
+        protected Button AddSchedule;
+        protected PictureBox pictureBox1;
+        protected Label label5;
+        protected Label label4;
+        protected Label label3;
+        protected Label label2;
+        protected Label label1;
+        protected DataGridViewCheckBoxColumn CourseDGVCheck;
+        protected DataGridViewTextBoxColumn ScheduleDGVName;
+        protected DataGridViewTextBoxColumn ScheduleDGVWeek;
+        protected DataGridViewTextBoxColumn ScheduleDGVDay;
+        protected DataGridViewTextBoxColumn ScheduleDGVTime;
+        protected DataGridViewTextBoxColumn ScheduleDGVDuration;
+        protected Button DeleteSchedule;
+        protected Button ReviseSchedule;
     }
 }
