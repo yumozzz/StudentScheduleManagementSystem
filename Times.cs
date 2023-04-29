@@ -650,10 +650,10 @@ namespace StudentScheduleManagementSystem.Times
         {
             while (!MainProgram.Program._cts.IsCancellationRequested)
             {
-                if (!Pause && UI.MainWindow.StudentWindow !=null)
+                if (!Pause && UI.MainWindow.StudentSubwindow != null)
                 {
                     Console.WriteLine(LocalTime);
-                    UI.MainWindow.StudentWindow.SetLocalTime(_localTime);
+                    UI.MainWindow.StudentSubwindow.SetLocalTime(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;

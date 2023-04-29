@@ -29,6 +29,12 @@
         private void InitializeComponent()
         {
             this.CourseData = new System.Windows.Forms.DataGridView();
+            this.CourseDGVCheck = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.CourseDGVName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CourseDGVWeek = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CourseDGVDay = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CourseDGVTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CourseDGVDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.WeekSelectBox = new StudentScheduleManagementSystem.MultiSelectBox();
             this.DaySelectBox = new StudentScheduleManagementSystem.MultiSelectBox();
             this.DurcomboBox = new System.Windows.Forms.ComboBox();
@@ -36,13 +42,8 @@
             this.NameBox = new System.Windows.Forms.TextBox();
             this.AddCourse = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.CourseDGVCheck = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.CourseDGVName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CourseDGVWeek = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CourseDGVDay = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CourseDGVTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CourseDGVDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DeleteCourse = new System.Windows.Forms.Button();
+            this.ReviseCourse = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.CourseData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -66,6 +67,59 @@
             this.CourseData.RowTemplate.Height = 32;
             this.CourseData.Size = new System.Drawing.Size(714, 651);
             this.CourseData.TabIndex = 33;
+            // 
+            // CourseDGVCheck
+            // 
+            this.CourseDGVCheck.Frozen = true;
+            this.CourseDGVCheck.HeaderText = "";
+            this.CourseDGVCheck.MinimumWidth = 8;
+            this.CourseDGVCheck.Name = "CourseDGVCheck";
+            this.CourseDGVCheck.Width = 30;
+            // 
+            // CourseDGVName
+            // 
+            this.CourseDGVName.Frozen = true;
+            this.CourseDGVName.HeaderText = "课程名称";
+            this.CourseDGVName.MinimumWidth = 8;
+            this.CourseDGVName.Name = "CourseDGVName";
+            this.CourseDGVName.ReadOnly = true;
+            this.CourseDGVName.Width = 180;
+            // 
+            // CourseDGVWeek
+            // 
+            this.CourseDGVWeek.Frozen = true;
+            this.CourseDGVWeek.HeaderText = "上课周";
+            this.CourseDGVWeek.MinimumWidth = 8;
+            this.CourseDGVWeek.Name = "CourseDGVWeek";
+            this.CourseDGVWeek.ReadOnly = true;
+            this.CourseDGVWeek.Width = 120;
+            // 
+            // CourseDGVDay
+            // 
+            this.CourseDGVDay.Frozen = true;
+            this.CourseDGVDay.HeaderText = "上课日";
+            this.CourseDGVDay.MinimumWidth = 8;
+            this.CourseDGVDay.Name = "CourseDGVDay";
+            this.CourseDGVDay.ReadOnly = true;
+            this.CourseDGVDay.Width = 120;
+            // 
+            // CourseDGVTime
+            // 
+            this.CourseDGVTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.CourseDGVTime.HeaderText = "时间";
+            this.CourseDGVTime.MinimumWidth = 8;
+            this.CourseDGVTime.Name = "CourseDGVTime";
+            this.CourseDGVTime.ReadOnly = true;
+            this.CourseDGVTime.Width = 150;
+            // 
+            // CourseDGVDuration
+            // 
+            this.CourseDGVDuration.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.CourseDGVDuration.HeaderText = "时长";
+            this.CourseDGVDuration.MinimumWidth = 8;
+            this.CourseDGVDuration.Name = "CourseDGVDuration";
+            this.CourseDGVDuration.ReadOnly = true;
+            this.CourseDGVDuration.Width = 150;
             // 
             // WeekSelectBox
             // 
@@ -158,59 +212,6 @@
             this.pictureBox1.TabIndex = 34;
             this.pictureBox1.TabStop = false;
             // 
-            // CourseDGVCheck
-            // 
-            this.CourseDGVCheck.Frozen = true;
-            this.CourseDGVCheck.HeaderText = "";
-            this.CourseDGVCheck.MinimumWidth = 8;
-            this.CourseDGVCheck.Name = "CourseDGVCheck";
-            this.CourseDGVCheck.Width = 30;
-            // 
-            // CourseDGVName
-            // 
-            this.CourseDGVName.Frozen = true;
-            this.CourseDGVName.HeaderText = "课程名称";
-            this.CourseDGVName.MinimumWidth = 8;
-            this.CourseDGVName.Name = "CourseDGVName";
-            this.CourseDGVName.ReadOnly = true;
-            this.CourseDGVName.Width = 180;
-            // 
-            // CourseDGVWeek
-            // 
-            this.CourseDGVWeek.Frozen = true;
-            this.CourseDGVWeek.HeaderText = "上课周";
-            this.CourseDGVWeek.MinimumWidth = 8;
-            this.CourseDGVWeek.Name = "CourseDGVWeek";
-            this.CourseDGVWeek.ReadOnly = true;
-            this.CourseDGVWeek.Width = 120;
-            // 
-            // CourseDGVDay
-            // 
-            this.CourseDGVDay.Frozen = true;
-            this.CourseDGVDay.HeaderText = "上课日";
-            this.CourseDGVDay.MinimumWidth = 8;
-            this.CourseDGVDay.Name = "CourseDGVDay";
-            this.CourseDGVDay.ReadOnly = true;
-            this.CourseDGVDay.Width = 120;
-            // 
-            // CourseDGVTime
-            // 
-            this.CourseDGVTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.CourseDGVTime.HeaderText = "时间";
-            this.CourseDGVTime.MinimumWidth = 8;
-            this.CourseDGVTime.Name = "CourseDGVTime";
-            this.CourseDGVTime.ReadOnly = true;
-            this.CourseDGVTime.Width = 150;
-            // 
-            // CourseDGVDuration
-            // 
-            this.CourseDGVDuration.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.CourseDGVDuration.HeaderText = "时长";
-            this.CourseDGVDuration.MinimumWidth = 8;
-            this.CourseDGVDuration.Name = "CourseDGVDuration";
-            this.CourseDGVDuration.ReadOnly = true;
-            this.CourseDGVDuration.Width = 150;
-            // 
             // DeleteCourse
             // 
             this.DeleteCourse.Location = new System.Drawing.Point(735, 364);
@@ -221,11 +222,22 @@
             this.DeleteCourse.UseVisualStyleBackColor = true;
             this.DeleteCourse.Click += new System.EventHandler(this.DeleteCourse_Click);
             // 
+            // ReviseCourse
+            // 
+            this.ReviseCourse.Location = new System.Drawing.Point(735, 426);
+            this.ReviseCourse.Name = "ReviseCourse";
+            this.ReviseCourse.Size = new System.Drawing.Size(300, 34);
+            this.ReviseCourse.TabIndex = 36;
+            this.ReviseCourse.Text = "ReviseCourse";
+            this.ReviseCourse.UseVisualStyleBackColor = true;
+            this.ReviseCourse.Click += new System.EventHandler(this.ReviseCourse_Click);
+            // 
             // AdminWindowCourse
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.ReviseCourse);
             this.Controls.Add(this.DeleteCourse);
             this.Controls.Add(this.CourseData);
             this.Controls.Add(this.WeekSelectBox);
@@ -262,5 +274,6 @@
         private DataGridViewTextBoxColumn CourseDGVTime;
         private DataGridViewTextBoxColumn CourseDGVDuration;
         private Button DeleteCourse;
+        private Button ReviseCourse;
     }
 }

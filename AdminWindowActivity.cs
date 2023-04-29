@@ -303,5 +303,10 @@ namespace StudentScheduleManagementSystem
 
             return 0;
         }
+
+        private void ReviseActivity_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

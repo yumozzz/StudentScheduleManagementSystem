@@ -99,7 +99,7 @@ namespace StudentScheduleManagementSystem.UI
 
                     StudentSubwindow = new StudentWindow();
                     this.Hide();
-                    StudentWindow.ShowDialog();
+                    StudentSubwindow.ShowDialog();
                     this.Show();
                 }
                 else
