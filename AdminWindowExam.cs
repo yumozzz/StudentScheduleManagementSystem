@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudentScheduleManagementSystem.Schedule;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,16 +23,17 @@ namespace StudentScheduleManagementSystem
         public void Generate_Data()
         {
             ExamData.Rows.Clear();
-            int[] widths = { 30, 150, 150, 150, 100, 100 };
+            int[] widths = { 30, 150, 150, 150, 150, 100, 100 };
             for (int i = 0; i < widths.Length; i++)
             {
                 ExamData.Columns[i].Width = widths[i];
             }
-            Data = Schedule.ScheduleBase.GetShared(ScheduleType.Exam);
+            Data = Schedule.ScheduleBase.GetSharedByType(ScheduleType.Exam);
             for (int i = 1; i < Data.Count(); i++)
             {
                 this.ExamData.Rows.Add(null,
                                        Data[i].Name,
+                                       Data[i].Id,
                                        Data[i].Timestamp.Week.ToString(),
                                        Data[i].Timestamp.Day.ToString(),
                                        Data[i].Timestamp.Hour.ToString() + ":00",
@@ -39,8 +41,12 @@ namespace StudentScheduleManagementSystem
             }
         }
 
-        private void AddTest_Click(object sender, EventArgs e)
+        private void AddExam_Click(object sender, EventArgs e)
         {
+            AddOneExam(null);
+        }
+
+        private Boolean AddOneExam(long? ID){
             StringBuilder ErrorMessage = new StringBuilder("");
 
             if (NameBox.Text.Equals(""))
@@ -66,11 +72,11 @@ namespace StudentScheduleManagementSystem
             if (!ErrorMessage.Equals(""))
             {
                 MessageBox.Show(ErrorMessage.ToString());
-                return;
+                return false;
             }
 
             int activeWeek = 0;
-            if(WeekcomboBox.Text.Length == 5)
+            if (WeekcomboBox.Text.Length == 5)
             {
                 activeWeek = WeekcomboBox.Text[4] - '0';
             }
@@ -80,7 +86,7 @@ namespace StudentScheduleManagementSystem
             }
 
             Day activeDay = Day.Monday;
-            for(int i = 0; i < Constants.AllDays.Length; i++)
+            for (int i = 0; i < Constants.AllDays.Length; i++)
             {
                 if (DaycomboBox.Text.Equals(Constants.AllDays[i].ToString()))
                 {
@@ -103,9 +109,9 @@ namespace StudentScheduleManagementSystem
 
             //Double check
             StringBuilder examDetail = new StringBuilder("");
-            examDetail.Append("考试周：" + WeekcomboBox.Text + "\n考试日：" + DaycomboBox.Text + 
+            examDetail.Append("考试周：" + WeekcomboBox.Text + "\n考试日：" + DaycomboBox.Text +
                               "\n时间: " + HourcomboBox.Text + "\n时长: " + DurcomboBox.Text +
-                              "\n考试科目：" + NameBox.Text);
+                              "\n考试科目：" + NameBox.Text + "\nID: " + ID.ToString());
 
             if (MessageBox.Show(examDetail.ToString(), "考试信息", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
@@ -118,11 +124,12 @@ namespace StudentScheduleManagementSystem
                                              new Map.Location.Building(1,
                                                                        "default building",
                                                                        new() { Id = -1, X = 0, Y = 0 }),
-                                             null,
+                                             ID,
                                              addOnTimeline: false);
-                    
+
                     MessageBox.Show("已成功添加该考试");
                     Generate_Data();
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -134,15 +141,103 @@ namespace StudentScheduleManagementSystem
             {
                 MessageBox.Show("已取消添加该考试");
             }
-            /*public Exam(string name,
-                    Times.Time beginTime,
-                    int duration,
-                    string? description,
-                    Map.Location.Building offlineLocation,
-                    long? specifiedId = null,
-                    bool addOnTimeline = true)
-            */
+            return false;
+        }
 
+        private void DeleteExam_Click(object sender, EventArgs e)
+        {
+            int index = FindValidIndex();
+            DeleteOneExam(index);
+        }
+
+        private long DeleteOneExam(int index)
+        {
+            StringBuilder examDetail = UI.MainWindow.GenerateScheduleDetail(Data[index]);
+
+            if (MessageBox.Show(examDetail.ToString(), "考试信息", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                try
+                {
+                    long ID = Data[index].Id;
+                    ScheduleBase.DeleteShared(ID);
+                    MessageBox.Show("已成功删除该考试");
+                    Generate_Data();
+                    return ID;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    Log.Error.Log(null, ex);
+                }
+            }
+            else
+            {
+                MessageBox.Show("已取消删除该考试");
+            }
+            return 0;
+        }
+
+        private int FindValidIndex()
+        {
+            int cnt = 0, index = -1;
+            for (int i = 1; i < Data.Count(); i++)
+            {
+                if (Convert.ToBoolean(ExamData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                {
+                    cnt++;
+                    index = i;
+                }
+            }
+            if (cnt == 0)
+            {
+                index = -1;
+                MessageBox.Show("请选择要删除的考试！");
+            }
+            else if (cnt >= 2)
+            {
+                index = -1;
+                MessageBox.Show("请一次选择一个考试删除！");
+            }
+            return index;
+        }
+
+        private Boolean reviseExam = false;
+        private long tempID;
+        private void ReviseExam_Click(object sender, EventArgs e)
+        {
+            if (!reviseExam)
+            {
+                int index = FindValidIndex();
+                if(index != -1)
+                {
+                    Schedule.ScheduleBase.SharedData data = Data[index];
+                    tempID =  DeleteOneExam(index);
+
+                    if (tempID != 0)
+                    {
+                        this.NameBox.Text = data.Name;
+                        this.WeekcomboBox.Text = "Week" + data.Timestamp.Week.ToString();
+                        this.DaycomboBox.Text = data.Timestamp.Day.ToString();
+                        this.HourcomboBox.Text = data.Timestamp.Hour.ToString() + ":00";
+                        this.DurcomboBox.Text = data.Duration.ToString() + "小时";
+                        reviseExam = true;
+                        return;
+                    }
+                    return;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (AddOneExam(tempID))
+                {
+                    reviseExam = false;
+                }
+                return;
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ namespace StudentScheduleManagementSystem
         public String[] NameofCkbox;
         public Boolean browse_show = false;
 
-        private CheckBox[] CBs;
+        public CheckBox[] CBs;
         public MultiSelectBox()
         {
             InitializeComponent();
@@ -72,7 +72,7 @@ namespace StudentScheduleManagementSystem
             pictureBox2.Hide();
         }
 
-        private void Update_textBox()
+        public void Update_textBox()
         {
             valid = 0;
             textBox.Text = "";
@@ -87,7 +87,7 @@ namespace StudentScheduleManagementSystem
             }
         }
 
-        private void Select_All_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        public void Select_All_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             for (int i = 0; i < items_cnt; i++)
             {
@@ -96,7 +96,7 @@ namespace StudentScheduleManagementSystem
             Update_textBox();
         }
 
-        private void Cancel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        public void Cancel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             for (int i = 0; i < items_cnt; i++)
             {

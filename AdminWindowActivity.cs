@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudentScheduleManagementSystem.Schedule;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -39,7 +40,7 @@ namespace StudentScheduleManagementSystem
             {
                 ActivityData.Columns[i].Width = widths[i];
             }
-            Data = Schedule.ScheduleBase.GetShared(ScheduleType.Activity);
+            Data = Schedule.ScheduleBase.GetSharedByType(ScheduleType.Activity);
             for (int i = 1; i < Data.Count(); i++)
             {
                 if (Data[i].RepetitiveType == RepetitiveType.Single)
@@ -84,6 +85,16 @@ namespace StudentScheduleManagementSystem
 
         private void AddActivity_Click(object sender, EventArgs e)
         {
+            AddOneActivity(null);
+        }
+
+        private void DeleteActivity_Click(object sender, EventArgs e)
+        {
+            DeleteOneActivity();
+        }
+
+        private Boolean AddOneActivity(long? ID)
+        {
             //error
             StringBuilder ErrorMessage = new StringBuilder("");
 
@@ -110,7 +121,7 @@ namespace StudentScheduleManagementSystem
             if (!ErrorMessage.Equals(""))
             {
                 MessageBox.Show(ErrorMessage.ToString());
-                return;
+                return false;
             }
 
             //Time info
@@ -229,6 +240,7 @@ namespace StudentScheduleManagementSystem
                     }
                     MessageBox.Show("已成功添加该活动");
                     Generate_Data();
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -241,19 +253,55 @@ namespace StudentScheduleManagementSystem
                 //不加
                 MessageBox.Show("已取消添加该活动");
             }
-            /*
-            public Activity(RepetitiveType repetitiveType,
-                        string name,
-                        Times.Time beginTime,
-                        int duration,
-                        string? description,
-                        Map.Location.Building location,
-                        bool isGroupActivity,
-                        int[] activeWeeks,
-                        Day[] activeDays,
-                        long? specifiedId = null,
-                        bool addOnTimeline = true)
-             */
+            return false;
+        }
+
+        private long DeleteOneActivity()
+        {
+            int cnt = 0, index = 0;
+            for (int i = 1; i < Data.Count(); i++)
+            {
+                if (Convert.ToBoolean(ActivityData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                {
+                    cnt++;
+                    index = i;
+                }
+            }
+            if (cnt == 0)
+            {
+                MessageBox.Show("请选择要删除的活动！");
+                return 0;
+            }
+            else if (cnt >= 2)
+            {
+                MessageBox.Show("请一次选择一个活动删除！");
+                return 0;
+            }
+
+            StringBuilder activityDetail = UI.MainWindow.GenerateScheduleDetail(Data[index]);
+
+            if (MessageBox.Show(activityDetail.ToString(), "活动信息", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                try
+                {
+                    long ID = Data[index].Id;
+                    ScheduleBase.DeleteShared(ID);
+                    MessageBox.Show("已成功删除该活动");
+                    Generate_Data();
+                    return ID;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    Log.Error.Log(null, ex);
+                }
+            }
+            else
+            {
+                MessageBox.Show("已取消删除该活动");
+            }
+
+            return 0;
         }
     }
 }

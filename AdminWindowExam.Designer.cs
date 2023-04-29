@@ -32,7 +32,7 @@
             this.DurcomboBox = new System.Windows.Forms.ComboBox();
             this.HourcomboBox = new System.Windows.Forms.ComboBox();
             this.NameBox = new System.Windows.Forms.TextBox();
-            this.AddTest = new System.Windows.Forms.Button();
+            this.AddExam = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -41,8 +41,11 @@
             this.label5 = new System.Windows.Forms.Label();
             this.WeekcomboBox = new System.Windows.Forms.ComboBox();
             this.DaycomboBox = new System.Windows.Forms.ComboBox();
+            this.DeleteExam = new System.Windows.Forms.Button();
+            this.ReviseExam = new System.Windows.Forms.Button();
             this.CourseDGVCheck = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.ExamDGVName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IDDGVtextBox = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ExamDGVWeek = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ExamDGVDay = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ExamDGVTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,6 +62,7 @@
             this.ExamData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.CourseDGVCheck,
             this.ExamDGVName,
+            this.IDDGVtextBox,
             this.ExamDGVWeek,
             this.ExamDGVDay,
             this.ExamDGVTime,
@@ -123,17 +127,17 @@
             this.NameBox.Size = new System.Drawing.Size(300, 30);
             this.NameBox.TabIndex = 38;
             // 
-            // AddTest
+            // AddExam
             // 
-            this.AddTest.BackColor = System.Drawing.Color.White;
-            this.AddTest.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.AddTest.Location = new System.Drawing.Point(735, 274);
-            this.AddTest.Name = "AddTest";
-            this.AddTest.Size = new System.Drawing.Size(300, 35);
-            this.AddTest.TabIndex = 35;
-            this.AddTest.Text = "AddExam";
-            this.AddTest.UseVisualStyleBackColor = false;
-            this.AddTest.Click += new System.EventHandler(this.AddTest_Click);
+            this.AddExam.BackColor = System.Drawing.Color.White;
+            this.AddExam.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.AddExam.Location = new System.Drawing.Point(735, 274);
+            this.AddExam.Name = "AddExam";
+            this.AddExam.Size = new System.Drawing.Size(300, 35);
+            this.AddExam.TabIndex = 35;
+            this.AddExam.Text = "AddExam";
+            this.AddExam.UseVisualStyleBackColor = false;
+            this.AddExam.Click += new System.EventHandler(this.AddExam_Click);
             // 
             // pictureBox1
             // 
@@ -234,6 +238,26 @@
             this.DaycomboBox.Size = new System.Drawing.Size(135, 32);
             this.DaycomboBox.TabIndex = 49;
             // 
+            // DeleteExam
+            // 
+            this.DeleteExam.Location = new System.Drawing.Point(735, 344);
+            this.DeleteExam.Name = "DeleteExam";
+            this.DeleteExam.Size = new System.Drawing.Size(300, 34);
+            this.DeleteExam.TabIndex = 54;
+            this.DeleteExam.Text = "DeleteExam";
+            this.DeleteExam.UseVisualStyleBackColor = true;
+            this.DeleteExam.Click += new System.EventHandler(this.DeleteExam_Click);
+            // 
+            // ReviseExam
+            // 
+            this.ReviseExam.Location = new System.Drawing.Point(735, 405);
+            this.ReviseExam.Name = "ReviseExam";
+            this.ReviseExam.Size = new System.Drawing.Size(300, 34);
+            this.ReviseExam.TabIndex = 55;
+            this.ReviseExam.Text = "ReviseExam";
+            this.ReviseExam.UseVisualStyleBackColor = true;
+            this.ReviseExam.Click += new System.EventHandler(this.ReviseExam_Click);
+            // 
             // CourseDGVCheck
             // 
             this.CourseDGVCheck.Frozen = true;
@@ -250,6 +274,14 @@
             this.ExamDGVName.Name = "ExamDGVName";
             this.ExamDGVName.ReadOnly = true;
             this.ExamDGVName.Width = 180;
+            // 
+            // IDDGVtextBox
+            // 
+            this.IDDGVtextBox.Frozen = true;
+            this.IDDGVtextBox.HeaderText = "ID";
+            this.IDDGVtextBox.MinimumWidth = 8;
+            this.IDDGVtextBox.Name = "IDDGVtextBox";
+            this.IDDGVtextBox.Width = 150;
             // 
             // ExamDGVWeek
             // 
@@ -292,6 +324,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.ReviseExam);
+            this.Controls.Add(this.DeleteExam);
             this.Controls.Add(this.DaycomboBox);
             this.Controls.Add(this.WeekcomboBox);
             this.Controls.Add(this.label5);
@@ -303,7 +337,7 @@
             this.Controls.Add(this.DurcomboBox);
             this.Controls.Add(this.HourcomboBox);
             this.Controls.Add(this.NameBox);
-            this.Controls.Add(this.AddTest);
+            this.Controls.Add(this.AddExam);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "AdminWindowExam";
@@ -321,7 +355,7 @@
         private ComboBox DurcomboBox;
         private ComboBox HourcomboBox;
         private TextBox NameBox;
-        private Button AddTest;
+        private Button AddExam;
         private PictureBox pictureBox1;
         private Label label1;
         private Label label2;
@@ -330,8 +364,11 @@
         private Label label5;
         private ComboBox WeekcomboBox;
         private ComboBox DaycomboBox;
+        private Button DeleteExam;
+        private Button ReviseExam;
         private DataGridViewCheckBoxColumn CourseDGVCheck;
         private DataGridViewTextBoxColumn ExamDGVName;
+        private DataGridViewTextBoxColumn IDDGVtextBox;
         private DataGridViewTextBoxColumn ExamDGVWeek;
         private DataGridViewTextBoxColumn ExamDGVDay;
         private DataGridViewTextBoxColumn ExamDGVTime;

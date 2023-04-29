@@ -43,8 +43,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 
                 #region test
 
-                /*Schedule.Course course = new(null,
-                                             RepetitiveType.Designated,
+                /*Schedule.Course course = new(RepetitiveType.Designated,
                                              "test course*",
                                              new() { Week = 1, Day = Day.Monday, Hour = 12 },
                                              2,
@@ -54,6 +53,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                                        new() { Id = 0, X = 0, Y = 0 }),
                                              new[] { 1, 2, 3 },
                                              new[] { Day.Monday, Day.Tuesday });*/
+                //course.EnableAlarm()
                 //Constants.EmptyDayArray;
 
                 #endregion

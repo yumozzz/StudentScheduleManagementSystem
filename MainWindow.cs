@@ -11,7 +11,6 @@ namespace StudentScheduleManagementSystem.UI
         public MainWindow()
         {
             InitializeComponent();
-            //修改MultiSelectBox大小
         }
 
         private void MainWindow_Load(object sender, EventArgs e)
@@ -127,6 +126,11 @@ namespace StudentScheduleManagementSystem.UI
 
         public static StringBuilder Continuity(int[] activeWeeks)
         {
+            if (activeWeeks.Length == 1)
+            {
+                return new StringBuilder(activeWeeks[0].ToString());
+            }
+
             int continuity = 0;
             StringBuilder ret = new("");
             for (int i = 1; i < activeWeeks.Length; i++)
@@ -160,6 +164,7 @@ namespace StudentScheduleManagementSystem.UI
                     continuity = 0;
                 }
             }
+            
             if (continuity == 0)
             {
                 ret.Append(", " + activeWeeks[activeWeeks.Length - 1].ToString());
@@ -171,5 +176,69 @@ namespace StudentScheduleManagementSystem.UI
 
             return ret;
         }
+
+        
+        public static StringBuilder GenerateScheduleDetail(Schedule.ScheduleBase.SharedData data)
+        {
+            StringBuilder ret = new("");
+            StringBuilder week = new("");
+            StringBuilder day = new("");
+            //ScheduleType.Course
+
+            if (data.RepetitiveType == RepetitiveType.Single)
+            {
+                week.Append(data.Timestamp.Week.ToString());
+                day.Append(data.Timestamp.Day.ToString());
+            }
+            else if (data.RepetitiveType == RepetitiveType.MultipleDays)
+            {
+                week.Append("1-16");
+                for (int j = 0; j < data.ActiveDays.Count(); j++)
+                {
+                    day.Append(data.ActiveDays[j].ToString().Substring(0, 3) + ";");
+                }
+            }
+            else
+            {
+                week = Continuity(data.ActiveWeeks);
+                for (int j = 0; j < data.ActiveDays.Count(); j++)
+                {
+                    day.Append(data.ActiveDays[j].ToString().Substring(0, 3) + ";");
+                }
+            }
+
+            String[] type = new String[2];
+            if(data.ScheduleType == ScheduleType.Course)
+            {
+                type[0] = "课程";
+                type[1] = "上课";
+            }
+            else if (data.ScheduleType == ScheduleType.Activity)
+            {
+                type[0] = "活动";
+                type[1] = "活动";
+            }
+            else
+            {
+                type[0] = "考试";
+                type[1] = "考试";
+            }
+
+            ret.Append(type[0] + "名称：" + data.Name + "\n" + 
+                       type[1] + "周：" + week + "\n" +
+                       type[1] + "日：" + day + "\n" +
+                       "时间: " + data.Timestamp.Hour.ToString() + ":00" + "\n" +
+                       "时长: " + data.Duration.ToString() + "小时" + "\n" +
+                       "ID: " + data.Id.ToString());
+
+            return ret;
+        }
+        
+        /*
+        public void Delete_Click(DataGridView ActivityData)
+        {
+
+        }
+        */
     }
 }
