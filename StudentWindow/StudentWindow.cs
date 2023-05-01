@@ -54,14 +54,14 @@ namespace StudentScheduleManagementSystem.UI
 
         public void SetLocalTime(Times.Time time)
         {
-            if (CurrentTime.InvokeRequired)
+            if (currentTime.InvokeRequired)
             {
                 changeLocalTimeCallback = new(SetLocalTime);
-                this.CurrentTime.Invoke(SetLocalTime, time);
+                this.currentTime.Invoke(SetLocalTime, time);
             }
             else
             {
-                this.CurrentTime.Text = time.ToString();
+                this.currentTime.Text = time.ToString();
             }
         }
     }

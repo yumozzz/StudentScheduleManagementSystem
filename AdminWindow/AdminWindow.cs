@@ -31,8 +31,8 @@ namespace StudentScheduleManagementSystem.UI
             _courseSubwindow = new CourseSubwindow();
             _examSubwindow = new ExamSubwindow();
             _groupActivitySubwindow = new GroupActivitySubwindow();
-            this.Logout.Hide();
-            this.ClosePage.Hide();
+            this.logoutConfirm.Hide();
+            this.closeConfirm.Hide();
         }
 
         //窗口拖动
@@ -74,39 +74,39 @@ namespace StudentScheduleManagementSystem.UI
 
         private void CourseManagement_Click(object sender, EventArgs e)
         {
-            this.Logout.Hide();
-            this.ClosePage.Hide();
-            SubPage.Controls.Clear();
+            this.logoutConfirm.Hide();
+            this.closeConfirm.Hide();
+            mainpage.Controls.Clear();
             _courseSubwindow.TopLevel = false;
-            SubPage.Controls.Add(_courseSubwindow);
+            mainpage.Controls.Add(_courseSubwindow);
             _courseSubwindow.Show();
         }
 
         private void TestManagement_Click(object sender, EventArgs e)
         {
-            this.Logout.Hide();
-            this.ClosePage.Hide();
-            SubPage.Controls.Clear();
+            this.logoutConfirm.Hide();
+            this.closeConfirm.Hide();
+            mainpage.Controls.Clear();
             _examSubwindow.TopLevel = false;
-            SubPage.Controls.Add(_examSubwindow);
+            mainpage.Controls.Add(_examSubwindow);
             _examSubwindow.Show();
         }
 
         private void ActivityManagement_Click(object sender, EventArgs e)
         {
-            this.Logout.Hide();
-            this.ClosePage.Hide();
-            SubPage.Controls.Clear();
+            this.logoutConfirm.Hide();
+            this.closeConfirm.Hide();
+            mainpage.Controls.Clear();
             _groupActivitySubwindow.TopLevel = false;
-            SubPage.Controls.Add(_groupActivitySubwindow);
+            mainpage.Controls.Add(_groupActivitySubwindow);
             _groupActivitySubwindow.Show();
         }
 
         private void LogoutClose_Click(object sender, EventArgs e)
         {
-            SubPage.Controls.Clear();
-            this.Logout.Show();
-            this.ClosePage.Show();
+            mainpage.Controls.Clear();
+            this.logoutConfirm.Show();
+            this.closeConfirm.Show();
         }
 
 

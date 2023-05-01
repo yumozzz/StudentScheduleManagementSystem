@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.move = new System.Windows.Forms.Panel();
-            this.Logout = new System.Windows.Forms.Button();
-            this.CurrentTime = new System.Windows.Forms.Label();
-            this.search = new System.Windows.Forms.Button();
+            this.logoutButton = new System.Windows.Forms.Button();
+            this.currentTime = new System.Windows.Forms.Label();
+            this.searchButton = new System.Windows.Forms.Button();
             this.multiSelectBox1 = new StudentScheduleManagementSystem.MultiSelectBox();
             this.multiSelectBox2 = new StudentScheduleManagementSystem.MultiSelectBox();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -46,7 +46,7 @@
             // 
             // move
             // 
-            this.move.Controls.Add(this.Logout);
+            this.move.Controls.Add(this.logoutButton);
             this.move.Location = new System.Drawing.Point(0, 0);
             this.move.Name = "move";
             this.move.Size = new System.Drawing.Size(1200, 40);
@@ -56,33 +56,33 @@
             // 
             // Logout
             // 
-            this.Logout.Location = new System.Drawing.Point(1076, 3);
-            this.Logout.Name = "Logout";
-            this.Logout.Size = new System.Drawing.Size(112, 34);
-            this.Logout.TabIndex = 7;
-            this.Logout.Text = "Logout";
-            this.Logout.UseVisualStyleBackColor = true;
-            this.Logout.Click += new System.EventHandler(this.Logout_Click);
+            this.logoutButton.Location = new System.Drawing.Point(1076, 3);
+            this.logoutButton.Name = "logoutButton";
+            this.logoutButton.Size = new System.Drawing.Size(112, 34);
+            this.logoutButton.TabIndex = 7;
+            this.logoutButton.Text = "Logout";
+            this.logoutButton.UseVisualStyleBackColor = true;
+            this.logoutButton.Click += new System.EventHandler(this.Logout_Click);
             // 
             // CurrentTime
             // 
-            this.CurrentTime.AutoSize = true;
-            this.CurrentTime.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.CurrentTime.Location = new System.Drawing.Point(12, 53);
-            this.CurrentTime.Name = "CurrentTime";
-            this.CurrentTime.Size = new System.Drawing.Size(70, 26);
-            this.CurrentTime.TabIndex = 2;
-            this.CurrentTime.Text = "Week i";
+            this.currentTime.AutoSize = true;
+            this.currentTime.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.currentTime.Location = new System.Drawing.Point(12, 53);
+            this.currentTime.Name = "currentTime";
+            this.currentTime.Size = new System.Drawing.Size(70, 26);
+            this.currentTime.TabIndex = 2;
+            this.currentTime.Text = "Week i";
             // 
             // search
             // 
-            this.search.Location = new System.Drawing.Point(203, 114);
-            this.search.Name = "search";
-            this.search.Size = new System.Drawing.Size(112, 34);
-            this.search.TabIndex = 6;
-            this.search.Text = "Search";
-            this.search.UseVisualStyleBackColor = true;
-            this.search.Click += new System.EventHandler(this.search_Click);
+            this.searchButton.Location = new System.Drawing.Point(203, 114);
+            this.searchButton.Name = "searchButton";
+            this.searchButton.Size = new System.Drawing.Size(112, 34);
+            this.searchButton.TabIndex = 6;
+            this.searchButton.Text = "Search";
+            this.searchButton.UseVisualStyleBackColor = true;
+            this.searchButton.Click += new System.EventHandler(this.search_Click);
             // 
             // multiSelectBox1
             // 
@@ -108,7 +108,7 @@
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.button1);
-            this.panel1.Controls.Add(this.search);
+            this.panel1.Controls.Add(this.searchButton);
             this.panel1.Controls.Add(this.multiSelectBox3);
             this.panel1.Controls.Add(this.multiSelectBox1);
             this.panel1.Controls.Add(this.multiSelectBox2);
@@ -168,7 +168,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 800);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.CurrentTime);
+            this.Controls.Add(this.currentTime);
             this.Controls.Add(this.move);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "StudentWindow";
@@ -183,9 +183,9 @@
 
         #endregion
         private Panel move;
-        private Label CurrentTime;
-        private Button search;
-        private Button Logout;
+        private Label currentTime;
+        private Button searchButton;
+        private Button logoutButton;
         private MultiSelectBox multiSelectBox1;
         private MultiSelectBox multiSelectBox2;
         private Panel panel1;
