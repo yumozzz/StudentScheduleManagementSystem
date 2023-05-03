@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace StudentScheduleManagementSystem.UI
 {
@@ -15,10 +16,11 @@ namespace StudentScheduleManagementSystem.UI
     {
         private List<Schedule.ScheduleBase.SharedData> _data;
         private ScheduleType _type;
+        private long? _originId = null;
 
 
-        private AdminSubwindowBase() : this(ScheduleType.Idle)
-        { }
+        private AdminSubwindowBase()
+            : this(ScheduleType.Idle) { }
 
         protected AdminSubwindowBase(ScheduleType type)
         {
@@ -204,15 +206,111 @@ namespace StudentScheduleManagementSystem.UI
         protected void AddSchedule_Click(object sender, EventArgs e)
         {
             AddOneSchedule(null);
+            Log.Information.Log($"成功添加共享日程");
         }
 
         protected void DeleteSchedule_Click(object sender, EventArgs e)
         {
-            //TODO
-            DeleteOneSchedule(true);
+            int selectedCount = 0, index = 0;
+            for (int i = 1; i < _data.Count; i++)
+            {
+                if (Convert.ToBoolean(scheduleData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                {
+                    selectedCount++;
+                    index = i;
+                }
+            }
+            if (selectedCount == 0)
+            {
+                MessageBox.Show("请选择要删除的日程！");
+                return;
+            }
+            if (selectedCount >= 2)
+            {
+                MessageBox.Show("请一次选择一个日程删除！");
+                return;
+            }
+
+            var selected = _data[index];
+            StringBuilder ScheduleDetail = GetScheduleDatail(selected.Name,
+                                                             selected.RepetitiveType,
+                                                             selected.ActiveWeeks,
+                                                             selected.ActiveDays,
+                                                             selected.Timestamp,
+                                                             selected.Duration);
+
+            if (MessageBox.Show(ScheduleDetail.ToString(), "日程信息", MessageBoxButtons.OKCancel) != DialogResult.OK)
+            {
+                return;
+            }
+            long id = _data[index].Id;
+            Schedule.ScheduleBase.DeleteShared(id);
+            MessageBox.Show("已成功删除该日程");
+            Log.Information.Log($"成功删除id为{id}的共享日程");
+            GenerateFormData(_type);
         }
 
-        protected bool GetScheduleInfo(out string name,
+        protected void ReviseSchedule_Click(object sender, EventArgs e)
+        {
+            Debug.Assert(!_originId.HasValue);
+            int selectedCount = 0, index = 0;
+            for (int i = 1; i < _data.Count; i++)
+            {
+                if (Convert.ToBoolean(scheduleData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                {
+                    selectedCount++;
+                    index = i;
+                }
+            }
+            if (selectedCount == 0)
+            {
+                MessageBox.Show("请选择要删除或修改的日程！");
+                return;
+            }
+            if (selectedCount >= 2)
+            {
+                MessageBox.Show("请一次选择一个日程删除货修改！");
+                return;
+            }
+
+            var selected = _data[index];
+            this.nameBox.Text = selected.Name;
+            RepetitiveType repetitiveType = selected.RepetitiveType;
+            if (repetitiveType == RepetitiveType.Single)
+            {
+                this.weekSelectBox.SelectCheckBox(selected.Timestamp.Week);
+                this.daySelectBox.SelectCheckBox((int)selected.Timestamp.Day);
+            }
+            else if (repetitiveType == RepetitiveType.MultipleDays)
+            {
+                for (int i = 0; i < 16; i++)
+                {
+                    this.weekSelectBox.SelectCheckBox(i);
+                }
+                foreach (Day activeDay in selected.ActiveDays)
+                {
+                    this.daySelectBox.SelectCheckBox((int)activeDay);
+                }
+            }
+            else
+            {
+                foreach (int activeWeek in selected.ActiveWeeks)
+                {
+                    this.weekSelectBox.SelectCheckBox(activeWeek - 1);
+                }
+                foreach (Day activeDay in selected.ActiveDays)
+                {
+                    this.daySelectBox.SelectCheckBox((int)activeDay);
+                }
+            }
+
+            this.hourComboBox.Text = selected.Timestamp.Hour + ":00";
+            this.durationComboBox.Text = selected.Duration + "小时";
+            _originId = selected.Id;
+        }
+
+        protected bool GetScheduleInfo(bool showMessageBox,
+                                       out string name,
                                        out RepetitiveType repetitiveType,
                                        out int[] activeWeeks,
                                        out Day[] activeDays,
@@ -328,304 +426,196 @@ namespace StudentScheduleManagementSystem.UI
                 timestamp = new() { Hour = beginHour };
             }
 
-            return MessageBox.Show(GetScheduleDatail(name, repetitiveType, activeWeeks, activeDays, timestamp, duration)
-                                      .ToString(),
-                                   "确认日程信息",
-                                   MessageBoxButtons.OKCancel) == DialogResult.OK;
+            return showMessageBox
+                       ? MessageBox.Show(GetScheduleDatail(name,
+                                                           repetitiveType,
+                                                           activeWeeks,
+                                                           activeDays,
+                                                           timestamp,
+                                                           duration)
+                                            .ToString(),
+                                         "确认日程信息",
+                                         MessageBoxButtons.OKCancel) == DialogResult.OK
+                       : true;
         }
 
-        protected abstract Boolean AddOneSchedule(long? id);
-
-        protected long DeleteOneSchedule(Boolean isRevising)
-        {
-            int selectedCount = 0, index = 0;
-            for (int i = 1; i < _data.Count; i++)
-            {
-                if (Convert.ToBoolean(scheduleData.Rows[i - 1].Cells[0].EditedFormattedValue))
-                {
-                    selectedCount++;
-                    index = i;
-                }
-            }
-            if (selectedCount == 0)
-            {
-                MessageBox.Show("请选择要删除的日程！");
-                return -1;
-            }
-            if (selectedCount >= 2)
-            {
-                MessageBox.Show("请一次选择一个日程删除！");
-                return 0;
-            }
-
-            var selected = _data[index];
-            StringBuilder ScheduleDetail = GetScheduleDatail(selected.Name,
-                                                             selected.RepetitiveType,
-                                                             selected.ActiveWeeks,
-                                                             selected.ActiveDays,
-                                                             selected.Timestamp,
-                                                             selected.Duration);
-
-            if (MessageBox.Show(ScheduleDetail.ToString(), "日程信息", MessageBoxButtons.OKCancel) == DialogResult.OK)
-            {
-                long id = _data[index].Id;
-
-                if (!isRevising)
-                {
-                    this.nameBox.Text = selected.Name;
-                    RepetitiveType repetitiveType = selected.RepetitiveType;
-                    if (repetitiveType == RepetitiveType.Single)
-                    {
-                        this.weekSelectBox.SelectCheckBox(selected.Timestamp.Week);
-                        this.daySelectBox.SelectCheckBox((int)selected.Timestamp.Day);
-                    }
-                    else if (repetitiveType == RepetitiveType.MultipleDays)
-                    {
-                        for (int i = 0; i < 16; i++)
-                        {
-                            this.weekSelectBox.SelectCheckBox(i);
-                        }
-                        foreach (Day activeDay in selected.ActiveDays)
-                        {
-                            this.daySelectBox.SelectCheckBox((int)activeDay);
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < selected.ActiveWeeks.Length; i++)
-                        {
-                            this.weekSelectBox.SelectCheckBox(selected.ActiveWeeks[i] - 1);
-                        }
-                        foreach (Day activeDay in selected.ActiveDays)
-                        {
-                            this.daySelectBox.SelectCheckBox((int)activeDay);
-                        }
-                    }
-
-                    this.hourComboBox.Text = selected.Timestamp.Hour + ":00";
-                    this.durationComboBox.Text = selected.Duration + "小时";
-                }
-
-                Schedule.ScheduleBase.DeleteShared(id);
-                MessageBox.Show("已成功删除该日程");
-                GenerateFormData(_type);
-                return id;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        bool isRevising = false;
-        long id = 0;
-        protected void ReviseSchedule_Click(object sender, EventArgs e)
-        {
-            if (!isRevising)
-            {
-                id = DeleteOneSchedule(isRevising);
-                if (id > 0)
-                {
-                    isRevising = true;
-
-                }
-            }
-            else
-            {
-                if (AddOneSchedule(id))
-                {
-                    isRevising = false;
-                }
-            }
-        }
+        protected abstract bool AddOneSchedule(long? id);
     }
 
     public sealed class CourseSubwindow : AdminSubwindowBase
     {
         public CourseSubwindow()
-            : base(ScheduleType.Course)
+            : base(ScheduleType.Course) { }
+
+
+        protected override bool AddOneSchedule(long? id)
         {
-
-        }
-
-
-        protected override Boolean AddOneSchedule(long? id)
-        {
-            bool confirm = GetScheduleInfo(out string name,
+            bool confirm = GetScheduleInfo(true,
+                                           out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
                                            out Day[] activeDays,
                                            out int beginHour,
                                            out int duration);
-            Debug.Assert(repetitiveType == RepetitiveType.Single);
 
-            if (confirm)
+            if (!confirm)
             {
-                if (repetitiveType == RepetitiveType.Single)
-                {
-                    _ = new Schedule.Course(RepetitiveType.Single,
-                                                 nameBox.Text,
-                                                 new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
-                                                 duration,
-                                                 null,
-                                                 new Map.Location.Building(1,
-                                                                           "default building",
-                                                                           new() { Id = -1, X = 0, Y = 0 }),
-                                                 Constants.EmptyIntArray,
-                                                 Constants.EmptyDayArray,
-                                                 addOnTimeline: false);
-                }
-                else if (repetitiveType == RepetitiveType.MultipleDays)
-                {
-                    _ = new Schedule.Course(RepetitiveType.MultipleDays,
-                                              nameBox.Text,
-                                              new() { Hour = beginHour },
-                                              duration,
-                                              null,
-                                              new Map.Location.Building(1,
-                                                                        "default building",
-                                                                        new() { Id = 0, X = 0, Y = 0 }),
-                                              Constants.EmptyIntArray,
-                                              activeDays,
-                                              addOnTimeline: false);
-                }
-                else
-                {
-                    _ = new Schedule.Course(RepetitiveType.Designated,
-                                              nameBox.Text,
-                                              new() { Hour = beginHour },
-                                              duration,
-                                              null,
-                                              new Map.Location.Building(1,
-                                                                        "default building",
-                                                                        new() { Id = 0, X = 0, Y = 0 }),
-                                              activeWeeks,
-                                              activeDays,
-                                              addOnTimeline: false);
-                }
-                MessageBox.Show("已成功添加该课程");
-                GenerateFormData();
+                return false;
             }
 
-            return confirm;
+            if (repetitiveType == RepetitiveType.Single)
+            {
+                _ = new Schedule.Course(RepetitiveType.Single,
+                                        name,
+                                        new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
+                                        duration,
+                                        null,
+                                        new Map.Location.Building(1,
+                                                                  "default building",
+                                                                  new() { Id = -1, X = 0, Y = 0 }),
+                                        Constants.EmptyIntArray,
+                                        Constants.EmptyDayArray,
+                                        addOnTimeline: false);
+            }
+            else if (repetitiveType == RepetitiveType.MultipleDays)
+            {
+                _ = new Schedule.Course(RepetitiveType.MultipleDays,
+                                        name,
+                                        new() { Hour = beginHour },
+                                        duration,
+                                        null,
+                                        new Map.Location.Building(1,
+                                                                  "default building",
+                                                                  new() { Id = 0, X = 0, Y = 0 }),
+                                        Constants.EmptyIntArray,
+                                        activeDays,
+                                        addOnTimeline: false);
+            }
+            else
+            {
+                _ = new Schedule.Course(RepetitiveType.Designated,
+                                        name,
+                                        new() { Hour = beginHour },
+                                        duration,
+                                        null,
+                                        new Map.Location.Building(1,
+                                                                  "default building",
+                                                                  new() { Id = 0, X = 0, Y = 0 }),
+                                        activeWeeks,
+                                        activeDays,
+                                        addOnTimeline: false);
+            }
+            MessageBox.Show("已成功添加该课程");
+            GenerateFormData();
+            return true;
         }
     }
 
     public sealed class ExamSubwindow : AdminSubwindowBase
     {
         public ExamSubwindow()
-            : base(ScheduleType.Exam)
-        {
+            : base(ScheduleType.Exam) { }
 
-        }
-
-        protected override Boolean AddOneSchedule(long? id)
+        protected override bool AddOneSchedule(long? id)
         {
-            bool confirm = GetScheduleInfo(out string name,
+            bool confirm = GetScheduleInfo(true,
+                                           out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
                                            out Day[] activeDays,
                                            out int beginHour,
                                            out int duration);
-            Debug.Assert(repetitiveType == RepetitiveType.Single);
-            if (confirm)
-            {
-                if (repetitiveType != RepetitiveType.Single)
-                {
-                    MessageBox.Show("请选择且仅选择一个日程周和一个日程日！");
-                    return false;
-                }
 
-                _ = new Schedule.Exam(name,
-                                  new()
-                                  {
-                                      Week = activeWeeks[0],
-                                      Day = activeDays[0],
-                                      Hour = beginHour
-                                  },
-                                  duration,
-                                  null,
-                                  new Map.Location.Building(1,
-                                                            "default building",
-                                                            new() { Id = -1, X = 0, Y = 0 }));
-                MessageBox.Show("已成功添加该考试");
-                GenerateFormData();
+            if (!confirm)
+            {
+                return false;
+            }
+            if (repetitiveType != RepetitiveType.Single)
+            {
+                MessageBox.Show("只能选择一个周次和一个天次！");
+                return false;
             }
 
-            return confirm;
+            _ = new Schedule.Exam(name,
+                                  new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
+                                  duration,
+                                  null,
+                                  new Map.Location.Building(1, "default building", new() { Id = -1, X = 0, Y = 0 }));
+            MessageBox.Show("已成功添加该考试");
+            GenerateFormData();
+            return true;
         }
     }
 
     public sealed class GroupActivitySubwindow : AdminSubwindowBase
     {
         public GroupActivitySubwindow()
-            : base(ScheduleType.Activity)
+            : base(ScheduleType.Activity) { }
+
+
+        protected override bool AddOneSchedule(long? id)
         {
-
-        }
-
-
-        protected override Boolean AddOneSchedule(long? id)
-        {
-            bool confirm = GetScheduleInfo(out string name,
+            bool confirm = GetScheduleInfo(true,
+                                           out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
                                            out Day[] activeDays,
                                            out int beginHour,
                                            out int duration);
-            Debug.Assert(repetitiveType == RepetitiveType.Single);
-            if (confirm)
+
+            if (!confirm)
             {
-                if (repetitiveType == RepetitiveType.Single)
-                {
-                    _ = new Schedule.Activity(RepetitiveType.Single,
-                                                 nameBox.Text,
-                                                 new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
-                                                 duration,
-                                                 null,
-                                                 new Map.Location.Building(1,
-                                                                           "default building",
-                                                                           new() { Id = -1, X = 0, Y = 0 }),
-                                                 true,
-                                                 Constants.EmptyIntArray,
-                                                 Constants.EmptyDayArray,
-                                                 addOnTimeline: false);
-                }
-                else if (repetitiveType == RepetitiveType.MultipleDays)
-                {
-                    _ = new Schedule.Activity(RepetitiveType.MultipleDays,
-                                              nameBox.Text,
-                                              new() { Hour = beginHour },
-                                              duration,
-                                              null,
-                                              new Map.Location.Building(1,
-                                                                        "default building",
-                                                                        new() { Id = 0, X = 0, Y = 0 }),
-                                              true,
-                                              Constants.EmptyIntArray,
-                                              activeDays,
-                                              addOnTimeline: false);
-                }
-                else
-                {
-                    _ = new Schedule.Activity(RepetitiveType.Designated,
-                                              nameBox.Text,
-                                              new() { Hour = beginHour },
-                                              duration,
-                                              null,
-                                              new Map.Location.Building(1,
-                                                                        "default building",
-                                                                        new() { Id = 0, X = 0, Y = 0 }),
-                                              true,
-                                              activeWeeks,
-                                              activeDays,
-                                              addOnTimeline: false);
-                }
-                MessageBox.Show("已成功添加该集体活动");
-                GenerateFormData();
+                return false;
             }
 
-            return confirm;
+            if (repetitiveType == RepetitiveType.Single)
+            {
+                _ = new Schedule.Activity(RepetitiveType.Single,
+                                          name,
+                                          new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
+                                          duration,
+                                          null,
+                                          new Map.Location.Building(1,
+                                                                    "default building",
+                                                                    new() { Id = -1, X = 0, Y = 0 }),
+                                          true,
+                                          Constants.EmptyIntArray,
+                                          Constants.EmptyDayArray,
+                                          addOnTimeline: false);
+            }
+            else if (repetitiveType == RepetitiveType.MultipleDays)
+            {
+                _ = new Schedule.Activity(RepetitiveType.MultipleDays,
+                                          nameBox.Text,
+                                          new() { Hour = beginHour },
+                                          duration,
+                                          null,
+                                          new Map.Location.Building(1,
+                                                                    "default building",
+                                                                    new() { Id = 0, X = 0, Y = 0 }),
+                                          true,
+                                          Constants.EmptyIntArray,
+                                          activeDays,
+                                          addOnTimeline: false);
+            }
+            else
+            {
+                _ = new Schedule.Activity(RepetitiveType.Designated,
+                                          nameBox.Text,
+                                          new() { Hour = beginHour },
+                                          duration,
+                                          null,
+                                          new Map.Location.Building(1,
+                                                                    "default building",
+                                                                    new() { Id = 0, X = 0, Y = 0 }),
+                                          true,
+                                          activeWeeks,
+                                          activeDays,
+                                          addOnTimeline: false);
+            }
+            MessageBox.Show("已成功添加该集体活动");
+            GenerateFormData();
+            return true;
         }
     }
 }
