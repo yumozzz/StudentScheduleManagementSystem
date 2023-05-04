@@ -446,7 +446,7 @@ namespace StudentScheduleManagementSystem.Schedule
             };
             if(!addOnTimeline)
             {
-                Debug.Assert(thisScheduleId == null);
+                //Debug.Assert(thisScheduleId == null);
                 this.ScheduleId = thisScheduleId!.Value;
                 Log.Information.Log("已在时间轴与表中添加日程");
                 return;
@@ -770,12 +770,12 @@ namespace StudentScheduleManagementSystem.Schedule
                 Timestamp = schedule.BeginTime,
                 Duration = schedule.Duration
             };
-            if (_correspondenceDictionary.TryGetValue(schedule.ScheduleId, out _)) //字典中已存在（课程或考试），则更新
+            /*if (_correspondenceDictionary.TryGetValue(schedule.ScheduleId, out _)) //字典中已存在（课程或考试），则更新//不允许更新，必须先删除再添加
             {
                 data.ScheduleType = _correspondenceDictionary[schedule.ScheduleId].ScheduleType;
                 _correspondenceDictionary[schedule.ScheduleId] = data;
                 return;
-            }
+            }*/
             switch (schedule.ScheduleId / (long)1e9) //不存在，则新建
             {
                 case 1:

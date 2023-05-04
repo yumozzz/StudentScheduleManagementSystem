@@ -126,44 +126,44 @@ namespace StudentScheduleManagementSystem.UI
                 scheduleData.Columns[i].Width = widths[i];
             }
             _data = Schedule.ScheduleBase.GetSharedByType(type);
-            for (int i = 1; i < _data.Count(); i++)
+            foreach (var sharedData in _data)
             {
-                if (_data[i].RepetitiveType == RepetitiveType.Single)
+                if (sharedData.RepetitiveType == RepetitiveType.Single)
                 {
                     this.scheduleData.Rows.Add(null,
-                                               _data[i].Name,
-                                               _data[i].Timestamp.Week.ToString(),
-                                               _data[i].Timestamp.Day.ToString(),
-                                               _data[i].Timestamp.Hour.ToString() + ":00",
-                                               _data[i].Duration.ToString() + "小时");
+                                               sharedData.Name,
+                                               sharedData.Timestamp.Week.ToString(),
+                                               sharedData.Timestamp.Day.ToString(),
+                                               sharedData.Timestamp.Hour.ToString() + ":00",
+                                               sharedData.Duration.ToString() + "小时");
                 }
-                else if (_data[i].RepetitiveType == RepetitiveType.MultipleDays)
+                else if (sharedData.RepetitiveType == RepetitiveType.MultipleDays)
                 {
                     StringBuilder days = new();
-                    for (int j = 0; j < _data[i].ActiveDays.Length; j++)
+                    foreach (Day activeDay in sharedData.ActiveDays)
                     {
-                        days.Append(_data[i].ActiveDays[j].ToString()[..3] + ";");
+                        days.Append(activeDay.ToString()[..3] + ";");
                     }
                     this.scheduleData.Rows.Add(null,
-                                               _data[i].Name,
+                                               sharedData.Name,
                                                "1-16",
                                                days,
-                                               _data[i].Timestamp.Hour.ToString() + ":00",
-                                               _data[i].Duration.ToString() + "小时");
+                                               sharedData.Timestamp.Hour.ToString() + ":00",
+                                               sharedData.Duration.ToString() + "小时");
                 }
                 else
                 {
                     StringBuilder days = new();
-                    for (int j = 0; j < _data[i].ActiveDays.Length; j++)
+                    foreach (Day activeDay in sharedData.ActiveDays)
                     {
-                        days.Append(_data[i].ActiveDays[j].ToString()[..3] + ";");
+                        days.Append(activeDay.ToString()[..3] + ";");
                     }
                     this.scheduleData.Rows.Add(null,
-                                               _data[i].Name,
-                                               GetBriefWeeks(_data[i].ActiveWeeks),
+                                               sharedData.Name,
+                                               GetBriefWeeks(sharedData.ActiveWeeks),
                                                days,
-                                               _data[i].Timestamp.Hour.ToString() + ":00",
-                                               _data[i].Duration.ToString() + "小时");
+                                               sharedData.Timestamp.Hour.ToString() + ":00",
+                                               sharedData.Duration.ToString() + "小时");
                 }
             }
         }
@@ -207,7 +207,7 @@ namespace StudentScheduleManagementSystem.UI
 
         protected void AddSchedule_Click(object sender, EventArgs e)
         {
-            AddOneSchedule(null);
+            AddOneSchedule(null, true);
             Log.Information.Log($"成功添加共享日程");
         }
 
@@ -446,12 +446,22 @@ namespace StudentScheduleManagementSystem.UI
                        : true;
         }
 
-        protected abstract bool AddOneSchedule(long? id);
+        protected abstract bool AddOneSchedule(long? id, bool showMessageBox);
 
         private void ReviseOK_Click(object sender, EventArgs e)
         {
+            bool success = true;
+            try
+            {
+                success = AddOneSchedule(_originId, false);
+            }
+            catch (ArgumentException) { }
+            if (!success)
+            {
+                return;
+            }
             Schedule.ScheduleBase.DeleteShared(_originId!.Value);
-            AddOneSchedule(_originId);
+            AddOneSchedule(_originId, true);
             MessageBox.Show("已成功修改该日程");
             Log.Information.Log($"成功修改id为{_originId.Value}的共享日程");
             GenerateFormData();
@@ -492,9 +502,9 @@ namespace StudentScheduleManagementSystem.UI
             : base(ScheduleType.Course) { }
 
 
-        protected override bool AddOneSchedule(long? id)
+        protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
-            bool confirm = GetScheduleInfo(true,
+            bool confirm = GetScheduleInfo(showMessageBox,
                                            out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
@@ -519,7 +529,8 @@ namespace StudentScheduleManagementSystem.UI
                                                                   new() { Id = -1, X = 0, Y = 0 }),
                                         Constants.EmptyIntArray,
                                         Constants.EmptyDayArray,
-                                        addOnTimeline: false);
+                                        id,
+                                        false);
             }
             else if (repetitiveType == RepetitiveType.MultipleDays)
             {
@@ -533,7 +544,8 @@ namespace StudentScheduleManagementSystem.UI
                                                                   new() { Id = 0, X = 0, Y = 0 }),
                                         Constants.EmptyIntArray,
                                         activeDays,
-                                        addOnTimeline: false);
+                                        id,
+                                        false);
             }
             else
             {
@@ -544,12 +556,13 @@ namespace StudentScheduleManagementSystem.UI
                                         null,
                                         new Map.Location.Building(1,
                                                                   "default building",
-                                                                  new() { Id = 0, X = 0, Y = 0 }),
+                                                                  new() { Id = -1, X = 0, Y = 0 }),
                                         activeWeeks,
                                         activeDays,
-                                        addOnTimeline: false);
+                                        id,
+                                        false);
             }
-            if(id == null)
+            if (id == null)
             {
                 MessageBox.Show("已成功添加该课程");
             }
@@ -563,9 +576,9 @@ namespace StudentScheduleManagementSystem.UI
         public ExamSubwindow()
             : base(ScheduleType.Exam) { }
 
-        protected override bool AddOneSchedule(long? id)
+        protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
-            bool confirm = GetScheduleInfo(true,
+            bool confirm = GetScheduleInfo(showMessageBox,
                                            out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
@@ -587,7 +600,9 @@ namespace StudentScheduleManagementSystem.UI
                                   new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
                                   duration,
                                   null,
-                                  new Map.Location.Building(1, "default building", new() { Id = -1, X = 0, Y = 0 }));
+                                  new Map.Location.Building(1, "default building", new() { Id = -1, X = 0, Y = 0 }),
+                                  id,
+                                  false);
             if (id == null)
             {
                 MessageBox.Show("已成功添加该课程");
@@ -603,9 +618,9 @@ namespace StudentScheduleManagementSystem.UI
             : base(ScheduleType.Activity) { }
 
 
-        protected override bool AddOneSchedule(long? id)
+        protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
-            bool confirm = GetScheduleInfo(true,
+            bool confirm = GetScheduleInfo(showMessageBox,
                                            out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
@@ -631,7 +646,8 @@ namespace StudentScheduleManagementSystem.UI
                                           true,
                                           Constants.EmptyIntArray,
                                           Constants.EmptyDayArray,
-                                          addOnTimeline: false);
+                                          id,
+                                          false);
             }
             else if (repetitiveType == RepetitiveType.MultipleDays)
             {
@@ -646,7 +662,8 @@ namespace StudentScheduleManagementSystem.UI
                                           true,
                                           Constants.EmptyIntArray,
                                           activeDays,
-                                          addOnTimeline: false);
+                                          id,
+                                          false);
             }
             else
             {
@@ -661,7 +678,8 @@ namespace StudentScheduleManagementSystem.UI
                                           true,
                                           activeWeeks,
                                           activeDays,
-                                          addOnTimeline: false);
+                                          id,
+                                          false);
             }
             if (id == null)
             {
