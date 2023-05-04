@@ -49,11 +49,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.deleteScheduleButton = new System.Windows.Forms.Button();
             this.reviseScheduleButton = new System.Windows.Forms.Button();
+            this.reviseYes = new System.Windows.Forms.Button();
+            this.reviseCancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
-            // ScheduleData
+            // scheduleData
             // 
             this.scheduleData.AllowUserToAddRows = false;
             this.scheduleData.BackgroundColor = System.Drawing.Color.White;
@@ -73,7 +75,7 @@
             this.scheduleData.Size = new System.Drawing.Size(714, 651);
             this.scheduleData.TabIndex = 41;
             // 
-            // CourseDGVCheck
+            // courseCheckBoxColumn
             // 
             this.courseCheckBoxColumn.Frozen = true;
             this.courseCheckBoxColumn.HeaderText = "";
@@ -81,7 +83,7 @@
             this.courseCheckBoxColumn.Name = "courseCheckBoxColumn";
             this.courseCheckBoxColumn.Width = 30;
             // 
-            // ScheduleDGVName
+            // nameTextBoxColumn
             // 
             this.nameTextBoxColumn.Frozen = true;
             this.nameTextBoxColumn.HeaderText = "日程名称";
@@ -90,7 +92,7 @@
             this.nameTextBoxColumn.ReadOnly = true;
             this.nameTextBoxColumn.Width = 180;
             // 
-            // ScheduleDGVWeek
+            // weekTextBoxColumn
             // 
             this.weekTextBoxColumn.Frozen = true;
             this.weekTextBoxColumn.HeaderText = "日程周";
@@ -99,7 +101,7 @@
             this.weekTextBoxColumn.ReadOnly = true;
             this.weekTextBoxColumn.Width = 120;
             // 
-            // ScheduleDGVDay
+            // dayCheckBoxColumn
             // 
             this.dayCheckBoxColumn.Frozen = true;
             this.dayCheckBoxColumn.HeaderText = "日程日";
@@ -108,7 +110,7 @@
             this.dayCheckBoxColumn.ReadOnly = true;
             this.dayCheckBoxColumn.Width = 120;
             // 
-            // ScheduleDGVTime
+            // timeCheckBoxColumn
             // 
             this.timeCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.timeCheckBoxColumn.HeaderText = "时间";
@@ -117,7 +119,7 @@
             this.timeCheckBoxColumn.ReadOnly = true;
             this.timeCheckBoxColumn.Width = 150;
             // 
-            // ScheduleDGVDuration
+            // durationCheckBoxColumn
             // 
             this.durationCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.durationCheckBoxColumn.HeaderText = "时长";
@@ -126,7 +128,7 @@
             this.durationCheckBoxColumn.ReadOnly = true;
             this.durationCheckBoxColumn.Width = 150;
             // 
-            // WeekSelectBox
+            // weekSelectBox
             // 
             this.weekSelectBox.BackColor = System.Drawing.Color.White;
             this.weekSelectBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -135,7 +137,7 @@
             this.weekSelectBox.Size = new System.Drawing.Size(300, 30);
             this.weekSelectBox.TabIndex = 36;
             // 
-            // DaySelectBox
+            // daySelectBox
             // 
             this.daySelectBox.BackColor = System.Drawing.Color.White;
             this.daySelectBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -144,7 +146,7 @@
             this.daySelectBox.Size = new System.Drawing.Size(300, 30);
             this.daySelectBox.TabIndex = 37;
             // 
-            // DurcomboBox
+            // durationComboBox
             // 
             this.durationComboBox.BackColor = System.Drawing.Color.White;
             this.durationComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -159,7 +161,7 @@
             this.durationComboBox.Size = new System.Drawing.Size(135, 32);
             this.durationComboBox.TabIndex = 40;
             // 
-            // HourcomboBox
+            // hourComboBox
             // 
             this.hourComboBox.BackColor = System.Drawing.Color.White;
             this.hourComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -184,7 +186,7 @@
             this.hourComboBox.Size = new System.Drawing.Size(135, 32);
             this.hourComboBox.TabIndex = 39;
             // 
-            // NameBox
+            // nameBox
             // 
             this.nameBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.nameBox.Location = new System.Drawing.Point(735, 44);
@@ -192,7 +194,7 @@
             this.nameBox.Size = new System.Drawing.Size(300, 30);
             this.nameBox.TabIndex = 38;
             // 
-            // AddSchedule
+            // addScheduleButton
             // 
             this.addScheduleButton.BackColor = System.Drawing.Color.White;
             this.addScheduleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -209,7 +211,7 @@
             this.pictureBox1.Image = global::StudentScheduleManagementSystem.Properties.Resources.OPBG_Format_1;
             this.pictureBox1.Location = new System.Drawing.Point(725, 8);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(320, 320);
+            this.pictureBox1.Size = new System.Drawing.Size(320, 416);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 42;
             this.pictureBox1.TabStop = false;
@@ -259,9 +261,9 @@
             this.label1.TabIndex = 48;
             this.label1.Text = "Name";
             // 
-            // DeleteSchedule
+            // deleteScheduleButton
             // 
-            this.deleteScheduleButton.Location = new System.Drawing.Point(735, 353);
+            this.deleteScheduleButton.Location = new System.Drawing.Point(735, 325);
             this.deleteScheduleButton.Name = "deleteScheduleButton";
             this.deleteScheduleButton.Size = new System.Drawing.Size(300, 34);
             this.deleteScheduleButton.TabIndex = 53;
@@ -269,9 +271,9 @@
             this.deleteScheduleButton.UseVisualStyleBackColor = true;
             this.deleteScheduleButton.Click += new System.EventHandler(this.DeleteSchedule_Click);
             // 
-            // ReviseSchedule
+            // reviseScheduleButton
             // 
-            this.reviseScheduleButton.Location = new System.Drawing.Point(735, 410);
+            this.reviseScheduleButton.Location = new System.Drawing.Point(735, 374);
             this.reviseScheduleButton.Name = "reviseScheduleButton";
             this.reviseScheduleButton.Size = new System.Drawing.Size(300, 34);
             this.reviseScheduleButton.TabIndex = 54;
@@ -279,11 +281,33 @@
             this.reviseScheduleButton.UseVisualStyleBackColor = true;
             this.reviseScheduleButton.Click += new System.EventHandler(this.ReviseSchedule_Click);
             // 
-            // AdminWindowSchedule
+            // reviseYes
+            // 
+            this.reviseYes.Location = new System.Drawing.Point(735, 273);
+            this.reviseYes.Name = "reviseYes";
+            this.reviseYes.Size = new System.Drawing.Size(135, 34);
+            this.reviseYes.TabIndex = 55;
+            this.reviseYes.Text = "确认";
+            this.reviseYes.UseVisualStyleBackColor = true;
+            this.reviseYes.Click += new System.EventHandler(this.ReviseYes_Click);
+            // 
+            // reviseCancel
+            // 
+            this.reviseCancel.Location = new System.Drawing.Point(900, 273);
+            this.reviseCancel.Name = "reviseCancel";
+            this.reviseCancel.Size = new System.Drawing.Size(135, 34);
+            this.reviseCancel.TabIndex = 56;
+            this.reviseCancel.Text = "取消";
+            this.reviseCancel.UseVisualStyleBackColor = true;
+            this.reviseCancel.Click += new System.EventHandler(this.ReviseCanael_Click);
+            // 
+            // AdminSubwindowBase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.reviseCancel);
+            this.Controls.Add(this.reviseYes);
             this.Controls.Add(this.reviseScheduleButton);
             this.Controls.Add(this.deleteScheduleButton);
             this.Controls.Add(this.label5);
@@ -300,7 +324,7 @@
             this.Controls.Add(this.addScheduleButton);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "AdminWindowSchedule";
+            this.Name = "AdminSubwindowBase";
             this.Text = ",";
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -332,5 +356,7 @@
         protected DataGridViewTextBoxColumn dayCheckBoxColumn;
         protected DataGridViewTextBoxColumn timeCheckBoxColumn;
         protected DataGridViewTextBoxColumn durationCheckBoxColumn;
+        private Button reviseYes;
+        private Button reviseCancel;
     }
 }

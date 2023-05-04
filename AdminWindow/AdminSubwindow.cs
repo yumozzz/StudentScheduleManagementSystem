@@ -28,6 +28,8 @@ namespace StudentScheduleManagementSystem.UI
             GenerateMultiSelectBox();
             GenerateFormData(type);
             _type = type;
+            this.reviseYes.Hide();
+            this.reviseCancel.Hide();
         }
 
         private static StringBuilder GetBriefWeeks(int[] activeWeeks)
@@ -307,6 +309,11 @@ namespace StudentScheduleManagementSystem.UI
             this.hourComboBox.Text = selected.Timestamp.Hour + ":00";
             this.durationComboBox.Text = selected.Duration + "小时";
             _originId = selected.Id;
+            this.reviseScheduleButton.Hide();
+            this.addScheduleButton.Hide();
+            this.deleteScheduleButton.Hide();
+            this.reviseYes.Show();
+            this.reviseCancel.Show();
         }
 
         protected bool GetScheduleInfo(bool showMessageBox,
@@ -440,6 +447,43 @@ namespace StudentScheduleManagementSystem.UI
         }
 
         protected abstract bool AddOneSchedule(long? id);
+
+        private void ReviseYes_Click(object sender, EventArgs e)
+        {
+            Schedule.ScheduleBase.DeleteShared((long)_originId);
+            AddOneSchedule(_originId);
+            MessageBox.Show("已成功修改该日程");
+            Log.Information.Log($"成功修改id为{_originId}的共享日程");
+            GenerateFormData(_type);
+
+            this.ClearInput();
+            _originId = null;
+            this.reviseYes.Hide();
+            this.reviseCancel.Hide();
+            this.reviseScheduleButton.Show();
+            this.addScheduleButton.Show();
+            this.deleteScheduleButton.Show();
+        }
+
+        private void ReviseCanael_Click(object sender, EventArgs e)
+        {
+            this.ClearInput();
+            _originId = null;
+            this.reviseYes.Hide();
+            this.reviseCancel.Hide();
+            this.reviseScheduleButton.Show();
+            this.addScheduleButton.Show();
+            this.deleteScheduleButton.Show();
+        }
+
+        private void ClearInput()
+        {
+            this.nameBox.Text = "";
+            this.weekSelectBox.ClearBox();
+            this.daySelectBox.ClearBox();
+            this.hourComboBox.Text = "";
+            this.durationComboBox.Text = "";
+        }
     }
 
     public sealed class CourseSubwindow : AdminSubwindowBase
@@ -505,7 +549,10 @@ namespace StudentScheduleManagementSystem.UI
                                         activeDays,
                                         addOnTimeline: false);
             }
-            MessageBox.Show("已成功添加该课程");
+            if(id == null)
+            {
+                MessageBox.Show("已成功添加该课程");
+            }
             GenerateFormData();
             return true;
         }
@@ -541,7 +588,10 @@ namespace StudentScheduleManagementSystem.UI
                                   duration,
                                   null,
                                   new Map.Location.Building(1, "default building", new() { Id = -1, X = 0, Y = 0 }));
-            MessageBox.Show("已成功添加该考试");
+            if (id == null)
+            {
+                MessageBox.Show("已成功添加该课程");
+            }
             GenerateFormData();
             return true;
         }
@@ -613,7 +663,10 @@ namespace StudentScheduleManagementSystem.UI
                                           activeDays,
                                           addOnTimeline: false);
             }
-            MessageBox.Show("已成功添加该集体活动");
+            if (id == null)
+            {
+                MessageBox.Show("已成功添加该课程");
+            }
             GenerateFormData();
             return true;
         }
