@@ -120,7 +120,7 @@ namespace StudentScheduleManagementSystem.UI
         private void GenerateFormData(ScheduleType type)
         {
             scheduleData.Rows.Clear();
-            int[] widths = { 30, 150, 150, 150, 100, 100 };
+            int[] widths = { 30, 150, 130, 120, 130, 60, 60 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleData.Columns[i].Width = widths[i];
@@ -140,8 +140,9 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     this.scheduleData.Rows.Add(null,
                                                sharedData.Name,
+                                               sharedData.Id,
                                                sharedData.Timestamp.Week.ToString(),
-                                               sharedData.Timestamp.Day.ToString(),
+                                               sharedData.Timestamp.Day.ToString()[..3],
                                                sharedData.Timestamp.Hour.ToString() + ":00",
                                                sharedData.Duration.ToString() + "小时");
                 }
@@ -154,6 +155,7 @@ namespace StudentScheduleManagementSystem.UI
                     }
                     this.scheduleData.Rows.Add(null,
                                                sharedData.Name,
+                                               sharedData.Id,
                                                "1-16",
                                                days,
                                                sharedData.Timestamp.Hour.ToString() + ":00",
@@ -168,6 +170,7 @@ namespace StudentScheduleManagementSystem.UI
                     }
                     this.scheduleData.Rows.Add(null,
                                                sharedData.Name,
+                                               sharedData.Id,
                                                GetBriefWeeks(sharedData.ActiveWeeks),
                                                days,
                                                sharedData.Timestamp.Hour.ToString() + ":00",
