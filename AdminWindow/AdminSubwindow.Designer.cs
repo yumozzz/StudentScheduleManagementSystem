@@ -49,7 +49,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.deleteScheduleButton = new System.Windows.Forms.Button();
             this.reviseScheduleButton = new System.Windows.Forms.Button();
-            this.reviseYes = new System.Windows.Forms.Button();
+            this.reviseOK = new System.Windows.Forms.Button();
             this.reviseCancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -283,13 +283,13 @@
             // 
             // reviseYes
             // 
-            this.reviseYes.Location = new System.Drawing.Point(735, 273);
-            this.reviseYes.Name = "reviseYes";
-            this.reviseYes.Size = new System.Drawing.Size(135, 34);
-            this.reviseYes.TabIndex = 55;
-            this.reviseYes.Text = "确认";
-            this.reviseYes.UseVisualStyleBackColor = true;
-            this.reviseYes.Click += new System.EventHandler(this.ReviseYes_Click);
+            this.reviseOK.Location = new System.Drawing.Point(735, 273);
+            this.reviseOK.Name = "reviseOK";
+            this.reviseOK.Size = new System.Drawing.Size(135, 34);
+            this.reviseOK.TabIndex = 55;
+            this.reviseOK.Text = "确认";
+            this.reviseOK.UseVisualStyleBackColor = true;
+            this.reviseOK.Click += new System.EventHandler(this.ReviseOK_Click);
             // 
             // reviseCancel
             // 
@@ -299,7 +299,7 @@
             this.reviseCancel.TabIndex = 56;
             this.reviseCancel.Text = "取消";
             this.reviseCancel.UseVisualStyleBackColor = true;
-            this.reviseCancel.Click += new System.EventHandler(this.ReviseCanael_Click);
+            this.reviseCancel.Click += new System.EventHandler(this.ReviseCancel_Click);
             // 
             // AdminSubwindowBase
             // 
@@ -307,7 +307,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
             this.Controls.Add(this.reviseCancel);
-            this.Controls.Add(this.reviseYes);
+            this.Controls.Add(this.reviseOK);
             this.Controls.Add(this.reviseScheduleButton);
             this.Controls.Add(this.deleteScheduleButton);
             this.Controls.Add(this.label5);
@@ -356,7 +356,7 @@
         protected DataGridViewTextBoxColumn dayCheckBoxColumn;
         protected DataGridViewTextBoxColumn timeCheckBoxColumn;
         protected DataGridViewTextBoxColumn durationCheckBoxColumn;
-        private Button reviseYes;
-        private Button reviseCancel;
+        protected Button reviseOK;
+        protected Button reviseCancel;
     }
 }

@@ -28,7 +28,7 @@ namespace StudentScheduleManagementSystem.UI
             GenerateMultiSelectBox();
             GenerateFormData(type);
             _type = type;
-            this.reviseYes.Hide();
+            this.reviseOK.Hide();
             this.reviseCancel.Hide();
         }
 
@@ -168,7 +168,7 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        private StringBuilder GetScheduleDatail(string name,
+        private StringBuilder GetScheduleDetail(string name,
                                                 RepetitiveType repetitiveType,
                                                 int[] activeWeeks,
                                                 Day[] activeDays,
@@ -234,7 +234,7 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             var selected = _data[index];
-            StringBuilder ScheduleDetail = GetScheduleDatail(selected.Name,
+            StringBuilder ScheduleDetail = GetScheduleDetail(selected.Name,
                                                              selected.RepetitiveType,
                                                              selected.ActiveWeeks,
                                                              selected.ActiveDays,
@@ -266,12 +266,12 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (selectedCount == 0)
             {
-                MessageBox.Show("请选择要删除或修改的日程！");
+                MessageBox.Show("请选择要修改的日程！");
                 return;
             }
             if (selectedCount >= 2)
             {
-                MessageBox.Show("请一次选择一个日程删除货修改！");
+                MessageBox.Show("请一次选择一个日程修改！");
                 return;
             }
 
@@ -291,7 +291,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 foreach (Day activeDay in selected.ActiveDays)
                 {
-                    this.daySelectBox.SelectCheckBox((int)activeDay);
+                    this.daySelectBox.SelectCheckBox(activeDay.ToInt());
                 }
             }
             else
@@ -302,7 +302,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 foreach (Day activeDay in selected.ActiveDays)
                 {
-                    this.daySelectBox.SelectCheckBox((int)activeDay);
+                    this.daySelectBox.SelectCheckBox(activeDay.ToInt());
                 }
             }
 
@@ -312,7 +312,7 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseScheduleButton.Hide();
             this.addScheduleButton.Hide();
             this.deleteScheduleButton.Hide();
-            this.reviseYes.Show();
+            this.reviseOK.Show();
             this.reviseCancel.Show();
         }
 
@@ -434,7 +434,7 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             return showMessageBox
-                       ? MessageBox.Show(GetScheduleDatail(name,
+                       ? MessageBox.Show(GetScheduleDetail(name,
                                                            repetitiveType,
                                                            activeWeeks,
                                                            activeDays,
@@ -448,28 +448,28 @@ namespace StudentScheduleManagementSystem.UI
 
         protected abstract bool AddOneSchedule(long? id);
 
-        private void ReviseYes_Click(object sender, EventArgs e)
+        private void ReviseOK_Click(object sender, EventArgs e)
         {
-            Schedule.ScheduleBase.DeleteShared((long)_originId);
+            Schedule.ScheduleBase.DeleteShared(_originId!.Value);
             AddOneSchedule(_originId);
             MessageBox.Show("已成功修改该日程");
-            Log.Information.Log($"成功修改id为{_originId}的共享日程");
-            GenerateFormData(_type);
+            Log.Information.Log($"成功修改id为{_originId.Value}的共享日程");
+            GenerateFormData();
 
             this.ClearInput();
             _originId = null;
-            this.reviseYes.Hide();
+            this.reviseOK.Hide();
             this.reviseCancel.Hide();
             this.reviseScheduleButton.Show();
             this.addScheduleButton.Show();
             this.deleteScheduleButton.Show();
         }
 
-        private void ReviseCanael_Click(object sender, EventArgs e)
+        private void ReviseCancel_Click(object sender, EventArgs e)
         {
             this.ClearInput();
             _originId = null;
-            this.reviseYes.Hide();
+            this.reviseOK.Hide();
             this.reviseCancel.Hide();
             this.reviseScheduleButton.Show();
             this.addScheduleButton.Show();
