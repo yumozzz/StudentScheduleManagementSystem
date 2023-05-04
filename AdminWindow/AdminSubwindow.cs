@@ -126,8 +126,16 @@ namespace StudentScheduleManagementSystem.UI
                 scheduleData.Columns[i].Width = widths[i];
             }
             _data = Schedule.ScheduleBase.GetSharedByType(type);
+
+            bool igonreDefult = false;
             foreach (var sharedData in _data)
             {
+                if (!igonreDefult)
+                {
+                    igonreDefult = true;
+                    continue;
+                }
+
                 if (sharedData.RepetitiveType == RepetitiveType.Single)
                 {
                     this.scheduleData.Rows.Add(null,
