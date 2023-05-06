@@ -47,7 +47,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.testOperation)).BeginInit();
             this.SuspendLayout();
             // 
-            // Header
+            // header
             // 
             this.header.BackColor = System.Drawing.Color.Transparent;
             this.header.ForeColor = System.Drawing.SystemColors.ControlText;
@@ -58,7 +58,7 @@
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
             this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
             // 
-            // SubPage
+            // mainpage
             // 
             this.mainpage.BackColor = System.Drawing.Color.White;
             this.mainpage.Location = new System.Drawing.Point(180, 58);
@@ -66,7 +66,7 @@
             this.mainpage.Size = new System.Drawing.Size(1050, 655);
             this.mainpage.TabIndex = 25;
             // 
-            // LogoutClose
+            // logoutButton
             // 
             this.logoutButton.BackColor = System.Drawing.Color.Transparent;
             this.logoutButton.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -79,7 +79,7 @@
             this.logoutButton.TabStop = false;
             this.logoutButton.Click += new System.EventHandler(this.LogoutClose_Click);
             // 
-            // CourseOP
+            // courseButton
             // 
             this.courseButton.BackColor = System.Drawing.Color.Transparent;
             this.courseButton.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -92,7 +92,7 @@
             this.courseButton.TabStop = false;
             this.courseButton.Click += new System.EventHandler(this.CourseManagement_Click);
             // 
-            // ActivityOP
+            // activityButton
             // 
             this.activityButton.BackColor = System.Drawing.Color.Transparent;
             this.activityButton.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -105,7 +105,7 @@
             this.activityButton.TabStop = false;
             this.activityButton.Click += new System.EventHandler(this.ActivityManagement_Click);
             // 
-            // SubPageBG
+            // mainpageButton
             // 
             this.mainpageButton.BackColor = System.Drawing.Color.Transparent;
             this.mainpageButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.SubPageBG;
@@ -115,7 +115,7 @@
             this.mainpageButton.TabIndex = 31;
             this.mainpageButton.TabStop = false;
             // 
-            // Logout
+            // logoutConfirm
             // 
             this.logoutConfirm.Cursor = System.Windows.Forms.Cursors.Hand;
             this.logoutConfirm.Image = global::StudentScheduleManagementSystem.Properties.Resources.退出__a880c2_128_3661364;
@@ -127,7 +127,7 @@
             this.logoutConfirm.TabStop = false;
             this.logoutConfirm.Click += new System.EventHandler(this.Logout_Click);
             // 
-            // ClosePage
+            // closeConfirm
             // 
             this.closeConfirm.Cursor = System.Windows.Forms.Cursors.Hand;
             this.closeConfirm.Image = global::StudentScheduleManagementSystem.Properties.Resources.退出__a880c2_128_3656183;
@@ -139,7 +139,7 @@
             this.closeConfirm.TabStop = false;
             this.closeConfirm.Click += new System.EventHandler(this.ClosePage_Click);
             // 
-            // TestOP
+            // testOperation
             // 
             this.testOperation.BackColor = System.Drawing.Color.Transparent;
             this.testOperation.Cursor = System.Windows.Forms.Cursors.Hand;
