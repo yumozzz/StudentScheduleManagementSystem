@@ -87,9 +87,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void GenerateMultiSelectBox()
         {
-            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-            this.daySelectBox.InitializeBox(7, days);
-
             string[] weeks =
             {
                 "Week1",
@@ -548,7 +545,10 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class CourseSubwindow : AdminSubwindowBase
     {
         public CourseSubwindow()
-            : base(ScheduleType.Course) { }
+            : base(ScheduleType.Course) {
+            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri" };
+            this.daySelectBox.InitializeBox(5, days);
+        }
 
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
@@ -623,7 +623,10 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class ExamSubwindow : AdminSubwindowBase
     {
         public ExamSubwindow()
-            : base(ScheduleType.Exam) { }
+            : base(ScheduleType.Exam) {
+            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            this.daySelectBox.InitializeBox(7, days);
+        }
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
@@ -664,7 +667,10 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class GroupActivitySubwindow : AdminSubwindowBase
     {
         public GroupActivitySubwindow()
-            : base(ScheduleType.Activity) { }
+            : base(ScheduleType.Activity) {
+            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            this.daySelectBox.InitializeBox(7, days);
+        }
 
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)

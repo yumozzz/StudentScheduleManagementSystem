@@ -54,8 +54,11 @@
             // scheduleData
             // 
             this.scheduleData.AllowUserToAddRows = false;
+            this.scheduleData.AllowUserToResizeColumns = false;
+            this.scheduleData.AllowUserToResizeRows = false;
             this.scheduleData.BackgroundColor = System.Drawing.Color.White;
-            this.scheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.scheduleData.ColumnHeadersHeight = 34;
+            this.scheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.scheduleData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.courseCheckBoxColumn,
             this.nameTextBoxColumn,
@@ -68,6 +71,7 @@
             this.scheduleData.Name = "scheduleData";
             this.scheduleData.RowHeadersVisible = false;
             this.scheduleData.RowHeadersWidth = 62;
+            this.scheduleData.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.scheduleData.RowTemplate.Height = 32;
             this.scheduleData.Size = new System.Drawing.Size(714, 645);
             this.scheduleData.TabIndex = 41;
