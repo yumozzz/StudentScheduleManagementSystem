@@ -36,8 +36,8 @@
             this.dayCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timeCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.durationCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.weekSelectBox = new StudentScheduleManagementSystem.MultiSelectBox();
-            this.daySelectBox = new StudentScheduleManagementSystem.MultiSelectBox();
+            this.weekSelectBox = new StudentScheduleManagementSystem.UI.MultiSelectBox();
+            this.daySelectBox = new StudentScheduleManagementSystem.UI.MultiSelectBox();
             this.durationComboBox = new System.Windows.Forms.ComboBox();
             this.hourComboBox = new System.Windows.Forms.ComboBox();
             this.nameBox = new System.Windows.Forms.TextBox();

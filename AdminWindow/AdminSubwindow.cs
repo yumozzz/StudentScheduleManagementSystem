@@ -79,7 +79,7 @@ namespace StudentScheduleManagementSystem.UI
         private void GenerateMultiSelectBox()
         {
             string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-            this.daySelectBox.InitializeBox(7, days);
+            this.daySelectBox.InitializeBox(days);
 
             string[] weeks =
             {
@@ -100,7 +100,7 @@ namespace StudentScheduleManagementSystem.UI
                 "Week15",
                 "Week16",
             };
-            this.weekSelectBox.InitializeBox(16, weeks);
+            this.weekSelectBox.InitializeBox(weeks);
         }
 
         protected void GenerateFormData(ScheduleType type)
@@ -202,11 +202,11 @@ namespace StudentScheduleManagementSystem.UI
             {
                 errorMessage.AppendLine("日程名不能为保留值！");
             }
-            if (weekSelectBox.valid == 0)
+            if (weekSelectBox.ValidCount == 0)
             {
                 errorMessage.AppendLine("请输入日程周！");
             }
-            if (daySelectBox.valid == 0)
+            if (daySelectBox.ValidCount == 0)
             {
                 errorMessage.AppendLine("请输入日程日！");
             }
@@ -225,11 +225,11 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             name = nameBox.Text;
-            if (weekSelectBox.valid == 1 && daySelectBox.valid == 1)
+            if (weekSelectBox.ValidCount == 1 && daySelectBox.ValidCount == 1)
             {
                 repetitiveType = RepetitiveType.Single;
             }
-            else if (weekSelectBox.valid == 16)
+            else if (weekSelectBox.ValidCount == 16)
             {
                 repetitiveType = RepetitiveType.MultipleDays;
             }
@@ -237,9 +237,9 @@ namespace StudentScheduleManagementSystem.UI
             {
                 repetitiveType = RepetitiveType.Designated;
             }
-            activeWeeks = new int[weekSelectBox.valid];
+            activeWeeks = new int[weekSelectBox.ValidCount];
             int activeWeekCount = 0;
-            for (int i = 0; i < weekSelectBox.items_cnt; i++)
+            for (int i = 0; i < weekSelectBox.TotalCount; i++)
             {
                 if (weekSelectBox.Selects[i])
                 {
@@ -247,9 +247,9 @@ namespace StudentScheduleManagementSystem.UI
                     activeWeekCount++;
                 }
             }
-            activeDays = new Day[daySelectBox.valid];
+            activeDays = new Day[daySelectBox.ValidCount];
             int activeDayCount = 0;
-            for (int i = 0; i < daySelectBox.items_cnt; i++)
+            for (int i = 0; i < daySelectBox.TotalCount; i++)
             {
                 if (daySelectBox.Selects[i])
                 {
