@@ -11,7 +11,7 @@ using System.Windows.Forms;
 using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace StudentScheduleManagementSystem.UI
-{
+{ 
     public abstract partial class AdminSubwindowBase : Form
     {
         private List<Schedule.ScheduleBase.SharedData> _data;
@@ -26,7 +26,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             InitializeComponent();
             GenerateMultiSelectBox();
-            GenerateFormData(type);
+            GenerateFormData(type, true);
             _type = type;
             this.reviseOK.Hide();
             this.reviseCancel.Hide();
@@ -87,7 +87,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void GenerateMultiSelectBox()
         {
-            string[] days = { "Mon", "Tue", "Wen", "Thu", "Fri", "Sat", "Sun" };
+            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
             this.daySelectBox.InitializeBox(7, days);
 
             string[] weeks =
@@ -112,12 +112,14 @@ namespace StudentScheduleManagementSystem.UI
             this.weekSelectBox.InitializeBox(16, weeks);
         }
 
-        protected void GenerateFormData()
+        protected void GenerateFormData(bool shouldInitiallize)
         {
-            GenerateFormData(_type);
+            GenerateFormData(_type, shouldInitiallize);
         }
 
-        private void GenerateFormData(ScheduleType type)
+        
+
+        private void GenerateFormData(ScheduleType type, bool shouldInitiallize)
         {
             scheduleData.Rows.Clear();
             int[] widths = { 30, 150, 130, 120, 130, 60, 60 };
@@ -125,7 +127,11 @@ namespace StudentScheduleManagementSystem.UI
             {
                 scheduleData.Columns[i].Width = widths[i];
             }
-            _data = Schedule.ScheduleBase.GetSharedByType(type);
+            if (shouldInitiallize)
+            {
+                _data = Schedule.ScheduleBase.GetSharedByType(type);
+            }
+            
 
             bool igonreDefult = false;
             foreach (var sharedData in _data)
@@ -157,7 +163,7 @@ namespace StudentScheduleManagementSystem.UI
                                                sharedData.Name,
                                                sharedData.Id,
                                                "1-16",
-                                               days,
+                                               days.ToString(),
                                                sharedData.Timestamp.Hour.ToString() + ":00",
                                                sharedData.Duration.ToString() + "小时");
                 }
@@ -171,8 +177,8 @@ namespace StudentScheduleManagementSystem.UI
                     this.scheduleData.Rows.Add(null,
                                                sharedData.Name,
                                                sharedData.Id,
-                                               GetBriefWeeks(sharedData.ActiveWeeks),
-                                               days,
+                                               GetBriefWeeks(sharedData.ActiveWeeks).ToString(),
+                                               days.ToString(),
                                                sharedData.Timestamp.Hour.ToString() + ":00",
                                                sharedData.Duration.ToString() + "小时");
                 }
@@ -260,7 +266,7 @@ namespace StudentScheduleManagementSystem.UI
             Schedule.ScheduleBase.DeleteShared(id);
             MessageBox.Show("已成功删除该日程");
             Log.Information.Log($"成功删除id为{id}的共享日程");
-            GenerateFormData(_type);
+            GenerateFormData(_type, true);
         }
 
         protected void ReviseSchedule_Click(object sender, EventArgs e)
@@ -475,7 +481,7 @@ namespace StudentScheduleManagementSystem.UI
             AddOneSchedule(_originId, true);
             MessageBox.Show("已成功修改该日程");
             Log.Information.Log($"成功修改id为{_originId.Value}的共享日程");
-            GenerateFormData();
+            GenerateFormData(true);
 
             this.ClearInput();
             _originId = null;
@@ -504,6 +510,38 @@ namespace StudentScheduleManagementSystem.UI
             this.daySelectBox.ClearBox();
             this.hourComboBox.Text = "";
             this.durationComboBox.Text = "";
+        }
+
+        //bool isReversed = true;
+        private void ScheduleData_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        {
+            int column = e.Column.Index;
+            if (column == 3)
+            {
+                _data.Sort(1, _data.Count - 1 ,new ActiveWeekComparer());
+                if (this.scheduleData.Columns[3].HeaderCell.SortGlyphDirection==SortOrder.Descending)
+                {
+                    _data.Reverse(1, _data.Count - 1);
+                }
+                e.Handled = true;
+                GenerateFormData(false);
+            }
+            else if (column == 4)
+            {
+                _data.Sort(1, _data.Count - 1, new ActiveDayComparer());
+                if (this.scheduleData.Columns[4].HeaderCell.SortGlyphDirection == SortOrder.Descending)
+                {
+                    _data.Reverse(1, _data.Count - 1);
+                }
+                e.Handled = true;
+                GenerateFormData(false);
+            }
+        }
+
+        private Schedule.ScheduleBase.SharedData SearchById(long id)
+        {
+            Schedule.ScheduleBase.SharedData ret = new Schedule.ScheduleBase.SharedData();
+            return ret;
         }
     }
 
@@ -577,7 +615,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 MessageBox.Show("已成功添加该课程");
             }
-            GenerateFormData();
+            GenerateFormData(true);
             return true;
         }
     }
@@ -618,7 +656,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 MessageBox.Show("已成功添加该课程");
             }
-            GenerateFormData();
+            GenerateFormData(true);
             return true;
         }
     }
@@ -696,7 +734,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 MessageBox.Show("已成功添加该课程");
             }
-            GenerateFormData();
+            GenerateFormData(true);
             return true;
         }
     }
