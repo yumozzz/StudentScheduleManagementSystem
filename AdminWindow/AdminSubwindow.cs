@@ -21,6 +21,8 @@ namespace StudentScheduleManagementSystem.UI
             _type = type;
             this.reviseOK.Hide();
             this.reviseCancel.Hide();
+            this.searchByNameBox.ForeColor = Color.Black;
+            this.searchByIdBox.ForeColor = Color.Gray;
         }
 
         private static StringBuilder GetBriefWeeks(int[] activeWeeks)
@@ -78,9 +80,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void GenerateMultiSelectBox()
         {
-            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-            this.daySelectBox.InitializeBox(days);
-
             string[] weeks =
             {
                 "Week1",
@@ -522,12 +521,90 @@ namespace StudentScheduleManagementSystem.UI
 
             return ret;
         }
+
+        private bool searchByName = true;
+
+        private void SearchByNameBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            searchByName = true;
+            if (e.KeyChar is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
+                              (>= '0' and <= '9') or
+                              (>= 'A' and <= 'Z') or
+                              (>= 'a' and <= 'z') or
+                              '_' or
+                              '-' or
+                              ' '))
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                this.searchByNameBox.ForeColor = Color.Black;
+                this.searchByIdBox.ForeColor = Color.Gray;
+            }
+        }
+        private void SearchByIdBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            searchByName = false;
+            if (e.KeyChar is not (>= '0' and <= '9'))
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                this.searchByNameBox.ForeColor = Color.Gray;
+                this.searchByIdBox.ForeColor = Color.Black;
+            }
+        }
+
+        private void SearchOK_Click(object sender, EventArgs e)
+        {
+            if (searchByName)
+            {
+                if (this.searchByNameBox.Text.Equals(""))
+                {
+                    MessageBox.Show("请输入要搜索的日程名！");
+                    return;
+                }
+                List<Schedule.ScheduleBase.SharedData> result = Schedule.ScheduleBase.GetSharedByName(this.searchByNameBox.Text);
+                if (result.Count == 0)
+                {
+                    MessageBox.Show("未搜索到日程！");
+                    return;
+                }
+                GenerateFormData(result);
+            }
+            else
+            {
+                if (this.searchByIdBox.Text.Equals(""))
+                {
+                    MessageBox.Show("请输入要搜索的日程ID！");
+                    return;
+                }
+                Schedule.ScheduleBase.SharedData? result = Schedule.ScheduleBase.GetSharedById(long.Parse(searchByIdBox.Text));
+                if (result == null)
+                {
+                    MessageBox.Show("未搜索到日程！");
+                    return;
+                }
+                GenerateFormData(new List<Schedule.ScheduleBase.SharedData> { result });
+            }
+        }
+
+        private void SearchCancel_Click(object sender, EventArgs e)
+        {
+            GenerateFormData(_type);
+        }
+
     }
 
     public sealed class CourseSubwindow : AdminSubwindowBase
     {
         public CourseSubwindow()
-            : base(ScheduleType.Course) { }
+            : base(ScheduleType.Course) {
+            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri" };
+            this.daySelectBox.InitializeBox(days);
+        }
 
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
@@ -544,6 +621,14 @@ namespace StudentScheduleManagementSystem.UI
             {
                 return false;
             }
+
+            if (beginHour + duration >= Schedule.Course.Latest)
+            {
+                MessageBox.Show("课程结束时间不得晚于规定时间！");
+                return false;
+            }
+
+            if (beginHour + duration > Schedule.Course.Latest)
 
             if (repetitiveType == RepetitiveType.Single)
             {
@@ -602,7 +687,10 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class ExamSubwindow : AdminSubwindowBase
     {
         public ExamSubwindow()
-            : base(ScheduleType.Exam) { }
+            : base(ScheduleType.Exam) {
+            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            this.daySelectBox.InitializeBox(days);
+        }
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
@@ -618,6 +706,13 @@ namespace StudentScheduleManagementSystem.UI
             {
                 return false;
             }
+
+            if (beginHour + duration >= Schedule.Course.Latest)
+            {
+                MessageBox.Show("考试结束时间不得晚于规定时间！");
+                return false;
+            }
+
             if (repetitiveType != RepetitiveType.Single)
             {
                 MessageBox.Show("只能选择一个周次和一个天次！");
@@ -643,7 +738,10 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class GroupActivitySubwindow : AdminSubwindowBase
     {
         public GroupActivitySubwindow()
-            : base(ScheduleType.Activity) { }
+            : base(ScheduleType.Activity) {
+            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            this.daySelectBox.InitializeBox(days);
+        }
 
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
@@ -658,6 +756,12 @@ namespace StudentScheduleManagementSystem.UI
 
             if (!confirm)
             {
+                return false;
+            }
+
+            if (beginHour + duration >= Schedule.Course.Latest)
+            {
+                MessageBox.Show("活动结束时间不得晚于规定时间！");
                 return false;
             }
 

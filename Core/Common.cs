@@ -51,6 +51,12 @@ namespace StudentScheduleManagementSystem
         public static abstract JArray SaveInstance();
     }
 
+    internal interface ISchedule
+    {
+        public static abstract int Earliest { get; }
+        public static abstract int Latest { get; }
+    }
+
     public class RecordOverrideException : InvalidOperationException { }
 
     public class JsonFormatException : JsonException
@@ -164,7 +170,7 @@ namespace StudentScheduleManagementSystem
 
         public static Times.Time ToTimeStamp(this int value)
         {
-            if (value is < 0 or >= Times.Time.TotalHours)
+            if (value is < 0 or >= Constants.TotalHours)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
             }
@@ -177,6 +183,7 @@ namespace StudentScheduleManagementSystem
 
     public static class Constants
     {
+        public const int TotalHours = 16 * 7 * 24;
         public static readonly int[] AllWeeks = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
         public static readonly Day[] AllDays = { Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday, Day.Sunday };
         public static readonly int[] EmptyIntArray = Array.Empty<int>();

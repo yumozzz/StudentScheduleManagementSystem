@@ -47,15 +47,24 @@
             this.reviseScheduleButton = new System.Windows.Forms.Button();
             this.reviseOK = new System.Windows.Forms.Button();
             this.reviseCancel = new System.Windows.Forms.Button();
+            this.searchOK = new System.Windows.Forms.Button();
+            this.searchByNameBox = new System.Windows.Forms.TextBox();
+            this.searchCancel = new System.Windows.Forms.Button();
+            this.searchByIdBox = new System.Windows.Forms.TextBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // scheduleData
             // 
             this.scheduleData.AllowUserToAddRows = false;
+            this.scheduleData.AllowUserToResizeColumns = false;
+            this.scheduleData.AllowUserToResizeRows = false;
             this.scheduleData.BackgroundColor = System.Drawing.Color.White;
-            this.scheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.scheduleData.ColumnHeadersHeight = 34;
+            this.scheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.scheduleData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.courseCheckBoxColumn,
             this.nameTextBoxColumn,
@@ -68,6 +77,7 @@
             this.scheduleData.Name = "scheduleData";
             this.scheduleData.RowHeadersVisible = false;
             this.scheduleData.RowHeadersWidth = 62;
+            this.scheduleData.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.scheduleData.RowTemplate.Height = 32;
             this.scheduleData.Size = new System.Drawing.Size(714, 645);
             this.scheduleData.TabIndex = 41;
@@ -140,6 +150,7 @@
             this.weekSelectBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.weekSelectBox.Location = new System.Drawing.Point(735, 106);
             this.weekSelectBox.Name = "weekSelectBox";
+            this.weekSelectBox.ShowComboBox = false;
             this.weekSelectBox.Size = new System.Drawing.Size(300, 30);
             this.weekSelectBox.TabIndex = 36;
             // 
@@ -149,6 +160,7 @@
             this.daySelectBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.daySelectBox.Location = new System.Drawing.Point(735, 166);
             this.daySelectBox.Name = "daySelectBox";
+            this.daySelectBox.ShowComboBox = false;
             this.daySelectBox.Size = new System.Drawing.Size(300, 30);
             this.daySelectBox.TabIndex = 37;
             // 
@@ -200,6 +212,7 @@
             this.nameBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.nameBox.Location = new System.Drawing.Point(735, 46);
             this.nameBox.Name = "nameBox";
+            this.nameBox.ShortcutsEnabled = false;
             this.nameBox.Size = new System.Drawing.Size(300, 30);
             this.nameBox.TabIndex = 38;
             // 
@@ -273,12 +286,71 @@
             this.reviseCancel.UseVisualStyleBackColor = false;
             this.reviseCancel.Click += new System.EventHandler(this.ReviseCancel_Click);
             // 
+            // searchOK
+            // 
+            this.searchOK.BackColor = System.Drawing.Color.White;
+            this.searchOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.searchOK.Location = new System.Drawing.Point(735, 582);
+            this.searchOK.Name = "searchOK";
+            this.searchOK.Size = new System.Drawing.Size(135, 34);
+            this.searchOK.TabIndex = 57;
+            this.searchOK.Text = "搜索";
+            this.searchOK.UseVisualStyleBackColor = false;
+            this.searchOK.Click += new System.EventHandler(this.SearchOK_Click);
+            // 
+            // searchByNameBox
+            // 
+            this.searchByNameBox.AcceptsReturn = true;
+            this.searchByNameBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.searchByNameBox.Location = new System.Drawing.Point(735, 468);
+            this.searchByNameBox.Name = "searchByNameBox";
+            this.searchByNameBox.ShortcutsEnabled = false;
+            this.searchByNameBox.Size = new System.Drawing.Size(300, 30);
+            this.searchByNameBox.TabIndex = 58;
+            this.searchByNameBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchByNameBox_KeyPress);
+            // 
+            // searchCancel
+            // 
+            this.searchCancel.BackColor = System.Drawing.Color.White;
+            this.searchCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.searchCancel.Location = new System.Drawing.Point(900, 582);
+            this.searchCancel.Name = "searchCancel";
+            this.searchCancel.Size = new System.Drawing.Size(135, 34);
+            this.searchCancel.TabIndex = 59;
+            this.searchCancel.Text = "取消";
+            this.searchCancel.UseVisualStyleBackColor = false;
+            this.searchCancel.Click += new System.EventHandler(this.SearchCancel_Click);
+            // 
+            // searchByIdBox
+            // 
+            this.searchByIdBox.AcceptsReturn = true;
+            this.searchByIdBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.searchByIdBox.Location = new System.Drawing.Point(735, 533);
+            this.searchByIdBox.Name = "searchByIdBox";
+            this.searchByIdBox.ShortcutsEnabled = false;
+            this.searchByIdBox.Size = new System.Drawing.Size(300, 30);
+            this.searchByIdBox.TabIndex = 60;
+            this.searchByIdBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchByIdBox_KeyPress);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = global::StudentScheduleManagementSystem.Properties.Resources.SearchBG;
+            this.pictureBox2.Location = new System.Drawing.Point(725, 434);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(320, 216);
+            this.pictureBox2.TabIndex = 61;
+            this.pictureBox2.TabStop = false;
+            // 
             // AdminSubwindowBase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(168)))), ((int)(((byte)(128)))), ((int)(((byte)(194)))));
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.searchByIdBox);
+            this.Controls.Add(this.searchCancel);
+            this.Controls.Add(this.searchByNameBox);
+            this.Controls.Add(this.searchOK);
             this.Controls.Add(this.nameBox);
             this.Controls.Add(this.weekSelectBox);
             this.Controls.Add(this.daySelectBox);
@@ -291,11 +363,13 @@
             this.Controls.Add(this.hourComboBox);
             this.Controls.Add(this.addScheduleButton);
             this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.pictureBox2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "AdminSubwindowBase";
             this.Text = ",";
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -322,5 +396,10 @@
         private DataGridViewTextBoxColumn dayCheckBoxColumn;
         private DataGridViewTextBoxColumn timeCheckBoxColumn;
         private DataGridViewTextBoxColumn durationCheckBoxColumn;
+        private Button searchOK;
+        private TextBox searchByNameBox;
+        private Button searchCancel;
+        private TextBox searchByIdBox;
+        private PictureBox pictureBox2;
     }
 }
