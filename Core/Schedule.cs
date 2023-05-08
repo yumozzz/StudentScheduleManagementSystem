@@ -99,7 +99,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static readonly Times.Timeline<Record> _timeline = new();
 
-        protected static readonly Dictionary<long, ScheduleBase> _scheduleList = new();
+        protected static readonly Dictionary<long, ScheduleBase> _scheduleDictionary = new();
 
         protected static long _courseIdMax = 1000000000;
 
@@ -107,7 +107,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static long _groutActivityIdMax = 3000000000;
 
-        protected static readonly Dictionary<long, SharedData> _correspondenceDictionary = new()
+        protected static readonly Dictionary<long, SharedData> _sharedDictionary = new()
         {
             {
                 1000000000,
@@ -299,7 +299,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public static void ClearAll()
         {
-            _scheduleList.Clear();
+            _scheduleDictionary.Clear();
             _timeline.Clear();
         }
 
@@ -314,8 +314,8 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static void RemoveSchedule(long scheduleId)
         {
-            ScheduleBase schedule = _scheduleList[scheduleId];
-            _scheduleList.Remove(scheduleId);
+            ScheduleBase schedule = _scheduleDictionary[scheduleId];
+            _scheduleDictionary.Remove(scheduleId);
             _timeline.RemoveMultipleItems(schedule.BeginTime,
                                           schedule.Duration,
                                           schedule.RepetitiveType,
@@ -444,7 +444,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 (ScheduleType.TemporaryAffair, _) => specifiedId.Value,
                 (_, _) => throw new ArgumentException(null, nameof(ScheduleType)),
             };
-            if(!addOnTimeline)
+            if (!addOnTimeline)
             {
                 //Debug.Assert(thisScheduleId == null);
                 this.ScheduleId = thisScheduleId!.Value;
@@ -464,21 +464,26 @@ namespace StudentScheduleManagementSystem.Schedule
                                        ActiveDays);
             thisScheduleId ??= outScheduleId;
             ScheduleId = thisScheduleId.Value;
-            _scheduleList.Add(thisScheduleId.Value, this); //调用前已创建实例
+            _scheduleDictionary.Add(thisScheduleId.Value, this); //调用前已创建实例
             Log.Information.Log("已在时间轴与表中添加日程");
         }
 
-        protected static List<ScheduleBase> GetAll(ScheduleType type)
+        public static List<ScheduleBase> GetScheduleByType(ScheduleType type)
         {
-            List<ScheduleBase> list = new();
-            foreach (var instance in _scheduleList)
+            int i = type switch
             {
-                if (instance.Value.ScheduleType == type)
+                ScheduleType.Course => 1, ScheduleType.Exam => 2, ScheduleType.Activity => 3,
+                ScheduleType.TemporaryAffair => 4, _ => throw new ArgumentException(null, nameof(type))
+            };
+            List<ScheduleBase> ret = new();
+            foreach (var id in _scheduleDictionary.Keys)
+            {
+                if (id / (long)1e9 == i && id % (long)1e9 != 0)
                 {
-                    list.Add(instance.Value);
+                    ret.Add(_scheduleDictionary[id]);
                 }
             }
-            return list;
+            return ret;
         }
 
         public static List<SharedData> GetSharedByType(ScheduleType type)
@@ -489,11 +494,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 _ => throw new ArgumentException(null, nameof(type))
             };
             List<SharedData> ret = new();
-            foreach (var id in _correspondenceDictionary.Keys)
+            foreach (var id in _sharedDictionary.Keys)
             {
-                if (id / (long)1e9 == i)
+                if (id / (long)1e9 == i && id % (long)1e9 != 0)
                 {
-                    ret.Add(_correspondenceDictionary[id]);
+                    ret.Add(_sharedDictionary[id]);
                 }
             }
             return ret;
@@ -501,13 +506,13 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public static SharedData? GetSharedById(long id)
         {
-            if(id is not (>=1000000000 and <= 9999999999))
+            if (id is not (>= 1000000000 and <= 9999999999))
             {
-                throw new FormatException("id "+ id.ToString() + " is invalid");
+                throw new FormatException($"id {id} is invalid");
             }
             try
             {
-                return _correspondenceDictionary[id];
+                return _sharedDictionary[id];
             }
             catch (KeyNotFoundException)
             {
@@ -556,12 +561,12 @@ namespace StudentScheduleManagementSystem.Schedule
                 default:
                     throw new FormatException($"Item id {id} is invalid");
             }
-            _correspondenceDictionary.Remove(id);
+            _sharedDictionary.Remove(id);
         }
 
         public static Record GetRecordAt(int offset) => _timeline[offset];
 
-        public static ScheduleBase GetScheduleById(int id) => _scheduleList[id];
+        public static ScheduleBase GetScheduleById(int id) => _scheduleDictionary[id];
 
         //UNDONE
         public static List<ScheduleBase> GetSchedulesByName(string name)
@@ -620,7 +625,7 @@ namespace StudentScheduleManagementSystem.Schedule
         protected static JArray SaveInstance(ScheduleType scheduleType)
         {
             JArray array = new();
-            foreach ((_, ScheduleBase schedule) in _scheduleList)
+            foreach ((_, ScheduleBase schedule) in _scheduleDictionary)
             {
                 if (schedule.ScheduleType != scheduleType)
                 {
@@ -639,8 +644,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public static void ReadSharedData()
         {
             var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
-                                                                      "share",
-                                                                      Encryption.Encrypt.AESDecrypt);
+                                                                  "share",
+                                                                  Encryption.Encrypt.AESDecrypt);
 
             try
             {
@@ -653,7 +658,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     if (dobj.Name != "Default")
                     {
-                        _correspondenceDictionary.Add(dobj.Id, dobj);
+                        _sharedDictionary.Add(dobj.Id, dobj);
                     }
                     else
                     {
@@ -674,7 +679,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     if (dobj.Name != "Default")
                     {
-                        _correspondenceDictionary.Add(dobj.Id, dobj);
+                        _sharedDictionary.Add(dobj.Id, dobj);
                     }
                     else
                     {
@@ -695,7 +700,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     if (dobj.Name != "Default")
                     {
-                        _correspondenceDictionary.Add(dobj.Id, dobj);
+                        _sharedDictionary.Add(dobj.Id, dobj);
                     }
                     else
                     {
@@ -720,10 +725,10 @@ namespace StudentScheduleManagementSystem.Schedule
         public static void SaveSharedData()
         {
             JArray courses = new(), exams = new(), groupActivities = new(), scheduleCount;
-            _correspondenceDictionary[1000000000].Id = _courseIdMax;
-            _correspondenceDictionary[2000000000].Id = _examIdMax;
-            _correspondenceDictionary[3000000000].Id = _groutActivityIdMax;
-            foreach ((long id, var data) in _correspondenceDictionary)
+            _sharedDictionary[1000000000].Id = _courseIdMax;
+            _sharedDictionary[2000000000].Id = _examIdMax;
+            _sharedDictionary[3000000000].Id = _groutActivityIdMax;
+            foreach ((long id, var data) in _sharedDictionary)
             {
                 JObject obj = JObject.FromObject(data, _serializer);
                 switch (id / (long)1e9)
@@ -782,19 +787,19 @@ namespace StudentScheduleManagementSystem.Schedule
                     _courseIdMax++;
                     Debug.Assert(_courseIdMax == schedule.ScheduleId);
                     data.ScheduleType = ScheduleType.Course;
-                    _correspondenceDictionary.Add(schedule.ScheduleId, data);
+                    _sharedDictionary.Add(schedule.ScheduleId, data);
                     break;
                 case 2:
                     _examIdMax++;
                     Debug.Assert(_examIdMax == schedule.ScheduleId);
                     data.ScheduleType = ScheduleType.Exam;
-                    _correspondenceDictionary.Add(schedule.ScheduleId, data);
+                    _sharedDictionary.Add(schedule.ScheduleId, data);
                     break;
                 case 3:
                     _groutActivityIdMax++;
                     Debug.Assert(_groutActivityIdMax == schedule.ScheduleId);
                     data.ScheduleType = ScheduleType.Activity;
-                    _correspondenceDictionary.Add(schedule.ScheduleId, data);
+                    _sharedDictionary.Add(schedule.ScheduleId, data);
                     break;
             }
         }
@@ -893,7 +898,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 try
                 {
-                    var shared = _correspondenceDictionary[dobj.ScheduleId];
+                    var shared = _sharedDictionary[dobj.ScheduleId];
                     if (dobj.OfflineLocation != null)
                     {
                         var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
@@ -1009,7 +1014,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 try
                 {
-                    var shared = _correspondenceDictionary[dobj.ScheduleId];
+                    var shared = _sharedDictionary[dobj.ScheduleId];
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
                     Map.Location.Building location =
                         locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
@@ -1064,7 +1069,7 @@ namespace StudentScheduleManagementSystem.Schedule
         public override int Latest => 20;
         [JsonProperty] public bool IsGroupActivity { get; init; }
         [JsonProperty] public string? OnlineLink { get; init; } = null;
-        [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))] 
+        [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
         public Map.Location.Building? OfflineLocation { get; init; }
 
         #endregion
@@ -1143,7 +1148,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     try
                     {
-                        var shared = _correspondenceDictionary[dobj.ScheduleId];
+                        var shared = _sharedDictionary[dobj.ScheduleId];
                         Debug.Assert((dobj.RepetitiveType, dobj.Name, dobj.Timestamp, dobj.Duration, dobj.ActiveWeeks,
                                       dobj.ActiveDays) ==
                                      (shared.RepetitiveType, shared.Name, shared.Timestamp, shared.Duration,
@@ -1263,13 +1268,18 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region ctor
 
-        public TemporaryAffairs(string name, Times.Time beginTime, string? description, Map.Location.Building location, bool addOnTimeline = true)
+        public TemporaryAffairs(string name,
+                                Times.Time beginTime,
+                                string? description,
+                                Map.Location.Building location,
+                                bool addOnTimeline = true)
             : base(RepetitiveType.Single, name, beginTime, 1, false, description)
         {
             OnlineLink = null;
             OfflineLocation = location;
             AddSchedule(addOnTimeline);
-            AlarmEnabled = ((TemporaryAffairs)_scheduleList[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
+            AlarmEnabled =
+                ((TemporaryAffairs)_scheduleDictionary[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
         }
 
         #endregion
@@ -1279,8 +1289,8 @@ namespace StudentScheduleManagementSystem.Schedule
         public override void RemoveSchedule()
         {
             int offset = BeginTime.ToInt();
-            ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Remove(OfflineLocation!.Value);
-            if (((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Count == 0)
+            ((TemporaryAffairs)_scheduleDictionary[_timeline[offset].Id])._locations.Remove(OfflineLocation!.Value);
+            if (((TemporaryAffairs)_scheduleDictionary[_timeline[offset].Id])._locations.Count == 0)
             {
                 base.RemoveSchedule();
                 Log.Information.Log("已删除全部临时日程");
@@ -1304,7 +1314,7 @@ namespace StudentScheduleManagementSystem.Schedule
                      ScheduleType.TemporaryAffair) //有临时日程而添加临时日程，此时添加的日程与已有日程共享ID和表中的实例
             {
                 ScheduleId = _timeline[offset].Id;
-                TemporaryAffairs affairs = (TemporaryAffairs)_scheduleList[_timeline[offset].Id];
+                TemporaryAffairs affairs = (TemporaryAffairs)_scheduleDictionary[_timeline[offset].Id];
                 if (affairs._locations.Count == 20)
                 {
                     throw new TooManyTemporaryAffairsException();
@@ -1316,7 +1326,7 @@ namespace StudentScheduleManagementSystem.Schedule
             else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例
             {
                 base.AddSchedule(null, '5', addOnTimeline);
-                ((TemporaryAffairs)_scheduleList[_timeline[offset].Id])._locations.Add(OfflineLocation!.Value);
+                ((TemporaryAffairs)_scheduleDictionary[_timeline[offset].Id])._locations.Add(OfflineLocation!.Value);
             }
         }
 

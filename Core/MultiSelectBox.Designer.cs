@@ -1,4 +1,4 @@
-﻿namespace StudentScheduleManagementSystem
+﻿namespace StudentScheduleManagementSystem.UI
 {
     partial class MultiSelectBox
     {
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MultiSelectBox));
-            this.Select_All = new System.Windows.Forms.LinkLabel();
+            this.SelectAll = new System.Windows.Forms.LinkLabel();
             this.Cancel = new System.Windows.Forms.LinkLabel();
             this.textBox = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -38,16 +38,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
-            // Select_All
+            // SelectAll
             // 
-            this.Select_All.AutoSize = true;
-            this.Select_All.Location = new System.Drawing.Point(3, 30);
-            this.Select_All.Name = "Select_All";
-            this.Select_All.Size = new System.Drawing.Size(86, 24);
-            this.Select_All.TabIndex = 2;
-            this.Select_All.TabStop = true;
-            this.Select_All.Text = "Select all";
-            this.Select_All.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.Select_All_LinkClicked);
+            this.SelectAll.AutoSize = true;
+            this.SelectAll.Location = new System.Drawing.Point(3, 30);
+            this.SelectAll.Name = "SelectAll";
+            this.SelectAll.Size = new System.Drawing.Size(86, 24);
+            this.SelectAll.TabIndex = 2;
+            this.SelectAll.TabStop = true;
+            this.SelectAll.Text = "Select all";
+            this.SelectAll.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.SelectAll_LinkClicked);
             // 
             // Cancel
             // 
@@ -101,7 +101,7 @@
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.textBox);
             this.Controls.Add(this.Cancel);
-            this.Controls.Add(this.Select_All);
+            this.Controls.Add(this.SelectAll);
             this.Name = "MultiSelectBox";
             this.Size = new System.Drawing.Size(300, 724);
             this.Load += new System.EventHandler(this.MultiSelectBox_Load);
@@ -113,7 +113,7 @@
         }
 
         #endregion
-        private LinkLabel Select_All;
+        private LinkLabel SelectAll;
         private LinkLabel Cancel;
         private TextBox textBox;
         private PictureBox pictureBox1;

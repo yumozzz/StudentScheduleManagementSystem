@@ -32,14 +32,14 @@
             this.logoutButton = new System.Windows.Forms.Button();
             this.currentTime = new System.Windows.Forms.Label();
             this.searchButton = new System.Windows.Forms.Button();
-            this.multiSelectBox1 = new StudentScheduleManagementSystem.MultiSelectBox();
-            this.multiSelectBox2 = new StudentScheduleManagementSystem.MultiSelectBox();
+            this.multiSelectBox1 = new StudentScheduleManagementSystem.UI.MultiSelectBox();
+            this.multiSelectBox2 = new StudentScheduleManagementSystem.UI.MultiSelectBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.multiSelectBox3 = new StudentScheduleManagementSystem.MultiSelectBox();
+            this.multiSelectBox3 = new StudentScheduleManagementSystem.UI.MultiSelectBox();
             this.move.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();

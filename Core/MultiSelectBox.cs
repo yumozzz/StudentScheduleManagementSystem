@@ -1,93 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace StudentScheduleManagementSystem
+﻿namespace StudentScheduleManagementSystem.UI
 {
     public partial class MultiSelectBox : UserControl
     {
-        private const int gapHeight = 24;
-        private const int height_hide = 30;
-        private int height_show;
+        private const int GapHeight = 24;
+        private const int HideHeight = 30;
+        private int _showHeight;
 
-        public int items_cnt = 0;
-        public int valid = 0;
-        public Boolean[] Selects;
-        public String[] NameofCkbox;
-        public Boolean browse_show = false;
+        public int TotalCount { get; private set; } = 0;
+        public int ValidCount { get; private set; } = 0;
+        public bool[] Selects { get; private set; }
+        public bool ShowComboBox { get; set; } = false;
 
-        private CheckBox[] CBs;
+        private CheckBox[] _boxes;
+
         public MultiSelectBox()
         {
             InitializeComponent();
         }
 
-        public void InitializeBox(int items_cnt, String[] Names)
+        public void InitializeBox(string[] texts)
         {
+            this.TotalCount = texts.Length;
+            Selects = new bool[texts.Length];
+            _boxes = new CheckBox[texts.Length];
 
-            this.items_cnt = items_cnt;
-            Selects = new Boolean[items_cnt];
-            NameofCkbox = new String[items_cnt];
-            CBs = new CheckBox[items_cnt];
-            for (int i = 0; i < items_cnt; i++)
+            for (int i = 0; i < texts.Length; i++)
             {
-                NameofCkbox[i] = Names[i];
-                Selects[i] = false;
-                CBs[i] = new CheckBox();
+                CheckBox box = new();
+                box.Location = new(3, HideHeight + GapHeight + i * 28);
+                box.Name = texts[i];
+                box.Size = new(300, 28);
+                box.TabIndex = 1;
+                box.Text = texts[i];
+                box.UseVisualStyleBackColor = true;
+                box.CheckedChanged += (sender, e) => { Update_textBox(); };
+                box.MouseLeave += (sender, e) => { box.BackColor = Color.White; };
+                box.MouseMove += (sender, e) => { box.BackColor = Color.DodgerBlue; };
+                Controls.Add(box);
+                _boxes[i] = box;
             }
 
-            int cnt = 0;
-            foreach (CheckBox CB in CBs)
-            {
-                CB.Location = new System.Drawing.Point(0, height_hide + gapHeight + cnt * 28);
-                CB.Name = NameofCkbox[cnt];
-                CB.Size = new System.Drawing.Size(300, 28);
-                CB.TabIndex = 1;
-                CB.Text = NameofCkbox[cnt];
-                CB.UseVisualStyleBackColor = true;
-                CB.CheckedChanged += new System.EventHandler((sender, e) =>
-                {
-                    Update_textBox();
-                });
-                CB.MouseLeave += new System.EventHandler((sender, e) =>
-                {
-                    CB.BackColor = Color.White;
-                });
-                CB.MouseMove += new System.Windows.Forms.MouseEventHandler((sender, e) =>
-                {
-                    CB.BackColor = Color.DodgerBlue;
-                });
-                Controls.Add(CB);
-                cnt++;
-            }
-
-            height_show = height_hide + items_cnt * CBs[0].Height + gapHeight;
-
+            _showHeight = HideHeight + texts.Length * _boxes[0].Height + GapHeight;
             pictureBox2.Hide();
         }
 
         private void Update_textBox()
         {
-            valid = 0;
+            ValidCount = 0;
             textBox.Text = "";
-            for (int i = 0; i < items_cnt; i++)
+            for (int i = 0; i < TotalCount; i++)
             {
-                this.Selects[i] = CBs[i].Checked;
+                this.Selects[i] = _boxes[i].Checked;
                 if (this.Selects[i])
                 {
-                    textBox.Text += NameofCkbox[i] + ";";
-                    valid++;
+                    textBox.Text += _boxes[i].Text + ";";
+                    ValidCount++;
                 }
             }
         }
 
-        private void Select_All_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void SelectAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             SetAllValid();
         }
@@ -99,12 +71,12 @@ namespace StudentScheduleManagementSystem
 
         private void MultiSelectBox_Load(object sender, EventArgs e)
         {
-            this.Height = height_hide;
+            this.Height = HideHeight;
         }
 
         private void textBox_Click(object sender, EventArgs e)
         {
-            if (browse_show == false)
+            if (ShowComboBox == false)
             {
                 pictureBox1_Click(sender, e);
             }
@@ -112,45 +84,45 @@ namespace StudentScheduleManagementSystem
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            if (browse_show)
+            if (ShowComboBox)
             {
-                this.Height = height_hide;
-                browse_show = false;
+                this.Height = HideHeight;
+                ShowComboBox = false;
                 pictureBox2.Hide();
             }
             else
             {
-                this.Height = height_show;
-                browse_show = true;
+                this.Height = _showHeight;
+                ShowComboBox = true;
                 pictureBox2.Show();
             }
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-            if (browse_show)
+            if (ShowComboBox)
             {
-                this.Height = height_hide;
-                browse_show = false;
+                this.Height = HideHeight;
+                ShowComboBox = false;
                 pictureBox2.Hide();
             }
             else
             {
-                this.Height = height_show;
-                browse_show = true;
+                this.Height = _showHeight;
+                ShowComboBox = true;
                 pictureBox2.Show();
             }
         }
 
-        public Boolean SelectCheckBox(int index)
+        public bool SelectCheckBox(int index)
         {
-            if(index >= this.items_cnt)
+            if (index >= this.TotalCount || index < 0)
             {
                 return false;
             }
 
             Selects[index] = true;
-            CBs[index].Checked = true;
+            _boxes[index].Checked = true;
             Update_textBox();
 
             return true;
@@ -158,18 +130,18 @@ namespace StudentScheduleManagementSystem
 
         public void ClearBox()
         {
-            for (int i = 0; i < items_cnt; i++)
+            foreach (var box in _boxes)
             {
-                CBs[i].Checked = false;
+                box.Checked = false;
             }
             Update_textBox();
         }
 
         public void SetAllValid()
         {
-            for (int i = 0; i < items_cnt; i++)
+            foreach (var box in _boxes)
             {
-                CBs[i].Checked = true;
+                box.Checked = true;
             }
             Update_textBox();
         }
