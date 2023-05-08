@@ -71,6 +71,7 @@
             this.scheduleData.RowTemplate.Height = 32;
             this.scheduleData.Size = new System.Drawing.Size(714, 645);
             this.scheduleData.TabIndex = 41;
+            this.scheduleData.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.ScheduleData_SortCompare);
             // 
             // courseCheckBoxColumn
             // 

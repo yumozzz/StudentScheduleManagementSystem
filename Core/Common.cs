@@ -71,6 +71,90 @@ namespace StudentScheduleManagementSystem
     public class TooManyTemporaryAffairsException : InvalidOperationException { }
     public class EndOfSemester : Exception { };
 
+    public class ActiveWeekComparer : IComparer<Schedule.ScheduleBase.SharedData>
+    {
+        public int Compare(Schedule.ScheduleBase.SharedData? data1, Schedule.ScheduleBase.SharedData? data2)
+        {
+            int[] weeks1 = data1!.ActiveWeeks, weeks2 = data2!.ActiveWeeks;
+            if (data1.RepetitiveType == RepetitiveType.Single)
+            {
+                weeks1 = new[] { data1.Timestamp.Week };
+            }
+            else if (data1.RepetitiveType == RepetitiveType.MultipleDays)
+            {
+                weeks1 = Constants.AllWeeks;
+            }
+            if (data2.RepetitiveType == RepetitiveType.Single)
+            {
+                weeks2 = new[] { data2.Timestamp.Week };
+            }
+            else if (data2.RepetitiveType == RepetitiveType.MultipleDays)
+            {
+                weeks2 = Constants.AllWeeks;
+            }
+
+            int i = 0;
+            for (; i < weeks1.Length && i < weeks2.Length; i++)
+            {
+                if (weeks1[i] > weeks2[i])
+                {
+                    return 1;
+                }
+                if (weeks1[i] < weeks2[i])
+                {
+                    return -1;
+                }
+            }
+            if (weeks1.Length == weeks2.Length)
+            {
+                return data1.Id.CompareTo(data2.Id);
+            }
+            if (i == weeks1.Length)
+            {
+                return -1;
+            }
+            return 1;
+        }
+    }
+
+    public class ActiveDayComparer : IComparer<Schedule.ScheduleBase.SharedData>
+    {
+        public int Compare(Schedule.ScheduleBase.SharedData? data1, Schedule.ScheduleBase.SharedData? data2)
+        {
+            Day[] days1 = data1!.ActiveDays, days2 = data2!.ActiveDays;
+            if (data1.RepetitiveType == RepetitiveType.Single)
+            {
+                days1 = new[] { data1.Timestamp.Day };
+            }
+            if (data2.RepetitiveType == RepetitiveType.Single)
+            {
+                days2 = new[] { data2.Timestamp.Day };
+            }
+
+            int i = 0;
+            for (; i < days1.Length && i < days2.Length; i++)
+            {
+                if (days1[i] > days2[i])
+                {
+                    return 1;
+                }
+                if (days1[i] < days2[i])
+                {
+                    return -1;
+                }
+            }
+            if (days1.Length == days2.Length)
+            {
+                return data1.Id.CompareTo(data2.Id);
+            }
+            if (i == days1.Length)
+            {
+                return -1;
+            }
+            return 1;
+        }
+    }
+
     public static class Extension
     {
         public static int ToInt(this Enum e)
