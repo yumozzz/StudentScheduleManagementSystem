@@ -179,8 +179,6 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty] public string Name { get; protected set; }
         [JsonProperty(propertyName: "Timestamp")]
         public Times.Time BeginTime { get; init; }
-        public abstract int Earliest { get; }
-        public abstract int Latest { get; }
         [JsonProperty] public int Duration { get; init; } = 1;
         [JsonProperty] public bool IsOnline { get; init; }
         [JsonProperty] public string? Description { get; init; }
@@ -197,13 +195,15 @@ namespace StudentScheduleManagementSystem.Schedule
                                bool isOnline,
                                string? description,
                                int[] activeWeeks,
-                               Day[] activeDays)
+                               Day[] activeDays,
+                               int earliest,
+                               int latest)
         {
             if (duration is not (1 or 2 or 3))
             {
                 throw new ArgumentOutOfRangeException(nameof(duration));
             }
-            if (beginTime.Hour < Earliest || beginTime.Hour > Latest - duration)
+            if (beginTime.Hour < earliest || beginTime.Hour > latest - duration)
             {
                 throw new ArgumentOutOfRangeException(nameof(beginTime));
             }
@@ -367,7 +367,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     for (int i = 0; i < Duration; i++)
                     {
                         offset = 24 * dayOffset + BeginTime.Hour + i;
-                        while (offset < Times.Time.TotalHours)
+                        while (offset < Constants.TotalHours)
                         {
                             if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（自身不可能为临时日程，需要选择是否覆盖）
                             {
@@ -402,7 +402,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
-            delete_process:
+        delete_process:
             //_timeline[offset]记录的是会覆盖的日程
             //TODO:增加删除逻辑
             switch ((overrideType, RepetitiveType))
@@ -434,7 +434,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 default:
                     throw new ArgumentException(null, nameof(RepetitiveType));
             }
-            add_process:
+        add_process:
             long? thisScheduleId = (ScheduleType, specifiedId) switch
             {
                 (ScheduleType.Course, null) => _courseIdMax + 1, (ScheduleType.Course, _) => specifiedId.Value,
@@ -532,31 +532,31 @@ namespace StudentScheduleManagementSystem.Schedule
             switch (id / (long)1e9)
             {
                 case 1:
-                {
-                    ref long prevIdMax = ref _courseIdMax;
-                    if (prevIdMax == id)
                     {
-                        prevIdMax++;
+                        ref long prevIdMax = ref _courseIdMax;
+                        if (prevIdMax == id)
+                        {
+                            prevIdMax++;
+                        }
                     }
-                }
                     break;
                 case 2:
-                {
-                    ref long prevIdMax = ref _examIdMax;
-                    if (prevIdMax == id)
                     {
-                        prevIdMax++;
+                        ref long prevIdMax = ref _examIdMax;
+                        if (prevIdMax == id)
+                        {
+                            prevIdMax++;
+                        }
                     }
-                }
                     break;
                 case 3:
-                {
-                    ref long prevIdMax = ref _groutActivityIdMax;
-                    if (prevIdMax == id)
                     {
-                        prevIdMax++;
+                        ref long prevIdMax = ref _groutActivityIdMax;
+                        if (prevIdMax == id)
+                        {
+                            prevIdMax++;
+                        }
                     }
-                }
                     break;
                 default:
                     throw new FormatException($"Item id {id} is invalid");
@@ -564,9 +564,30 @@ namespace StudentScheduleManagementSystem.Schedule
             _sharedDictionary.Remove(id);
         }
 
-        public static Record GetRecordAt(int offset) => _timeline[offset];
+        public static Record GetRecordAt(int offset)
+        {
+            if (offset is >= Constants.TotalHours or <0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            return _timeline[offset];
+        }
 
-        public static ScheduleBase GetScheduleById(int id) => _scheduleDictionary[id];
+        public static ScheduleBase? GetScheduleById(long id)
+        {
+            if (id is not (>= 1000000000 and <= 9999999999))
+            {
+                throw new FormatException($"id {id} is invalid");
+            }
+            try
+            {
+                return _scheduleDictionary[id];
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
+        }
 
         //UNDONE
         public static List<ScheduleBase> GetSchedulesByName(string name)
@@ -808,7 +829,7 @@ namespace StudentScheduleManagementSystem.Schedule
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public sealed partial class Course : ScheduleBase, IJsonConvertible
+    public sealed partial class Course : ScheduleBase, IJsonConvertible, ISchedule
     {
         #region structs and classes
 
@@ -827,8 +848,8 @@ namespace StudentScheduleManagementSystem.Schedule
         #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.Course;
-        public override int Earliest => 8;
-        public override int Latest => 20;
+        public static int Earliest => 8;
+        public static int Latest => 20;
         [JsonProperty]
         public new const bool IsOnline = false;
         [JsonProperty] public string? OnlineLink { get; init; }
@@ -849,7 +870,7 @@ namespace StudentScheduleManagementSystem.Schedule
                       Day[] activeDays,
                       long? specifiedId = null,
                       bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays, Earliest, Latest)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -871,7 +892,7 @@ namespace StudentScheduleManagementSystem.Schedule
                       Day[] activeDays,
                       long? specifiedId = null,
                       bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays, Earliest, Latest)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -945,7 +966,7 @@ namespace StudentScheduleManagementSystem.Schedule
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public sealed partial class Exam : ScheduleBase, IJsonConvertible
+    public sealed partial class Exam : ScheduleBase, IJsonConvertible, ISchedule
     {
         #region structs and classes
 
@@ -963,8 +984,8 @@ namespace StudentScheduleManagementSystem.Schedule
         #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.Exam;
-        public override int Earliest => 8;
-        public override int Latest => 20;
+        public static int Earliest => 8;
+        public static int Latest => 20;
         [JsonProperty]
         public new const bool IsOnline = false;
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
@@ -988,7 +1009,9 @@ namespace StudentScheduleManagementSystem.Schedule
                    false,
                    description,
                    Constants.EmptyIntArray,
-                   Constants.EmptyDayArray)
+                   Constants.EmptyDayArray,
+                   Earliest,
+                   Latest)
         {
             if (beginTime.Day is Day.Saturday or Day.Sunday)
             {
@@ -1039,7 +1062,7 @@ namespace StudentScheduleManagementSystem.Schedule
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public partial class Activity : ScheduleBase, IJsonConvertible
+    public partial class Activity : ScheduleBase, IJsonConvertible, ISchedule
     {
         #region structs and classes
 
@@ -1065,8 +1088,8 @@ namespace StudentScheduleManagementSystem.Schedule
         #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.Activity;
-        public override int Earliest => 8;
-        public override int Latest => 20;
+        public static int Earliest => 8;
+        public static int Latest => 20;
         [JsonProperty] public bool IsGroupActivity { get; init; }
         [JsonProperty] public string? OnlineLink { get; init; } = null;
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
@@ -1089,7 +1112,7 @@ namespace StudentScheduleManagementSystem.Schedule
                    isOnline,
                    description,
                    Constants.EmptyIntArray,
-                   Constants.EmptyDayArray) { }
+                   Constants.EmptyDayArray, Earliest, Latest) { }
 
         public Activity(RepetitiveType repetitiveType,
                         string name,
@@ -1102,7 +1125,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         Day[] activeDays,
                         long? specifiedId = null,
                         bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, true, description, activeWeeks, activeDays)
+            : base(repetitiveType, name, beginTime, duration, true, description, activeWeeks, activeDays, Earliest, Latest)
         {
             OnlineLink = onlineLink;
             OfflineLocation = null;
@@ -1122,7 +1145,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         Day[] activeDays,
                         long? specifiedId = null,
                         bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays)
+            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays, Earliest, Latest)
         {
             OnlineLink = null;
             OfflineLocation = location;

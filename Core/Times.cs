@@ -7,7 +7,6 @@ namespace StudentScheduleManagementSystem.Times
 {
     public class Time
     {
-        public const int TotalHours = 16 * 7 * 24;
         private int _week = 1;
         public int Week
         {
@@ -104,7 +103,7 @@ namespace StudentScheduleManagementSystem.Times
 
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
-        public TRecord[] RecordArray { get; } = new TRecord[Time.TotalHours];
+        public TRecord[] RecordArray { get; } = new TRecord[Constants.TotalHours];
 
         private static readonly Random _randomGenerator = new(DateTime.Now.Millisecond);
 
@@ -160,7 +159,7 @@ namespace StudentScheduleManagementSystem.Times
                     for (int i = 0; i < duration; i++)
                     {
                         int offset = 24 * dayOffset + timestamp.Hour + i;
-                        while (offset < Time.TotalHours)
+                        while (offset < Constants.TotalHours)
                         {
                             RemoveSingleItem(offset);
                             offset += 7 * 24;
@@ -238,7 +237,7 @@ namespace StudentScheduleManagementSystem.Times
                     for (int i = 0; i < duration; i++)
                     {
                         offset = 24 * dayOffset + timestamp.Hour + i;
-                        while (offset < Time.TotalHours)
+                        while (offset < Constants.TotalHours)
                         {
                             AddSingleItem(offset, record);
                             offset += 7 * 24;
@@ -404,7 +403,7 @@ namespace StudentScheduleManagementSystem.Times
                 foreach (var dayOffset in dayOffsets)
                 {
                     offset = 24 * dayOffset + timestamp.Hour;
-                    while (offset < Time.TotalHours)
+                    while (offset < Constants.TotalHours)
                     {
                         if (_timeline[offset].RepetitiveType != RepetitiveType.Null)//有闹钟
                         {
