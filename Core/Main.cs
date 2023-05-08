@@ -268,8 +268,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 var record = _timeline[param.startTimestamp.ToInt() + i];
                 if (record.ScheduleType is ScheduleType.Course or ScheduleType.Exam or ScheduleType.Activity)
                 {
-                    schedules.Add((i, _scheduleList[record.Id].Name));
-                    i += _scheduleList[record.Id].Duration;
+                    schedules.Add((i, _scheduleDictionary[record.Id].Name));
+                    i += _scheduleDictionary[record.Id].Duration;
                     continue;
                 }
                 i++;
@@ -310,7 +310,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
             }
-            Course course = (Course)_scheduleList[param.scheduleId];
+            Course course = (Course)_scheduleDictionary[param.scheduleId];
             Console.WriteLine($"下一个小时有以下课程：\"{course.Name}\"，时长为{course.Duration}小时。");
             if (course.OfflineLocation.HasValue)
             {
@@ -339,7 +339,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
             }
-            Exam exam = (Exam)_scheduleList[param.scheduleId];
+            Exam exam = (Exam)_scheduleDictionary[param.scheduleId];
             Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
             Console.WriteLine($"地点为{exam.OfflineLocation.Name}");
             /*var input = Console.ReadLine();
@@ -361,7 +361,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
             }
-            Activity activity = (Activity)_scheduleList[param.scheduleId];
+            Activity activity = (Activity)_scheduleDictionary[param.scheduleId];
             Console.WriteLine("下一个小时有以下" + (activity.IsGroupActivity ? "集体" : "个人") +
                               $"活动：\"{activity.Name}\"，时长为{activity.Duration}小时。");
             if (activity.OfflineLocation.HasValue)
