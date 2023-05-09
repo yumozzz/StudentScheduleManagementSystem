@@ -33,7 +33,7 @@
             this.passwordbox = new System.Windows.Forms.TextBox();
             this.clear = new System.Windows.Forms.Button();
             this.close = new System.Windows.Forms.Button();
-            this.move = new System.Windows.Forms.Panel();
+            this.header = new System.Windows.Forms.Panel();
             this.register = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -50,7 +50,7 @@
             this.login.TabIndex = 0;
             this.login.Text = "Login";
             this.login.UseVisualStyleBackColor = true;
-            this.login.Click += new System.EventHandler(this.login_Click);
+            this.login.Click += new System.EventHandler(this.LoginButton_Click);
             // 
             // usernamebox
             // 
@@ -62,7 +62,7 @@
             this.usernamebox.Size = new System.Drawing.Size(215, 33);
             this.usernamebox.TabIndex = 3;
             this.usernamebox.Text = "2021219999";
-            this.usernamebox.TextChanged += new System.EventHandler(this.usernamebox_TextChanged);
+            this.usernamebox.TextChanged += new System.EventHandler(this.UsernameBox_TextChanged);
             // 
             // passwordbox
             // 
@@ -84,7 +84,7 @@
             this.clear.TabIndex = 8;
             this.clear.Text = "Clear";
             this.clear.UseVisualStyleBackColor = true;
-            this.clear.Click += new System.EventHandler(this.clear_Click);
+            this.clear.Click += new System.EventHandler(this.ClearButton_Click);
             // 
             // close
             // 
@@ -96,18 +96,18 @@
             this.close.TabIndex = 11;
             this.close.Text = "Close";
             this.close.UseVisualStyleBackColor = true;
-            this.close.Click += new System.EventHandler(this.close_Click);
+            this.close.Click += new System.EventHandler(this.CloseButton_Click);
             // 
-            // move
+            // header
             // 
-            this.move.BackgroundImage = global::StudentScheduleManagementSystem.Properties.Resources.LoginBackground;
-            this.move.Location = new System.Drawing.Point(0, 0);
-            this.move.Name = "move";
-            this.move.Size = new System.Drawing.Size(800, 40);
-            this.move.TabIndex = 12;
+            this.header.BackgroundImage = global::StudentScheduleManagementSystem.Properties.Resources.LoginBackground;
+            this.header.Location = new System.Drawing.Point(0, 0);
+            this.header.Name = "header";
+            this.header.Size = new System.Drawing.Size(800, 40);
+            this.header.TabIndex = 12;
             //this.move.Paint += new System.Windows.Forms.PaintEventHandler(this.move_Paint);
-            this.move.MouseDown += new System.Windows.Forms.MouseEventHandler(this.move_MouseDown);
-            this.move.MouseMove += new System.Windows.Forms.MouseEventHandler(this.move_MouseMove);
+            this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
+            this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
             // 
             // register
             // 
@@ -119,7 +119,7 @@
             this.register.TabIndex = 13;
             this.register.Text = "Register";
             this.register.UseVisualStyleBackColor = true;
-            this.register.Click += new System.EventHandler(this.register_Click);
+            this.register.Click += new System.EventHandler(this.RegisterButton_Click);
             // 
             // MainWindow
             // 
@@ -128,7 +128,7 @@
             this.BackgroundImage = global::StudentScheduleManagementSystem.Properties.Resources.LoginBackground1;
             this.ClientSize = new System.Drawing.Size(800, 600);
             this.Controls.Add(this.register);
-            this.Controls.Add(this.move);
+            this.Controls.Add(this.header);
             this.Controls.Add(this.close);
             this.Controls.Add(this.clear);
             this.Controls.Add(this.passwordbox);
@@ -151,7 +151,7 @@
         private TextBox passwordbox;
         private Button clear;
         private Button close;
-        private Panel move;
+        private Panel header;
         private Button register;
     }
 }
