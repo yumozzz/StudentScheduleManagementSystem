@@ -402,7 +402,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
-        delete_process:
+            delete_process:
             //_timeline[offset]记录的是会覆盖的日程
             //TODO:增加删除逻辑
             switch ((overrideType, RepetitiveType))
@@ -434,7 +434,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 default:
                     throw new ArgumentException(null, nameof(RepetitiveType));
             }
-        add_process:
+            add_process:
             long? thisScheduleId = (ScheduleType, specifiedId) switch
             {
                 (ScheduleType.Course, null) => _courseIdMax + 1, (ScheduleType.Course, _) => specifiedId.Value,
@@ -532,41 +532,41 @@ namespace StudentScheduleManagementSystem.Schedule
             switch (id / (long)1e9)
             {
                 case 1:
+                {
+                    ref long prevIdMax = ref _courseIdMax;
+                    if (prevIdMax == id)
                     {
-                        ref long prevIdMax = ref _courseIdMax;
-                        if (prevIdMax == id)
-                        {
-                            prevIdMax++;
-                        }
+                        prevIdMax++;
                     }
+                }
                     break;
                 case 2:
+                {
+                    ref long prevIdMax = ref _examIdMax;
+                    if (prevIdMax == id)
                     {
-                        ref long prevIdMax = ref _examIdMax;
-                        if (prevIdMax == id)
-                        {
-                            prevIdMax++;
-                        }
+                        prevIdMax++;
                     }
+                }
                     break;
                 case 3:
+                {
+                    ref long prevIdMax = ref _groutActivityIdMax;
+                    if (prevIdMax == id)
                     {
-                        ref long prevIdMax = ref _groutActivityIdMax;
-                        if (prevIdMax == id)
-                        {
-                            prevIdMax++;
-                        }
+                        prevIdMax++;
                     }
+                }
                     break;
                 default:
                     throw new FormatException($"Item id {id} is invalid");
             }
-            _sharedDictionary.Remove(id);
+            Log.Information.Log(_sharedDictionary.Remove(id) ? $"已删除id为{id}的共享日程" : $"未删除id为{id}的共享日程，日程不存在");
         }
 
         public static Record GetRecordAt(int offset)
         {
-            if (offset is >= Constants.TotalHours or <0)
+            if (offset is >= Constants.TotalHours or < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
@@ -870,7 +870,16 @@ namespace StudentScheduleManagementSystem.Schedule
                       Day[] activeDays,
                       long? specifiedId = null,
                       bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays, Earliest, Latest)
+            : base(repetitiveType,
+                   name,
+                   beginTime,
+                   duration,
+                   false,
+                   description,
+                   activeWeeks,
+                   activeDays,
+                   Earliest,
+                   Latest)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -892,7 +901,16 @@ namespace StudentScheduleManagementSystem.Schedule
                       Day[] activeDays,
                       long? specifiedId = null,
                       bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays, Earliest, Latest)
+            : base(repetitiveType,
+                   name,
+                   beginTime,
+                   duration,
+                   false,
+                   description,
+                   activeWeeks,
+                   activeDays,
+                   Earliest,
+                   Latest)
         {
             if (activeDays.Contains(Day.Saturday) || activeDays.Contains(Day.Sunday))
             {
@@ -1112,7 +1130,9 @@ namespace StudentScheduleManagementSystem.Schedule
                    isOnline,
                    description,
                    Constants.EmptyIntArray,
-                   Constants.EmptyDayArray, Earliest, Latest) { }
+                   Constants.EmptyDayArray,
+                   Earliest,
+                   Latest) { }
 
         public Activity(RepetitiveType repetitiveType,
                         string name,
@@ -1125,7 +1145,16 @@ namespace StudentScheduleManagementSystem.Schedule
                         Day[] activeDays,
                         long? specifiedId = null,
                         bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, true, description, activeWeeks, activeDays, Earliest, Latest)
+            : base(repetitiveType,
+                   name,
+                   beginTime,
+                   duration,
+                   true,
+                   description,
+                   activeWeeks,
+                   activeDays,
+                   Earliest,
+                   Latest)
         {
             OnlineLink = onlineLink;
             OfflineLocation = null;
@@ -1145,7 +1174,16 @@ namespace StudentScheduleManagementSystem.Schedule
                         Day[] activeDays,
                         long? specifiedId = null,
                         bool addOnTimeline = true)
-            : base(repetitiveType, name, beginTime, duration, false, description, activeWeeks, activeDays, Earliest, Latest)
+            : base(repetitiveType,
+                   name,
+                   beginTime,
+                   duration,
+                   false,
+                   description,
+                   activeWeeks,
+                   activeDays,
+                   Earliest,
+                   Latest)
         {
             OnlineLink = null;
             OfflineLocation = location;

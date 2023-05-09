@@ -33,7 +33,7 @@
                 box.TabIndex = 1;
                 box.Text = texts[i];
                 box.UseVisualStyleBackColor = true;
-                box.CheckedChanged += (sender, e) => { Update_textBox(); };
+                box.CheckedChanged += (sender, e) => { UpdateTextBox(); };
                 box.MouseLeave += (sender, e) => { box.BackColor = Color.White; };
                 box.MouseMove += (sender, e) => { box.BackColor = Color.DodgerBlue; };
                 Controls.Add(box);
@@ -44,7 +44,7 @@
             pictureBox2.Hide();
         }
 
-        private void Update_textBox()
+        private void UpdateTextBox()
         {
             ValidCount = 0;
             textBox.Text = "";
@@ -123,7 +123,7 @@
 
             Selects[index] = true;
             _boxes[index].Checked = true;
-            Update_textBox();
+            UpdateTextBox();
 
             return true;
         }
@@ -134,7 +134,7 @@
             {
                 box.Checked = false;
             }
-            Update_textBox();
+            UpdateTextBox();
         }
 
         public void SetAllValid()
@@ -143,7 +143,7 @@
             {
                 box.Checked = true;
             }
-            Update_textBox();
+            UpdateTextBox();
         }
     }
 }

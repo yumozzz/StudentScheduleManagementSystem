@@ -46,4 +46,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;$(SolutionDir)Core\makecert.exe&quot; &quot;$(SolutionDir)$(OutDir)&quot;" />
+  </Target>
+
 </Project>
