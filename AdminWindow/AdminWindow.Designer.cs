@@ -38,6 +38,7 @@
             this.logoutConfirm = new System.Windows.Forms.PictureBox();
             this.closeConfirm = new System.Windows.Forms.PictureBox();
             this.testOperation = new System.Windows.Forms.PictureBox();
+            this.mapEditButton = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.logoutButton)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.courseButton)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.activityButton)).BeginInit();
@@ -45,6 +46,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.logoutConfirm)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.closeConfirm)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.testOperation)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.mapEditButton)).BeginInit();
             this.SuspendLayout();
             // 
             // header
@@ -71,7 +73,7 @@
             this.logoutButton.BackColor = System.Drawing.Color.Transparent;
             this.logoutButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.logoutButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.研究人员__ffffff_128_21601186;
-            this.logoutButton.Location = new System.Drawing.Point(65, 540);
+            this.logoutButton.Location = new System.Drawing.Point(65, 610);
             this.logoutButton.Name = "logoutButton";
             this.logoutButton.Size = new System.Drawing.Size(50, 50);
             this.logoutButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -84,7 +86,7 @@
             this.courseButton.BackColor = System.Drawing.Color.Transparent;
             this.courseButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.courseButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.课表__ffffff_128_21601021;
-            this.courseButton.Location = new System.Drawing.Point(65, 180);
+            this.courseButton.Location = new System.Drawing.Point(65, 130);
             this.courseButton.Name = "courseButton";
             this.courseButton.Size = new System.Drawing.Size(50, 50);
             this.courseButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -97,7 +99,7 @@
             this.activityButton.BackColor = System.Drawing.Color.Transparent;
             this.activityButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.activityButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.户外实践__ffffff_128_21601017;
-            this.activityButton.Location = new System.Drawing.Point(65, 420);
+            this.activityButton.Location = new System.Drawing.Point(65, 370);
             this.activityButton.Name = "activityButton";
             this.activityButton.Size = new System.Drawing.Size(50, 50);
             this.activityButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -144,13 +146,26 @@
             this.testOperation.BackColor = System.Drawing.Color.Transparent;
             this.testOperation.Cursor = System.Windows.Forms.Cursors.Hand;
             this.testOperation.Image = global::StudentScheduleManagementSystem.Properties.Resources.试卷__ffffff_128_21601018;
-            this.testOperation.Location = new System.Drawing.Point(65, 300);
+            this.testOperation.Location = new System.Drawing.Point(65, 250);
             this.testOperation.Name = "testOperation";
             this.testOperation.Size = new System.Drawing.Size(50, 50);
             this.testOperation.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.testOperation.TabIndex = 29;
             this.testOperation.TabStop = false;
             this.testOperation.Click += new System.EventHandler(this.TestManagement_Click);
+            // 
+            // mapEditButton
+            // 
+            this.mapEditButton.BackColor = System.Drawing.Color.Transparent;
+            this.mapEditButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.mapEditButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.地图__ffffff_128_21601004;
+            this.mapEditButton.Location = new System.Drawing.Point(65, 490);
+            this.mapEditButton.Name = "mapEditButton";
+            this.mapEditButton.Size = new System.Drawing.Size(50, 50);
+            this.mapEditButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.mapEditButton.TabIndex = 35;
+            this.mapEditButton.TabStop = false;
+            this.mapEditButton.Click += new System.EventHandler(this.MapEditButton_Click);
             // 
             // AdminWindow
             // 
@@ -160,6 +175,7 @@
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1300, 770);
+            this.Controls.Add(this.mapEditButton);
             this.Controls.Add(this.testOperation);
             this.Controls.Add(this.activityButton);
             this.Controls.Add(this.courseButton);
@@ -179,6 +195,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.logoutConfirm)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.closeConfirm)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.testOperation)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.mapEditButton)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -193,5 +210,6 @@
         private PictureBox logoutConfirm;
         private PictureBox closeConfirm;
         private PictureBox testOperation;
+        private PictureBox mapEditButton;
     }
 }

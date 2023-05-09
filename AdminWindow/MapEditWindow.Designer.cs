@@ -35,8 +35,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(778, 1144);
-            this.Name = "MapOPWindow";
-            this.Text = "MapOPWindow";
+            this.Name = "MapEditWindow";
+            this.Text = "MapEditWindow";
             this.ResumeLayout(false);
 
         }

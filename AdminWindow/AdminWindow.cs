@@ -6,6 +6,8 @@
         private static ExamSubwindow _examSubwindow { get; set; }
         private static GroupActivitySubwindow _groupActivitySubwindow { get; set; }
 
+        private static MapEditWindow _mapEditWindow { get; set; }
+
         public AdminWindow()
         {
             InitializeComponent();
@@ -90,6 +92,13 @@
             this.closeConfirm.Show();
         }
 
+        private void MapEditButton_Click(object sender, EventArgs e)
+        {
+            _mapEditWindow = new MapEditWindow(new List<(Map.Location.Vertex, Map.Location.Vertex)>(), new List<(Map.Location.Vertex, Point, Point, Map.Location.Vertex)>());
+            _mapEditWindow.ShowDialog();
+            _mapEditWindow.Close();
+            _mapEditWindow.Dispose();
+        }
 
         private void Header_MouseDown(object sender, MouseEventArgs e)
         {

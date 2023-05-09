@@ -7,6 +7,10 @@
             : base(lineEndPointPairs, bezCurveControlPointTuples)
         {
             InitializeComponent();
+            Button buttonOK = new() { Text = "OK", Name = "OK", Location = new(0, 0),Size=new(150, 45) };
+            Controls.Add(buttonOK);
+            Button buttonCancel = new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
+            Controls.Add(buttonCancel);
         }
     }
 }

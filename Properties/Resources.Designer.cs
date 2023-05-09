@@ -183,6 +183,16 @@ namespace StudentScheduleManagementSystem.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap 地图__ffffff_128_21601004 {
+            get {
+                object obj = ResourceManager.GetObject("地图_#ffffff_128_21601004", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap 户外实践__ffffff_128_21601017 {
             get {
                 object obj = ResourceManager.GetObject("户外实践_#ffffff_128_21601017", resourceCulture);
