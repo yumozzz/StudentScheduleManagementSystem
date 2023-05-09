@@ -1,11 +1,11 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class AdminWindow
+    public partial class AdminWindow
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        public System.ComponentModel.IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -79,7 +79,7 @@
             this.logoutButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.logoutButton.TabIndex = 26;
             this.logoutButton.TabStop = false;
-            this.logoutButton.Click += new System.EventHandler(this.LogoutClose_Click);
+            this.logoutButton.Click += new System.EventHandler(this.LogoutCloseButton_Click);
             // 
             // courseButton
             // 

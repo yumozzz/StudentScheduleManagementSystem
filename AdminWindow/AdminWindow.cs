@@ -5,21 +5,17 @@
         private static CourseSubwindow _courseSubwindow { get; set; }
         private static ExamSubwindow _examSubwindow { get; set; }
         private static GroupActivitySubwindow _groupActivitySubwindow { get; set; }
-
         private static MapEditWindow _mapEditWindow { get; set; }
 
         public AdminWindow()
         {
             InitializeComponent();
-            _courseSubwindow = new CourseSubwindow();
-            _examSubwindow = new ExamSubwindow();
-            _groupActivitySubwindow = new GroupActivitySubwindow();
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
         }
 
         //窗口拖动
-        int oldX, oldY;
+        private int oldX, oldY;
         private void Header_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -32,27 +28,28 @@
         private void Logout_Click(object sender, EventArgs e)
         {
             MainProgram.Program.Logout();
-            _courseSubwindow.Dispose();
-            _courseSubwindow.Close();
-            _examSubwindow.Dispose();
-            _examSubwindow.Close();
-            _groupActivitySubwindow.Dispose();
-            _groupActivitySubwindow.Close();
-            this.Dispose();
+            _courseSubwindow?.Close();
+            _courseSubwindow?.Dispose(true);
+            _examSubwindow?.Close();
+            _examSubwindow?.Dispose(true);
+            _groupActivitySubwindow?.Close();
+            _groupActivitySubwindow?.Dispose(true);
             this.Close();
+            this.Dispose(true);
         }
 
+        //TODO:
         private void ClosePage_Click(object sender, EventArgs e)
         {
             MainProgram.Program.Logout();
             _courseSubwindow.Close();
-            _courseSubwindow.Dispose();
+            _courseSubwindow.Dispose(true);
             _examSubwindow.Close();
-            _examSubwindow.Dispose();
+            _examSubwindow.Dispose(true);
             _groupActivitySubwindow.Close();
-            _groupActivitySubwindow.Dispose();
+            _groupActivitySubwindow.Dispose(true);
             this.Close();
-            this.Dispose();
+            this.Dispose(true);
         }
 
         private void CourseManagement_Click(object sender, EventArgs e)
@@ -60,6 +57,7 @@
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
+            _courseSubwindow = new();
             _courseSubwindow.TopLevel = false;
             mainpage.Controls.Add(_courseSubwindow);
             _courseSubwindow.Show();
@@ -70,6 +68,7 @@
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
+            _examSubwindow = new();
             _examSubwindow.TopLevel = false;
             mainpage.Controls.Add(_examSubwindow);
             _examSubwindow.Show();
@@ -80,12 +79,13 @@
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
+            _groupActivitySubwindow = new();
             _groupActivitySubwindow.TopLevel = false;
             mainpage.Controls.Add(_groupActivitySubwindow);
             _groupActivitySubwindow.Show();
         }
 
-        private void LogoutClose_Click(object sender, EventArgs e)
+        private void LogoutCloseButton_Click(object sender, EventArgs e)
         {
             mainpage.Controls.Clear();
             this.logoutConfirm.Show();
@@ -94,10 +94,11 @@
 
         private void MapEditButton_Click(object sender, EventArgs e)
         {
-            _mapEditWindow = new MapEditWindow(new List<(Map.Location.Vertex, Map.Location.Vertex)>(), new List<(Map.Location.Vertex, Point, Point, Map.Location.Vertex)>());
+            //TODO
+            _mapEditWindow = new(new List<(Map.Location.Vertex, Map.Location.Vertex)>(), new List<(Map.Location.Vertex, Point, Point, Map.Location.Vertex)>());
             _mapEditWindow.ShowDialog();
             _mapEditWindow.Close();
-            _mapEditWindow.Dispose();
+            _mapEditWindow.Dispose(true);
         }
 
         private void Header_MouseDown(object sender, MouseEventArgs e)
