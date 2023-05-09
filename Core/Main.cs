@@ -364,16 +364,16 @@ namespace StudentScheduleManagementSystem.Schedule
             Activity activity = (Activity)_scheduleDictionary[param.scheduleId];
             Console.WriteLine("下一个小时有以下" + (activity.IsGroupActivity ? "集体" : "个人") +
                               $"活动：\"{activity.Name}\"，时长为{activity.Duration}小时。");
-            if (activity.OfflineLocation.HasValue)
+            if (activity.IsOnline)
+            {
+                Console.WriteLine($"在线地址为{activity.OnlineLink!}");
+            }
+            else
             {
                 Console.WriteLine($"地点为{activity.OfflineLocation!.Value.Name}");
                 /*var input = Console.ReadLine();
                 Map.Location.Building from = Map.Location.GetBuildingsByName(input!)[0];
                 Map.Navigate.Show(Map.Location.GetClosestPath(from.Id,activity.OfflineLocation.Value.Id));*/
-            }
-            else
-            {
-                Console.WriteLine($"在线地址为{activity.OnlineLink!}");
             }
         }
     }

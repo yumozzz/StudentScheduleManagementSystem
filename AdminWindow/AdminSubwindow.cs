@@ -16,7 +16,26 @@ namespace StudentScheduleManagementSystem.UI
         protected AdminSubwindowBase(ScheduleType type)
         {
             InitializeComponent();
-            GenerateMultiSelectBox();
+            string[] weeks =
+            {
+                "Week1",
+                "Week2",
+                "Week3",
+                "Week4",
+                "Week5",
+                "Week6",
+                "Week7",
+                "Week8",
+                "Week9",
+                "Week10",
+                "Week11",
+                "Week12",
+                "Week13",
+                "Week14",
+                "Week15",
+                "Week16",
+            };
+            this.weekSelectBox.InitializeBox(weeks);
             GenerateFormData(type);
             _type = type;
             this.reviseOK.Hide();
@@ -76,30 +95,6 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             return ret;
-        }
-
-        private void GenerateMultiSelectBox()
-        {
-            string[] weeks =
-            {
-                "Week1",
-                "Week2",
-                "Week3",
-                "Week4",
-                "Week5",
-                "Week6",
-                "Week7",
-                "Week8",
-                "Week9",
-                "Week10",
-                "Week11",
-                "Week12",
-                "Week13",
-                "Week14",
-                "Week15",
-                "Week16",
-            };
-            this.weekSelectBox.InitializeBox(weeks);
         }
 
         protected void GenerateFormData(ScheduleType type)
@@ -489,7 +484,6 @@ namespace StudentScheduleManagementSystem.UI
             this.durationComboBox.Text = "";
         }
 
-        //bool isReversed = true;
         private void ScheduleData_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
             int column = e.Column.Index;
@@ -515,18 +509,11 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        private Schedule.ScheduleBase.SharedData SearchById(long id)
-        {
-            Schedule.ScheduleBase.SharedData ret = new Schedule.ScheduleBase.SharedData();
-
-            return ret;
-        }
-
-        private bool searchByName = true;
+        private bool _searchByName = true;
 
         private void SearchByNameBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            searchByName = true;
+            _searchByName = true;
             if (e.KeyChar is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
                               (>= '0' and <= '9') or
                               (>= 'A' and <= 'Z') or
@@ -545,7 +532,7 @@ namespace StudentScheduleManagementSystem.UI
         }
         private void SearchByIdBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            searchByName = false;
+            _searchByName = false;
             if (e.KeyChar is not (>= '0' and <= '9'))
             {
                 e.Handled = true;
@@ -559,14 +546,14 @@ namespace StudentScheduleManagementSystem.UI
 
         private void SearchOK_Click(object sender, EventArgs e)
         {
-            if (searchByName)
+            if (_searchByName)
             {
                 if (this.searchByNameBox.Text.Equals(""))
                 {
                     MessageBox.Show("请输入要搜索的日程名！");
                     return;
                 }
-                List<Schedule.ScheduleBase.SharedData> result = Schedule.ScheduleBase.GetSharedByName(this.searchByNameBox.Text);
+                var result = Schedule.ScheduleBase.GetSharedByName(this.searchByNameBox.Text);
                 if (result.Count == 0)
                 {
                     MessageBox.Show("未搜索到日程！");
@@ -581,7 +568,7 @@ namespace StudentScheduleManagementSystem.UI
                     MessageBox.Show("请输入要搜索的日程ID！");
                     return;
                 }
-                Schedule.ScheduleBase.SharedData? result = Schedule.ScheduleBase.GetSharedById(long.Parse(searchByIdBox.Text));
+                var result = Schedule.ScheduleBase.GetSharedById(long.Parse(searchByIdBox.Text));
                 if (result == null)
                 {
                     MessageBox.Show("未搜索到日程！");
@@ -627,8 +614,6 @@ namespace StudentScheduleManagementSystem.UI
                 MessageBox.Show("课程结束时间不得晚于规定时间！");
                 return false;
             }
-
-            if (beginHour + duration > Schedule.Course.Latest)
 
             if (repetitiveType == RepetitiveType.Single)
             {
@@ -707,7 +692,7 @@ namespace StudentScheduleManagementSystem.UI
                 return false;
             }
 
-            if (beginHour + duration >= Schedule.Course.Latest)
+            if (beginHour + duration >= Schedule.Exam.Latest)
             {
                 MessageBox.Show("考试结束时间不得晚于规定时间！");
                 return false;
@@ -759,7 +744,7 @@ namespace StudentScheduleManagementSystem.UI
                 return false;
             }
 
-            if (beginHour + duration >= Schedule.Course.Latest)
+            if (beginHour + duration >= Schedule.Activity.Latest)
             {
                 MessageBox.Show("活动结束时间不得晚于规定时间！");
                 return false;
