@@ -36,6 +36,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
+                Times.Timer.TimeChange += (t) => Console.WriteLine(t.ToString());
                 Thread clockThread = new(Times.Timer.Start);
                 clockThread.Start();
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));

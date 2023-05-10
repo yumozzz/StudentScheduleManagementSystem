@@ -402,7 +402,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
-            delete_process:
+        delete_process:
             //_timeline[offset]记录的是会覆盖的日程
             //TODO:增加删除逻辑
             switch ((overrideType, RepetitiveType))
@@ -434,13 +434,16 @@ namespace StudentScheduleManagementSystem.Schedule
                 default:
                     throw new ArgumentException(null, nameof(RepetitiveType));
             }
-            add_process:
+        add_process:
             long? thisScheduleId = (ScheduleType, specifiedId) switch
             {
-                (ScheduleType.Course, null) => _courseIdMax + 1, (ScheduleType.Course, _) => specifiedId.Value,
-                (ScheduleType.Exam, null) => _examIdMax + 1, (ScheduleType.Exam, _) => specifiedId.Value,
+                (ScheduleType.Course, null) => _courseIdMax + 1,
+                (ScheduleType.Course, _) => specifiedId.Value,
+                (ScheduleType.Exam, null) => _examIdMax + 1,
+                (ScheduleType.Exam, _) => specifiedId.Value,
                 (ScheduleType.Activity, null) => ((Activity)this).IsGroupActivity ? _groutActivityIdMax + 1 : null,
-                (ScheduleType.Activity, _) => specifiedId.Value, (ScheduleType.TemporaryAffair, null) => null,
+                (ScheduleType.Activity, _) => specifiedId.Value,
+                (ScheduleType.TemporaryAffair, null) => null,
                 (ScheduleType.TemporaryAffair, _) => specifiedId.Value,
                 (_, _) => throw new ArgumentException(null, nameof(ScheduleType)),
             };
@@ -457,7 +460,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                        Duration,
                                        new Record
                                        {
-                                           RepetitiveType = this.RepetitiveType, ScheduleType = this.ScheduleType
+                                           RepetitiveType = this.RepetitiveType,
+                                           ScheduleType = this.ScheduleType
                                        },
                                        out long outScheduleId,
                                        ActiveWeeks,
@@ -468,23 +472,55 @@ namespace StudentScheduleManagementSystem.Schedule
             Log.Information.Log("已在时间轴与表中添加日程");
         }
 
-        public static List<ScheduleBase> GetScheduleByType(ScheduleType type)
+        public static void DeleteShared(long id)
         {
-            int i = type switch
+            switch (id / (long)1e9)
             {
-                ScheduleType.Course => 1, ScheduleType.Exam => 2, ScheduleType.Activity => 3,
-                ScheduleType.TemporaryAffair => 4, _ => throw new ArgumentException(null, nameof(type))
-            };
-            List<ScheduleBase> ret = new();
-            foreach (var id in _scheduleDictionary.Keys)
-            {
-                if (id / (long)1e9 == i && id % (long)1e9 != 0)
-                {
-                    ret.Add(_scheduleDictionary[id]);
-                }
+                case 1:
+                    {
+                        ref long prevIdMax = ref _courseIdMax;
+                        if (prevIdMax == id)
+                        {
+                            prevIdMax++;
+                        }
+                    }
+                    break;
+                case 2:
+                    {
+                        ref long prevIdMax = ref _examIdMax;
+                        if (prevIdMax == id)
+                        {
+                            prevIdMax++;
+                        }
+                    }
+                    break;
+                case 3:
+                    {
+                        ref long prevIdMax = ref _groutActivityIdMax;
+                        if (prevIdMax == id)
+                        {
+                            prevIdMax++;
+                        }
+                    }
+                    break;
+                default:
+                    throw new FormatException($"Item id {id} is invalid");
             }
-            return ret;
+            Log.Information.Log(_sharedDictionary.Remove(id) ? $"已删除id为{id}的共享日程" : $"未删除id为{id}的共享日程，日程不存在");
         }
+
+        public static Record GetRecordAt(int offset)
+        {
+            if (offset is >= Constants.TotalHours or < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            return _timeline[offset];
+        }
+
+        #endregion
+
+        #region API on shared schedule search
 
         public static List<SharedData> GetSharedByType(ScheduleType type)
         {
@@ -527,50 +563,29 @@ namespace StudentScheduleManagementSystem.Schedule
             return ret;
         }
 
-        public static void DeleteShared(long id)
-        {
-            switch (id / (long)1e9)
-            {
-                case 1:
-                {
-                    ref long prevIdMax = ref _courseIdMax;
-                    if (prevIdMax == id)
-                    {
-                        prevIdMax++;
-                    }
-                }
-                    break;
-                case 2:
-                {
-                    ref long prevIdMax = ref _examIdMax;
-                    if (prevIdMax == id)
-                    {
-                        prevIdMax++;
-                    }
-                }
-                    break;
-                case 3:
-                {
-                    ref long prevIdMax = ref _groutActivityIdMax;
-                    if (prevIdMax == id)
-                    {
-                        prevIdMax++;
-                    }
-                }
-                    break;
-                default:
-                    throw new FormatException($"Item id {id} is invalid");
-            }
-            Log.Information.Log(_sharedDictionary.Remove(id) ? $"已删除id为{id}的共享日程" : $"未删除id为{id}的共享日程，日程不存在");
-        }
+        #endregion
 
-        public static Record GetRecordAt(int offset)
+        #region API on schedule search
+
+        public static List<ScheduleBase> GetScheduleByType(ScheduleType type)
         {
-            if (offset is >= Constants.TotalHours or < 0)
+            int i = type switch
             {
-                throw new ArgumentOutOfRangeException(nameof(offset));
+                ScheduleType.Course => 1,
+                ScheduleType.Exam => 2,
+                ScheduleType.Activity => 3,
+                ScheduleType.TemporaryAffair => 4,
+                _ => throw new ArgumentException(null, nameof(type))
+            };
+            List<ScheduleBase> ret = new();
+            foreach (var id in _scheduleDictionary.Keys)
+            {
+                if (id / (long)1e9 == i && id % (long)1e9 != 0)
+                {
+                    ret.Add(_scheduleDictionary[id]);
+                }
             }
-            return _timeline[offset];
+            return ret;
         }
 
         public static ScheduleBase? GetScheduleById(long id)

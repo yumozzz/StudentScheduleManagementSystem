@@ -636,14 +636,20 @@ namespace StudentScheduleManagementSystem.Times
 
     public static class Timer
     {
-        private const int BaseTimeout = 10000;
+        private const int BaseTimeoutMs = 3000;
         private static int _acceleration = 1;
         private static Time _localTime = new();
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();
         public static bool Pause { get; set; } = false;
-
         public static Time Now => _localTime;
+        public delegate void TimeChangeEventHandler(Time t);
+        private static TimeChangeEventHandler _timeChangeEventHandler;
+        public static event TimeChangeEventHandler TimeChange
+        {
+            add => _timeChangeEventHandler += value;
+            remove => _timeChangeEventHandler -= value;
+        }
 
         public static void Start()
         {
@@ -651,13 +657,12 @@ namespace StudentScheduleManagementSystem.Times
             {
                 if (!Pause && UI.MainWindow.StudentSubwindow != null)
                 {
-                    Console.WriteLine(LocalTime);
-                    UI.MainWindow.StudentSubwindow.SetLocalTime(_localTime);
+                    _timeChangeEventHandler.Invoke(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
                 }
-                Thread.Sleep(BaseTimeout / _acceleration);
+                Thread.Sleep(BaseTimeoutMs / _acceleration);
             }
             Console.WriteLine("clock terminate");
         }
