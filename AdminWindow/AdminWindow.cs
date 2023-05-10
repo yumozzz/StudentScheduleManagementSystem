@@ -50,12 +50,7 @@
         //TODO:
         private void CloseConfirm_Click(object sender, EventArgs e)
         {
-            MainProgram.Program.Logout();
-            _courseSubwindow?.Close();
-            _examSubwindow?.Close();
-            _examSubwindow?.Dispose();
-            _groupActivitySubwindow?.Close();
-            _groupActivitySubwindow?.Dispose();
+            LogoutConfirm_Click(sender, e);
         }
 
         private void CourseButton_Click(object sender, EventArgs e)
