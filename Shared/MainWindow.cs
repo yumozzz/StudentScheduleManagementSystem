@@ -47,13 +47,19 @@ namespace StudentScheduleManagementSystem.UI
                     if (MainProgram.Program.Identity == Identity.User)
                     {
                         StudentSubwindow = new();
-                        StudentSubwindow.ShowDialog();
+                        Thread thread = new(() => StudentSubwindow.ShowDialog());
+                        thread.SetApartmentState(ApartmentState.STA);
+                        thread.Start();
+                        thread.Join();
                         StudentSubwindow.Dispose();
                     }
                     else
                     {
                         AdminSubwindow = new();
-                        AdminSubwindow.ShowDialog();
+                        Thread thread = new(() => AdminSubwindow.ShowDialog());
+                        thread.SetApartmentState(ApartmentState.STA);
+                        thread.Start();
+                        thread.Join();
                         AdminSubwindow.Dispose();
                     }
                     GC.Collect();
@@ -93,6 +99,8 @@ namespace StudentScheduleManagementSystem.UI
                     StudentSubwindow = new StudentWindow();
                     this.Hide();
                     StudentSubwindow.ShowDialog();
+                    StudentSubwindow.Dispose();
+                    GC.Collect();
                     this.Show();
                 }
                 else
