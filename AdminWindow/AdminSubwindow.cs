@@ -333,9 +333,9 @@ namespace StudentScheduleManagementSystem.UI
         protected void DeleteSchedule_Click(object sender, EventArgs e)
         {
             int selectedCount = 0, index = 0;
-            for (int i = 1; i < _data.Count; i++)
+            for (int i = 0; i < _data.Count; i++)
             {
-                if (Convert.ToBoolean(scheduleData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                if (Convert.ToBoolean(scheduleData.Rows[i].Cells[0].EditedFormattedValue))
                 {
                     selectedCount++;
                     index = i;
@@ -352,6 +352,10 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
+            long id = (long)scheduleData.Rows[index].Cells[2].Value;
+            
+            //TODO: 展示日程信息+确认删除的日程
+            /*
             var selected = _data[index];
             StringBuilder ScheduleDetail = GetScheduleDetail(selected.Name,
                                                              selected.RepetitiveType,
@@ -359,12 +363,13 @@ namespace StudentScheduleManagementSystem.UI
                                                              selected.ActiveDays,
                                                              selected.Timestamp,
                                                              selected.Duration);
-
             if (MessageBox.Show(ScheduleDetail.ToString(), "日程信息", MessageBoxButtons.OKCancel) != DialogResult.OK)
             {
                 return;
             }
-            long id = _data[index].Id;
+            */
+
+            
             Schedule.ScheduleBase.DeleteShared(id);
             MessageBox.Show("已成功删除该日程");
             Log.Information.Log($"成功删除id为{id}的共享日程");
@@ -394,6 +399,7 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
+            //TODO: 通过id拿到课程信息
             var selected = _data[index];
             this.nameBox.Text = selected.Name;
             RepetitiveType repetitiveType = selected.RepetitiveType;

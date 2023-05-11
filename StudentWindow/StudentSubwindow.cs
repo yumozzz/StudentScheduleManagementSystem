@@ -97,7 +97,6 @@ namespace StudentScheduleManagementSystem.UI
                 if (sharedData.RepetitiveType == RepetitiveType.Single)
                 {
                     this.allScheduleData.Rows.Add( null,
-                                                   "检测冲突",
                                                    sharedData.Name,
                                                    sharedData.Id,
                                                    sharedData.Timestamp.Week.ToString(),
@@ -113,7 +112,6 @@ namespace StudentScheduleManagementSystem.UI
                         days.Append(activeDay.ToString()[..3] + ";");
                     }
                     this.allScheduleData.Rows.Add( null,
-                                                   "检测冲突",
                                                    sharedData.Name,
                                                    sharedData.Id,
                                                    "1-16",
@@ -129,7 +127,6 @@ namespace StudentScheduleManagementSystem.UI
                         days.Append(activeDay.ToString()[..3] + ";");
                     }
                     this.allScheduleData.Rows.Add( null,
-                                                   "检测冲突",
                                                    sharedData.Name,
                                                    sharedData.Id,
                                                    GetBriefWeeks(sharedData.ActiveWeeks).ToString(),
@@ -144,7 +141,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             //TODO:检测是否只选择了一个
 
-            bool collide =
+            //bool noCollide = Schedule.ScheduleBase.DetectCollision(repetitiveType, scheduleType, beginTime, duration, activeWeeks, activeDays, out _, out ScheduleType overrideSchType, out _);
         }
     }
 
