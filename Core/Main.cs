@@ -44,18 +44,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 
                 #region test
 
-                /*Schedule.Course course = new(RepetitiveType.Designated,
-                                             "test course*",
-                                             new() { Week = 1, Day = Day.Monday, Hour = 12 },
-                                             2,
-                                             null,
-                                             new Map.Location.Building(1,
-                                                                       "test building",
-                                                                       new() { Id = 0, X = 0, Y = 0 }),
-                                             new[] { 1, 2, 3 },
-                                             new[] { Day.Monday, Day.Tuesday });*/
-                //course.EnableAlarm()
-                //Constants.EmptyDayArray;
+                var ta = new Schedule.TemporaryAffairs("name", new(){Hour = 12}, null, Map.Location.GetBuildingsByName("")[0]);
 
                 #endregion
 

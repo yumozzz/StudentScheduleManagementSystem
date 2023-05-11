@@ -105,19 +105,16 @@ namespace StudentScheduleManagementSystem.Times
     {
         public TRecord[] RecordArray { get; } = new TRecord[Constants.TotalHours];
 
-        private static readonly Random _randomGenerator = new(DateTime.Now.Millisecond);
-
-        public TRecord this[int index]
+        public ref TRecord this[int index]
         {
-            get => RecordArray[index];
-            private set => RecordArray[index] = value;
+            get => ref RecordArray[index];
         }
 
         private void RemoveSingleItem(int offset, TRecord defaultValue = default)
         {
             if (RecordArray[offset].Equal(defaultValue))
             {
-                throw new RecordOverrideException();
+                throw new ItemOverrideException();
             }
             RecordArray[offset] = defaultValue;
         }
@@ -126,7 +123,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             if (!RecordArray[offset].Equals(default(TRecord)))
             {
-                throw new RecordOverrideException();
+                throw new ItemOverrideException();
             }
             RecordArray[offset] = value;
         }
@@ -195,28 +192,12 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
-        public void AddMultipleItems(long? specificId,
-                                     char? beginWith,
-                                     Time timestamp,
+        public void AddMultipleItems(Time timestamp,
                                      int duration,
                                      TRecord record,
-                                     out long outId,
                                      int[] activeWeeks,
                                      Day[] activeDays)
         {
-            outId = (specificId.HasValue, beginWith.HasValue) switch
-            {
-                (false, false) => _randomGenerator.Next(1, 9) * (long)1e9 + _randomGenerator.Next(1, 999999999), //完全随机
-                (true, false) => specificId!.Value / (long)1e9 is >= 1 and <= 9
-                                     ? specificId.Value
-                                     : throw new ArgumentException("specifiedId should be a 10-digit number"), //完全指定
-                (false, true) => (beginWith!.Value - '0') * (long)1e9 + _randomGenerator.Next(1, 999999999), //指定第一位
-                (true, true) => specificId!.Value / (long)1e9 == beginWith!.Value - '0'
-                                    ? specificId.Value
-                                    : throw new
-                                          ArgumentException("beginWith is not correspondent with the first letter of specifiedId")
-            };
-            record.Id = outId;
             int offset;
             if (record.RepetitiveType == RepetitiveType.Single)
             {
@@ -315,6 +296,8 @@ namespace StudentScheduleManagementSystem.Times
         #endregion
 
         #region private fields
+
+        private static readonly Random _randomGenerator = new(DateTime.Now.Millisecond + 1000);
 
         private AlarmCallback? _alarmCallback;
 
@@ -467,24 +450,23 @@ namespace StudentScheduleManagementSystem.Times
 
             #region 添加新闹钟
 
-            _timeline.AddMultipleItems(null,
-                                       null,
-                                       timestamp,
+            long id = _randomGenerator.Next(1, 9) * (long)1e9 + _randomGenerator.Next(1, 999999999);
+
+            _timeline.AddMultipleItems(timestamp,
                                        1,
-                                       new Record { RepetitiveType = repetitiveType },
-                                       out long thisAlarmId,
+                                       new Record { Id = id, RepetitiveType = repetitiveType },
                                        activeWeeks,
                                        activeDays);
             if (isDailyNotification)
             {
-                _dailyNotificationAlarmId = thisAlarmId;
+                _dailyNotificationAlarmId = id;
             }
-            _alarmList.Add(thisAlarmId,
+            _alarmList.Add(id,
                            new()
                            {
                                RepetitiveType = repetitiveType,
                                ActiveDays = activeDays,
-                               AlarmId = thisAlarmId,
+                               AlarmId = id,
                                BeginTime = timestamp,
                                _alarmCallback = alarmTimeUpCallback,
                                _callbackParameter = callbackParameter,

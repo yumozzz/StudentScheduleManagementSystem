@@ -14,21 +14,23 @@ namespace StudentScheduleManagementSystem
         Sunday,
     }
 
+    [Flags]
     public enum RepetitiveType
     {
-        Null,
-        Single,
-        MultipleDays,
-        Designated
+        Null = 0,
+        Single = 1,
+        MultipleDays = 2,
+        Designated = 4,
     }
 
+    [Flags]
     public enum ScheduleType
     {
-        Idle,
-        Course,
-        Exam,
-        Activity,
-        TemporaryAffair,
+        Idle = 0,
+        Course = 1,
+        Exam = 2,
+        Activity = 4,
+        TemporaryAffair = 8,
     }
 
     public enum Identity
@@ -57,7 +59,7 @@ namespace StudentScheduleManagementSystem
         public static abstract int Latest { get; }
     }
 
-    public class RecordOverrideException : InvalidOperationException { }
+    public class ItemOverrideException : InvalidOperationException { }
 
     public class JsonFormatException : JsonException
     {
@@ -185,8 +187,14 @@ namespace StudentScheduleManagementSystem
     {
         public const int TotalHours = 16 * 7 * 24;
         public static readonly int[] AllWeeks = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-        public static readonly Day[] AllDays = { Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday, Day.Sunday };
+        public static readonly Day[] AllDays =
+        {
+            Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday, Day.Sunday
+        };
         public static readonly int[] EmptyIntArray = Array.Empty<int>();
         public static readonly Day[] EmptyDayArray = Array.Empty<Day>();
+        public static readonly Map.Location.Building DefaultBuilding = new(-1,
+                                                                           "default building",
+                                                                           new() { Id = -1, X = 0, Y = 0 });
     }
 }
