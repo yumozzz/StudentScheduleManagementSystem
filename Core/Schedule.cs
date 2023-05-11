@@ -331,69 +331,81 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        protected void AddSchedule(long? specifiedId, char beginWith, bool addOnTimeline) //添加日程
+        public static bool DetectCollision(RepetitiveType repetitiveType,
+                                           ScheduleType scheduleType,
+                                           Times.Time beginTime,
+                                           int duration,
+                                           int[] activeWeeks,
+                                           Day[] activeDays,
+                                           out RepetitiveType collideRepType,
+                                           out ScheduleType collideSchType,
+                                           out int collideOffset)
         {
-            if (!addOnTimeline)
+            collideRepType = RepetitiveType.Null;
+            collideSchType = ScheduleType.Idle;
+            collideOffset = 0;
+            if (repetitiveType == RepetitiveType.Single)
             {
-                goto add_process;
-            }
-            int offset = 0;
-            RepetitiveType overrideType = RepetitiveType.Null;
-            if (RepetitiveType == RepetitiveType.Single)
-            {
-                for (int i = 0; i < Duration; i++)
+                for (int i = 0; i < duration; i++)
                 {
-                    offset = BeginTime.ToInt() + i;
-                    if (ScheduleType == ScheduleType.TemporaryAffair)
+                    collideOffset = beginTime.ToInt() + i;
+                    if (scheduleType == ScheduleType.TemporaryAffair)
                     {
-                        if (_timeline[offset].ScheduleType == ScheduleType.TemporaryAffair)
+                        if (_timeline[collideOffset].ScheduleType == ScheduleType.TemporaryAffair)
                         {
                             throw new
                                 InvalidOperationException("Cannot add temporary affair when there already exists temporary affair (can only modify)");
                         }
                     }
-                    else if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（需要选择是否覆盖）
+                    else if (_timeline[collideOffset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（需要选择是否覆盖）
                     {
-                        overrideType = _timeline[offset].RepetitiveType;
-                        goto delete_process; //跳出循环
+                        collideRepType = _timeline[collideOffset].RepetitiveType;
+                        collideSchType = _timeline[collideOffset].ScheduleType;
+                        return false;
                     }
                 }
             }
-            else if (RepetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复，则自身不可能为临时日程
+            else if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复，则自身不可能为临时日程
             {
-                int[] dayOffsets = Array.ConvertAll(ActiveDays!, day => day.ToInt());
+                Debug.Assert(scheduleType != ScheduleType.TemporaryAffair);
+                int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
                 foreach (var dayOffset in dayOffsets)
                 {
-                    for (int i = 0; i < Duration; i++)
+                    for (int i = 0; i < duration; i++)
                     {
-                        offset = 24 * dayOffset + BeginTime.Hour + i;
-                        while (offset < Constants.TotalHours)
+                        collideOffset = 24 * dayOffset + beginTime.Hour + i;
+                        while (collideOffset < Constants.TotalHours)
                         {
-                            if (_timeline[offset].ScheduleType != ScheduleType.Idle) //有日程而添加非临时日程（自身不可能为临时日程，需要选择是否覆盖）
+                            if (_timeline[collideOffset].ScheduleType !=
+                                ScheduleType.Idle) //有日程而添加非临时日程（自身不可能为临时日程，需要选择是否覆盖）
                             {
-                                overrideType = _timeline[offset].RepetitiveType;
-                                goto delete_process; //跳出循环
+                                collideRepType = _timeline[collideOffset].RepetitiveType;
+                                collideSchType = _timeline[collideOffset].ScheduleType;
+                                return false;
                             }
-                            offset += 7 * 24;
+                            collideOffset += 7 * 24;
                         }
                     }
                 }
             }
-            else if (RepetitiveType == RepetitiveType.Designated)
+            else if (repetitiveType == RepetitiveType.Designated)
             {
-                foreach (var activeWeek in ActiveWeeks)
+                Debug.Assert(scheduleType != ScheduleType.TemporaryAffair);
+                foreach (var activeWeek in activeWeeks)
                 {
-                    foreach (var activeDay in ActiveDays)
+                    foreach (var activeDay in activeDays)
                     {
-                        offset = new Times.Time() { Week = activeWeek, Day = activeDay, Hour = BeginTime.Hour }.ToInt();
-                        for (int i = 0; i < Duration; i++)
+                        collideOffset = new Times.Time { Week = activeWeek, Day = activeDay, Hour = beginTime.Hour }
+                           .ToInt();
+                        for (int i = 0; i < duration; i++)
                         {
-                            if (_timeline[offset].ScheduleType != ScheduleType.Idle)
+                            if (_timeline[collideOffset].ScheduleType != ScheduleType.Idle)
                             {
-                                overrideType = _timeline[offset].RepetitiveType;
-                                goto delete_process; //跳出多重循环
+                                collideRepType = _timeline[collideOffset].RepetitiveType;
+                                collideSchType = _timeline[collideOffset].ScheduleType;
+                                return false; //跳出多重循环
                             }
-                            offset++;
+                            collideOffset++;
                         }
                     }
                 }
@@ -402,7 +414,24 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
-        delete_process:
+            return true;
+        }
+
+        protected void AddSchedule(long? specifiedId, char beginWith, bool addOnTimeline) //添加日程
+        {
+            if (!addOnTimeline)
+            {
+                goto add_process;
+            }
+            DetectCollision(RepetitiveType,
+                            ScheduleType,
+                            BeginTime,
+                            Duration,
+                            ActiveWeeks,
+                            ActiveDays,
+                            out RepetitiveType overrideType,
+                            out _,
+                            out int offset);
             //_timeline[offset]记录的是会覆盖的日程
             //TODO:增加删除逻辑
             switch ((overrideType, RepetitiveType))
