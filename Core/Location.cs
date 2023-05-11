@@ -448,9 +448,9 @@ namespace StudentScheduleManagementSystem.Map
         {
             if(name == "default building")
             {
-                return new List<Building>() { new(-1, "default building", new() { Id = -1, X = 0, Y = 0 }) };
+                return new List<Building>() { Constants.DefaultBuilding };
             }
-            //UNDONE
+            //TODO:完成按名字查询Building的函数
             return new List<Building>() { new(0, "random building", new() { Id = 0, X = 0, Y = 0 }) };
         }
 
