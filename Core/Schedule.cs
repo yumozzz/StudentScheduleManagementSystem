@@ -1310,6 +1310,7 @@ namespace StudentScheduleManagementSystem.Schedule
         #endregion
     }
 
+    //TODO:同步闹钟情况
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class TemporaryAffairs : Activity
     {
@@ -1320,8 +1321,8 @@ namespace StudentScheduleManagementSystem.Schedule
             public string Name { get; set; }
             public Times.Time Timestamp { get; set; }
             public string? Description { get; set; }
-            [JsonProperty(ItemConverterType = typeof(BuildingJsonConverter))]
-            public Map.Location.Building[] Locations { get; set; }
+            [JsonConverter(typeof(BuildingJsonConverter))]
+            public Map.Location.Building OfflineLocation { get; set; }
             public bool AlarmEnabled { get; set; }
         }
 
@@ -1448,16 +1449,15 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     throw new JsonFormatException();
                 }
-                for (int i = 0; i < dobj.Locations.Length; i++)
+
+                var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
+                Map.Location.Building location =
+                    locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                _ = new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location)
                 {
-                    var locations = Map.Location.GetBuildingsByName(dobj.Locations[i].Name);
-                    Map.Location.Building location =
-                        locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                    _ = new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location)
-                    {
-                        AlarmEnabled = dobj.AlarmEnabled //should be the same
-                    };
-                }
+                    AlarmEnabled = dobj.AlarmEnabled //should be the same
+                };
+
                 Log.Information.Log("已导入临时事务");
             }
         }

@@ -7,7 +7,7 @@ namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        public static List<Building> Buildings { get; private set; } = new();
+        public static List<Building> Buildings { get; private set; } = new() {Constants.DefaultBuilding, new(0, "Test Building", new(1, 100, 100))};
         public static AdjacencyTable GlobalMap { get; private set; }
 
         #region structs, classes and enums

@@ -319,8 +319,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
             }
 
-            scheduleDetail.Append("\n时间: " + timestamp.Hour + "\n时长: " + duration + "\n名称：" + name + "\n类型：" +
-                                  repetitiveType.ToString());
+            scheduleDetail.Append("\n时间: " + timestamp.Hour + "\n时长: " + duration + "\n名称：" + name);
             return scheduleDetail;
         }
 
@@ -353,36 +352,35 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             long id = (long)scheduleData.Rows[index].Cells[2].Value;
-            
-            //TODO: 展示日程信息+确认删除的日程
-            /*
-            var selected = _data[index];
-            StringBuilder ScheduleDetail = GetScheduleDetail(selected.Name,
-                                                             selected.RepetitiveType,
-                                                             selected.ActiveWeeks,
-                                                             selected.ActiveDays,
-                                                             selected.Timestamp,
-                                                             selected.Duration);
-            if (MessageBox.Show(ScheduleDetail.ToString(), "日程信息", MessageBoxButtons.OKCancel) != DialogResult.OK)
-            {
-                return;
-            }
-            */
 
-            
-            Schedule.ScheduleBase.DeleteShared(id);
-            MessageBox.Show("已成功删除该日程");
-            Log.Information.Log($"成功删除id为{id}的共享日程");
-            GenerateFormData(_type);
+            if (MessageBox.Show(
+                                "周次: " + scheduleData.Rows[index].Cells[3].Value.ToString() + 
+                                "\n天次: " + scheduleData.Rows[index].Cells[4].Value.ToString() + 
+                                "\n时间: " + scheduleData.Rows[index].Cells[5].Value.ToString() + 
+                                "\n时长: " + scheduleData.Rows[index].Cells[6].Value.ToString() + 
+                                "\n名称: " + scheduleData.Rows[index].Cells[1].Value.ToString(),
+                                "日程信息", 
+                                MessageBoxButtons.OKCancel
+                                ) == DialogResult.OK)
+            {
+                Schedule.ScheduleBase.DeleteShared(id);
+                MessageBox.Show("已成功删除该日程");
+                Log.Information.Log($"成功删除id为{id}的共享日程");
+                GenerateFormData(_type);
+            } 
+            else
+            {
+                MessageBox.Show("已取消删除该日程");
+            }
         }
 
         protected void ReviseSchedule_Click(object sender, EventArgs e)
         {
             Debug.Assert(!_originId.HasValue);
             int selectedCount = 0, index = 0;
-            for (int i = 1; i < _data.Count; i++)
+            for (int i = 0; i < _data.Count; i++)
             {
-                if (Convert.ToBoolean(scheduleData.Rows[i - 1].Cells[0].EditedFormattedValue))
+                if (Convert.ToBoolean(scheduleData.Rows[i].Cells[0].EditedFormattedValue))
                 {
                     selectedCount++;
                     index = i;
@@ -398,10 +396,11 @@ namespace StudentScheduleManagementSystem.UI
                 MessageBox.Show("请一次选择一个日程修改！");
                 return;
             }
+            
+            long id = (long)scheduleData.Rows[index].Cells[2].Value;
+            var selected = Schedule.ScheduleBase.GetSharedById(id);
 
-            //TODO: 通过id拿到课程信息
-            var selected = _data[index];
-            this.nameBox.Text = selected.Name;
+            this.nameBox.Text = selected!.Name;
             RepetitiveType repetitiveType = selected.RepetitiveType;
             if (repetitiveType == RepetitiveType.Single)
             {
