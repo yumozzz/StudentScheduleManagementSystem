@@ -311,10 +311,34 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public virtual void DeleteSchedule()
         {
-            DeleteSchedule(ScheduleId);
+            DeleteSchedule(this);
         }
 
-        protected static void DeleteSchedule(long scheduleId) { }
+        protected static void DeleteSchedule(ScheduleBase schedule) 
+        {
+            _scheduleDictionary.Remove(schedule.ScheduleId);
+            DetectCollision(schedule.RepetitiveType, schedule.ScheduleType, schedule.BeginTime, schedule.Duration, schedule.ActiveWeeks, schedule.ActiveDays, out _, out _, out long[] ids);
+            if (!(ids.Length == 1 && ids[0] == schedule.ScheduleId))
+            {
+                _timeline.RemoveMultipleItems(schedule.BeginTime,
+                                              schedule.Duration,
+                                              schedule.RepetitiveType,
+                                              out _,
+                                              schedule.ActiveWeeks,
+                                              schedule.ActiveDays);
+            }
+            else
+            {
+                Debug.Assert(!ids.Contains(schedule.ScheduleId));
+            }
+            if (schedule.AlarmEnabled)
+            {
+                Times.Alarm.RemoveAlarm(schedule.BeginTime,
+                                        schedule.RepetitiveType,
+                                        schedule.ActiveWeeks,
+                                        schedule.ActiveDays);
+            }
+        }
 
         public static bool DetectCollision(RepetitiveType repetitiveType,
                                            ScheduleType scheduleType,
@@ -323,11 +347,13 @@ namespace StudentScheduleManagementSystem.Schedule
                                            int[] activeWeeks,
                                            Day[] activeDays,
                                            out RepetitiveType collisionRepType,
-                                           out ScheduleType collisionSchType)
+                                           out ScheduleType collisionSchType,
+                                           out long[] collisionIds)
         {
             bool willCollide = false;
             collisionRepType = RepetitiveType.Null;
             collisionSchType = ScheduleType.Idle;
+            List<long> ids = new();
             int offset = 0;
             if (repetitiveType == RepetitiveType.Single)
             {
@@ -346,6 +372,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     {
                         collisionRepType |= _timeline[offset].RepetitiveType;
                         collisionSchType |= _timeline[offset].ScheduleType;
+                        ids.Add(_timeline[offset].Id);
                         willCollide = true;
                     }
                 }
@@ -365,6 +392,7 @@ namespace StudentScheduleManagementSystem.Schedule
                             {
                                 collisionRepType |= _timeline[offset].RepetitiveType;
                                 collisionSchType |= _timeline[offset].ScheduleType;
+                                ids.Add(_timeline[offset].Id);
                                 willCollide = true;
                             }
                             offset += 7 * 24;
@@ -386,6 +414,7 @@ namespace StudentScheduleManagementSystem.Schedule
                             {
                                 collisionRepType |= _timeline[offset].RepetitiveType;
                                 collisionSchType |= _timeline[offset].ScheduleType;
+                                ids.Add(_timeline[offset].Id);
                                 willCollide = true;
                             }
                             offset++;
@@ -397,6 +426,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
+            collisionIds = ids.ToArray();
             return willCollide;
         }
 
@@ -429,7 +459,7 @@ namespace StudentScheduleManagementSystem.Schedule
             return id;
         }
 
-        protected void AddSchedule(long? specifiedId, char beginWith, bool addOnTimeline) //添加日程
+        protected void AddSchedule(long? specifiedId, char beginWith, bool addOnTimeline, bool addOnUserTable) //添加日程
         {
             DetectCollision(RepetitiveType,
                             ScheduleType,
@@ -437,8 +467,9 @@ namespace StudentScheduleManagementSystem.Schedule
                             Duration,
                             ActiveWeeks,
                             ActiveDays,
-                            out RepetitiveType overrideRepType,
-                            out ScheduleType overrideSchType);
+                            out _,
+                            out ScheduleType overrideSchType,
+                            out _);
 
             if (overrideSchType == ScheduleType.Idle)
             {
@@ -455,6 +486,10 @@ namespace StudentScheduleManagementSystem.Schedule
                                                },
                                                ActiveWeeks,
                                                ActiveDays);
+                   
+                }
+                if (addOnUserTable)
+                {
                     _scheduleDictionary.Add(ScheduleId, this); //调用前已创建实例
                 }
                 Log.Information.Log("已在时间轴与表中添加日程");
@@ -566,23 +601,53 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public static List<ScheduleBase> GetScheduleByType(ScheduleType type)
         {
-            int i = type switch
-            {
-                ScheduleType.Course => 1,
-                ScheduleType.Exam => 2,
-                ScheduleType.Activity => 3,
-                ScheduleType.TemporaryAffair => 4,
-                _ => throw new ArgumentException(null, nameof(type))
-            };
             List<ScheduleBase> ret = new();
-            foreach (var id in _scheduleDictionary.Keys)
+            if (type == ScheduleType.Course)
             {
-                if (id / (long)1e9 == i && id % (long)1e9 != 0)
+                foreach (var id in _scheduleDictionary.Keys)
                 {
-                    ret.Add(_scheduleDictionary[id]);
+                    if (id / (long)1e9 ==1 && id % (long)1e9 != 0)
+                    {
+                        ret.Add(_scheduleDictionary[id]);
+                    }
                 }
+                return ret;
             }
-            return ret;
+            if (type == ScheduleType.Exam)
+            {
+                foreach (var id in _scheduleDictionary.Keys)
+                {
+                    if (id / (long)1e9 == 2 && id % (long)1e9 != 0)
+                    {
+                        ret.Add(_scheduleDictionary[id]);
+                    }
+                }
+                return ret;
+            }
+            if (type == ScheduleType.Activity)
+            {
+                foreach (var id in _scheduleDictionary.Keys)
+                {
+                    if ((id / (long)1e9 is 3 && id % (long)1e9 != 0) || id / (long)1e9 == 4)
+                    {
+                        ret.Add(_scheduleDictionary[id]);
+                    }
+                }
+                return ret;
+            }
+            if (type == ScheduleType.TemporaryAffair)
+            {
+                foreach (var id in _scheduleDictionary.Keys)
+                {
+                    if (id / (long)1e9 == 5)
+                    {
+                        ret.Add(_scheduleDictionary[id]);
+                    }
+                }
+                return ret;
+            }
+
+            throw new ArgumentException(null, nameof(type));
         }
 
         public static ScheduleBase? GetScheduleById(long id)
@@ -880,8 +945,8 @@ namespace StudentScheduleManagementSystem.Schedule
                       string onlineLink,
                       int[] activeWeeks,
                       Day[] activeDays,
-                      long? specifiedId = null,
-                      bool addOnTimeline = true)
+                      ScheduleOperationType operationType,
+                      long? specifiedId = null)
             : base(repetitiveType,
                    name,
                    beginTime,
@@ -899,8 +964,11 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             OnlineLink = onlineLink;
             OfflineLocation = null;
-            AddSchedule(specifiedId, '1', addOnTimeline);
-            UpdateSharedData(this);
+            AddSchedule(specifiedId, '1', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
+            {
+                UpdateSharedData(this);
+            }
         }
 
         public Course(RepetitiveType repetitiveType,
@@ -911,8 +979,8 @@ namespace StudentScheduleManagementSystem.Schedule
                       Map.Location.Building location,
                       int[] activeWeeks,
                       Day[] activeDays,
-                      long? specifiedId = null,
-                      bool addOnTimeline = true)
+                      ScheduleOperationType operationType,
+                      long? specifiedId = null)
             : base(repetitiveType,
                    name,
                    beginTime,
@@ -930,8 +998,11 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             OnlineLink = null;
             OfflineLocation = location;
-            AddSchedule(specifiedId, '1', addOnTimeline);
-            UpdateSharedData(this);
+            AddSchedule(specifiedId, '1', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
+            {
+                UpdateSharedData(this);
+            }
         }
 
         #endregion
@@ -963,6 +1034,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                        location,
                                        shared.ActiveWeeks,
                                        shared.ActiveDays,
+                                       ScheduleOperationType.UserOpration,
                                        dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                     }
                     else if (dobj.OnlineLink != null)
@@ -975,6 +1047,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                        dobj.OnlineLink,
                                        shared.ActiveWeeks,
                                        shared.ActiveDays,
+                                       ScheduleOperationType.UserOpration,
                                        dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                     }
                     else
@@ -1030,8 +1103,8 @@ namespace StudentScheduleManagementSystem.Schedule
                     int duration,
                     string? description,
                     Map.Location.Building offlineLocation,
-                    long? specifiedId = null,
-                    bool addOnTimeline = true)
+                    ScheduleOperationType operationType,
+                    long? specifiedId = null)
             : base(RepetitiveType.Single,
                    name,
                    beginTime,
@@ -1048,8 +1121,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 throw new ArgumentOutOfRangeException(nameof(beginTime));
             }
             OfflineLocation = offlineLocation;
-            AddSchedule(specifiedId, '2', addOnTimeline);
-            UpdateSharedData(this);
+            AddSchedule(specifiedId, '2', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
+            {
+                UpdateSharedData(this);
+            }
         }
 
         #endregion
@@ -1076,6 +1152,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                  shared.Duration,
                                  dobj.Description,
                                  location,
+                                 ScheduleOperationType.UserOpration,
                                  dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                     Log.Information.Log($"已导入ID为{dobj.ScheduleId}的考试");
                 }
@@ -1155,8 +1232,8 @@ namespace StudentScheduleManagementSystem.Schedule
                         bool isGroupActivity,
                         int[] activeWeeks,
                         Day[] activeDays,
-                        long? specifiedId = null,
-                        bool addOnTimeline = true)
+                        ScheduleOperationType operationType,
+                        long? specifiedId = null)
             : base(repetitiveType,
                    name,
                    beginTime,
@@ -1171,8 +1248,15 @@ namespace StudentScheduleManagementSystem.Schedule
             OnlineLink = onlineLink;
             OfflineLocation = null;
             IsGroupActivity = isGroupActivity;
-            AddSchedule(specifiedId, isGroupActivity ? '3' : '4', addOnTimeline);
-            UpdateSharedData(this);
+            if (!isGroupActivity && operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
+            {
+                throw new ArgumentException(null, nameof(operationType));
+            }
+            AddSchedule(specifiedId, isGroupActivity ? '3' : '4', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
+            {
+                UpdateSharedData(this);
+            }
         }
 
         public Activity(RepetitiveType repetitiveType,
@@ -1184,8 +1268,8 @@ namespace StudentScheduleManagementSystem.Schedule
                         bool isGroupActivity,
                         int[] activeWeeks,
                         Day[] activeDays,
-                        long? specifiedId = null,
-                        bool addOnTimeline = true)
+                        ScheduleOperationType operationType,
+                        long? specifiedId = null)
             : base(repetitiveType,
                    name,
                    beginTime,
@@ -1200,8 +1284,15 @@ namespace StudentScheduleManagementSystem.Schedule
             OnlineLink = null;
             OfflineLocation = location;
             IsGroupActivity = isGroupActivity;
-            AddSchedule(specifiedId, isGroupActivity ? '3' : '4', addOnTimeline);
-            UpdateSharedData(this);
+            if (!isGroupActivity && operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
+            {
+                throw new ArgumentException(null, nameof(operationType));
+            }
+            AddSchedule(specifiedId, isGroupActivity ? '3' : '4', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
+            {
+                UpdateSharedData(this);
+            }
         }
 
         #endregion
@@ -1240,6 +1331,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                              true,
                                              shared.ActiveWeeks,
                                              shared.ActiveDays,
+                                             ScheduleOperationType.UserOpration,
                                              dobj.ScheduleId);
                         }
                         else if (dobj.OnlineLink != null)
@@ -1253,6 +1345,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                              true,
                                              shared.ActiveWeeks,
                                              shared.ActiveDays,
+                                             ScheduleOperationType.UserOpration,
                                              dobj.ScheduleId);
                         }
                         else
@@ -1282,7 +1375,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                          location,
                                          false,
                                          dobj.ActiveWeeks,
-                                         dobj.ActiveDays) { AlarmEnabled = dobj.AlarmEnabled };
+                                         dobj.ActiveDays,
+                                         ScheduleOperationType.UserOpration) { AlarmEnabled = dobj.AlarmEnabled };
                     }
                     else if (dobj.OnlineLink != null)
                     {
@@ -1294,7 +1388,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                          dobj.OnlineLink,
                                          false,
                                          dobj.ActiveWeeks,
-                                         dobj.ActiveDays) { AlarmEnabled = dobj.AlarmEnabled };
+                                         dobj.ActiveDays,
+                                         ScheduleOperationType.UserOpration) { AlarmEnabled = dobj.AlarmEnabled };
                     }
                     else
                     {
@@ -1344,13 +1439,12 @@ namespace StudentScheduleManagementSystem.Schedule
         public TemporaryAffairs(string name,
                                 Times.Time beginTime,
                                 string? description,
-                                Map.Location.Building location,
-                                bool addOnTimeline = true)
+                                Map.Location.Building location)
             : base(RepetitiveType.Single, name, beginTime, 1, false, description)
         {
             OnlineLink = null;
             OfflineLocation = location;
-            AddSchedule(addOnTimeline);
+            AddSchedule();
             AlarmEnabled =
                 ((TemporaryAffairs)_scheduleDictionary[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
         }
@@ -1407,7 +1501,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        private void AddSchedule(bool addOnTimeline)
+        private void AddSchedule()
         {
             int offset = BeginTime.ToInt();
 
@@ -1432,7 +1526,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例
             {
-                base.AddSchedule(null, '5', addOnTimeline);
+                base.AddSchedule(null, '5', true, true);
             }
         }
 

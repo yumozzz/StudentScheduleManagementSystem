@@ -35,6 +35,8 @@
             this.mainpage = new System.Windows.Forms.Panel();
             this.ScheduleTableButton = new System.Windows.Forms.Button();
             this.courseButton = new System.Windows.Forms.Button();
+            this.exam = new System.Windows.Forms.Button();
+            this.GroupActivity = new System.Windows.Forms.Button();
             this.header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).BeginInit();
             this.SuspendLayout();
@@ -108,11 +110,33 @@
             this.courseButton.UseVisualStyleBackColor = true;
             this.courseButton.Click += new System.EventHandler(this.CourseButton_Click);
             // 
+            // exam
+            // 
+            this.exam.Location = new System.Drawing.Point(12, 187);
+            this.exam.Name = "exam";
+            this.exam.Size = new System.Drawing.Size(112, 34);
+            this.exam.TabIndex = 36;
+            this.exam.Text = "Exam";
+            this.exam.UseVisualStyleBackColor = true;
+            this.exam.Click += new System.EventHandler(this.Exam_Click);
+            // 
+            // GroupActivity
+            // 
+            this.GroupActivity.Location = new System.Drawing.Point(12, 240);
+            this.GroupActivity.Name = "GroupActivity";
+            this.GroupActivity.Size = new System.Drawing.Size(112, 34);
+            this.GroupActivity.TabIndex = 37;
+            this.GroupActivity.Text = "GroupActivity";
+            this.GroupActivity.UseVisualStyleBackColor = true;
+            this.GroupActivity.Click += new System.EventHandler(this.GroupActivity_Click);
+            // 
             // StudentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1300, 770);
+            this.Controls.Add(this.GroupActivity);
+            this.Controls.Add(this.exam);
             this.Controls.Add(this.courseButton);
             this.Controls.Add(this.ScheduleTableButton);
             this.Controls.Add(this.mainpage);
@@ -136,5 +160,7 @@
         private Panel mainpage;
         private Button ScheduleTableButton;
         private Button courseButton;
+        private Button exam;
+        private Button GroupActivity;
     }
 }

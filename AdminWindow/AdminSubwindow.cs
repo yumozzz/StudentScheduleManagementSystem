@@ -9,7 +9,6 @@ namespace StudentScheduleManagementSystem.UI
         protected ScheduleType _type;
         protected long? _originId = null;
 
-
         private AdminSubwindowBase()
             : this(ScheduleType.Idle) { }
 
@@ -52,7 +51,7 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             int continuity = 0;
-            StringBuilder ret = new("");
+            StringBuilder ret = new();
             for (int i = 1; i < activeWeeks.Length; i++)
             {
                 if (activeWeeks[i] == activeWeeks[i - 1] + 1)
@@ -294,7 +293,7 @@ namespace StudentScheduleManagementSystem.UI
                                                 Times.Time timestamp,
                                                 int duration)
         {
-            StringBuilder scheduleDetail = new("");
+            StringBuilder scheduleDetail = new();
             if (repetitiveType == RepetitiveType.Single)
             {
                 scheduleDetail.Append("\n周次：" + timestamp.Week);
@@ -630,8 +629,8 @@ namespace StudentScheduleManagementSystem.UI
                                         Constants.DefaultBuilding,
                                         Constants.EmptyIntArray,
                                         Constants.EmptyDayArray,
-                                        id,
-                                        false);
+                                        ScheduleOperationType.AdminOperation,
+                                        id);
             }
             else if (repetitiveType == RepetitiveType.MultipleDays)
             {
@@ -643,8 +642,8 @@ namespace StudentScheduleManagementSystem.UI
                                         Constants.DefaultBuilding,
                                         Constants.EmptyIntArray,
                                         activeDays,
-                                        id,
-                                        false);
+                                        ScheduleOperationType.AdminOperation,
+                                        id);
             }
             else
             {
@@ -656,8 +655,8 @@ namespace StudentScheduleManagementSystem.UI
                                         Constants.DefaultBuilding,
                                         activeWeeks,
                                         activeDays,
-                                        id,
-                                        false);
+                                        ScheduleOperationType.AdminOperation,
+                                        id);
             }
             if (id == null)
             {
@@ -708,8 +707,8 @@ namespace StudentScheduleManagementSystem.UI
                                   duration,
                                   null,
                                   Constants.DefaultBuilding,
-                                  id,
-                                  false);
+                                  ScheduleOperationType.AdminOperation,
+                                  id);
             if (id == null)
             {
                 MessageBox.Show("已成功添加该课程");
@@ -760,8 +759,8 @@ namespace StudentScheduleManagementSystem.UI
                                           true,
                                           Constants.EmptyIntArray,
                                           Constants.EmptyDayArray,
-                                          id,
-                                          false);
+                                          ScheduleOperationType.AdminOperation,
+                                          id);
             }
             else if (repetitiveType == RepetitiveType.MultipleDays)
             {
@@ -774,8 +773,8 @@ namespace StudentScheduleManagementSystem.UI
                                           true,
                                           Constants.EmptyIntArray,
                                           activeDays,
-                                          id,
-                                          false);
+                                          ScheduleOperationType.AdminOperation,
+                                          id);
             }
             else
             {
@@ -788,8 +787,8 @@ namespace StudentScheduleManagementSystem.UI
                                           true,
                                           activeWeeks,
                                           activeDays,
-                                          id,
-                                          false);
+                                          ScheduleOperationType.AdminOperation,
+                                          id);
             }
             if (id == null)
             {

@@ -33,6 +33,17 @@ namespace StudentScheduleManagementSystem
         TemporaryAffair = 8,
     }
 
+    [Flags]
+    public enum ScheduleOperationType
+    {
+        AddOnTimeline = 1,
+        AddOnUserTable = 2,
+        AddOnSharedTable = 4,
+        AdminOperation = AddOnSharedTable,
+        UserOpration = AddOnTimeline | AddOnUserTable,
+        All = AddOnTimeline | AddOnUserTable | AddOnSharedTable,
+    }
+
     public enum Identity
     {
         User,
@@ -196,5 +207,6 @@ namespace StudentScheduleManagementSystem
         public static readonly Map.Location.Building DefaultBuilding = new(-1,
                                                                            "default building",
                                                                            new() { Id = -1, X = 0, Y = 0 });
+        public const int NormalState = 0, AddUserScheduleState = 1, DeleteUserScheduleState = 2, ReviseUserScheduleState = 3;
     }
 }

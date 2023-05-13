@@ -20,8 +20,8 @@ namespace StudentScheduleManagementSystem.UI
         private static StudentScheduleTable? _studentScheduleTable;
 
         private static StudentCourseSubwindow? _studentCourseSubwindow;
-        //private static ExamSubwindow? _examSubwindow;
-        //private static GroupActivitySubwindow? _groupActivitySubwindow;
+        private static StudentExamSubwindow? _studentExamSubwindow;
+        private static StudentGroupActivitySubwindow? _studentGroupActivitySubwindow;
         //private static MapEditWindow? _mapEditWindow;
         public StudentWindow()
         {
@@ -70,6 +70,24 @@ namespace StudentScheduleManagementSystem.UI
             _studentCourseSubwindow.TopLevel = false;
             mainpage.Controls.Add(_studentCourseSubwindow);
             _studentCourseSubwindow.Show();
+        }
+
+        private void Exam_Click(object sender, EventArgs e)
+        {
+            mainpage.Controls.Clear();
+            _studentExamSubwindow = new ();
+            _studentExamSubwindow.TopLevel = false;
+            mainpage.Controls.Add(_studentExamSubwindow);
+            _studentExamSubwindow.Show();
+        }
+
+        private void GroupActivity_Click(object sender, EventArgs e)
+        {
+            mainpage.Controls.Clear();
+            _studentGroupActivitySubwindow = new ();
+            _studentGroupActivitySubwindow.TopLevel = false;
+            mainpage.Controls.Add(_studentGroupActivitySubwindow);
+            _studentGroupActivitySubwindow.Show();
         }
 
         public void SetLocalTime(Times.Time time)
