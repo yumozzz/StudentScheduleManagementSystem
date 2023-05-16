@@ -22,6 +22,7 @@ namespace StudentScheduleManagementSystem.UI
         private static StudentCourseSubwindow? _studentCourseSubwindow;
         private static StudentExamSubwindow? _studentExamSubwindow;
         private static StudentGroupActivitySubwindow? _studentGroupActivitySubwindow;
+        private static StudentPersonalActivitySubwindow? _studentPersonalActivitySubwindow;
         //private static MapEditWindow? _mapEditWindow;
         public StudentWindow()
         {
@@ -88,6 +89,15 @@ namespace StudentScheduleManagementSystem.UI
             _studentGroupActivitySubwindow.TopLevel = false;
             mainpage.Controls.Add(_studentGroupActivitySubwindow);
             _studentGroupActivitySubwindow.Show();
+        }
+
+        private void personalActivity_Click(object sender, EventArgs e)
+        {
+            mainpage.Controls.Clear();
+            _studentPersonalActivitySubwindow = new();
+            _studentPersonalActivitySubwindow.TopLevel = false;
+            mainpage.Controls.Add(_studentPersonalActivitySubwindow);
+            _studentPersonalActivitySubwindow.Show();
         }
 
         public void SetLocalTime(Times.Time time)

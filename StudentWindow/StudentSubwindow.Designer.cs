@@ -93,7 +93,7 @@
             this.scheduleData.RowHeadersWidth = 62;
             this.scheduleData.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.scheduleData.RowTemplate.Height = 32;
-            this.scheduleData.Size = new System.Drawing.Size(714, 600);
+            this.scheduleData.Size = new System.Drawing.Size(650, 600);
             this.scheduleData.TabIndex = 42;
             // 
             // courseCheckBoxColumn
@@ -188,51 +188,51 @@
             // 
             // nameBox
             // 
-            this.nameBox.Location = new System.Drawing.Point(797, 12);
+            this.nameBox.Location = new System.Drawing.Point(747, 10);
             this.nameBox.Name = "nameBox";
-            this.nameBox.Size = new System.Drawing.Size(250, 30);
+            this.nameBox.Size = new System.Drawing.Size(300, 30);
             this.nameBox.TabIndex = 44;
             // 
             // weekBox
             // 
-            this.weekBox.Location = new System.Drawing.Point(797, 50);
+            this.weekBox.Location = new System.Drawing.Point(747, 47);
             this.weekBox.Name = "weekBox";
-            this.weekBox.Size = new System.Drawing.Size(250, 30);
+            this.weekBox.Size = new System.Drawing.Size(300, 30);
             this.weekBox.TabIndex = 45;
             // 
             // dayBox
             // 
-            this.dayBox.Location = new System.Drawing.Point(797, 86);
+            this.dayBox.Location = new System.Drawing.Point(747, 83);
             this.dayBox.Name = "dayBox";
-            this.dayBox.Size = new System.Drawing.Size(250, 30);
+            this.dayBox.Size = new System.Drawing.Size(300, 30);
             this.dayBox.TabIndex = 46;
             // 
             // hourBox
             // 
-            this.hourBox.Location = new System.Drawing.Point(797, 123);
+            this.hourBox.Location = new System.Drawing.Point(747, 120);
             this.hourBox.Name = "hourBox";
-            this.hourBox.Size = new System.Drawing.Size(92, 30);
+            this.hourBox.Size = new System.Drawing.Size(104, 30);
             this.hourBox.TabIndex = 47;
             // 
             // durationBox
             // 
-            this.durationBox.Location = new System.Drawing.Point(955, 123);
+            this.durationBox.Location = new System.Drawing.Point(944, 120);
             this.durationBox.Name = "durationBox";
-            this.durationBox.Size = new System.Drawing.Size(92, 30);
+            this.durationBox.Size = new System.Drawing.Size(103, 30);
             this.durationBox.TabIndex = 48;
             // 
             // buildingComboBox
             // 
             this.buildingComboBox.FormattingEnabled = true;
-            this.buildingComboBox.Location = new System.Drawing.Point(735, 193);
+            this.buildingComboBox.Location = new System.Drawing.Point(803, 156);
             this.buildingComboBox.Name = "buildingComboBox";
-            this.buildingComboBox.Size = new System.Drawing.Size(312, 32);
+            this.buildingComboBox.Size = new System.Drawing.Size(244, 32);
             this.buildingComboBox.TabIndex = 49;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(735, 18);
+            this.label1.Location = new System.Drawing.Point(679, 13);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(62, 24);
             this.label1.TabIndex = 51;
@@ -241,7 +241,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(735, 53);
+            this.label2.Location = new System.Drawing.Point(685, 50);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(58, 24);
             this.label2.TabIndex = 52;
@@ -250,7 +250,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(735, 89);
+            this.label3.Location = new System.Drawing.Point(685, 86);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(44, 24);
             this.label3.TabIndex = 53;
@@ -259,7 +259,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(735, 126);
+            this.label4.Location = new System.Drawing.Point(685, 123);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(53, 24);
             this.label4.TabIndex = 54;
@@ -268,7 +268,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(907, 126);
+            this.label5.Location = new System.Drawing.Point(871, 123);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(42, 24);
             this.label5.TabIndex = 55;
@@ -277,7 +277,7 @@
             // buildingRadioButton
             // 
             this.buildingRadioButton.AutoSize = true;
-            this.buildingRadioButton.Location = new System.Drawing.Point(740, 159);
+            this.buildingRadioButton.Location = new System.Drawing.Point(690, 156);
             this.buildingRadioButton.Name = "buildingRadioButton";
             this.buildingRadioButton.Size = new System.Drawing.Size(107, 28);
             this.buildingRadioButton.TabIndex = 58;
@@ -288,7 +288,7 @@
             // linkRadioButton
             // 
             this.linkRadioButton.AutoSize = true;
-            this.linkRadioButton.Location = new System.Drawing.Point(740, 231);
+            this.linkRadioButton.Location = new System.Drawing.Point(690, 199);
             this.linkRadioButton.Name = "linkRadioButton";
             this.linkRadioButton.Size = new System.Drawing.Size(70, 28);
             this.linkRadioButton.TabIndex = 59;
@@ -300,7 +300,7 @@
             // 
             this.searchCancel.BackColor = System.Drawing.Color.White;
             this.searchCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.searchCancel.Location = new System.Drawing.Point(901, 606);
+            this.searchCancel.Location = new System.Drawing.Point(871, 523);
             this.searchCancel.Name = "searchCancel";
             this.searchCancel.Size = new System.Drawing.Size(135, 34);
             this.searchCancel.TabIndex = 66;
@@ -312,7 +312,7 @@
             // 
             this.searchOK.BackColor = System.Drawing.Color.White;
             this.searchOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.searchOK.Location = new System.Drawing.Point(738, 606);
+            this.searchOK.Location = new System.Drawing.Point(708, 523);
             this.searchOK.Name = "searchOK";
             this.searchOK.Size = new System.Drawing.Size(135, 34);
             this.searchOK.TabIndex = 65;
@@ -324,7 +324,7 @@
             // 
             this.reviseCancel.BackColor = System.Drawing.Color.White;
             this.reviseCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.reviseCancel.Location = new System.Drawing.Point(903, 382);
+            this.reviseCancel.Location = new System.Drawing.Point(873, 299);
             this.reviseCancel.Name = "reviseCancel";
             this.reviseCancel.Size = new System.Drawing.Size(135, 35);
             this.reviseCancel.TabIndex = 64;
@@ -336,7 +336,7 @@
             // 
             this.reviseOK.BackColor = System.Drawing.Color.White;
             this.reviseOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.reviseOK.Location = new System.Drawing.Point(738, 382);
+            this.reviseOK.Location = new System.Drawing.Point(708, 299);
             this.reviseOK.Name = "reviseOK";
             this.reviseOK.Size = new System.Drawing.Size(135, 35);
             this.reviseOK.TabIndex = 63;
@@ -348,7 +348,7 @@
             // 
             this.reviseScheduleButton.BackColor = System.Drawing.Color.White;
             this.reviseScheduleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.reviseScheduleButton.Location = new System.Drawing.Point(738, 482);
+            this.reviseScheduleButton.Location = new System.Drawing.Point(708, 399);
             this.reviseScheduleButton.Name = "reviseScheduleButton";
             this.reviseScheduleButton.Size = new System.Drawing.Size(300, 34);
             this.reviseScheduleButton.TabIndex = 62;
@@ -360,7 +360,7 @@
             // 
             this.deleteScheduleButton.BackColor = System.Drawing.Color.White;
             this.deleteScheduleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.deleteScheduleButton.Location = new System.Drawing.Point(738, 433);
+            this.deleteScheduleButton.Location = new System.Drawing.Point(708, 350);
             this.deleteScheduleButton.Name = "deleteScheduleButton";
             this.deleteScheduleButton.Size = new System.Drawing.Size(300, 34);
             this.deleteScheduleButton.TabIndex = 61;
@@ -372,7 +372,7 @@
             // 
             this.addScheduleButton.BackColor = System.Drawing.Color.White;
             this.addScheduleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.addScheduleButton.Location = new System.Drawing.Point(738, 382);
+            this.addScheduleButton.Location = new System.Drawing.Point(708, 299);
             this.addScheduleButton.Name = "addScheduleButton";
             this.addScheduleButton.Size = new System.Drawing.Size(300, 35);
             this.addScheduleButton.TabIndex = 60;
@@ -384,7 +384,7 @@
             // 
             this.searchByNameBox.AcceptsReturn = true;
             this.searchByNameBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.searchByNameBox.Location = new System.Drawing.Point(738, 560);
+            this.searchByNameBox.Location = new System.Drawing.Point(708, 477);
             this.searchByNameBox.Name = "searchByNameBox";
             this.searchByNameBox.ShortcutsEnabled = false;
             this.searchByNameBox.Size = new System.Drawing.Size(300, 30);
@@ -393,7 +393,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(738, 533);
+            this.label6.Location = new System.Drawing.Point(708, 450);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(147, 24);
             this.label6.TabIndex = 69;
@@ -411,22 +411,22 @@
             // 
             // descriptionBox
             // 
-            this.descriptionBox.Location = new System.Drawing.Point(735, 337);
+            this.descriptionBox.Location = new System.Drawing.Point(803, 230);
             this.descriptionBox.Name = "descriptionBox";
-            this.descriptionBox.Size = new System.Drawing.Size(312, 30);
+            this.descriptionBox.Size = new System.Drawing.Size(244, 30);
             this.descriptionBox.TabIndex = 72;
             // 
             // linkBox
             // 
-            this.linkBox.Location = new System.Drawing.Point(735, 265);
+            this.linkBox.Location = new System.Drawing.Point(803, 194);
             this.linkBox.Name = "linkBox";
-            this.linkBox.Size = new System.Drawing.Size(312, 30);
+            this.linkBox.Size = new System.Drawing.Size(244, 30);
             this.linkBox.TabIndex = 73;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(735, 310);
+            this.label7.Location = new System.Drawing.Point(685, 236);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(109, 24);
             this.label7.TabIndex = 74;
@@ -477,13 +477,6 @@
         #endregion
 
         protected DataGridView scheduleData;
-        private Button switchData;
-        private TextBox nameBox;
-        private TextBox weekBox;
-        private TextBox dayBox;
-        private TextBox hourBox;
-        private TextBox durationBox;
-        private ComboBox buildingComboBox;
         private Label label1;
         private Label label2;
         private Label label3;
@@ -513,5 +506,12 @@
         protected RadioButton linkRadioButton;
         protected TextBox descriptionBox;
         protected TextBox linkBox;
+        protected TextBox nameBox;
+        protected TextBox weekBox;
+        protected TextBox dayBox;
+        protected TextBox hourBox;
+        protected TextBox durationBox;
+        protected Button switchData;
+        protected ComboBox buildingComboBox;
     }
 }

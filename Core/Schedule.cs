@@ -318,14 +318,14 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             _scheduleDictionary.Remove(schedule.ScheduleId);
             DetectCollision(schedule.RepetitiveType, schedule.ScheduleType, schedule.BeginTime, schedule.Duration, schedule.ActiveWeeks, schedule.ActiveDays, out _, out _, out long[] ids);
-            if (!(ids.Length == 1 && ids[0] == schedule.ScheduleId))
+            if (ids.Length == 1 && ids[0] == schedule.ScheduleId)
             {
                 _timeline.RemoveMultipleItems(schedule.BeginTime,
                                               schedule.Duration,
                                               schedule.RepetitiveType,
-                                              out _,
                                               schedule.ActiveWeeks,
-                                              schedule.ActiveDays);
+                                              schedule.ActiveDays,
+                                              out _);
             }
             else
             {
