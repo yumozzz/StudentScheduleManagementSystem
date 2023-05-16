@@ -35,9 +35,9 @@
             this.mainpage = new System.Windows.Forms.Panel();
             this.ScheduleTableButton = new System.Windows.Forms.Button();
             this.courseButton = new System.Windows.Forms.Button();
-            this.exam = new System.Windows.Forms.Button();
-            this.GroupActivity = new System.Windows.Forms.Button();
-            this.personalActivity = new System.Windows.Forms.Button();
+            this.examButton = new System.Windows.Forms.Button();
+            this.GroupActivityButton = new System.Windows.Forms.Button();
+            this.personalActivityButton = new System.Windows.Forms.Button();
             this.header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).BeginInit();
             this.SuspendLayout();
@@ -113,42 +113,42 @@
             // 
             // exam
             // 
-            this.exam.Location = new System.Drawing.Point(12, 187);
-            this.exam.Name = "exam";
-            this.exam.Size = new System.Drawing.Size(112, 34);
-            this.exam.TabIndex = 36;
-            this.exam.Text = "Exam";
-            this.exam.UseVisualStyleBackColor = true;
-            this.exam.Click += new System.EventHandler(this.Exam_Click);
+            this.examButton.Location = new System.Drawing.Point(12, 187);
+            this.examButton.Name = "examButton";
+            this.examButton.Size = new System.Drawing.Size(112, 34);
+            this.examButton.TabIndex = 36;
+            this.examButton.Text = "Exam";
+            this.examButton.UseVisualStyleBackColor = true;
+            this.examButton.Click += new System.EventHandler(this.ExamButton_Click);
             // 
             // GroupActivity
             // 
-            this.GroupActivity.Location = new System.Drawing.Point(12, 240);
-            this.GroupActivity.Name = "GroupActivity";
-            this.GroupActivity.Size = new System.Drawing.Size(112, 34);
-            this.GroupActivity.TabIndex = 37;
-            this.GroupActivity.Text = "GroupActivity";
-            this.GroupActivity.UseVisualStyleBackColor = true;
-            this.GroupActivity.Click += new System.EventHandler(this.GroupActivity_Click);
+            this.GroupActivityButton.Location = new System.Drawing.Point(12, 240);
+            this.GroupActivityButton.Name = "GroupActivityButton";
+            this.GroupActivityButton.Size = new System.Drawing.Size(112, 34);
+            this.GroupActivityButton.TabIndex = 37;
+            this.GroupActivityButton.Text = "GroupActivity";
+            this.GroupActivityButton.UseVisualStyleBackColor = true;
+            this.GroupActivityButton.Click += new System.EventHandler(this.GroupActivityButton_Click);
             // 
             // personalActivity
             // 
-            this.personalActivity.Location = new System.Drawing.Point(12, 293);
-            this.personalActivity.Name = "personalActivity";
-            this.personalActivity.Size = new System.Drawing.Size(112, 34);
-            this.personalActivity.TabIndex = 38;
-            this.personalActivity.Text = "PersonalActivity";
-            this.personalActivity.UseVisualStyleBackColor = true;
-            this.personalActivity.Click += new System.EventHandler(this.personalActivity_Click);
+            this.personalActivityButton.Location = new System.Drawing.Point(12, 293);
+            this.personalActivityButton.Name = "personalActivityButton";
+            this.personalActivityButton.Size = new System.Drawing.Size(112, 34);
+            this.personalActivityButton.TabIndex = 38;
+            this.personalActivityButton.Text = "PersonalActivity";
+            this.personalActivityButton.UseVisualStyleBackColor = true;
+            this.personalActivityButton.Click += new System.EventHandler(this.PersonalActivityButton_Click);
             // 
             // StudentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1300, 770);
-            this.Controls.Add(this.personalActivity);
-            this.Controls.Add(this.GroupActivity);
-            this.Controls.Add(this.exam);
+            this.Controls.Add(this.personalActivityButton);
+            this.Controls.Add(this.GroupActivityButton);
+            this.Controls.Add(this.examButton);
             this.Controls.Add(this.courseButton);
             this.Controls.Add(this.ScheduleTableButton);
             this.Controls.Add(this.mainpage);
@@ -172,8 +172,8 @@
         private Panel mainpage;
         private Button ScheduleTableButton;
         private Button courseButton;
-        private Button exam;
-        private Button GroupActivity;
-        private Button personalActivity;
+        private Button examButton;
+        private Button GroupActivityButton;
+        private Button personalActivityButton;
     }
 }

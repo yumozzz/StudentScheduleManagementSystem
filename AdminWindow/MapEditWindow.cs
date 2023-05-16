@@ -39,7 +39,7 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         UpdateGraphics();
                     }
-                    Thread.Sleep(500);
+                    Thread.Sleep(100);
                 }
             });
             thread.Start();
@@ -52,8 +52,8 @@ namespace StudentScheduleManagementSystem.UI
 
         private void UpdateGraphics()
         {
-            Console.WriteLine("clear" + DateTime.Now.Millisecond);
             pictureBox1.Invalidate();
+            Update();
             using Graphics graphics = pictureBox1.CreateGraphics();
             Pen pen = new(Color.Red, 2);
             Brush brush = new SolidBrush(Color.Red);
@@ -76,7 +76,6 @@ namespace StudentScheduleManagementSystem.UI
                     return;
                 }
             }
-            Console.WriteLine("redraw" + DateTime.Now.Millisecond);
             graphics.FillEllipse(brush,
                                  new()
                                  {
