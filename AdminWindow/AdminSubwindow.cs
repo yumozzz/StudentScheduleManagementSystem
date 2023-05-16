@@ -353,14 +353,14 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             var selected = _data[index];
-            StringBuilder ScheduleDetail = GetScheduleDetail(selected.Name,
+            StringBuilder scheduleDetail = GetScheduleDetail(selected.Name,
                                                              selected.RepetitiveType,
                                                              selected.ActiveWeeks,
                                                              selected.ActiveDays,
                                                              selected.Timestamp,
                                                              selected.Duration);
 
-            if (MessageBox.Show(ScheduleDetail.ToString(), "日程信息", MessageBoxButtons.OKCancel) != DialogResult.OK)
+            if (MessageBox.Show(scheduleDetail.ToString(), "日程信息", MessageBoxButtons.OKCancel) != DialogResult.OK)
             {
                 return;
             }

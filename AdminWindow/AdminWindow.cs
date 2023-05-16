@@ -47,7 +47,7 @@
             this.Close();
         }
 
-        //TODO:
+        //TODO:退出程序
         private void CloseConfirm_Click(object sender, EventArgs e)
         {
             LogoutConfirm_Click(sender, e);
@@ -95,9 +95,8 @@
 
         private void MapEditButton_Click(object sender, EventArgs e)
         {
-            //TODO
-            _mapEditWindow = new(new List<(Map.Location.Vertex, Map.Location.Vertex)>(),
-                                 new List<(Map.Location.Vertex, Point, Point, Map.Location.Vertex)>());
+            //TODO:MapEdit
+            _mapEditWindow = new();
             _mapEditWindow.ShowDialog();
             _mapEditWindow.Close();
             _mapEditWindow.Dispose();

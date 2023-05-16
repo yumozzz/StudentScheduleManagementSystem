@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
-using System.Xml.Linq;
+using System.Collections.Generic;
 
 namespace StudentScheduleManagementSystem.Map
 {
@@ -39,13 +38,18 @@ namespace StudentScheduleManagementSystem.Map
                 Y = y;
             }
 
+            public Point ToPoint()
+            {
+                return new Point(X, Y);
+            }
+
             public override bool Equals(object? obj)
             {
                 if (obj == null)
                 {
                     return false;
                 }
-                if(obj is not Vertex)
+                if (obj is not Vertex)
                 {
                     return false;
                 }
@@ -454,6 +458,49 @@ namespace StudentScheduleManagementSystem.Map
             return new List<Building>() { new(0, "random building", new() { Id = 0, X = 0, Y = 0 }) };
         }
 
+        public static List<(Vertex, Vertex)> GetLineEndPoints()
+        {
+            HashSet<(Vertex, Vertex)> ret = new();
+            for (int i = 0; i < GlobalMap.Size; i++)
+            {
+                foreach (var pair in GlobalMap[i])
+                {
+                    var smallerId = pair.Item1 <= pair.Item2 ? pair.Item1 : pair.Item2;
+                    var biggerId = smallerId == pair.Item1 ? pair.Item2 : pair.Item1;
+                    if (GlobalMap[smallerId,biggerId]!.Value.Type==EdgeType.Line)
+                    {
+                        ret.Add((GlobalMap.GetVertex(smallerId), GlobalMap.GetVertex(biggerId)));
+                    }
+                }
+            }
+            return ret.ToList();
+        }
+
+        public static List<(Vertex, Point, Point, Vertex)> GetBezierCurveControlPoint()
+        {
+            HashSet<(Vertex, Vertex)> set = new();
+            List<(Vertex, Point, Point, Vertex)> ret = new();
+            for (int i = 0; i < GlobalMap.Size; i++)
+            {
+                foreach (var pair in GlobalMap[i])
+                {
+                    var smallerId = pair.Item1 <= pair.Item2 ? pair.Item1 : pair.Item2;
+                    var biggerId = smallerId == pair.Item1 ? pair.Item2 : pair.Item1;
+                    if (GlobalMap[smallerId, biggerId]!.Value.Type == EdgeType.Line)
+                    {
+                        set.Add((GlobalMap.GetVertex(smallerId), GlobalMap.GetVertex(biggerId)));
+                    }
+                }
+            }
+            foreach (var points in set)
+            {
+                Edge e = GlobalMap[points.Item1.Id, points.Item2.Id]!.Value;
+                (Point, Point) controls = e.Controls!.Value;
+                ret.Add((points.Item1, controls.Item1, controls.Item2, points.Item2));
+            }
+            return ret;
+        }
+
         #endregion
 
         #region other methods
@@ -570,7 +617,7 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
-        public static JArray SaveBuildings() =>
+        public static JArray SaveAllBuildings() =>
             new(Array.ConvertAll(Buildings.ToArray(),
                                  building => (Id: building.Id, Name: building.Name, CenterId: building.Center.Id)));
 
@@ -590,7 +637,7 @@ namespace StudentScheduleManagementSystem.Map
             int prevId = points[0];
             for (int i = 1; i < points.Count - 1; i++)
             {
-                Location.Edge? edge = Location.GlobalMap![prevId, i];
+                Location.Edge? edge = Location.GlobalMap[prevId, i];
                 if (!edge.HasValue)
                 {
                     throw new ArgumentException($"there's no edge between vertex {prevId} and {i}");

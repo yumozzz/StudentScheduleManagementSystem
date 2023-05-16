@@ -587,7 +587,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        //UNDONE
+        //TODO:完成按名字查询日程的函数
         public static List<ScheduleBase> GetSchedulesByName(string name)
         {
             List<ScheduleBase> ret = new();

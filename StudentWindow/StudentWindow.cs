@@ -13,10 +13,6 @@ namespace StudentScheduleManagementSystem.UI
 
     public partial class StudentWindow : Form
     {
-        public delegate void ChangeLocalTimeCallback(Times.Time time);
-
-        public ChangeLocalTimeCallback changeLocalTimeCallback;
-
         public StudentWindow()
         {
             InitializeComponent();
@@ -56,7 +52,6 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (currentTime.InvokeRequired)
             {
-                changeLocalTimeCallback = new(SetLocalTime);
                 this.currentTime.Invoke(SetLocalTime, time);
             }
             else
