@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace StudentScheduleManagementSystem
@@ -31,6 +32,17 @@ namespace StudentScheduleManagementSystem
         Exam = 2,
         Activity = 4,
         TemporaryAffair = 8,
+    }
+
+    [Flags]
+    public enum ScheduleOperationType
+    {
+        AddOnTimeline = 1,
+        AddOnUserTable = 2,
+        AddOnSharedTable = 4,
+        AdminOperation = AddOnSharedTable,
+        UserOpration = AddOnTimeline | AddOnUserTable,
+        All = AddOnTimeline | AddOnUserTable | AddOnSharedTable,
     }
 
     public enum Identity
@@ -201,5 +213,129 @@ namespace StudentScheduleManagementSystem
         public static readonly Map.Location.Building DefaultBuilding = new(-1,
                                                                            "default building",
                                                                            new() { Id = -1, X = 0, Y = 0 });
+    }
+}
+
+namespace StudentScheduleManagementSystem.UI
+{
+    public enum SubwindowState
+    {
+        Viewing, AddUserSchedule, DeleteUserSchedule, ReviseUserSchedule,
+    }
+    public enum SubwindowType
+    {
+        Default, Course, Exam, GroupActivity, PersonalActivity, TemporaryAffair
+    }
+    
+    public static class Shared
+    {
+        public static string[] Weeks => new string[]
+            {
+                "Week1",
+                "Week2",
+                "Week3",
+                "Week4",
+                "Week5",
+                "Week6",
+                "Week7",
+                "Week8",
+                "Week9",
+                "Week10",
+                "Week11",
+                "Week12",
+                "Week13",
+                "Week14",
+                "Week15",
+                "Week16",
+            };
+
+        public static StringBuilder GetBriefWeeks(int[] activeWeeks)
+        {
+            if (activeWeeks.Length == 1)
+            {
+                return new StringBuilder(activeWeeks[0].ToString());
+            }
+
+            int continuity = 0;
+            StringBuilder ret = new();
+            for (int i = 1; i < activeWeeks.Length; i++)
+            {
+                if (activeWeeks[i] == activeWeeks[i - 1] + 1)
+                {
+                    if (continuity == 0)
+                    {
+                        if (i != 1)
+                        {
+                            ret.Append(", ");
+                        }
+                        ret.Append(activeWeeks[i - 1]);
+                    }
+                    continuity++;
+                }
+                else
+                {
+                    if (continuity == 0)
+                    {
+                        if (i != 1)
+                        {
+                            ret.Append(", ");
+                        }
+                        ret.Append(activeWeeks[i - 1]);
+                    }
+                    else
+                    {
+                        ret.Append("-" + activeWeeks[i - 1].ToString());
+                    }
+                    continuity = 0;
+                }
+            }
+
+            if (continuity == 0)
+            {
+                ret.Append(", " + activeWeeks[^1].ToString());
+            }
+            else
+            {
+                ret.Append("-" + activeWeeks[^1].ToString());
+            }
+
+            return ret;
+        }
+
+        public static StringBuilder GetScheduleDetail(string name,
+                                                RepetitiveType repetitiveType,
+                                                int[] activeWeeks,
+                                                Day[] activeDays,
+                                                Times.Time timestamp,
+                                                int duration)
+        {
+            StringBuilder scheduleDetail = new();
+            if (repetitiveType == RepetitiveType.Single)
+            {
+                scheduleDetail.Append("\n周次：" + timestamp.Week);
+                scheduleDetail.Append("\n天次：" + timestamp.Day);
+            }
+            else if (repetitiveType == RepetitiveType.MultipleDays)
+            {
+                scheduleDetail.Append("\n周次：" + "1-16");
+                scheduleDetail.Append("\n天次：");
+                foreach (Day activeDay in activeDays)
+                {
+                    scheduleDetail.Append(activeDay.ToString() + "; ");
+                }
+            }
+            else
+            {
+                scheduleDetail.Append("\n周次：" + GetBriefWeeks(activeWeeks));
+                scheduleDetail.Append("\n天次：");
+                foreach (Day activeDay in activeDays)
+                {
+                    scheduleDetail.Append(activeDay.ToString() + "; ");
+                }
+            }
+
+            scheduleDetail.Append("\n时间: " + timestamp.Hour + "\n时长: " + duration + "\n名称：" + name);
+            return scheduleDetail;
+        }
     }
 }

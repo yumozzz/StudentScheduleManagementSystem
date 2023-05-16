@@ -32,6 +32,18 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
+            this.usernamebox.Text = "";
+            this.passwordbox.Text = "";
+        }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            this.Dispose();
+        }
+
         private void LoginButton_Click(object sender, EventArgs e)
         {
             if (usernamebox.Text == "" || passwordbox.Text == "")
@@ -72,18 +84,6 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        private void ClearButton_Click(object sender, EventArgs e)
-        {
-            this.usernamebox.Text = "";
-            this.passwordbox.Text = "";
-        }
-
-        private void CloseButton_Click(object sender, EventArgs e)
-        {
-            this.Close();
-            this.Dispose();
-        }
-
         private void RegisterButton_Click(object sender, EventArgs e)
         {
             if (usernamebox.Text == "" || passwordbox.Text == "")
@@ -95,7 +95,7 @@ namespace StudentScheduleManagementSystem.UI
                 if (MainProgram.Program.Register(usernamebox.Text, passwordbox.Text))
                 {
                     MessageBox.Show("Successfully register!");
-
+                    
                     StudentSubwindow = new StudentWindow();
                     this.Hide();
                     StudentSubwindow.ShowDialog();

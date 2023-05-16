@@ -61,7 +61,7 @@
             this.usernamebox.Name = "usernamebox";
             this.usernamebox.Size = new System.Drawing.Size(215, 33);
             this.usernamebox.TabIndex = 3;
-            this.usernamebox.Text = "2021219999";
+            this.usernamebox.Text = "2021210001";
             this.usernamebox.TextChanged += new System.EventHandler(this.UsernameBox_TextChanged);
             // 
             // passwordbox
@@ -72,7 +72,7 @@
             this.passwordbox.PasswordChar = '*';
             this.passwordbox.Size = new System.Drawing.Size(215, 35);
             this.passwordbox.TabIndex = 4;
-            this.passwordbox.Text = "administrator";
+            this.passwordbox.Text = "123456";
             // 
             // clear
             // 
@@ -105,7 +105,6 @@
             this.header.Name = "header";
             this.header.Size = new System.Drawing.Size(800, 40);
             this.header.TabIndex = 12;
-            //this.move.Paint += new System.Windows.Forms.PaintEventHandler(this.move_Paint);
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
             this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
             // 
@@ -138,7 +137,6 @@
             this.Name = "MainWindow";
             this.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Text = "Login";
-            //this.Load += new System.EventHandler(this.MainWindow_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

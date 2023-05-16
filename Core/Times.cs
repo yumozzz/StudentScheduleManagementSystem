@@ -131,13 +131,14 @@ namespace StudentScheduleManagementSystem.Times
         public void RemoveMultipleItems(Time timestamp,
                                         int duration,
                                         RepetitiveType repetitiveType,
-                                        out long outId,
                                         int[] activeWeeks,
-                                        Day[] activeDays)
+                                        Day[] activeDays,
+                                        out long removeId)
         {
-            outId = -1;
+            removeId = -1;
             if (repetitiveType == RepetitiveType.Single)
             {
+                removeId = RecordArray[timestamp.ToInt()].Id;
                 for (int i = 0; i < duration; i++)
                 {
                     int offset = timestamp.ToInt() + i;
@@ -156,6 +157,7 @@ namespace StudentScheduleManagementSystem.Times
                     for (int i = 0; i < duration; i++)
                     {
                         int offset = 24 * dayOffset + timestamp.Hour + i;
+                        removeId = RecordArray[offset].Id;
                         while (offset < Constants.TotalHours)
                         {
                             RemoveSingleItem(offset);
@@ -179,6 +181,7 @@ namespace StudentScheduleManagementSystem.Times
                     foreach (var activeDay in activeDays)
                     {
                         Time activeTime = new() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour };
+                        removeId = RecordArray[activeTime.ToInt()].Id;
                         for (int i = 0; i < duration; i++)
                         {
                             RemoveSingleItem(activeTime.ToInt() + i);
@@ -362,7 +365,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void RemoveAlarm(Time timestamp, RepetitiveType repetitiveType, int[] activeWeeks, Day[] activeDays)
         {
-            _timeline.RemoveMultipleItems(timestamp, 1, repetitiveType, out long alarmId, activeWeeks, activeDays);
+            _timeline.RemoveMultipleItems(timestamp, 1, repetitiveType, activeWeeks, activeDays, out long alarmId);
             _alarmList.Remove(alarmId);
             Log.Information.Log($"已删除{timestamp}时的闹钟");
         }
@@ -431,7 +434,7 @@ namespace StudentScheduleManagementSystem.Times
                 case (RepetitiveType.MultipleDays, RepetitiveType.Single):
                     Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟在{timestamp.ToString()}上已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟在{timestamp.ToString()}上已被覆盖");
-                    _timeline.RemoveMultipleItems(timestamp, 1, overrideType, out _, Constants.EmptyIntArray, Constants.EmptyDayArray);
+                    _timeline.RemoveMultipleItems(timestamp, 1, overrideType, Constants.EmptyIntArray, Constants.EmptyDayArray, out _);
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
                     Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
@@ -618,14 +621,20 @@ namespace StudentScheduleManagementSystem.Times
 
     public static class Timer
     {
-        private const int BaseTimeout = 10000;
+        private const int BaseTimeoutMs = 3000;
         private static int _acceleration = 1;
         private static Time _localTime = new();
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();
         public static bool Pause { get; set; } = false;
-
         public static Time Now => _localTime;
+        public delegate void TimeChangeEventHandler(Time t);
+        private static TimeChangeEventHandler _timeChangeEventHandler;
+        public static event TimeChangeEventHandler TimeChange
+        {
+            add => _timeChangeEventHandler += value;
+            remove => _timeChangeEventHandler -= value;
+        }
 
         public static void Start()
         {
@@ -633,13 +642,12 @@ namespace StudentScheduleManagementSystem.Times
             {
                 if (!Pause && UI.MainWindow.StudentSubwindow != null)
                 {
-                    Console.WriteLine(LocalTime);
-                    UI.MainWindow.StudentSubwindow.SetLocalTime(_localTime);
+                    _timeChangeEventHandler.Invoke(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
                 }
-                Thread.Sleep(BaseTimeout / _acceleration);
+                Thread.Sleep(BaseTimeoutMs / _acceleration);
             }
             Console.WriteLine("clock terminate");
         }

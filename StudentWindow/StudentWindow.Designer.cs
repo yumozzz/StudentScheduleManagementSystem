@@ -28,35 +28,44 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.move = new System.Windows.Forms.Panel();
-            this.logoutButton = new System.Windows.Forms.Button();
+            this.header = new System.Windows.Forms.Panel();
             this.currentTime = new System.Windows.Forms.Label();
-            this.searchButton = new System.Windows.Forms.Button();
-            this.multiSelectBox1 = new StudentScheduleManagementSystem.UI.MultiSelectBox();
-            this.multiSelectBox2 = new StudentScheduleManagementSystem.UI.MultiSelectBox();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.multiSelectBox3 = new StudentScheduleManagementSystem.UI.MultiSelectBox();
-            this.move.SuspendLayout();
-            this.panel1.SuspendLayout();
+            this.logoutButton = new System.Windows.Forms.Button();
+            this.mainpageButton = new System.Windows.Forms.PictureBox();
+            this.mainpage = new System.Windows.Forms.Panel();
+            this.ScheduleTableButton = new System.Windows.Forms.Button();
+            this.courseButton = new System.Windows.Forms.Button();
+            this.exam = new System.Windows.Forms.Button();
+            this.GroupActivity = new System.Windows.Forms.Button();
+            this.personalActivity = new System.Windows.Forms.Button();
+            this.header.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).BeginInit();
             this.SuspendLayout();
             // 
-            // move
+            // header
             // 
-            this.move.Controls.Add(this.logoutButton);
-            this.move.Location = new System.Drawing.Point(0, 0);
-            this.move.Name = "move";
-            this.move.Size = new System.Drawing.Size(1200, 40);
-            this.move.TabIndex = 1;
-            this.move.MouseDown += new System.Windows.Forms.MouseEventHandler(this.move_MouseDown);
-            this.move.MouseMove += new System.Windows.Forms.MouseEventHandler(this.move_MouseMove);
+            this.header.Controls.Add(this.currentTime);
+            this.header.Controls.Add(this.logoutButton);
+            this.header.Location = new System.Drawing.Point(0, 0);
+            this.header.Name = "header";
+            this.header.Size = new System.Drawing.Size(1300, 45);
+            this.header.TabIndex = 1;
+            this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
+            this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
             // 
-            // Logout
+            // currentTime
             // 
-            this.logoutButton.Location = new System.Drawing.Point(1076, 3);
+            this.currentTime.AutoSize = true;
+            this.currentTime.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.currentTime.Location = new System.Drawing.Point(12, 11);
+            this.currentTime.Name = "currentTime";
+            this.currentTime.Size = new System.Drawing.Size(70, 26);
+            this.currentTime.TabIndex = 2;
+            this.currentTime.Text = "Week i";
+            // 
+            // logoutButton
+            // 
+            this.logoutButton.Location = new System.Drawing.Point(1185, 3);
             this.logoutButton.Name = "logoutButton";
             this.logoutButton.Size = new System.Drawing.Size(112, 34);
             this.logoutButton.TabIndex = 7;
@@ -64,135 +73,107 @@
             this.logoutButton.UseVisualStyleBackColor = true;
             this.logoutButton.Click += new System.EventHandler(this.Logout_Click);
             // 
-            // CurrentTime
+            // mainpageButton
             // 
-            this.currentTime.AutoSize = true;
-            this.currentTime.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.currentTime.Location = new System.Drawing.Point(12, 53);
-            this.currentTime.Name = "currentTime";
-            this.currentTime.Size = new System.Drawing.Size(70, 26);
-            this.currentTime.TabIndex = 2;
-            this.currentTime.Text = "Week i";
+            this.mainpageButton.BackColor = System.Drawing.Color.Transparent;
+            this.mainpageButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.SubPageBG;
+            this.mainpageButton.Location = new System.Drawing.Point(171, 53);
+            this.mainpageButton.Name = "mainpageButton";
+            this.mainpageButton.Size = new System.Drawing.Size(1060, 665);
+            this.mainpageButton.TabIndex = 32;
+            this.mainpageButton.TabStop = false;
             // 
-            // search
+            // mainpage
             // 
-            this.searchButton.Location = new System.Drawing.Point(203, 114);
-            this.searchButton.Name = "searchButton";
-            this.searchButton.Size = new System.Drawing.Size(112, 34);
-            this.searchButton.TabIndex = 6;
-            this.searchButton.Text = "Search";
-            this.searchButton.UseVisualStyleBackColor = true;
-            this.searchButton.Click += new System.EventHandler(this.search_Click);
+            this.mainpage.BackColor = System.Drawing.Color.White;
+            this.mainpage.Location = new System.Drawing.Point(176, 58);
+            this.mainpage.Name = "mainpage";
+            this.mainpage.Size = new System.Drawing.Size(1050, 655);
+            this.mainpage.TabIndex = 33;
             // 
-            // multiSelectBox1
+            // ScheduleTableButton
             // 
-            this.multiSelectBox1.BackColor = System.Drawing.Color.White;
-            this.multiSelectBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.multiSelectBox1.Location = new System.Drawing.Point(140, 3);
-            this.multiSelectBox1.Name = "multiSelectBox1";
-            this.multiSelectBox1.Size = new System.Drawing.Size(184, 30);
-            this.multiSelectBox1.TabIndex = 9;
+            this.ScheduleTableButton.Location = new System.Drawing.Point(12, 80);
+            this.ScheduleTableButton.Name = "ScheduleTableButton";
+            this.ScheduleTableButton.Size = new System.Drawing.Size(112, 34);
+            this.ScheduleTableButton.TabIndex = 34;
+            this.ScheduleTableButton.Text = "ScheduleTable";
+            this.ScheduleTableButton.UseVisualStyleBackColor = true;
+            this.ScheduleTableButton.Click += new System.EventHandler(this.ScheduleTableButton_Click);
             // 
-            // multiSelectBox2
+            // courseButton
             // 
-            this.multiSelectBox2.BackColor = System.Drawing.Color.White;
-            this.multiSelectBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.multiSelectBox2.Location = new System.Drawing.Point(140, 39);
-            this.multiSelectBox2.Name = "multiSelectBox2";
-            this.multiSelectBox2.Size = new System.Drawing.Size(184, 30);
-            this.multiSelectBox2.TabIndex = 10;
+            this.courseButton.Location = new System.Drawing.Point(12, 134);
+            this.courseButton.Name = "courseButton";
+            this.courseButton.Size = new System.Drawing.Size(112, 34);
+            this.courseButton.TabIndex = 35;
+            this.courseButton.Text = "course";
+            this.courseButton.UseVisualStyleBackColor = true;
+            this.courseButton.Click += new System.EventHandler(this.CourseButton_Click);
             // 
-            // panel1
+            // exam
             // 
-            this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.button1);
-            this.panel1.Controls.Add(this.searchButton);
-            this.panel1.Controls.Add(this.multiSelectBox3);
-            this.panel1.Controls.Add(this.multiSelectBox1);
-            this.panel1.Controls.Add(this.multiSelectBox2);
-            this.panel1.Location = new System.Drawing.Point(873, 46);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(327, 224);
-            this.panel1.TabIndex = 11;
+            this.exam.Location = new System.Drawing.Point(12, 187);
+            this.exam.Name = "exam";
+            this.exam.Size = new System.Drawing.Size(112, 34);
+            this.exam.TabIndex = 36;
+            this.exam.Text = "Exam";
+            this.exam.UseVisualStyleBackColor = true;
+            this.exam.Click += new System.EventHandler(this.Exam_Click);
             // 
-            // label3
+            // GroupActivity
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(71, 76);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(61, 24);
-            this.label3.TabIndex = 15;
-            this.label3.Text = "Hours";
+            this.GroupActivity.Location = new System.Drawing.Point(12, 240);
+            this.GroupActivity.Name = "GroupActivity";
+            this.GroupActivity.Size = new System.Drawing.Size(112, 34);
+            this.GroupActivity.TabIndex = 37;
+            this.GroupActivity.Text = "GroupActivity";
+            this.GroupActivity.UseVisualStyleBackColor = true;
+            this.GroupActivity.Click += new System.EventHandler(this.GroupActivity_Click);
             // 
-            // label2
+            // personalActivity
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(71, 39);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(52, 24);
-            this.label2.TabIndex = 14;
-            this.label2.Text = "Days";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(71, 3);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(66, 24);
-            this.label1.TabIndex = 13;
-            this.label1.Text = "Weeks";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(203, 154);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(112, 34);
-            this.button1.TabIndex = 12;
-            this.button1.Text = "Insert";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // multiSelectBox3
-            // 
-            this.multiSelectBox3.BackColor = System.Drawing.Color.White;
-            this.multiSelectBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.multiSelectBox3.Location = new System.Drawing.Point(140, 76);
-            this.multiSelectBox3.Name = "multiSelectBox3";
-            this.multiSelectBox3.Size = new System.Drawing.Size(184, 30);
-            this.multiSelectBox3.TabIndex = 11;
+            this.personalActivity.Location = new System.Drawing.Point(12, 293);
+            this.personalActivity.Name = "personalActivity";
+            this.personalActivity.Size = new System.Drawing.Size(112, 34);
+            this.personalActivity.TabIndex = 38;
+            this.personalActivity.Text = "PersonalActivity";
+            this.personalActivity.UseVisualStyleBackColor = true;
+            this.personalActivity.Click += new System.EventHandler(this.personalActivity_Click);
             // 
             // StudentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1200, 800);
-            this.Controls.Add(this.panel1);
-            this.Controls.Add(this.currentTime);
-            this.Controls.Add(this.move);
+            this.ClientSize = new System.Drawing.Size(1300, 770);
+            this.Controls.Add(this.personalActivity);
+            this.Controls.Add(this.GroupActivity);
+            this.Controls.Add(this.exam);
+            this.Controls.Add(this.courseButton);
+            this.Controls.Add(this.ScheduleTableButton);
+            this.Controls.Add(this.mainpage);
+            this.Controls.Add(this.header);
+            this.Controls.Add(this.mainpageButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "StudentWindow";
             this.Text = "StudentWindow";
-            this.move.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.header.ResumeLayout(false);
+            this.header.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-        private Panel move;
+        private Panel header;
         private Label currentTime;
-        private Button searchButton;
         private Button logoutButton;
-        private MultiSelectBox multiSelectBox1;
-        private MultiSelectBox multiSelectBox2;
-        private Panel panel1;
-        private Label label3;
-        private Label label2;
-        private Label label1;
-        private Button button1;
-        private MultiSelectBox multiSelectBox3;
+        private PictureBox mainpageButton;
+        private Panel mainpage;
+        private Button ScheduleTableButton;
+        private Button courseButton;
+        private Button exam;
+        private Button GroupActivity;
+        private Button personalActivity;
     }
 }

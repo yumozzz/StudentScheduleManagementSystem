@@ -347,13 +347,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(168)))), ((int)(((byte)(128)))), ((int)(((byte)(194)))));
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.daySelectBox);
+            this.Controls.Add(this.weekSelectBox);
             this.Controls.Add(this.searchByIdBox);
             this.Controls.Add(this.searchCancel);
             this.Controls.Add(this.searchByNameBox);
             this.Controls.Add(this.searchOK);
             this.Controls.Add(this.nameBox);
-            this.Controls.Add(this.weekSelectBox);
-            this.Controls.Add(this.daySelectBox);
             this.Controls.Add(this.reviseCancel);
             this.Controls.Add(this.reviseOK);
             this.Controls.Add(this.reviseScheduleButton);
