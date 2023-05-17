@@ -23,7 +23,9 @@ namespace StudentScheduleManagementSystem.UI
         private static StudentExamSubwindow? _studentExamSubwindow;
         private static StudentGroupActivitySubwindow? _studentGroupActivitySubwindow;
         private static StudentPersonalActivitySubwindow? _studentPersonalActivitySubwindow;
+        private static StudentTemporaryAffairSubwindow? _studentTemporaryAffairSubwindow;
         //private static MapEditWindow? _mapEditWindow;
+
         public StudentWindow()
         {
             InitializeComponent();
@@ -98,6 +100,15 @@ namespace StudentScheduleManagementSystem.UI
             _studentPersonalActivitySubwindow.TopLevel = false;
             mainpage.Controls.Add(_studentPersonalActivitySubwindow);
             _studentPersonalActivitySubwindow.Show();
+        }
+
+        private void TemporaryAffairButton_Click(object sender, EventArgs e)
+        {
+            mainpage.Controls.Clear();
+            _studentTemporaryAffairSubwindow = new();
+            _studentTemporaryAffairSubwindow.TopLevel = false;
+            mainpage.Controls.Add(_studentTemporaryAffairSubwindow);
+            _studentTemporaryAffairSubwindow.Show();
         }
 
         public void SetLocalTime(Times.Time time)

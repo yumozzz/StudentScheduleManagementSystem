@@ -26,7 +26,11 @@ namespace StudentScheduleManagementSystem.UI
         protected StudentSubwindowBase(ScheduleType scheduleType, SubwindowType subwindowType)
         {
             InitializeComponent();
-            GenerateSharedData(scheduleType);
+            if(scheduleType == ScheduleType.Idle || scheduleType == ScheduleType.Course ||
+                scheduleType == ScheduleType.Exam || scheduleType == ScheduleType.Activity)
+            {
+                GenerateSharedData(scheduleType);
+            }
             _scheduleType = scheduleType;
             _subwindowType = subwindowType;
             for (int i = 0; i < Map.Location.Buildings.Count; i++)
@@ -1302,9 +1306,14 @@ namespace StudentScheduleManagementSystem.UI
 
     }
 
-    /*
+
     public sealed class StudentTemporaryAffairSubwindow : StudentSubwindowBase
     {
+        private ComboBox weekSelectBox = new();
+        private ComboBox daySelectBox = new();
+        private ComboBox hourComboBox = new();
+        private string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+
         public StudentTemporaryAffairSubwindow()
             : base(ScheduleType.TemporaryAffair, SubwindowType.TemporaryAffair)
         {
@@ -1314,8 +1323,105 @@ namespace StudentScheduleManagementSystem.UI
             _subwindowState = SubwindowState.Viewing;
         }
 
+        protected void GenerateTemporaryAffairSubwindow()
+        {
+            hourComboBox.BackColor = Color.White;
+            hourComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            hourComboBox.DropDownWidth = 130;
+            hourComboBox.FlatStyle = FlatStyle.Flat;
+            hourComboBox.FormattingEnabled = true;
+            hourComboBox.Items.AddRange(new object[] {
+            "8:00",
+            "9:00",
+            "10:00",
+            "11:00",
+            "12:00",
+            "13:00",
+            "14:00",
+            "15:00",
+            "16:00",
+            "17:00",
+            "18:00",
+            "19:00",
+            "20:00",
+            "21:00"});
+            hourComboBox.Location = hourBox.Location;
+            hourComboBox.Name = "hourComboBox";
+            hourComboBox.Size = hourBox.Size;
+            Controls.Add(hourComboBox);
 
+            weekSelectBox.BackColor = Color.White;
+            weekSelectBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            weekSelectBox.DropDownWidth = 130;
+            weekSelectBox.FlatStyle = FlatStyle.Flat;
+            weekSelectBox.FormattingEnabled = true;
+            weekSelectBox.Items.AddRange(Shared.Weeks);
+            weekSelectBox.Location = weekBox.Location;
+            weekSelectBox.Name = "weekSelectBox";
+            weekSelectBox.Size = weekBox.Size;
+            Controls.Add(weekSelectBox);
+
+            daySelectBox.BackColor = Color.White;
+            daySelectBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            daySelectBox.DropDownWidth = 130;
+            daySelectBox.FlatStyle = FlatStyle.Flat;
+            daySelectBox.FormattingEnabled = true;
+            daySelectBox.Items.AddRange(days);
+            daySelectBox.Location = dayBox.Location;
+            daySelectBox.Name = "daySelectBox";
+            daySelectBox.Size = dayBox.Size;
+            Controls.Add(daySelectBox);
+
+            weekBox.Hide();
+            dayBox.Hide();
+            hourBox.Hide();
+            durationBox.Hide();
+            switchData.Hide();
+        }
+
+        protected override void GenerateUserData(List<Schedule.ScheduleBase> list)
+        {
+            scheduleData.Rows.Clear();
+            int[] widths = { 30, 130, 50, 80, 60, 60, 150, 150 };
+            for (int i = 0; i < widths.Length; i++)
+            {
+                scheduleData.Columns[i].Width = widths[i];
+            }
+            scheduleData.Columns[5].Visible = false;
+            scheduleData.Columns[6].Visible = true;
+            scheduleData.Columns[7].Visible = true;
+            var converted = list.Select(elem => (Schedule.TemporaryAffairs)elem);
+            foreach (var affair in converted)
+            {
+                scheduleData.Rows.Add(null,
+                                          affair.Name,
+                                          affair.BeginTime.Week,
+                                          affair.BeginTime.Day.ToString()[..3],
+                                          affair.BeginTime.Hour.ToString() + ":00",
+                                          null,
+                                          affair.Description ?? "",
+                                          ((Map.Location.Building)(affair.OfflineLocation!)).Name,
+                                          affair.ScheduleId.ToString()
+                                          );
+            }
+        }
+
+        protected override void AddScheduleById(long id)
+        {
+            //TODO
+
+        }
+
+        protected override void AddPersonalSchedule(long? id)
+        {
+            /*public TemporaryAffairs(string name,
+                                Times.Time beginTime,
+                                string? description,
+                                Map.Location.Building location)
+            */
+
+
+        }
     }
-    */
 }
 

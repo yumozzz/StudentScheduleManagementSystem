@@ -38,6 +38,7 @@
             this.exam = new System.Windows.Forms.Button();
             this.GroupActivity = new System.Windows.Forms.Button();
             this.personalActivity = new System.Windows.Forms.Button();
+            this.temporaryAffairButton = new System.Windows.Forms.Button();
             this.header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).BeginInit();
             this.SuspendLayout();
@@ -141,11 +142,22 @@
             this.personalActivity.UseVisualStyleBackColor = true;
             this.personalActivity.Click += new System.EventHandler(this.personalActivity_Click);
             // 
+            // temporaryAffairButton
+            // 
+            this.temporaryAffairButton.Location = new System.Drawing.Point(12, 344);
+            this.temporaryAffairButton.Name = "temporaryAffairButton";
+            this.temporaryAffairButton.Size = new System.Drawing.Size(112, 34);
+            this.temporaryAffairButton.TabIndex = 39;
+            this.temporaryAffairButton.Text = "TemporaryAffair";
+            this.temporaryAffairButton.UseVisualStyleBackColor = true;
+            this.temporaryAffairButton.Click += new System.EventHandler(this.TemporaryAffairButton_Click);
+            // 
             // StudentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1300, 770);
+            this.Controls.Add(this.temporaryAffairButton);
             this.Controls.Add(this.personalActivity);
             this.Controls.Add(this.GroupActivity);
             this.Controls.Add(this.exam);
@@ -175,5 +187,6 @@
         private Button exam;
         private Button GroupActivity;
         private Button personalActivity;
+        private Button temporaryAffairButton;
     }
 }

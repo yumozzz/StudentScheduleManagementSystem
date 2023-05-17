@@ -12,9 +12,9 @@ namespace StudentScheduleManagementSystem.UI
 {
     public partial class StudentScheduleTable : Form
     {
-        public delegate void RefreshTimeTableCallback(Times.Time time);
+        public delegate void RefreshTimeTableDelegate(Times.Time time);
 
-        private RefreshTimeTableCallback _resreshTimeTableCallback;
+        private RefreshTimeTableDelegate _resreshTimeTableDelegate;
 
         public StudentScheduleTable()
         {
@@ -28,7 +28,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (scheduleTable.InvokeRequired)
             {
-                _resreshTimeTableCallback = new(RefreshScheduleTable);
+                _resreshTimeTableDelegate = new(RefreshScheduleTable);
                 this.scheduleTable.Invoke(RefreshScheduleTable, time);
                 return;
             }
