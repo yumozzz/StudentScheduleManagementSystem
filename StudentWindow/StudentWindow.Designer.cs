@@ -35,9 +35,9 @@
             this.mainpage = new System.Windows.Forms.Panel();
             this.ScheduleTableButton = new System.Windows.Forms.Button();
             this.courseButton = new System.Windows.Forms.Button();
-            this.exam = new System.Windows.Forms.Button();
-            this.GroupActivity = new System.Windows.Forms.Button();
-            this.personalActivity = new System.Windows.Forms.Button();
+            this.examButton = new System.Windows.Forms.Button();
+            this.GroupActivityButton = new System.Windows.Forms.Button();
+            this.personalActivityButton = new System.Windows.Forms.Button();
             this.temporaryAffairButton = new System.Windows.Forms.Button();
             this.header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).BeginInit();
@@ -158,9 +158,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1300, 770);
             this.Controls.Add(this.temporaryAffairButton);
-            this.Controls.Add(this.personalActivity);
-            this.Controls.Add(this.GroupActivity);
-            this.Controls.Add(this.exam);
+            this.Controls.Add(this.personalActivityButton);
+            this.Controls.Add(this.GroupActivityButton);
+            this.Controls.Add(this.examButton);
             this.Controls.Add(this.courseButton);
             this.Controls.Add(this.ScheduleTableButton);
             this.Controls.Add(this.mainpage);

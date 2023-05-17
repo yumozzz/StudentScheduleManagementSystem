@@ -273,7 +273,8 @@ namespace StudentScheduleManagementSystem.UI
 
         private void AddScheduleButton_Click(object sender, EventArgs e)
         {
-            if(this._subwindowType == SubwindowType.PersonalActivity)
+            if(_subwindowType == SubwindowType.PersonalActivity ||
+                _subwindowType == SubwindowType.TemporaryAffair)
             {
                 AddPersonalSchedule(null);
             }
@@ -285,7 +286,7 @@ namespace StudentScheduleManagementSystem.UI
 
         protected virtual void AddPersonalSchedule(long? id)
         {
-
+            
         }
 
         protected void AddGroupSchedule()
@@ -343,7 +344,8 @@ namespace StudentScheduleManagementSystem.UI
 
         private void DeleteScheduleButton_Click(object sender, EventArgs e)
         {
-            if (this._subwindowType == SubwindowType.PersonalActivity)
+            if (_subwindowType == SubwindowType.PersonalActivity ||
+                _subwindowType == SubwindowType.TemporaryAffair)
             {
                 DeletePersonalSchedule();
             }
@@ -389,8 +391,8 @@ namespace StudentScheduleManagementSystem.UI
             long id = long.Parse(scheduleData.Rows[index].Cells[8].Value.ToString()!);
 
             if (MessageBox.Show(
-                                "周次: " + scheduleData.Rows[index].Cells[3].Value.ToString() +
-                                "\n天次: " + scheduleData.Rows[index].Cells[4].Value.ToString() +
+                                "周次: " + scheduleData.Rows[index].Cells[2].Value.ToString() +
+                                "\n天次: " + scheduleData.Rows[index].Cells[3].Value.ToString() +
                                 "\n时间: " + scheduleData.Rows[index].Cells[5].Value.ToString() +
                                 "\n时长: " + scheduleData.Rows[index].Cells[6].Value.ToString() +
                                 "\n名称: " + scheduleData.Rows[index].Cells[1].Value.ToString(),
@@ -406,7 +408,8 @@ namespace StudentScheduleManagementSystem.UI
 
         private void ReviseScheduleButton_Click(object sender, EventArgs e)
         {
-            if (this._subwindowType == SubwindowType.PersonalActivity)
+            if (_subwindowType == SubwindowType.PersonalActivity ||
+                _subwindowType == SubwindowType.TemporaryAffair)
             {
                 RevisePersonalSchedule();
             }
@@ -508,6 +511,7 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseScheduleButton.Show();
             this.reviseOK.Hide();
             this.reviseCancel.Hide();
+            this._subwindowState = SubwindowState.Viewing;
         }
 
         abstract protected void AddScheduleById(long id);
@@ -520,6 +524,7 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseScheduleButton.Show();
             this.reviseOK.Hide();
             this.reviseCancel.Hide();
+            this._subwindowState = SubwindowState.Viewing;
         }
 
         protected bool isSearching = false;
@@ -1290,7 +1295,7 @@ namespace StudentScheduleManagementSystem.UI
             } 
             else
             {
-                buildingComboBox.Text = ((Map.Location.Building)((Schedule.Activity)selected).OfflineLocation).Name; ;
+                buildingComboBox.Text = ((Map.Location.Building)((Schedule.Activity)selected).OfflineLocation!).Name; ;
                 buildingRadioButton.Checked = true;
             }
             descriptionBox.Text = selected.Description;
@@ -1302,8 +1307,6 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseCancel.Show();
             _subwindowState = SubwindowState.ReviseUserSchedule;
         }
-
-
     }
 
 
@@ -1318,12 +1321,12 @@ namespace StudentScheduleManagementSystem.UI
             : base(ScheduleType.TemporaryAffair, SubwindowType.TemporaryAffair)
         {
             GenerateUserData(_scheduleType);
-            //GeneratePersonalActivitySubwindow();
+            GenerateTemporaryAffairSubwindow();
             showAllData = false;
             _subwindowState = SubwindowState.Viewing;
         }
 
-        protected void GenerateTemporaryAffairSubwindow()
+        private void GenerateTemporaryAffairSubwindow()
         {
             hourComboBox.BackColor = Color.White;
             hourComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -1347,7 +1350,7 @@ namespace StudentScheduleManagementSystem.UI
             "21:00"});
             hourComboBox.Location = hourBox.Location;
             hourComboBox.Name = "hourComboBox";
-            hourComboBox.Size = hourBox.Size;
+            hourComboBox.Size = weekBox.Size;
             Controls.Add(hourComboBox);
 
             weekSelectBox.BackColor = Color.White;
@@ -1398,7 +1401,7 @@ namespace StudentScheduleManagementSystem.UI
                                           affair.BeginTime.Week,
                                           affair.BeginTime.Day.ToString()[..3],
                                           affair.BeginTime.Hour.ToString() + ":00",
-                                          null,
+                                          "",
                                           affair.Description ?? "",
                                           ((Map.Location.Building)(affair.OfflineLocation!)).Name,
                                           affair.ScheduleId.ToString()
@@ -1408,19 +1411,133 @@ namespace StudentScheduleManagementSystem.UI
 
         protected override void AddScheduleById(long id)
         {
-            //TODO
-
+            AddPersonalSchedule(id);
         }
 
         protected override void AddPersonalSchedule(long? id)
         {
-            /*public TemporaryAffairs(string name,
-                                Times.Time beginTime,
-                                string? description,
-                                Map.Location.Building location)
-            */
+            StringBuilder errorMessage = new();
+            int activeWeek;
+            Day activeDay = Day.Monday;
+            int beginHour;
+            string buildingName;
+
+            char[] arr = nameBox.Text.ToCharArray();
+            if (arr.Length == 0)
+            {
+                errorMessage.AppendLine("请输入日程名！");
+            }
+            foreach (char c in arr)
+            {
+                if (c is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
+                              (>= '0' and <= '9') or
+                              (>= 'A' and <= 'Z') or
+                              (>= 'a' and <= 'z') or
+                              '_' or
+                              '-' or
+                              ' '))
+                {
+                    errorMessage.AppendLine("日程名包含非法字符！");
+                    break;
+                }
+            }
+            if (nameBox.Text is "Default" or "default")
+            {
+                errorMessage.AppendLine("日程名不能为保留值！");
+            }
+            if (weekSelectBox.Text.Equals(""))
+            {
+                errorMessage.AppendLine("请输入日程周！");
+            }
+            if (daySelectBox.Text.Equals(""))
+            {
+                errorMessage.AppendLine("请输入日程日！");
+            }
+            if (hourComboBox.Text == "")
+            {
+                errorMessage.AppendLine("请输入日程时间！");
+            }
+            if (!errorMessage.Equals(""))
+            {
+                MessageBox.Show(errorMessage.ToString());
+                return;
+            }
+
+            string name = nameBox.Text;
+
+            activeWeek = int.Parse(weekSelectBox.Text[4..]);
+            for(int i = 0; i < days.Length; i++)
+            {
+                if (days[i].Equals(daySelectBox.Text))
+                {
+                    activeDay = (Day)i;
+                    break;
+                }
+            }
+
+            if (hourComboBox.Text.Length == 5)
+            {
+                beginHour = (hourComboBox.Text[0] - '0') * 10 + hourComboBox.Text[1] - '0';
+            }
+            else
+            {
+                beginHour = hourComboBox.Text[0] - '0';
+            }
+
+            Times.Time beginTime = new() { Week = activeWeek, Day = activeDay, Hour = beginHour };
 
 
+            if (MessageBox.Show("", "确认日程信息", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                _ = new Schedule.TemporaryAffairs(name, beginTime, descriptionBox.Text == "" ? null : descriptionBox.Text, Map.Location.Buildings[0]);
+                GenerateUserData(_scheduleType);
+                return;
+            }
+        }
+
+        protected override void DeletePersonalSchedule()
+        {
+            DeleteGroupSchedule();
+        }
+
+        protected override void RevisePersonalSchedule()
+        {
+            int selectedCount = 0, index = 0;
+            for (int i = 0; i < _userData.Count; i++)
+            {
+                if (Convert.ToBoolean(scheduleData.Rows[i].Cells[0].EditedFormattedValue))
+                {
+                    selectedCount++;
+                    index = i;
+                }
+            }
+            if (selectedCount == 0)
+            {
+                MessageBox.Show("请选择要修改的日程！");
+                return;
+            }
+            if (selectedCount >= 2)
+            {
+                MessageBox.Show("请一次选择一个日程修改！");
+                return;
+            }
+
+            long id = long.Parse(scheduleData.Rows[index].Cells[8].Value.ToString()!);
+            var selected = Schedule.ScheduleBase.GetScheduleById(id);
+
+            nameBox.Text = selected!.Name;
+            weekSelectBox.Text = "Week" + selected.BeginTime.Week;
+            daySelectBox.Text = days[(int)selected.BeginTime.Day];
+            descriptionBox.Text = selected.Description ?? "";
+            hourComboBox.Text = selected.BeginTime.Hour + ":00";
+            buildingComboBox.Text = ((Map.Location.Building)((Schedule.TemporaryAffairs)selected).OfflineLocation).Name; ;
+            _originId = selected.ScheduleId;
+            this.reviseScheduleButton.Hide();
+            this.addScheduleButton.Hide();
+            this.deleteScheduleButton.Hide();
+            this.reviseOK.Show();
+            this.reviseCancel.Show();
+            _subwindowState = SubwindowState.ReviseUserSchedule;
         }
     }
 }
