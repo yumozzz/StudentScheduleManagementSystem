@@ -14,9 +14,9 @@
             InitializeComponent();
         }
 
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        protected void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            Graphics graphics = e.Graphics;
+            using Graphics graphics = e.Graphics;
             Pen pen = new(Color.Red, 2);
 
             foreach (var endPoints in _lineEndPointPairs)
@@ -33,11 +33,6 @@
                                     controlPoints.Item3,
                                     new(controlPoints.Item4.X, controlPoints.Item4.Y));
             }
-
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
 
         }
     }

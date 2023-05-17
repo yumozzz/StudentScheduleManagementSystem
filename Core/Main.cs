@@ -44,7 +44,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 
                 #region test
 
-                var ta = new Schedule.TemporaryAffairs("name", new(){Hour = 12}, null, Map.Location.GetBuildingsByName("")[0]);
+                //var ta = new Schedule.TemporaryAffairs("name", new(){Hour = 12}, null, Map.Location.GetBuildingsByName("")[0]);
 
                 #endregion
 

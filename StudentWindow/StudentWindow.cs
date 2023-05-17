@@ -1,24 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace StudentScheduleManagementSystem.UI
+﻿namespace StudentScheduleManagementSystem.UI
 {
 
     public partial class StudentWindow : Form
     {
-        public delegate void ChangeLocalTimeCallback(Times.Time time);
-
-        private ChangeLocalTimeCallback _changeLocalTimeCallback;
-
         private static StudentScheduleTable? _studentScheduleTable;
-
         private static StudentCourseSubwindow? _studentCourseSubwindow;
         private static StudentExamSubwindow? _studentExamSubwindow;
         private static StudentGroupActivitySubwindow? _studentGroupActivitySubwindow;
@@ -75,7 +60,7 @@ namespace StudentScheduleManagementSystem.UI
             _studentCourseSubwindow.Show();
         }
 
-        private void Exam_Click(object sender, EventArgs e)
+        private void ExamButton_Click(object sender, EventArgs e)
         {
             mainpage.Controls.Clear();
             _studentExamSubwindow = new ();
@@ -84,7 +69,7 @@ namespace StudentScheduleManagementSystem.UI
             _studentExamSubwindow.Show();
         }
 
-        private void GroupActivity_Click(object sender, EventArgs e)
+        private void GroupActivityButton_Click(object sender, EventArgs e)
         {
             mainpage.Controls.Clear();
             _studentGroupActivitySubwindow = new ();
@@ -93,7 +78,7 @@ namespace StudentScheduleManagementSystem.UI
             _studentGroupActivitySubwindow.Show();
         }
 
-        private void personalActivity_Click(object sender, EventArgs e)
+        private void PersonalActivityButton_Click(object sender, EventArgs e)
         {
             mainpage.Controls.Clear();
             _studentPersonalActivitySubwindow = new();
@@ -115,7 +100,6 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (currentTime.InvokeRequired)
             {
-                _changeLocalTimeCallback = new(SetLocalTime);
                 this.currentTime.Invoke(SetLocalTime, time);
             }
             else

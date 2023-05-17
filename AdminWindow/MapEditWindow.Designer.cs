@@ -1,6 +1,6 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
-    partial class MapEditWindow : MapWindow
+    partial class MapEditWindow : Form
     {
         /// <summary>
         /// Required designer variable.
@@ -28,19 +28,36 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
+            pictureBox1 = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            SuspendLayout();
             // 
-            // MapOPWindow
+            // pictureBox1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(778, 1144);
-            this.Name = "MapEditWindow";
-            this.Text = "MapEditWindow";
-            this.ResumeLayout(false);
+            pictureBox1.Image = Properties.Resources.SchoolMap;
+            pictureBox1.Location = new Point(0, 45);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(779, 1097);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 0;
+            pictureBox1.TabStop = false;
+            // 
+            // MapWindow
+            // 
+            AutoScaleDimensions = new SizeF(11F, 24F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(778, 1144);
+            Controls.Add(pictureBox1);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Name = "MapEditWindow";
+            Text = "MapEdit";
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ResumeLayout(false);
 
         }
 
         #endregion
+
+        private PictureBox pictureBox1;
     }
 }
