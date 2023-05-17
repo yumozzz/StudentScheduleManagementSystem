@@ -13,9 +13,9 @@ namespace StudentScheduleManagementSystem.Map
 
         public struct Edge //边
         {
-            public EdgeType Type { get; init; }
-            public (Point, Point)? Controls { get; init; }
-            public int Weight { get; init; }
+            public EdgeType Type { get; set; }
+            public (Point, Point)? Controls { get; set; }
+            public int Weight { get; set; }
 
             public Edge(EdgeType type, (Point, Point)? controls, int weight)
             {
@@ -27,9 +27,9 @@ namespace StudentScheduleManagementSystem.Map
 
         public struct Vertex //点
         {
-            public int Id { get; init; }
-            public int X { get; init; }
-            public int Y { get; init; }
+            public int Id { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
 
             public Vertex(int id, int x, int y)
             {
@@ -133,10 +133,8 @@ namespace StudentScheduleManagementSystem.Map
         {
             private struct Node
             {
-                public int adjVexId;
-                public int adjVexDist;
-                public EdgeType edgeType;
-                public (Point, Point)? controls;
+                public int pointId;
+                public Edge edge;
                 public Node* next;
             }
 
@@ -167,21 +165,25 @@ namespace StudentScheduleManagementSystem.Map
                         {
                             Node node = new()
                             {
-                                adjVexId = next["Id"]!.Value<int>(),
-                                adjVexDist = next["Distance"]!.Value<int>(),
-                                edgeType = next["EdgeType"]!.Value<string>() switch
-                                {
-                                    "Line" => EdgeType.Line, "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
-                                    _ => throw new JsonFormatException("Wrong EdgeType")
+                                pointId = next["Id"]!.Value<int>(),
+                                edge = new()
+                                { 
+                                    Weight =
+                                    next["Distance"]!.Value<int>(),
+                                    Type = next["EdgeType"]!.Value<string>() switch
+                                    {
+                                        "Line" => EdgeType.Line, "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
+                                        _ => throw new JsonFormatException("Wrong EdgeType")
+                                    },
+                                    Controls = null,
                                 },
-                                controls = null,
                                 next = null
                             };
-                            if (node.adjVexId >= Size || node.adjVexId < 0)
+                            if (node.pointId >= Size || node.pointId < 0)
                             {
                                 throw new JsonFormatException("Wrong vertex id");
                             }
-                            if (node.edgeType == EdgeType.QuadraticBezierCurve)
+                            if (node.edge.Type == EdgeType.QuadraticBezierCurve)
                             {
                                 JArray controls = (JArray)next["Controls"]!;
                                 if (controls.Count != 2)
@@ -190,7 +192,7 @@ namespace StudentScheduleManagementSystem.Map
                                 }
                                 var control1 = JsonConvert.DeserializeObject<Point>(controls.ElementAt(1).ToString());
                                 var control2 = JsonConvert.DeserializeObject<Point>(controls.ElementAt(2).ToString());
-                                node.controls = (control1, control2);
+                                node.edge.Controls = (control1, control2);
                             }
                             if (_adjArray[id] == null) //头结点
                             {
@@ -215,7 +217,7 @@ namespace StudentScheduleManagementSystem.Map
                 }
             }
 
-            #if DEBUG
+            #if false
 
             public AdjacencyTable(int[,] adjMatrix, (int, int)[] location)
             {
@@ -280,7 +282,7 @@ namespace StudentScheduleManagementSystem.Map
                     Node* cur = _adjArray[id];
                     while (cur != null)
                     {
-                        list.Add((cur->adjVexId, cur->adjVexDist));
+                        list.Add((cur->pointId, cur->edge.Weight));
                         cur = cur->next;
                     }
                     return list;
@@ -299,14 +301,14 @@ namespace StudentScheduleManagementSystem.Map
                     bool find = false;
                     while (cur != null)
                     {
-                        if (cur->adjVexId == toId)
+                        if (cur->pointId == toId)
                         {
                             find = true;
                             break;
                         }
                         cur = cur->next;
                     }
-                    return find ? new Edge(cur->edgeType, cur->controls, cur->adjVexDist) : null;
+                    return find ? cur->edge : null;
                 }
             }
 
@@ -324,15 +326,15 @@ namespace StudentScheduleManagementSystem.Map
                     {
                         JObject next = new()
                         {
-                            { "Id", cur->adjVexId },
-                            { "Distance", cur->adjVexDist },
-                            { "EdgeType", cur->edgeType == EdgeType.Line ? "Line" : "QuadraticBezierCurve" }
+                            { "Id", cur->pointId },
+                            { "Distance", cur->edge.Weight },
+                            { "EdgeType", cur->edge.Type == EdgeType.Line ? "Line" : "QuadraticBezierCurve" }
                         };
                         JArray controls = new();
-                        if (cur->edgeType == EdgeType.QuadraticBezierCurve)
+                        if (cur->edge.Type == EdgeType.QuadraticBezierCurve)
                         {
-                            JObject control1 = JObject.FromObject(cur->controls!.Value.Item1);
-                            JObject control2 = JObject.FromObject(cur->controls!.Value.Item2);
+                            JObject control1 = JObject.FromObject(cur->edge.Controls!.Value.Item1);
+                            JObject control2 = JObject.FromObject(cur->edge.Controls!.Value.Item2);
                             controls.Add(control1);
                             controls.Add(control2);
                         }

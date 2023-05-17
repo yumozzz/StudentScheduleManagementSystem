@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Net;
 
 namespace StudentScheduleManagementSystem.UI
@@ -33,7 +34,8 @@ namespace StudentScheduleManagementSystem.UI
             InitializeComponent();
             Button buttonOK = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
             Controls.Add(buttonOK);
-            Button buttonCancel = new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
+            Button buttonCancel =
+                new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
             Controls.Add(buttonCancel);
             this.KeyDown += OnKeyDown;
             pictureBox1.MouseDown += OnMouseDown;
@@ -77,11 +79,22 @@ namespace StudentScheduleManagementSystem.UI
 
             foreach ((var center, _) in _points)
             {
-                graphics.FillEllipse(brush, new() { Location = new(center.X - SmallCircRad, center.Y - SmallCircRad), Size = new(2 * SmallCircRad, 2 * SmallCircRad) });
+                graphics.FillEllipse(brush,
+                                     new()
+                                     {
+                                         Location = new(center.X - SmallCircRad, center.Y - SmallCircRad),
+                                         Size = new(2 * SmallCircRad, 2 * SmallCircRad)
+                                     });
             }
             if (_selected.HasValue)
             {
-                graphics.FillEllipse(new SolidBrush(Color.Green), new() { Location = new(_selected.Value.X - SmallCircRad, _selected.Value.Y - SmallCircRad), Size = new(2 * SmallCircRad, 2 * SmallCircRad) });
+                graphics.FillEllipse(new SolidBrush(Color.Green),
+                                     new()
+                                     {
+                                         Location = new(_selected.Value.X - SmallCircRad,
+                                                        _selected.Value.Y - SmallCircRad),
+                                         Size = new(2 * SmallCircRad, 2 * SmallCircRad)
+                                     });
             }
             foreach (var endPoints in _lineEndPointPairs)
             {
@@ -94,9 +107,14 @@ namespace StudentScheduleManagementSystem.UI
             circleCenter.Y -= BigCircRad;
             foreach ((var center, _) in _points)
             {
-                if (Distance(circleCenter, center) < 14.0)
+                if (Distance(circleCenter, center) < 10.0)
                 {
-                    graphics.FillEllipse(new SolidBrush(Color.Blue), new() { Location = new(center.X - BigCircRad, center.Y - BigCircRad), Size = new(2 * BigCircRad, 2 * BigCircRad) });
+                    graphics.FillEllipse(new SolidBrush(Color.Blue),
+                                         new()
+                                         {
+                                             Location = new(center.X - BigCircRad, center.Y - BigCircRad),
+                                             Size = new(2 * BigCircRad, 2 * BigCircRad)
+                                         });
                     _mouseOver = center;
                     return;
                 }
@@ -108,11 +126,16 @@ namespace StudentScheduleManagementSystem.UI
                                      X = _xLock == null ? circleCenter.X : _xLock.Value - BigCircRad,
                                      Y = _yLock == null ? circleCenter.Y : _yLock.Value - BigCircRad,
                                      Size = new(2 * BigCircRad, 2 * BigCircRad)
-                                 }); ;
+                                 });
+            ;
         }
 
         private void OnMouseDown(object sender, EventArgs e)
         {
+            if (isInputting)
+            {
+                return;
+            }
             Point mousePositionToPicture = pictureBox1.PointToClient(Control.MousePosition);
             if (_xLock.HasValue)
             {
@@ -124,7 +147,6 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (_mouseOver == null)
             {
-                
                 _points.Add(mousePositionToPicture, null);
                 Console.WriteLine("add point");
             }
@@ -133,14 +155,16 @@ namespace StudentScheduleManagementSystem.UI
                 if (_selected == null)
                 {
                     _selected = _mouseOver;
+                    foreach (var tuple in _points.Values)
+                    {
+                        tuple?.Item2.Hide();
+                    }
                     Console.WriteLine("select");
-                    
                 }
-                else
+                else if (_selected != _mouseOver)
                 {
                     Console.WriteLine("add line");
-                    _lineEndPointPairs.Add((_selected.Value,
-                                            _mouseOver.Value));
+                    _lineEndPointPairs.Add((_selected.Value, _mouseOver.Value));
                     _selected = null;
                 }
             }
@@ -161,10 +185,12 @@ namespace StudentScheduleManagementSystem.UI
                     e.Handled = true;
                     break;
                 case Keys.Delete:
-                    if (_selected == null)
+                    if (!_selected.HasValue)
                     {
                         break;
                     }
+                    _points[_selected.Value]?.Item2.Dispose();
+                    Controls.Remove(_points[_selected.Value]?.Item2!);
                     _points.Remove(_selected.Value);
                     int i = 0;
                     var list = _lineEndPointPairs.ToList();
@@ -186,38 +212,46 @@ namespace StudentScheduleManagementSystem.UI
                     _lineEndPointPairs = list.ToHashSet();
                     _selected = null;
                     UpdateGraphics();
+                    e.Handled = true;
+                    break;
+                case Keys.Escape:
+                    _selected = null;
+                    e.Handled = true;
                     break;
                 case Keys.Insert:
-                    if(_selected == null || !_showLabels)
+                    if (_selected == null)
                     {
                         break;
                     }
                     isInputting = true;
-                    string pointName;
-                    Label pointLabel;
-                    _textBox.Location = new Point(_selected.Value.X + 20, _selected.Value.Y + 20);
-                    _textBox.Text = "";
+                    _textBox.Location = new(_selected.Value.X + 20, _selected.Value.Y + 20);
+                    _textBox.Text = _points[_selected.Value]?.Item1 ?? String.Empty;
                     _textBox.Show();
-                    if (_points[(Point)_selected].HasValue)
-                    {
-                        pointName = _points[(Point)_selected]!.Value.Item1;
-                        _textBox.Text = pointName;
-                    }
+                    e.Handled = true;
                     break;
                 case Keys.Return:
                     if (!isInputting)
                     {
                         break;
                     }
-                    Label _ = new() { Location = _textBox.Location, Size = new(100, 24), Text = _textBox.Text, AutoSize = true, BackColor = Color.FromArgb(50, 168, 128, 194) };
-                    _points[(Point)_selected!] = (_textBox.Text, _);
-                    Controls.Add(_);
-                    _.BringToFront();
-                    _.Show();
+                    Label information = new()
+                    {
+                        Location = _textBox.Location,
+                        Size = new(100, 24),
+                        Text = _textBox.Text,
+                        AutoSize = true,
+                        BackColor = Color.FromArgb(50, 168, 128, 194)
+                    };
+                    _points[_selected!.Value] = (_textBox.Text, information);
+                    Controls.Add(information);
+                    information.BringToFront();
+                    information.Show();
                     isInputting = false;
+                    _selected = null;
                     _textBox.Hide();
-                    break;
-                case Keys.Space:
+                    goto alt; //identical to a missing break in C/C++
+                case Keys.Menu:
+                    alt:
                     if (isInputting)
                     {
                         break;
@@ -237,8 +271,51 @@ namespace StudentScheduleManagementSystem.UI
                         }
                     }
                     _showLabels = !_showLabels;
+                    e.Handled = true;
                     break;
             }
+        }
+
+        private Dictionary<Point, int> _pointIds;
+
+        private void GenerateIdDictionary()
+        {
+            _pointIds = new();
+            int index = 0;
+            foreach (var point in _points.Keys)
+            {
+                _pointIds.Add(point, index++);
+            }
+        }
+
+        public List<Map.Location.Vertex> GetVertices()
+        {
+            GenerateIdDictionary();
+            return _pointIds.Select(kvPair => kvPair.Key.ToVertex(kvPair.Value)).ToList();
+        }
+
+        public List<(Map.Location.Vertex, Map.Location.Vertex)> GetEdges()
+        {
+            GenerateIdDictionary();
+            return _lineEndPointPairs.Select(tuple => (tuple.Item1.ToVertex(_pointIds[tuple.Item1]),
+                                                       tuple.Item2.ToVertex(_pointIds[tuple.Item2])))
+                                     .ToList();
+        }
+
+        public List<Map.Location.Building> GetBuildings()
+        {
+            GenerateIdDictionary();
+            List<Map.Location.Building> ret = new();
+            int index = 0;
+            foreach (var kvPair in _points)
+            {
+                if (!kvPair.Value.HasValue)
+                {
+                    continue;
+                }
+                ret.Add(new(index++, kvPair.Value.Value.Item1, kvPair.Key.ToVertex(_pointIds[kvPair.Key])));
+            }
+            return ret;
         }
     }
 }

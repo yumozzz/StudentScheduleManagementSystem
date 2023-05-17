@@ -222,11 +222,11 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                      Map.Location.SaveBuildings(),
                                                      FileManagement.FileManager.MapFileDirectory);*/
             FileManagement.FileManager.SaveToUserAccountFile(_accounts.ToList()
-                                                                      .Select(kvpair => new UserInformation()
+                                                                      .Select(kvPair => new UserInformation()
                                                                        {
-                                                                           UserId = kvpair.Key,
-                                                                           Password = kvpair.Value.Item1,
-                                                                           PrivateKey = kvpair.Value.Item2
+                                                                           UserId = kvPair.Key,
+                                                                           Password = kvPair.Value.Item1,
+                                                                           PrivateKey = kvPair.Value.Item2
                                                                        })
                                                                       .ToList(),
                                                              FileManagement.FileManager.UserFileDirectory);
