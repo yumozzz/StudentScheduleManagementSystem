@@ -55,7 +55,6 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         UpdateGraphics();
                     }
-                    Thread.Sleep(100);
                 }
             });
             Controls.Add(_textBox);
@@ -71,8 +70,10 @@ namespace StudentScheduleManagementSystem.UI
 
         private void UpdateGraphics()
         {
+            Console.WriteLine("begin " + DateTime.Now.Millisecond);
             pictureBox1.Invalidate();
             Update();
+            Console.WriteLine("update " + DateTime.Now.Millisecond);
             using Graphics graphics = pictureBox1.CreateGraphics();
             Pen pen = new(Color.Red, 2);
             Brush brush = new SolidBrush(Color.Red);
@@ -127,7 +128,7 @@ namespace StudentScheduleManagementSystem.UI
                                      Y = _yLock == null ? circleCenter.Y : _yLock.Value - BigCircRad,
                                      Size = new(2 * BigCircRad, 2 * BigCircRad)
                                  });
-            ;
+            Console.WriteLine("end " + DateTime.Now.Millisecond);
         }
 
         private void OnMouseDown(object sender, EventArgs e)
