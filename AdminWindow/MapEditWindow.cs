@@ -1,36 +1,45 @@
-﻿using static StudentScheduleManagementSystem.UI.StudentWindow;
+﻿using System.Drawing;
+using System.Net;
 
 namespace StudentScheduleManagementSystem.UI
 {
     public partial class MapEditWindow : Form
     {
-        private HashSet<(Map.Location.Vertex, Map.Location.Vertex)> _lineEndPointPairs;
+        private const int SmallCircRad = 5;
+        private const int BigCircRad = 6;
+
+        private HashSet<(Point, Point)> _lineEndPointPairs;
         private HashSet<Point> _points;
         private int? _xLock = null, _yLock = null;
-        private Point? mouseOver = null, selected = null;
+        private Point? _mouseOver = null, _selected = null;
 
         public MapEditWindow()
         {
-            //_lineEndPointPairs = Map.Location.GetLineEndPoints().ToHashSet();
+            /*_lineEndPointPairs = Map.Location.GetLineEndPoints()
+                                    .Select(pair => (pair.Item1.ToPoint(), pair.Item2.ToPoint()))
+                                    .ToHashSet();*/
             _lineEndPointPairs = new();
             _points = new();
             foreach (var pair in _lineEndPointPairs)
             {
-                _points.Add(pair.Item1.ToPoint());
-                _points.Add(pair.Item2.ToPoint());
+                _points.Add(pair.Item1);
+                _points.Add(pair.Item2);
             }
             InitializeComponent();
             Button buttonOK = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
             Controls.Add(buttonOK);
             Button buttonCancel = new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
             Controls.Add(buttonCancel);
-            this.KeyDown += switchXLock;
-            this.KeyDown += switchYLock;
+            this.KeyDown += OnKeyDown;
             pictureBox1.MouseDown += OnMouseDown;
             Thread thread = new(() =>
             {
                 while (true)
                 {
+                    if (pictureBox1.IsDisposed)
+                    {
+                        return;
+                    }
                     if (pictureBox1.InvokeRequired)
                     {
                         this.pictureBox1.Invoke(UpdateGraphics);
@@ -58,56 +67,118 @@ namespace StudentScheduleManagementSystem.UI
             Pen pen = new(Color.Red, 2);
             Brush brush = new SolidBrush(Color.Red);
 
+            foreach (var center in _points)
+            {
+                graphics.FillEllipse(brush, new() { Location = new(center.X - SmallCircRad, center.Y - SmallCircRad), Size = new(2 * SmallCircRad, 2 * SmallCircRad) });
+            }
+            if (_selected.HasValue)
+            {
+                graphics.FillEllipse(new SolidBrush(Color.Green), new() { Location = new(_selected.Value.X - SmallCircRad, _selected.Value.Y - SmallCircRad), Size = new(2 * SmallCircRad, 2 * SmallCircRad) });
+            }
             foreach (var endPoints in _lineEndPointPairs)
             {
                 graphics.DrawLine(pen,
                                   new(endPoints.Item1.X, endPoints.Item1.Y),
                                   new(endPoints.Item2.X, endPoints.Item2.Y));
-                graphics.FillEllipse(brush, new() { X = endPoints.Item1.X, Y = endPoints.Item1.Y, Size = new(10, 10) });
-                graphics.FillEllipse(brush, new() { X = endPoints.Item2.X, Y = endPoints.Item2.Y, Size = new(10, 10) });
             }
-            Point mousePosition = this.PointToClient(Control.MousePosition);
-            foreach (var point in _points)
+            Point circleCenter = pictureBox1.PointToClient(Control.MousePosition);
+            circleCenter.X -= BigCircRad;
+            circleCenter.Y -= BigCircRad;
+            foreach (var center in _points)
             {
-                if (Distance(mousePosition, point) < 8.0)
+                if (Distance(circleCenter, center) < 14.0)
                 {
-                    graphics.FillEllipse(brush, new() { X = point.X, Y = point.Y, Size = new(20, 20) });
-                    mouseOver = point;
+                    graphics.FillEllipse(new SolidBrush(Color.Blue), new() { Location = new(center.X - BigCircRad, center.Y - BigCircRad), Size = new(2 * BigCircRad, 2 * BigCircRad) });
+                    _mouseOver = center;
                     return;
                 }
             }
+            _mouseOver = null;
             graphics.FillEllipse(brush,
                                  new()
                                  {
-                                     X = _xLock ?? mousePosition.X - 10,
-                                     Y = _yLock ?? mousePosition.Y - 55,
-                                     Size = new(20, 20)
-                                 });
+                                     X = _xLock == null ? circleCenter.X : _xLock.Value - BigCircRad,
+                                     Y = _yLock == null ? circleCenter.Y : _yLock.Value - BigCircRad,
+                                     Size = new(2 * BigCircRad, 2 * BigCircRad)
+                                 }); ;
         }
 
         private void OnMouseDown(object sender, EventArgs e)
         {
-
+            Point mousePositionToPicture = pictureBox1.PointToClient(Control.MousePosition);
+            if (_xLock.HasValue)
+            {
+                mousePositionToPicture.X = _xLock.Value;
+            }
+            if (_yLock.HasValue)
+            {
+                mousePositionToPicture.Y = _yLock.Value;
+            }
+            if (_mouseOver == null)
+            {
+                
+                _points.Add(mousePositionToPicture);
+                Console.WriteLine("add point");
+            }
+            else
+            {
+                if (_selected == null)
+                {
+                    _selected = _mouseOver;
+                    Console.WriteLine("select");
+                }
+                else
+                {
+                    Console.WriteLine("add line");
+                    _lineEndPointPairs.Add((_selected.Value,
+                                            _mouseOver.Value));
+                    _selected = null;
+                }
+            }
         }
 
-        private void switchXLock(object sender, KeyEventArgs e)
+        private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode != Keys.LShiftKey)
+            
+            switch (e.KeyCode)
             {
-                e.Handled = true;
+                case Keys.ShiftKey:
+                    //TODO:改变窗口显示
+                    _xLock = _xLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).X;
+                    e.Handled = true;
+                    break;
+                case Keys.ControlKey:
+                    _yLock = _yLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).Y;
+                    e.Handled = true;
+                    break;
+                case Keys.Delete:
+                    if (_selected == null)
+                    {
+                        break;
+                    }
+                    _points.Remove(_selected.Value);
+                    int i = 0;
+                    var list = _lineEndPointPairs.ToList();
+                    while (true)
+                    {
+                        if (i == list.Count)
+                        {
+                            break;
+                        }
+                        if (list[i].Item1 == _selected.Value || list[i].Item2 == _selected.Value)
+                        {
+                            list.RemoveAt(i);
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                    _lineEndPointPairs = list.ToHashSet();
+                    _selected = null;
+                    UpdateGraphics();
+                    break;
             }
-            _xLock = _xLock.HasValue ? null : Control.MousePosition.X;
-            //TODO:改变窗口显示
-        }
-
-        private void switchYLock(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode != Keys.LControlKey)
-            {
-                e.Handled = true;
-            }
-            _yLock = _yLock.HasValue ? null : Control.MousePosition.Y;
-            //TODO:改变窗口显示
         }
     }
 }
