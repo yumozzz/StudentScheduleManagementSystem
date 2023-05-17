@@ -42,18 +42,18 @@
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             // 
-            // MapWindow
+            // MapEditWindow
             // 
             AutoScaleDimensions = new SizeF(11F, 24F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(778, 1144);
             Controls.Add(pictureBox1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            KeyPreview = true;
             Name = "MapEditWindow";
             Text = "MapEdit";
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
-
         }
 
         #endregion

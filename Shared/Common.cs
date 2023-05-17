@@ -194,7 +194,7 @@ namespace StudentScheduleManagementSystem
             return new Times.Time { Week = week, Day = (Day)day, Hour = hour };
         }
 
-        public static Map.Location.Vertex ToPoint(this Point p, int id)
+        public static Map.Location.Vertex ToVertex(this Point p, int id)
         {
             return new() { X = p.X, Y = p.Y, Id = id };
         }
