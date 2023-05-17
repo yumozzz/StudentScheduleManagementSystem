@@ -9,9 +9,13 @@ namespace StudentScheduleManagementSystem.UI
         private const int BigCircRad = 6;
 
         private HashSet<(Point, Point)> _lineEndPointPairs;
-        private HashSet<Point> _points;
+        private Dictionary<Point, (string, Label)?> _points;
+        private TextBox _textBox = new() { Name = "TextBox", Size = new Size(100, 30) };
+
         private int? _xLock = null, _yLock = null;
         private Point? _mouseOver = null, _selected = null;
+        private bool _showLabels = false;
+        private bool isInputting = false;
 
         public MapEditWindow()
         {
@@ -20,10 +24,11 @@ namespace StudentScheduleManagementSystem.UI
                                     .ToHashSet();*/
             _lineEndPointPairs = new();
             _points = new();
+            //TODO:初始化name
             foreach (var pair in _lineEndPointPairs)
             {
-                _points.Add(pair.Item1);
-                _points.Add(pair.Item2);
+                _points.Add(pair.Item1, null);
+                _points.Add(pair.Item2, null);
             }
             InitializeComponent();
             Button buttonOK = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
@@ -51,6 +56,9 @@ namespace StudentScheduleManagementSystem.UI
                     Thread.Sleep(100);
                 }
             });
+            Controls.Add(_textBox);
+            _textBox.BringToFront();
+            _textBox.Hide();
             thread.Start();
         }
 
@@ -67,7 +75,7 @@ namespace StudentScheduleManagementSystem.UI
             Pen pen = new(Color.Red, 2);
             Brush brush = new SolidBrush(Color.Red);
 
-            foreach (var center in _points)
+            foreach ((var center, _) in _points)
             {
                 graphics.FillEllipse(brush, new() { Location = new(center.X - SmallCircRad, center.Y - SmallCircRad), Size = new(2 * SmallCircRad, 2 * SmallCircRad) });
             }
@@ -84,7 +92,7 @@ namespace StudentScheduleManagementSystem.UI
             Point circleCenter = pictureBox1.PointToClient(Control.MousePosition);
             circleCenter.X -= BigCircRad;
             circleCenter.Y -= BigCircRad;
-            foreach (var center in _points)
+            foreach ((var center, _) in _points)
             {
                 if (Distance(circleCenter, center) < 14.0)
                 {
@@ -117,7 +125,7 @@ namespace StudentScheduleManagementSystem.UI
             if (_mouseOver == null)
             {
                 
-                _points.Add(mousePositionToPicture);
+                _points.Add(mousePositionToPicture, null);
                 Console.WriteLine("add point");
             }
             else
@@ -126,6 +134,7 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     _selected = _mouseOver;
                     Console.WriteLine("select");
+                    
                 }
                 else
                 {
@@ -139,7 +148,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            
+            Console.WriteLine(e.KeyCode.ToString());
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:
@@ -177,6 +186,57 @@ namespace StudentScheduleManagementSystem.UI
                     _lineEndPointPairs = list.ToHashSet();
                     _selected = null;
                     UpdateGraphics();
+                    break;
+                case Keys.Insert:
+                    if(_selected == null || !_showLabels)
+                    {
+                        break;
+                    }
+                    isInputting = true;
+                    string pointName;
+                    Label pointLabel;
+                    _textBox.Location = new Point(_selected.Value.X + 20, _selected.Value.Y + 20);
+                    _textBox.Text = "";
+                    _textBox.Show();
+                    if (_points[(Point)_selected].HasValue)
+                    {
+                        pointName = _points[(Point)_selected]!.Value.Item1;
+                        _textBox.Text = pointName;
+                    }
+                    break;
+                case Keys.Return:
+                    if (!isInputting)
+                    {
+                        break;
+                    }
+                    Label _ = new() { Location = _textBox.Location, Size = new(100, 24), Text = _textBox.Text, AutoSize = true, BackColor = Color.FromArgb(50, 168, 128, 194) };
+                    _points[(Point)_selected!] = (_textBox.Text, _);
+                    Controls.Add(_);
+                    _.BringToFront();
+                    _.Show();
+                    isInputting = false;
+                    _textBox.Hide();
+                    break;
+                case Keys.Space:
+                    if (isInputting)
+                    {
+                        break;
+                    }
+                    foreach (var tuple in _points.Values)
+                    {
+                        if (tuple.HasValue)
+                        {
+                            if (_showLabels)
+                            {
+                                tuple.Value.Item2.Show();
+                            }
+                            else
+                            {
+                                tuple.Value.Item2.Hide();
+                            }
+                        }
+                    }
+                    _showLabels = !_showLabels;
                     break;
             }
         }
