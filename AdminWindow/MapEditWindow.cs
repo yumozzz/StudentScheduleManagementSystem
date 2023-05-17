@@ -68,7 +68,7 @@ namespace StudentScheduleManagementSystem.UI
             Controls.Add(_textBox);
             _textBox.BringToFront();
             _textBox.Hide();
-            warmPictureBox.Hide();
+            warnPictureBox.Hide();
             helpPictureBox.Hide();
             helpPictureBox.SendToBack();
             thread.Start();
@@ -185,24 +185,23 @@ namespace StudentScheduleManagementSystem.UI
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:
-                    //TODO:改变窗口显示
                     _xLock = _xLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).X;
                     e.Handled = true;
                     if (_xLock.HasValue)
                     {
-                        warmPictureBox.Image = imageList.Images[0];
-                        warmPictureBox.Show();
-                        warmPictureBox.BringToFront();
+                        warnPictureBox.Image = imageList.Images[0];
+                        warnPictureBox.Show();
+                        warnPictureBox.BringToFront();
                     }
                     else if(_yLock.HasValue)
                     {
-                        warmPictureBox.Image = imageList.Images[1];
-                        warmPictureBox.Show();
-                        warmPictureBox.BringToFront();
+                        warnPictureBox.Image = imageList.Images[1];
+                        warnPictureBox.Show();
+                        warnPictureBox.BringToFront();
                     }
                     else
                     {
-                        warmPictureBox.Hide();
+                        warnPictureBox.Hide();
                     }
                     break;
                 case Keys.ControlKey:
@@ -210,19 +209,19 @@ namespace StudentScheduleManagementSystem.UI
                     e.Handled = true; 
                     if (_yLock.HasValue)
                     {
-                        warmPictureBox.Image = imageList.Images[1];
-                        warmPictureBox.Show();
-                        warmPictureBox.BringToFront();
+                        warnPictureBox.Image = imageList.Images[1];
+                        warnPictureBox.Show();
+                        warnPictureBox.BringToFront();
                     }
                     else if (_xLock.HasValue)
                     {
-                        warmPictureBox.Image = imageList.Images[0];
-                        warmPictureBox.Show();
-                        warmPictureBox.BringToFront();
+                        warnPictureBox.Image = imageList.Images[0];
+                        warnPictureBox.Show();
+                        warnPictureBox.BringToFront();
                     }
                     else
                     {
-                        warmPictureBox.Hide();
+                        warnPictureBox.Hide();
                     }
                     break;
                 case Keys.Delete:
