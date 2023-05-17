@@ -33,20 +33,22 @@ namespace StudentScheduleManagementSystem.UI
             }
             InitializeComponent();
             Button buttonOK = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
+            //TODO:构造邻接表
+            buttonOK.Click += (sender, e) => { };
             Controls.Add(buttonOK);
             Button buttonCancel =
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
+            buttonCancel.Click += (sender, e) =>
+            {
+                this.Close();
+            };
             Controls.Add(buttonCancel);
             this.KeyDown += OnKeyDown;
             pictureBox1.MouseDown += OnMouseDown;
             Thread thread = new(() =>
             {
-                while (true)
+                while (!pictureBox1.IsDisposed)
                 {
-                    if (pictureBox1.IsDisposed)
-                    {
-                        return;
-                    }
                     if (pictureBox1.InvokeRequired)
                     {
                         this.pictureBox1.Invoke(UpdateGraphics);
@@ -55,6 +57,7 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         UpdateGraphics();
                     }
+                    Thread.Sleep(10);
                 }
             });
             Controls.Add(_textBox);
@@ -70,10 +73,8 @@ namespace StudentScheduleManagementSystem.UI
 
         private void UpdateGraphics()
         {
-            Console.WriteLine("begin " + DateTime.Now.Millisecond);
             pictureBox1.Invalidate();
             Update();
-            Console.WriteLine("update " + DateTime.Now.Millisecond);
             using Graphics graphics = pictureBox1.CreateGraphics();
             Pen pen = new(Color.Red, 2);
             Brush brush = new SolidBrush(Color.Red);
@@ -128,7 +129,6 @@ namespace StudentScheduleManagementSystem.UI
                                      Y = _yLock == null ? circleCenter.Y : _yLock.Value - BigCircRad,
                                      Size = new(2 * BigCircRad, 2 * BigCircRad)
                                  });
-            Console.WriteLine("end " + DateTime.Now.Millisecond);
         }
 
         private void OnMouseDown(object sender, EventArgs e)
@@ -173,7 +173,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            Console.WriteLine(e.KeyCode.ToString());
+            //Console.WriteLine(e.KeyCode.ToString());
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:

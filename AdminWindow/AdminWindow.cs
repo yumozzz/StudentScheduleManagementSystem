@@ -95,7 +95,6 @@
 
         private void MapEditButton_Click(object sender, EventArgs e)
         {
-            //TODO:MapEdit
             _mapEditWindow = new();
             _mapEditWindow.ShowDialog();
             _mapEditWindow.Close();
