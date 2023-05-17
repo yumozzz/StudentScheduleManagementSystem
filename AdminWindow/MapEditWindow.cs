@@ -43,26 +43,34 @@ namespace StudentScheduleManagementSystem.UI
                 this.Close();
             };
             Controls.Add(buttonCancel);
+            helpButton.Location = new(528, 0);
             this.KeyDown += OnKeyDown;
             pictureBox1.MouseDown += OnMouseDown;
             Thread thread = new(() =>
             {
-                while (!pictureBox1.IsDisposed)
+                try
                 {
-                    if (pictureBox1.InvokeRequired)
+                    while (true)
                     {
-                        this.pictureBox1.Invoke(UpdateGraphics);
+                        if (pictureBox1.InvokeRequired)
+                        {
+                            this.pictureBox1.Invoke(UpdateGraphics);
+                        }
+                        else
+                        {
+                            UpdateGraphics();
+                        }
+                        Thread.Sleep(10);
                     }
-                    else
-                    {
-                        UpdateGraphics();
-                    }
-                    Thread.Sleep(10);
                 }
+                catch(Exception) { }
             });
             Controls.Add(_textBox);
             _textBox.BringToFront();
             _textBox.Hide();
+            warmPictureBox.Hide();
+            helpPictureBox.Hide();
+            helpPictureBox.SendToBack();
             thread.Start();
         }
 
@@ -180,10 +188,42 @@ namespace StudentScheduleManagementSystem.UI
                     //TODO:改变窗口显示
                     _xLock = _xLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).X;
                     e.Handled = true;
+                    if (_xLock.HasValue)
+                    {
+                        warmPictureBox.Image = imageList.Images[0];
+                        warmPictureBox.Show();
+                        warmPictureBox.BringToFront();
+                    }
+                    else if(_yLock.HasValue)
+                    {
+                        warmPictureBox.Image = imageList.Images[1];
+                        warmPictureBox.Show();
+                        warmPictureBox.BringToFront();
+                    }
+                    else
+                    {
+                        warmPictureBox.Hide();
+                    }
                     break;
                 case Keys.ControlKey:
                     _yLock = _yLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).Y;
-                    e.Handled = true;
+                    e.Handled = true; 
+                    if (_yLock.HasValue)
+                    {
+                        warmPictureBox.Image = imageList.Images[1];
+                        warmPictureBox.Show();
+                        warmPictureBox.BringToFront();
+                    }
+                    else if (_xLock.HasValue)
+                    {
+                        warmPictureBox.Image = imageList.Images[0];
+                        warmPictureBox.Show();
+                        warmPictureBox.BringToFront();
+                    }
+                    else
+                    {
+                        warmPictureBox.Hide();
+                    }
                     break;
                 case Keys.Delete:
                     if (!_selected.HasValue)
@@ -317,6 +357,23 @@ namespace StudentScheduleManagementSystem.UI
                 ret.Add(new(index++, kvPair.Value.Value.Item1, kvPair.Key.ToVertex(_pointIds[kvPair.Key])));
             }
             return ret;
+        }
+
+        bool needHelp = false;
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (needHelp)
+            {
+                helpPictureBox.Hide();
+                needHelp = false;
+            }
+            else
+            {
+                helpPictureBox.Show();
+                helpPictureBox.BringToFront();
+                needHelp = true;
+            }
         }
     }
 }
