@@ -6,8 +6,14 @@ namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        public static List<Building> Buildings { get; private set; } = new() {Constants.DefaultBuilding, new(0, "Test Building", new(1, 100, 100))};
-        public static AdjacencyTable GlobalMap { get; private set; }
+        public static List<Building> _buildings = new(){Constants.DefaultBuilding, new (0, "Test Building", new (1, 100, 100))};
+
+        public static List<Building> Buildings
+        {
+            get => _buildings.GetRange(1, _buildings.Count - 1);
+            set => _buildings = new List<Building>() { Constants.DefaultBuilding }.Concat(value).ToList();
+        }
+        public static AdjacencyTable GlobalMap { get; set; }
 
         #region structs, classes and enums
 
@@ -45,15 +51,14 @@ namespace StudentScheduleManagementSystem.Map
 
             public override bool Equals(object? obj)
             {
-                if (obj == null)
+                if (obj is Vertex v)
+                {
+                    return Id == v.Id && X == v.X && Y == v.Y;
+                }
+                else
                 {
                     return false;
                 }
-                if (obj is not Vertex)
-                {
-                    return false;
-                }
-                return Id == ((Vertex)obj).Id && X == ((Vertex)obj).X && Y == ((Vertex)obj).Y;
             }
 
             public override int GetHashCode()
@@ -100,6 +105,18 @@ namespace StudentScheduleManagementSystem.Map
                 return !left.Equals(right);
             }
 
+            public override bool Equals(object? obj)
+            {
+                if (obj is Building b)
+                {
+                    return Id == b.Id && Name == b.Name && Center.Equals(b.Center);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
             public override int GetHashCode()
             {
                 unchecked
@@ -113,19 +130,6 @@ namespace StudentScheduleManagementSystem.Map
                     result += Center.GetHashCode();
                     return result;
                 }
-            }
-
-            public override bool Equals(object? obj)
-            {
-                if (obj == null)
-                {
-                    return false;
-                }
-                if(obj is not Building)
-                {
-                    return false;
-                }
-                return Id == ((Building)obj).Id && Name == ((Building)obj).Name && Center.Equals(((Building)obj).Center);
             }
         }
 
@@ -270,6 +274,7 @@ namespace StudentScheduleManagementSystem.Map
             }
 
             #endif
+
             public List<(int, int)> this[int id]
             {
                 get

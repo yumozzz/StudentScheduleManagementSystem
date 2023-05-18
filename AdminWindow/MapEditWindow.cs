@@ -1,8 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Net;
-
-namespace StudentScheduleManagementSystem.UI
+﻿namespace StudentScheduleManagementSystem.UI
 {
     public partial class MapEditWindow : Form
     {
@@ -25,23 +21,45 @@ namespace StudentScheduleManagementSystem.UI
                                     .ToHashSet();*/
             _lineEndPointPairs = new();
             _points = new();
-            //TODO:初始化name
+            foreach (var building in Map.Location.Buildings)
+            {
+                Label label = new()
+                {
+                    Location = new(building.Center.ToPoint().X + 20, building.Center.ToPoint().Y + 20),
+                    Size = new(100, 24),
+                    Text = building.Name,
+                    AutoSize = true,
+                    BackColor = Color.FromArgb(50, 168, 128, 194)
+                };
+                _points.Add(building.Center.ToPoint(), (building.Name, label));
+                label.BringToFront();
+                label.Hide();
+                Controls.Add(label);
+            }
             foreach (var pair in _lineEndPointPairs)
             {
-                _points.Add(pair.Item1, null);
-                _points.Add(pair.Item2, null);
+                try
+                {
+                    _points.Add(pair.Item1, null);
+                }
+                catch (ArgumentException) { }
+                try
+                {
+                    _points.Add(pair.Item2, null);
+                }
+                catch (ArgumentException) { }
             }
             InitializeComponent();
             Button buttonOK = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
-            //TODO:构造邻接表
-            buttonOK.Click += (sender, e) => { };
+            buttonOK.Click += (sender, e) =>
+            {
+                /*TODO:Map.Location.GlobalMap=new()*/
+                Map.Location.Buildings = GetBuildings();
+            };
             Controls.Add(buttonOK);
             Button buttonCancel =
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
-            buttonCancel.Click += (sender, e) =>
-            {
-                this.Close();
-            };
+            buttonCancel.Click += (sender, e) => { this.Close(); };
             Controls.Add(buttonCancel);
             helpButton.Location = new(528, 0);
             this.KeyDown += OnKeyDown;
@@ -63,7 +81,7 @@ namespace StudentScheduleManagementSystem.UI
                         Thread.Sleep(10);
                     }
                 }
-                catch(Exception) { }
+                catch (Exception) { }
             });
             Controls.Add(_textBox);
             _textBox.BringToFront();
@@ -181,7 +199,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            //Console.WriteLine(e.KeyCode.ToString());
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:
@@ -193,7 +210,7 @@ namespace StudentScheduleManagementSystem.UI
                         warnPictureBox.Show();
                         warnPictureBox.BringToFront();
                     }
-                    else if(_yLock.HasValue)
+                    else if (_yLock.HasValue)
                     {
                         warnPictureBox.Image = imageList.Images[1];
                         warnPictureBox.Show();
@@ -206,7 +223,7 @@ namespace StudentScheduleManagementSystem.UI
                     break;
                 case Keys.ControlKey:
                     _yLock = _yLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).Y;
-                    e.Handled = true; 
+                    e.Handled = true;
                     if (_yLock.HasValue)
                     {
                         warnPictureBox.Image = imageList.Images[1];
