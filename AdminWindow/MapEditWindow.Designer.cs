@@ -32,11 +32,11 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MapEditWindow));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.warmPictureBox = new System.Windows.Forms.PictureBox();
+            this.warnPictureBox = new System.Windows.Forms.PictureBox();
             this.helpPictureBox = new System.Windows.Forms.PictureBox();
             this.helpButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.warmPictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.warnPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.helpPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -60,11 +60,11 @@
             // 
             // warmPictureBox
             // 
-            this.warmPictureBox.Location = new System.Drawing.Point(239, 5);
-            this.warmPictureBox.Name = "warmPictureBox";
-            this.warmPictureBox.Size = new System.Drawing.Size(300, 50);
-            this.warmPictureBox.TabIndex = 1;
-            this.warmPictureBox.TabStop = false;
+            this.warnPictureBox.Location = new System.Drawing.Point(239, 5);
+            this.warnPictureBox.Name = "warnPictureBox";
+            this.warnPictureBox.Size = new System.Drawing.Size(300, 50);
+            this.warnPictureBox.TabIndex = 1;
+            this.warnPictureBox.TabStop = false;
             // 
             // helpPictureBox
             // 
@@ -94,14 +94,14 @@
             this.ClientSize = new System.Drawing.Size(778, 1144);
             this.Controls.Add(this.helpButton);
             this.Controls.Add(this.helpPictureBox);
-            this.Controls.Add(this.warmPictureBox);
+            this.Controls.Add(this.warnPictureBox);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.KeyPreview = true;
             this.Name = "MapEditWindow";
             this.Text = "MapEdit";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.warmPictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.warnPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.helpPictureBox)).EndInit();
             this.ResumeLayout(false);
 
@@ -111,7 +111,7 @@
 
         private PictureBox pictureBox1;
         private ImageList imageList;
-        private PictureBox warmPictureBox;
+        private PictureBox warnPictureBox;
         private PictureBox helpPictureBox;
         private Button helpButton;
     }

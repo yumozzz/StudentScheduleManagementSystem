@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
+using static StudentScheduleManagementSystem.Map.Location;
+using System.Xml.Linq;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -88,11 +90,14 @@ namespace StudentScheduleManagementSystem.Times
 
         public override bool Equals(object? obj)
         {
-            if (obj == null)
+            if (obj is Time t)
+            {
+                return _week == t._week && Day == t.Day && Hour == t.Hour;
+            }
+            else
             {
                 return false;
             }
-            return this.Week == ((Time)obj).Week && this.Day == ((Time)obj).Day && this.Hour == ((Time)obj).Hour;
         }
 
         public int ToInt()
