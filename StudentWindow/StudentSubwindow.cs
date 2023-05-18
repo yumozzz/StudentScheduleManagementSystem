@@ -1123,7 +1123,7 @@ namespace StudentScheduleManagementSystem.UI
                        : true;
             
         }
-      
+
         protected override void AddPersonalSchedule(long? id)
         {
             bool confirm = GetScheduleInfo(true,
