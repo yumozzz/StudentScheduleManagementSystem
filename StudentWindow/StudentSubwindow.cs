@@ -39,6 +39,8 @@ namespace StudentScheduleManagementSystem.UI
             }
             this.reviseOK.Hide();
             this.reviseCancel.Hide();
+            this.hideDurationPictureBox.Hide();
+            scheduleData.ScrollBars = ScrollBars.Horizontal;
         }
 
         protected static StringBuilder GetBriefWeeks(int[] activeWeeks)
@@ -188,6 +190,23 @@ namespace StudentScheduleManagementSystem.UI
         private void DetectCollision_Click(object sender, EventArgs e)
         {
             DetectCollision(true);
+        }
+
+        protected void HideLink()
+        {
+            linkRadioButton.Hide();
+            buildingRadioButton.Hide();
+            linkBox.Hide();
+            hideLinkPictureBox.Show();
+            locationPictureBox.Hide();
+            descriptionBox.Location = new(linkBox.Location.X - 16, linkBox.Location.Y);
+            buildingComboBox.Location = new(buildingComboBox.Location.X - 16, buildingComboBox.Location.Y);
+            buildingComboBox.Size = new(buildingComboBox.Width + 16, buildingComboBox.Height);
+            reviseOK.Location = new(reviseOK.Location.X, reviseOK.Location.Y - 40);
+            reviseCancel.Location = new(reviseCancel.Location.X, reviseCancel.Location.Y - 40);
+            addScheduleButton.Location = new(addScheduleButton.Location.X, addScheduleButton.Location.Y - 40);
+            deleteScheduleButton.Location = new(deleteScheduleButton.Location.X, deleteScheduleButton.Location.Y - 40);
+            reviseScheduleButton.Location = new(reviseScheduleButton.Location.X, reviseScheduleButton.Location.Y - 40);
         }
 
         private long DetectCollision(bool showMessageBox)
@@ -527,8 +546,6 @@ namespace StudentScheduleManagementSystem.UI
             this._subwindowState = SubwindowState.Viewing;
         }
 
-        protected bool isSearching = false;
-
         private void SearchOK_Click(object sender, EventArgs e)
         {
             if (this.searchByNameBox.Text.Equals(""))
@@ -674,7 +691,9 @@ namespace StudentScheduleManagementSystem.UI
     {
         public StudentExamSubwindow()
             : base(ScheduleType.Exam, SubwindowType.Exam)
-        { }
+        {
+            HideLink();
+        }
 
         protected override void GenerateUserData(List<Schedule.ScheduleBase> list)
         {
@@ -834,6 +853,7 @@ namespace StudentScheduleManagementSystem.UI
             GeneratePersonalActivitySubwindow();
             showAllData = false;
             _subwindowState = SubwindowState.Viewing;
+            HideLink();
         }
 
         private void GeneratePersonalActivitySubwindow()
@@ -904,6 +924,8 @@ namespace StudentScheduleManagementSystem.UI
             hourBox.Hide();
             durationBox.Hide();
             switchData.Hide();
+            hourComboBox.BringToFront();
+            durationComboBox.BringToFront();
             daySelectBox.BringToFront();
             weekSelectBox.BringToFront();
         }
@@ -1324,6 +1346,7 @@ namespace StudentScheduleManagementSystem.UI
             GenerateTemporaryAffairSubwindow();
             showAllData = false;
             _subwindowState = SubwindowState.Viewing;
+            HideLink();
         }
 
         private void GenerateTemporaryAffairSubwindow()
@@ -1379,7 +1402,11 @@ namespace StudentScheduleManagementSystem.UI
             dayBox.Hide();
             hourBox.Hide();
             durationBox.Hide();
+            hideDurationPictureBox.Show();
             switchData.Hide();
+            hourComboBox.BringToFront();
+            daySelectBox.BringToFront();
+            weekSelectBox.BringToFront();
         }
 
         protected override void GenerateUserData(List<Schedule.ScheduleBase> list)
