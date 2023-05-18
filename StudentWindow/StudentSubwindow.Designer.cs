@@ -465,17 +465,21 @@
         #endregion
 
         protected DataGridView scheduleData;
-        private Button searchCancel;
-        private Button searchOK;
+        protected Button searchCancel;
+        protected Button searchOK;
         protected Button cancelButton;
         protected Button okButton;
         protected Button reviseScheduleButton;
         protected Button deleteScheduleButton;
         protected Button addScheduleButton;
-        private TextBox searchByNameBox;
-        private Button detectCollisionButton;
+        protected Button detectCollisionButton;
+        protected Button switchPageButton;
+
         protected RadioButton buildingRadioButton;
         protected RadioButton linkRadioButton;
+        protected ComboBox buildingComboBox;
+
+        protected TextBox searchByNameBox;
         protected TextBox descriptionBox;
         protected TextBox onlineLinkBox;
         protected TextBox nameBox;
@@ -483,14 +487,14 @@
         protected TextBox dayBox;
         protected TextBox hourBox;
         protected TextBox durationBox;
-        protected Button switchPageButton;
-        protected ComboBox buildingComboBox;
+        
         protected PictureBox pictureBox1;
         protected PictureBox locationPictureBox;
-        private PictureBox searchByNamePictureBox;
+        protected PictureBox searchByNamePictureBox;
         protected PictureBox hideDurationPictureBox;
-        private ImageList imageList;
         protected PictureBox hideLinkPictureBox;
+        protected ImageList imageList;
+        
         private DataGridViewCheckBoxColumn courseCheckBoxColumn;
         private DataGridViewTextBoxColumn nameTextBoxColumn;
         private DataGridViewTextBoxColumn weekTextBoxColumn;

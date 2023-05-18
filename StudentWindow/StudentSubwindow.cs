@@ -775,7 +775,7 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     location = activity.OfflineLocation?.Name ?? activity.OnlineLink!;
                 }
-                else if (schedule is Schedule.TemporaryAffairs temp)
+                else if (schedule is Schedule.TemporaryAffair temp)
                 {
                     location = temp.OfflineLocation.Name;
                 }
@@ -1189,7 +1189,6 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             GenerateUserData(_scheduleType);
-            return;
         }
 
         #endregion
@@ -1339,7 +1338,7 @@ namespace StudentScheduleManagementSystem.UI
             scheduleData.Columns[5].Visible = false;
             scheduleData.Columns[6].Visible = true;
             scheduleData.Columns[7].Visible = true;
-            var converted = list.Select(elem => (Schedule.TemporaryAffairs)elem);
+            var converted = list.Select(elem => (Schedule.TemporaryAffair)elem);
             foreach (var affair in converted)
             {
                 scheduleData.Rows.Add(null,
@@ -1440,7 +1439,7 @@ namespace StudentScheduleManagementSystem.UI
                                 "确认日程信息",
                                 MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
-                _ = new Schedule.TemporaryAffairs(name,
+                _ = new Schedule.TemporaryAffair(name,
                                                   beginTime,
                                                   descriptionBox.Text == "" ? null : descriptionBox.Text,
                                                   Map.Location.Buildings[0]);
@@ -1470,7 +1469,7 @@ namespace StudentScheduleManagementSystem.UI
             daySelectBox.Text = Shared.Days[(int)selected.BeginTime.Day];
             descriptionBox.Text = selected.Description ?? "";
             hourComboBox.Text = selected.BeginTime.Hour + ":00";
-            buildingComboBox.Text = ((Schedule.TemporaryAffairs)selected).OfflineLocation.Name;
+            buildingComboBox.Text = ((Schedule.TemporaryAffair)selected).OfflineLocation.Name;
             _originId = selected.ScheduleId;
             this.reviseScheduleButton.Hide();
             this.addScheduleButton.Hide();

@@ -2,7 +2,7 @@
 using System.Text;
 
 namespace StudentScheduleManagementSystem.UI
-{ 
+{
     public abstract partial class AdminSubwindowBase : Form
     {
         protected List<Schedule.ScheduleBase.SharedData> _data;
@@ -203,16 +203,17 @@ namespace StudentScheduleManagementSystem.UI
 
             return showMessageBox
                        ? MessageBox.Show(Shared.GetScheduleDetail(name,
-                                                           repetitiveType,
-                                                           activeWeeks,
-                                                           activeDays,
-                                                           timestamp,
-                                                           duration)
-                                            .ToString(),
+                                                                  repetitiveType,
+                                                                  activeWeeks,
+                                                                  activeDays,
+                                                                  timestamp,
+                                                                  duration)
+                                               .ToString(),
                                          "确认日程信息",
                                          MessageBoxButtons.OKCancel) == DialogResult.OK
                        : true;
         }
+
         protected void AddSchedule_Click(object sender, EventArgs e)
         {
             AddOneSchedule(null, true);
@@ -243,21 +244,19 @@ namespace StudentScheduleManagementSystem.UI
 
             long id = (long)scheduleData.Rows[index].Cells[2].Value;
 
-            if (MessageBox.Show(
-                                "周次: " + scheduleData.Rows[index].Cells[3].Value.ToString() + 
-                                "\n天次: " + scheduleData.Rows[index].Cells[4].Value.ToString() + 
-                                "\n时间: " + scheduleData.Rows[index].Cells[5].Value.ToString() + 
-                                "\n时长: " + scheduleData.Rows[index].Cells[6].Value.ToString() + 
-                                "\n名称: " + scheduleData.Rows[index].Cells[1].Value.ToString(),
-                                "日程信息", 
-                                MessageBoxButtons.OKCancel
-                                ) == DialogResult.OK)
+            if (MessageBox.Show("周次: " + scheduleData.Rows[index].Cells[3].Value.ToString() + "\n天次: " +
+                                scheduleData.Rows[index].Cells[4].Value.ToString() + "\n时间: " +
+                                scheduleData.Rows[index].Cells[5].Value.ToString() + "\n时长: " +
+                                scheduleData.Rows[index].Cells[6].Value.ToString() + "\n名称: " +
+                                scheduleData.Rows[index].Cells[1].Value.ToString(),
+                                "日程信息",
+                                MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 Schedule.ScheduleBase.DeleteShared(id);
                 MessageBox.Show("已成功删除该日程");
                 Log.Information.Log($"成功删除id为{id}的共享日程");
                 GenerateFormData(_type);
-            } 
+            }
             else
             {
                 MessageBox.Show("已取消删除该日程");
@@ -286,7 +285,7 @@ namespace StudentScheduleManagementSystem.UI
                 MessageBox.Show("请一次选择一个日程修改！");
                 return;
             }
-            
+
             long id = (long)scheduleData.Rows[index].Cells[2].Value;
             var selected = Schedule.ScheduleBase.GetSharedById(id);
 
@@ -385,7 +384,7 @@ namespace StudentScheduleManagementSystem.UI
             if (column == 3)
             {
                 _data.Sort(new ActiveWeekComparer());
-                if (this.scheduleData.Columns[3].HeaderCell.SortGlyphDirection==SortOrder.Descending)
+                if (this.scheduleData.Columns[3].HeaderCell.SortGlyphDirection == SortOrder.Descending)
                 {
                     _data.Reverse(0, _data.Count);
                 }
@@ -410,12 +409,12 @@ namespace StudentScheduleManagementSystem.UI
         {
             _searchByName = true;
             if (e.KeyChar is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
-                              (>= '0' and <= '9') or
-                              (>= 'A' and <= 'Z') or
-                              (>= 'a' and <= 'z') or
-                              '_' or
-                              '-' or
-                              ' '))
+                                  (>= '0' and <= '9') or
+                                  (>= 'A' and <= 'Z') or
+                                  (>= 'a' and <= 'z') or
+                                  '_' or
+                                  '-' or
+                                  ' '))
             {
                 e.Handled = true;
             }
@@ -425,6 +424,7 @@ namespace StudentScheduleManagementSystem.UI
                 this.searchByIdBox.ForeColor = Color.Gray;
             }
         }
+
         private void SearchByIdBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             _searchByName = false;
@@ -482,7 +482,8 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class CourseSubwindow : AdminSubwindowBase
     {
         public CourseSubwindow()
-            : base(ScheduleType.Course) {
+            : base(ScheduleType.Course)
+        {
             string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri" };
             this.daySelectBox.InitializeBox(days);
         }
@@ -560,7 +561,8 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class ExamSubwindow : AdminSubwindowBase
     {
         public ExamSubwindow()
-            : base(ScheduleType.Exam) {
+            : base(ScheduleType.Exam)
+        {
             string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
             this.daySelectBox.InitializeBox(days);
         }
@@ -611,7 +613,8 @@ namespace StudentScheduleManagementSystem.UI
     public sealed class GroupActivitySubwindow : AdminSubwindowBase
     {
         public GroupActivitySubwindow()
-            : base(ScheduleType.Activity) {
+            : base(ScheduleType.Activity)
+        {
             string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
             this.daySelectBox.InitializeBox(days);
         }

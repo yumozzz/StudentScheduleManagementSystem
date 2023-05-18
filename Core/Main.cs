@@ -82,7 +82,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 { "Course", Schedule.Course.SaveInstance() },
                 { "Exam", Schedule.Exam.SaveInstance() },
                 { "Activity", Schedule.Activity.SaveInstance() },
-                { "TemporaryAffairs", Schedule.TemporaryAffairs.SaveInstance() }
+                { "TemporaryAffairs", Schedule.TemporaryAffair.SaveInstance() }
             };
 
         private static void ReadFromInstanceDictionary(Dictionary<string, JArray> instanceDictionary)
@@ -91,7 +91,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             Schedule.Course.CreateInstance(instanceDictionary["Course"]);
             Schedule.Exam.CreateInstance(instanceDictionary["Exam"]);
             Schedule.Activity.CreateInstance(instanceDictionary["Activity"]);
-            Schedule.TemporaryAffairs.CreateInstance(instanceDictionary["TemporaryAffairs"]);
+            Schedule.TemporaryAffair.CreateInstance(instanceDictionary["TemporaryAffairs"]);
         }
 
         //TODO:适配UI
@@ -368,7 +368,7 @@ namespace StudentScheduleManagementSystem.Schedule
         }
     }
 
-    public partial class TemporaryAffairs
+    public partial class TemporaryAffair
     {
         public static void FindOptimizedRoute(long id, object? obj)
         {

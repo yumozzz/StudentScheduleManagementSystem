@@ -326,7 +326,7 @@ namespace StudentScheduleManagementSystem.Times
                                                                            typeof(Schedule.Course).GetMethods(),
                                                                            typeof(Schedule.Exam).GetMethods(),
                                                                            typeof(Schedule.Activity).GetMethods(),
-                                                                           typeof(Schedule.TemporaryAffairs)
+                                                                           typeof(Schedule.TemporaryAffair)
                                                                               .GetMethods()
                                                                        }.Aggregate<
                                                                              IEnumerable<MethodInfo>>((arr, elem) =>
@@ -553,7 +553,7 @@ namespace StudentScheduleManagementSystem.Times
                     typeof(Schedule.Course).GetMethod(dobj.CallbackName!),
                     typeof(Schedule.Exam).GetMethod(dobj.CallbackName!),
                     typeof(Schedule.Activity).GetMethod(dobj.CallbackName!),
-                    typeof(Schedule.TemporaryAffairs).GetMethod(dobj.CallbackName!)
+                    typeof(Schedule.TemporaryAffair).GetMethod(dobj.CallbackName!)
                 }.First(methodInfo => methodInfo != null);
                 AddAlarm(dobj.Timestamp,
                          dobj.RepetitiveType,
