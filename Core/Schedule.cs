@@ -1430,6 +1430,9 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty]
         public new const bool IsOnline = false;
 
+        [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
+        public new Map.Location.Building OfflineLocation { get; init; }
+
         public long Next { get; private set; } = 0;
 
         #endregion

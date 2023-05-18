@@ -79,8 +79,8 @@ namespace StudentScheduleManagementSystem.Map
 
         public struct Building //建筑
         {
-            public int Id { get; set; } = -1;
-            public string Name { get; set; } = String.Empty;
+            public int Id { get; set; }
+            public string Name { get; set; }
             public Vertex Center { get; set; }
 
             public Building(int id, string name, Vertex center)

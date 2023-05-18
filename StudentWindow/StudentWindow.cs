@@ -9,7 +9,6 @@
         private static StudentGroupActivitySubwindow? _studentGroupActivitySubwindow;
         private static StudentPersonalActivitySubwindow? _studentPersonalActivitySubwindow;
         private static StudentTemporaryAffairSubwindow? _studentTemporaryAffairSubwindow;
-        //private static MapEditWindow? _mapEditWindow;
 
         public StudentWindow()
         {
