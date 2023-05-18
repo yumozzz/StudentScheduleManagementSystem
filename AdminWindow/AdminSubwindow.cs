@@ -477,7 +477,6 @@ namespace StudentScheduleManagementSystem.UI
         {
             GenerateFormData(_type);
         }
-
     }
 
     public sealed class CourseSubwindow : AdminSubwindowBase

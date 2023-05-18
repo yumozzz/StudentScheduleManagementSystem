@@ -95,10 +95,13 @@ namespace StudentScheduleManagementSystem.UI
                 if (MainProgram.Program.Register(usernamebox.Text, passwordbox.Text))
                 {
                     MessageBox.Show("Successfully register!");
-                    
-                    StudentSubwindow = new StudentWindow();
+
                     this.Hide();
-                    StudentSubwindow.ShowDialog();
+                    StudentSubwindow = new();
+                    Thread thread = new(() => StudentSubwindow.ShowDialog());
+                    thread.SetApartmentState(ApartmentState.STA);
+                    thread.Start();
+                    thread.Join();
                     StudentSubwindow.Dispose();
                     GC.Collect();
                     this.Show();

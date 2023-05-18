@@ -198,6 +198,26 @@ namespace StudentScheduleManagementSystem
         {
             return new() { X = p.X, Y = p.Y, Id = id };
         }
+
+        public static int[] GetSelectedRowsCount(this DataGridView dataGridView, int checkBoxColumn)
+        {
+            try
+            {
+                List<int> selected = new();
+                for (int i = 0; i < dataGridView.RowCount; i++)
+                {
+                    if (Convert.ToBoolean(dataGridView.Rows[i].Cells[checkBoxColumn].EditedFormattedValue))
+                    {
+                        selected.Add(i);
+                    }
+                }
+                return selected.ToArray();
+            }
+            catch (InvalidCastException)
+            {
+                throw new ArgumentException(null, nameof(checkBoxColumn));
+            }
+        }
     }
 
     public static class Constants
@@ -220,16 +240,26 @@ namespace StudentScheduleManagementSystem.UI
 {
     public enum SubwindowState
     {
-        Viewing, AddUserSchedule, DeleteUserSchedule, ReviseUserSchedule,
+        Viewing,
+        AddUserSchedule,
+        DeleteUserSchedule,
+        ReviseUserSchedule,
     }
+
     public enum SubwindowType
     {
-        Default, Course, Exam, GroupActivity, PersonalActivity, TemporaryAffair
+        Default,
+        Course,
+        Exam,
+        GroupActivity,
+        PersonalActivity,
+        TemporaryAffair
     }
-    
+
     public static class Shared
     {
-        public static string[] Weeks => new string[]
+        public static string[] Weeks =>
+            new string[]
             {
                 "Week1",
                 "Week2",
@@ -247,6 +277,25 @@ namespace StudentScheduleManagementSystem.UI
                 "Week14",
                 "Week15",
                 "Week16",
+            };
+        public static string[] Days => new string[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+        public static string[] Hours =>
+            new string[]
+            {
+                "8:00",
+                "9:00",
+                "10:00",
+                "11:00",
+                "12:00",
+                "13:00",
+                "14:00",
+                "15:00",
+                "16:00",
+                "17:00",
+                "18:00",
+                "19:00",
+                "20:00",
+                "21:00"
             };
 
         public static StringBuilder GetBriefWeeks(int[] activeWeeks)
@@ -303,11 +352,11 @@ namespace StudentScheduleManagementSystem.UI
         }
 
         public static StringBuilder GetScheduleDetail(string name,
-                                                RepetitiveType repetitiveType,
-                                                int[] activeWeeks,
-                                                Day[] activeDays,
-                                                Times.Time timestamp,
-                                                int duration)
+                                                      RepetitiveType repetitiveType,
+                                                      int[] activeWeeks,
+                                                      Day[] activeDays,
+                                                      Times.Time timestamp,
+                                                      int duration)
         {
             StringBuilder scheduleDetail = new();
             if (repetitiveType == RepetitiveType.Single)

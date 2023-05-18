@@ -38,7 +38,7 @@
             this.descriptionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.locationColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.idColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.switchData = new System.Windows.Forms.Button();
+            this.switchDataButton = new System.Windows.Forms.Button();
             this.nameBox = new System.Windows.Forms.TextBox();
             this.weekBox = new System.Windows.Forms.TextBox();
             this.dayBox = new System.Windows.Forms.TextBox();
@@ -54,16 +54,16 @@
             this.linkRadioButton = new System.Windows.Forms.RadioButton();
             this.searchCancel = new System.Windows.Forms.Button();
             this.searchOK = new System.Windows.Forms.Button();
-            this.reviseCancel = new System.Windows.Forms.Button();
-            this.reviseOK = new System.Windows.Forms.Button();
+            this.cancelButton = new System.Windows.Forms.Button();
+            this.okButton = new System.Windows.Forms.Button();
             this.reviseScheduleButton = new System.Windows.Forms.Button();
             this.deleteScheduleButton = new System.Windows.Forms.Button();
             this.addScheduleButton = new System.Windows.Forms.Button();
             this.searchByNameBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.detectCollision = new System.Windows.Forms.Button();
+            this.detectCollisionButton = new System.Windows.Forms.Button();
             this.descriptionBox = new System.Windows.Forms.TextBox();
-            this.linkBox = new System.Windows.Forms.TextBox();
+            this.onlineLinkBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
             this.SuspendLayout();
@@ -178,13 +178,13 @@
             // 
             // switchData
             // 
-            this.switchData.Location = new System.Drawing.Point(12, 8);
-            this.switchData.Name = "switchData";
-            this.switchData.Size = new System.Drawing.Size(112, 34);
-            this.switchData.TabIndex = 43;
-            this.switchData.Text = "Switch";
-            this.switchData.UseVisualStyleBackColor = true;
-            this.switchData.Click += new System.EventHandler(this.SwitchData_Click);
+            this.switchDataButton.Location = new System.Drawing.Point(12, 8);
+            this.switchDataButton.Name = "switchDataButton";
+            this.switchDataButton.Size = new System.Drawing.Size(112, 34);
+            this.switchDataButton.TabIndex = 43;
+            this.switchDataButton.Text = "Switch";
+            this.switchDataButton.UseVisualStyleBackColor = true;
+            this.switchDataButton.Click += new System.EventHandler(this.SwitchData_Click);
             // 
             // nameBox
             // 
@@ -322,27 +322,26 @@
             // 
             // reviseCancel
             // 
-            this.reviseCancel.BackColor = System.Drawing.Color.White;
-            this.reviseCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.reviseCancel.Location = new System.Drawing.Point(871, 408);
-            this.reviseCancel.Name = "reviseCancel";
-            this.reviseCancel.Size = new System.Drawing.Size(135, 35);
-            this.reviseCancel.TabIndex = 64;
-            this.reviseCancel.Text = "取消";
-            this.reviseCancel.UseVisualStyleBackColor = false;
-            this.reviseCancel.Click += new System.EventHandler(this.ReviseCancel_Click);
+            this.cancelButton.BackColor = System.Drawing.Color.White;
+            this.cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cancelButton.Location = new System.Drawing.Point(871, 408);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(135, 35);
+            this.cancelButton.TabIndex = 64;
+            this.cancelButton.Text = "取消";
+            this.cancelButton.UseVisualStyleBackColor = false;
+            this.cancelButton.Click += new System.EventHandler(this.ReviseCancel_Click);
             // 
             // reviseOK
             // 
-            this.reviseOK.BackColor = System.Drawing.Color.White;
-            this.reviseOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.reviseOK.Location = new System.Drawing.Point(706, 408);
-            this.reviseOK.Name = "reviseOK";
-            this.reviseOK.Size = new System.Drawing.Size(135, 35);
-            this.reviseOK.TabIndex = 63;
-            this.reviseOK.Text = "确认";
-            this.reviseOK.UseVisualStyleBackColor = false;
-            this.reviseOK.Click += new System.EventHandler(this.ReviseOK_Click);
+            this.okButton.BackColor = System.Drawing.Color.White;
+            this.okButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.okButton.Location = new System.Drawing.Point(706, 408);
+            this.okButton.Name = "okButton";
+            this.okButton.Size = new System.Drawing.Size(135, 35);
+            this.okButton.TabIndex = 63;
+            this.okButton.Text = "确认";
+            this.okButton.UseVisualStyleBackColor = false;
             // 
             // reviseScheduleButton
             // 
@@ -354,7 +353,6 @@
             this.reviseScheduleButton.TabIndex = 62;
             this.reviseScheduleButton.Text = "修改日程";
             this.reviseScheduleButton.UseVisualStyleBackColor = false;
-            this.reviseScheduleButton.Click += new System.EventHandler(this.ReviseScheduleButton_Click);
             // 
             // deleteScheduleButton
             // 
@@ -366,7 +364,6 @@
             this.deleteScheduleButton.TabIndex = 61;
             this.deleteScheduleButton.Text = "删除日程";
             this.deleteScheduleButton.UseVisualStyleBackColor = false;
-            this.deleteScheduleButton.Click += new System.EventHandler(this.DeleteScheduleButton_Click);
             // 
             // addScheduleButton
             // 
@@ -378,7 +375,6 @@
             this.addScheduleButton.TabIndex = 60;
             this.addScheduleButton.Text = "添加日程";
             this.addScheduleButton.UseVisualStyleBackColor = false;
-            this.addScheduleButton.Click += new System.EventHandler(this.AddScheduleButton_Click);
             // 
             // searchByNameBox
             // 
@@ -401,13 +397,12 @@
             // 
             // detectCollision
             // 
-            this.detectCollision.Location = new System.Drawing.Point(130, 8);
-            this.detectCollision.Name = "detectCollision";
-            this.detectCollision.Size = new System.Drawing.Size(112, 34);
-            this.detectCollision.TabIndex = 71;
-            this.detectCollision.Text = "检测冲突";
-            this.detectCollision.UseVisualStyleBackColor = true;
-            this.detectCollision.Click += new System.EventHandler(this.DetectCollision_Click);
+            this.detectCollisionButton.Location = new System.Drawing.Point(130, 8);
+            this.detectCollisionButton.Name = "detectCollisionButton";
+            this.detectCollisionButton.Size = new System.Drawing.Size(112, 34);
+            this.detectCollisionButton.TabIndex = 71;
+            this.detectCollisionButton.Text = "检测冲突";
+            this.detectCollisionButton.UseVisualStyleBackColor = true;
             // 
             // descriptionBox
             // 
@@ -418,10 +413,10 @@
             // 
             // linkBox
             // 
-            this.linkBox.Location = new System.Drawing.Point(776, 322);
-            this.linkBox.Name = "linkBox";
-            this.linkBox.Size = new System.Drawing.Size(230, 30);
-            this.linkBox.TabIndex = 73;
+            this.onlineLinkBox.Location = new System.Drawing.Point(776, 322);
+            this.onlineLinkBox.Name = "onlineLinkBox";
+            this.onlineLinkBox.Size = new System.Drawing.Size(230, 30);
+            this.onlineLinkBox.TabIndex = 73;
             // 
             // label7
             // 
@@ -438,15 +433,15 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
             this.Controls.Add(this.label7);
-            this.Controls.Add(this.linkBox);
+            this.Controls.Add(this.onlineLinkBox);
             this.Controls.Add(this.descriptionBox);
-            this.Controls.Add(this.detectCollision);
+            this.Controls.Add(this.detectCollisionButton);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.searchByNameBox);
             this.Controls.Add(this.searchCancel);
             this.Controls.Add(this.searchOK);
-            this.Controls.Add(this.reviseCancel);
-            this.Controls.Add(this.reviseOK);
+            this.Controls.Add(this.cancelButton);
+            this.Controls.Add(this.okButton);
             this.Controls.Add(this.reviseScheduleButton);
             this.Controls.Add(this.deleteScheduleButton);
             this.Controls.Add(this.addScheduleButton);
@@ -463,7 +458,7 @@
             this.Controls.Add(this.dayBox);
             this.Controls.Add(this.weekBox);
             this.Controls.Add(this.nameBox);
-            this.Controls.Add(this.switchData);
+            this.Controls.Add(this.switchDataButton);
             this.Controls.Add(this.scheduleData);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "StudentSubwindowBase";
@@ -484,14 +479,14 @@
         private Label label5;
         private Button searchCancel;
         private Button searchOK;
-        protected Button reviseCancel;
-        protected Button reviseOK;
+        protected Button cancelButton;
+        protected Button okButton;
         protected Button reviseScheduleButton;
         protected Button deleteScheduleButton;
         protected Button addScheduleButton;
         private TextBox searchByNameBox;
         private Label label6;
-        private Button detectCollision;
+        private Button detectCollisionButton;
         private Label label7;
         private DataGridViewCheckBoxColumn courseCheckBoxColumn;
         private DataGridViewTextBoxColumn nameTextBoxColumn;
@@ -505,13 +500,13 @@
         protected RadioButton buildingRadioButton;
         protected RadioButton linkRadioButton;
         protected TextBox descriptionBox;
-        protected TextBox linkBox;
+        protected TextBox onlineLinkBox;
         protected TextBox nameBox;
         protected TextBox weekBox;
         protected TextBox dayBox;
         protected TextBox hourBox;
         protected TextBox durationBox;
-        protected Button switchData;
+        protected Button switchDataButton;
         protected ComboBox buildingComboBox;
     }
 }
