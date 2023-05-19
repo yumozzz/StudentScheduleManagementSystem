@@ -95,6 +95,20 @@ namespace StudentScheduleManagementSystem.UI
             return ret;
         }
 
+        protected void ClearInput()
+        {
+            this.nameBox.Text = "";
+            this.weekBox.Text = "";
+            this.dayBox.Text = "";
+            this.hourBox.Text = "";
+            this.durationBox.Text = "";
+            this.buildingRadioButton.Checked = false;
+            this.onlineLinkRadioButton.Checked = false;
+            this.buildingComboBox.SelectedIndex = -1;
+            this.buildingComboBox.Text = "";
+            this.onlineLinkBox.Text = "";
+        }
+
         #endregion
 
         #region table content generator
@@ -232,15 +246,6 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        protected void ClearInput()
-        {
-            this.nameBox.Text = "";
-            this.weekBox.Text = "";
-            this.dayBox.Text = "";
-            this.hourBox.Text = "";
-            this.durationBox.Text = "";
-        }
-
         #endregion
 
         #region envent handler
@@ -250,11 +255,13 @@ namespace StudentScheduleManagementSystem.UI
             if (_showAllData)
             {
                 _showAllData = false;
+                detectCollisionButton.Visible = false;
                 GenerateUserData(_scheduleType);
             }
             else
             {
                 _showAllData = true;
+                detectCollisionButton.Visible = true;
                 GenerateSharedData(_scheduleType);
             }
         }
@@ -475,7 +482,7 @@ namespace StudentScheduleManagementSystem.UI
                     location = $"\n地址: {buildingComboBox.Text}";
                 }
             }
-            else if (linkRadioButton.Checked && linkRadioButton.Visible)
+            else if (onlineLinkRadioButton.Checked && onlineLinkRadioButton.Visible)
             {
                 if (onlineLinkBox.Text == "")
                 {
@@ -483,10 +490,10 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 else
                 {
-                    location = $"\n链接: {buildingComboBox.Text}";
+                    location = $"\n链接: {onlineLinkBox.Text}";
                 }
             }
-            else if (!buildingRadioButton.Visible && !linkRadioButton.Visible)
+            else if (!buildingRadioButton.Visible && !onlineLinkRadioButton.Visible)
             { }
             else
             {
@@ -562,7 +569,7 @@ namespace StudentScheduleManagementSystem.UI
                     selected.Timestamp,
                     selected.Duration,
                     descriptionBox.Text == "" ? null : descriptionBox.Text,
-                    onlineLinkBox,
+                    onlineLinkBox.Text,
                     selected.ActiveWeeks,
                     selected.ActiveDays,
                     ScheduleOperationType.UserOpration,
@@ -643,7 +650,6 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            //TODO:冲突检测
             long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[8].Value.ToString()!);
             bool confirm = GetScheduleInfo(true, scheduleData.Rows[selectedRows[0]], out _, out _);
             if (!confirm)
@@ -662,7 +668,12 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseScheduleButton.Show();
             this.okButton.Hide();
             this.cancelButton.Hide();
-            this._subwindowState = SubwindowState.Viewing;
+            if (_subwindowState == SubwindowState.ReviseUserSchedule)
+            {
+                GenerateUserData(_scheduleType);
+            }
+            _subwindowState = SubwindowState.Viewing;
+            ClearInput();
             foreach (DataGridViewRow row in scheduleData.Rows)
             {
                 ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
@@ -820,7 +831,6 @@ namespace StudentScheduleManagementSystem.UI
         {
             Debug.Assert(_subwindowState is SubwindowState.ReviseUserSchedule && _originId != null);
 
-            //TODO:冲突检测
             var selected = Schedule.ScheduleBase.GetScheduleById(_originId.Value);
             selected!.DeleteSchedule();
             AddSchedule();
@@ -997,7 +1007,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 errorMessage.AppendLine("请输入日程地址！");
             }
-            else if (linkRadioButton.Checked && linkRadioButton.Visible && onlineLinkBox.Text == "")
+            else if (onlineLinkRadioButton.Checked && onlineLinkRadioButton.Visible && onlineLinkBox.Text == "")
             {
                 errorMessage.AppendLine("请输入日程链接！");
             }
@@ -1242,7 +1252,7 @@ namespace StudentScheduleManagementSystem.UI
             if (selected.IsOnline)
             {
                 onlineLinkBox.Text = ((Schedule.Activity)selected).OnlineLink;
-                linkRadioButton.Checked = true;
+                onlineLinkRadioButton.Checked = true;
             }
             else
             {

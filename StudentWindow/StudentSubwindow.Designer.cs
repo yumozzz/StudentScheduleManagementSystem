@@ -48,7 +48,7 @@
             this.durationBox = new System.Windows.Forms.TextBox();
             this.buildingComboBox = new System.Windows.Forms.ComboBox();
             this.buildingRadioButton = new System.Windows.Forms.RadioButton();
-            this.linkRadioButton = new System.Windows.Forms.RadioButton();
+            this.onlineLinkRadioButton = new System.Windows.Forms.RadioButton();
             this.searchCancel = new System.Windows.Forms.Button();
             this.searchOK = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
@@ -244,13 +244,13 @@
             // 
             // linkRadioButton
             // 
-            this.linkRadioButton.AutoSize = true;
-            this.linkRadioButton.Location = new System.Drawing.Point(738, 317);
-            this.linkRadioButton.Name = "linkRadioButton";
-            this.linkRadioButton.Size = new System.Drawing.Size(21, 20);
-            this.linkRadioButton.TabIndex = 59;
-            this.linkRadioButton.TabStop = true;
-            this.linkRadioButton.UseVisualStyleBackColor = true;
+            this.onlineLinkRadioButton.AutoSize = true;
+            this.onlineLinkRadioButton.Location = new System.Drawing.Point(738, 317);
+            this.onlineLinkRadioButton.Name = "onlineLinkRadioButton";
+            this.onlineLinkRadioButton.Size = new System.Drawing.Size(21, 20);
+            this.onlineLinkRadioButton.TabIndex = 59;
+            this.onlineLinkRadioButton.TabStop = true;
+            this.onlineLinkRadioButton.UseVisualStyleBackColor = true;
             // 
             // searchCancel
             // 
@@ -433,7 +433,7 @@
             this.Controls.Add(this.reviseScheduleButton);
             this.Controls.Add(this.deleteScheduleButton);
             this.Controls.Add(this.addScheduleButton);
-            this.Controls.Add(this.linkRadioButton);
+            this.Controls.Add(this.onlineLinkRadioButton);
             this.Controls.Add(this.buildingRadioButton);
             this.Controls.Add(this.buildingComboBox);
             this.Controls.Add(this.durationBox);
@@ -476,7 +476,7 @@
         protected Button switchPageButton;
 
         protected RadioButton buildingRadioButton;
-        protected RadioButton linkRadioButton;
+        protected RadioButton onlineLinkRadioButton;
         protected ComboBox buildingComboBox;
 
         protected TextBox searchByNameBox;

@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Diagnostics;
-using StudentScheduleManagementSystem.Times;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -435,7 +434,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
-            collisionIds = ids.ToArray();
+            collisionIds = ids.Distinct().ToArray();
             return willCollide;
         }
 
@@ -1552,7 +1551,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on alarm manipulation
 
-        public override void EnableAlarm(Alarm.AlarmCallback alarmTimeUpCallback)
+        public override void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
         {
             TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
             if (affair != this)
@@ -1565,7 +1564,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public override void EnableAlarm<T>(Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
+        public override void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
             where T : default
         {
             TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
