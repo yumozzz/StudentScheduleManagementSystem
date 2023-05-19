@@ -20,7 +20,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             public string PrivateKey { get; set; }
         }
 
-        internal static CancellationTokenSource _cts = new();
+        internal static CancellationTokenSource Cts { get; set; }
         internal static Dictionary<string, (string, string)> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static string Password { get; private set; } = String.Empty;
@@ -37,8 +37,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
                 Times.Timer.TimeChange += (t) => Console.WriteLine(t.ToString());
-                Thread clockThread = new(Times.Timer.Start);
-                clockThread.Start();
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
 
@@ -60,7 +58,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             }*/
             finally
             {
-                _cts.Cancel();
+                Cts.Cancel();
                 Exit();
                 Console.ReadLine();
                 FreeConsole();

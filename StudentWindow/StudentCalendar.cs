@@ -23,17 +23,14 @@ namespace StudentScheduleManagementSystem.UI
             GenerateScheduleTable(1);
         }
 
-        private int previousWeek = 0;
         private void RefreshScheduleTable(Times.Time time)
         {
             if (scheduleTable.InvokeRequired)
             {
                 _resreshTimeTableDelegate = new(RefreshScheduleTable);
                 this.scheduleTable.Invoke(RefreshScheduleTable, time);
-                return;
             }
-
-            if (time.Week != previousWeek)
+            else if (time is { Day : Day.Monday, Hour : 0})
             {
                 GenerateScheduleTable(time.Week);
             }

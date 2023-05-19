@@ -56,22 +56,28 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     MessageBox.Show("Successfully login!");
                     this.Hide();
+                    Thread windowThread, clockThread = new(Times.Timer.Start);
+                    MainProgram.Program.Cts = new();
                     if (MainProgram.Program.Identity == Identity.User)
                     {
                         StudentSubwindow = new();
-                        Thread thread = new(() => StudentSubwindow.ShowDialog());
-                        thread.SetApartmentState(ApartmentState.STA);
-                        thread.Start();
-                        thread.Join();
+                        windowThread = new(() => StudentSubwindow.ShowDialog());
+                        windowThread.SetApartmentState(ApartmentState.STA);
+                        windowThread.Start();
+                        clockThread.Start();
+                        windowThread.Join();
+                        MainProgram.Program.Cts.Cancel();
                         StudentSubwindow.Dispose();
                     }
                     else
                     {
                         AdminSubwindow = new();
-                        Thread thread = new(() => AdminSubwindow.ShowDialog());
-                        thread.SetApartmentState(ApartmentState.STA);
-                        thread.Start();
-                        thread.Join();
+                        windowThread = new(() => AdminSubwindow.ShowDialog());
+                        windowThread.SetApartmentState(ApartmentState.STA);
+                        windowThread.Start();
+                        clockThread.Start();
+                        windowThread.Join();
+                        MainProgram.Program.Cts.Cancel();
                         AdminSubwindow.Dispose();
                     }
                     GC.Collect();

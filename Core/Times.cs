@@ -643,7 +643,9 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void Start()
         {
-            while (!MainProgram.Program._cts.IsCancellationRequested)
+            _localTime = new();
+            _offset = 0;
+            while (!MainProgram.Program.Cts.IsCancellationRequested)
             {
                 if (!Pause && UI.MainWindow.StudentSubwindow != null)
                 {
