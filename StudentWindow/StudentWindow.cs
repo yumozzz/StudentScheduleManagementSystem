@@ -146,12 +146,29 @@ namespace StudentScheduleManagementSystem.UI
             {
                 Times.Time time = new() { Week = week, Day = day, Hour = hour };
                 Times.Timer.SetTime(time);
+                Log.Information.Log("时间设置为: " + time.ToString());
             }
         }
 
         private void SpeedButton_Click(object sender, EventArgs e)
         {
             Times.Timer.SetSpeed();
+        }
+
+        private void PauseButton_Click(object sender, EventArgs e)
+        {
+            Times.Timer.Pause = !Times.Timer.Pause;
+            if(pauseButton.Text == "暂停")
+            {
+                pauseButton.Text = "继续";
+                Log.Information.Log("时间恢复: " + currentTime.Text);
+            }
+            else
+            {
+                Log.Information.Log("时间暂停: " + currentTime.Text);
+                pauseButton.Text = "暂停";
+            }
+            
         }
 
         public void SetLocalTime(Times.Time time)

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.header = new System.Windows.Forms.Panel();
+            this.pauseButton = new System.Windows.Forms.Button();
             this.speedButton = new System.Windows.Forms.Button();
             this.setTime = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -53,6 +54,7 @@
             // 
             // header
             // 
+            this.header.Controls.Add(this.pauseButton);
             this.header.Controls.Add(this.speedButton);
             this.header.Controls.Add(this.setTime);
             this.header.Controls.Add(this.label3);
@@ -69,6 +71,16 @@
             this.header.TabIndex = 1;
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
             this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
+            // 
+            // pauseButton
+            // 
+            this.pauseButton.Location = new System.Drawing.Point(967, 3);
+            this.pauseButton.Name = "pauseButton";
+            this.pauseButton.Size = new System.Drawing.Size(112, 34);
+            this.pauseButton.TabIndex = 18;
+            this.pauseButton.Text = "暂停";
+            this.pauseButton.UseVisualStyleBackColor = true;
+            this.pauseButton.Click += new System.EventHandler(this.PauseButton_Click);
             // 
             // speedButton
             // 
@@ -332,5 +344,6 @@
         private ComboBox dayBox;
         private Label label1;
         private Button speedButton;
+        private Button pauseButton;
     }
 }
