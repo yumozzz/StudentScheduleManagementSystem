@@ -29,7 +29,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.scheduleTable = new System.Windows.Forms.DataGridView();
             this.hourColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.mondayColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -41,13 +41,6 @@
             this.sundayColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleTable)).BeginInit();
             this.SuspendLayout();
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(898, 100);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(150, 30);
-            this.textBox1.TabIndex = 0;
             // 
             // scheduleTable
             // 
@@ -66,13 +59,21 @@
             this.fridayColumn,
             this.saturdayColumn,
             this.sundayColumn});
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.scheduleTable.DefaultCellStyle = dataGridViewCellStyle1;
             this.scheduleTable.Location = new System.Drawing.Point(12, 12);
             this.scheduleTable.Name = "scheduleTable";
             this.scheduleTable.RowHeadersVisible = false;
             this.scheduleTable.RowHeadersWidth = 62;
             this.scheduleTable.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.scheduleTable.RowTemplate.Height = 32;
-            this.scheduleTable.Size = new System.Drawing.Size(780, 645);
+            this.scheduleTable.Size = new System.Drawing.Size(922, 631);
             this.scheduleTable.TabIndex = 42;
             // 
             // hourColumn
@@ -137,19 +138,15 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 655);
             this.Controls.Add(this.scheduleTable);
-            this.Controls.Add(this.textBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "StudentScheduleTable";
             this.Text = "StudentCalender";
             ((System.ComponentModel.ISupportInitialize)(this.scheduleTable)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-
-        private TextBox textBox1;
         protected DataGridView scheduleTable;
         private DataGridViewTextBoxColumn hourColumn;
         private DataGridViewTextBoxColumn mondayColumn;

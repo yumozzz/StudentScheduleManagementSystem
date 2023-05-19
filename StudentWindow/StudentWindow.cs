@@ -1,6 +1,7 @@
-﻿namespace StudentScheduleManagementSystem.UI
-{
+﻿using System.Text;
 
+namespace StudentScheduleManagementSystem.UI
+{
     public partial class StudentWindow : Form
     {
         private static StudentScheduleTable? _studentScheduleTable;
@@ -13,6 +14,8 @@
         public StudentWindow()
         {
             InitializeComponent();
+            Times.Timer.TimeChange += SetLocalTime;
+
         }
 
         private int _x, _y;
@@ -93,6 +96,62 @@
             _studentTemporaryAffairSubwindow.TopLevel = false;
             mainpage.Controls.Add(_studentTemporaryAffairSubwindow);
             _studentTemporaryAffairSubwindow.Show();
+        }
+
+        private void SetTime_Click(object sender, EventArgs e)
+        {
+            StringBuilder errorMessage = new();
+            if (weekBox.Text.Equals(""))
+            {
+                errorMessage.AppendLine("请输入周！\n");
+            }
+            if (dayBox.Text.Equals(""))
+            {
+                errorMessage.AppendLine("请输入日！\n");
+            }
+            if (hourBox.Text.Equals(""))
+            {
+                errorMessage.AppendLine("请输入时间！\n");
+            }
+            if (!errorMessage.Equals(""))
+            {
+                MessageBox.Show(errorMessage.ToString());
+                return;
+            }
+
+            int week = weekBox.Text[4] - '0';
+            Day day = Day.Monday;
+            int hour = hourBox.Text[0] - '0';
+            if (weekBox.Text.Length == 6)
+            {
+                week = week * 10 + weekBox.Text[5] - '0';
+            }
+            for(int i = 0; i < 6; i++)
+            {
+                if (dayBox.Text.Equals(Shared.Days[i]))
+                {
+                    day = (Day)i;
+                }
+            }
+            if (hourBox.Text.Length == 5)
+            {
+                hour = hour * 10 + hourBox.Text[1] - '0';
+            }
+
+            if (MessageBox.Show("周次: " + week.ToString() + 
+                                "\n日次: " + day.ToString() + 
+                                "\n时间: " + hour.ToString() + ":00", 
+                                "确认时间修改",
+                                MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                Times.Time time = new() { Week = week, Day = day, Hour = hour };
+                Times.Timer.SetTime(time);
+            }
+        }
+
+        private void SpeedButton_Click(object sender, EventArgs e)
+        {
+            Times.Timer.SetSpeed();
         }
 
         public void SetLocalTime(Times.Time time)

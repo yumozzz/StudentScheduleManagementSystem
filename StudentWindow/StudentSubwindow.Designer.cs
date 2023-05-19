@@ -55,7 +55,7 @@
             this.okButton = new System.Windows.Forms.Button();
             this.reviseScheduleButton = new System.Windows.Forms.Button();
             this.deleteScheduleButton = new System.Windows.Forms.Button();
-            this.addScheduleButton = new System.Windows.Forms.Button();
+            this.AddScheduleButton = new System.Windows.Forms.Button();
             this.searchByNameBox = new System.Windows.Forms.TextBox();
             this.detectCollisionButton = new System.Windows.Forms.Button();
             this.descriptionBox = new System.Windows.Forms.TextBox();
@@ -65,13 +65,12 @@
             this.searchByNamePictureBox = new System.Windows.Forms.PictureBox();
             this.hideDurationPictureBox = new System.Windows.Forms.PictureBox();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.hideLinkPictureBox = new System.Windows.Forms.PictureBox();
+            this.label = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.locationPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchByNamePictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.hideDurationPictureBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hideLinkPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // scheduleData
@@ -235,6 +234,7 @@
             // buildingRadioButton
             // 
             this.buildingRadioButton.AutoSize = true;
+            this.buildingRadioButton.Checked = true;
             this.buildingRadioButton.Location = new System.Drawing.Point(738, 273);
             this.buildingRadioButton.Name = "buildingRadioButton";
             this.buildingRadioButton.Size = new System.Drawing.Size(21, 20);
@@ -242,14 +242,13 @@
             this.buildingRadioButton.TabStop = true;
             this.buildingRadioButton.UseVisualStyleBackColor = true;
             // 
-            // linkRadioButton
+            // onlineLinkRadioButton
             // 
             this.onlineLinkRadioButton.AutoSize = true;
             this.onlineLinkRadioButton.Location = new System.Drawing.Point(738, 317);
             this.onlineLinkRadioButton.Name = "onlineLinkRadioButton";
             this.onlineLinkRadioButton.Size = new System.Drawing.Size(21, 20);
             this.onlineLinkRadioButton.TabIndex = 59;
-            this.onlineLinkRadioButton.TabStop = true;
             this.onlineLinkRadioButton.UseVisualStyleBackColor = true;
             // 
             // searchCancel
@@ -320,16 +319,16 @@
             this.deleteScheduleButton.Text = "删除日程";
             this.deleteScheduleButton.UseVisualStyleBackColor = false;
             // 
-            // addScheduleButton
+            // AddScheduleButton
             // 
-            this.addScheduleButton.BackColor = System.Drawing.Color.White;
-            this.addScheduleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.addScheduleButton.Location = new System.Drawing.Point(736, 395);
-            this.addScheduleButton.Name = "addScheduleButton";
-            this.addScheduleButton.Size = new System.Drawing.Size(300, 35);
-            this.addScheduleButton.TabIndex = 60;
-            this.addScheduleButton.Text = "添加日程";
-            this.addScheduleButton.UseVisualStyleBackColor = false;
+            this.AddScheduleButton.BackColor = System.Drawing.Color.White;
+            this.AddScheduleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.AddScheduleButton.Location = new System.Drawing.Point(736, 395);
+            this.AddScheduleButton.Name = "AddScheduleButton";
+            this.AddScheduleButton.Size = new System.Drawing.Size(300, 35);
+            this.AddScheduleButton.TabIndex = 60;
+            this.AddScheduleButton.Text = "添加日程";
+            this.AddScheduleButton.UseVisualStyleBackColor = false;
             // 
             // searchByNameBox
             // 
@@ -341,12 +340,12 @@
             this.searchByNameBox.Size = new System.Drawing.Size(300, 30);
             this.searchByNameBox.TabIndex = 67;
             // 
-            // detectCollision
+            // detectCollisionButton
             // 
             this.detectCollisionButton.BackColor = System.Drawing.Color.White;
             this.detectCollisionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.detectCollisionButton.Location = new System.Drawing.Point(5, 5);
-            this.detectCollisionButton.Name = "detectCollision";
+            this.detectCollisionButton.Location = new System.Drawing.Point(489, 5);
+            this.detectCollisionButton.Name = "detectCollisionButton";
             this.detectCollisionButton.Size = new System.Drawing.Size(112, 34);
             this.detectCollisionButton.TabIndex = 71;
             this.detectCollisionButton.Text = "检测冲突";
@@ -407,14 +406,16 @@
             this.imageList.ImageSize = new System.Drawing.Size(16, 16);
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             // 
-            // hideLinkPictureBox
+            // label
             // 
-            this.hideLinkPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("hideLinkPictureBox.Image")));
-            this.hideLinkPictureBox.Location = new System.Drawing.Point(725, 250);
-            this.hideLinkPictureBox.Name = "hideLinkPictureBox";
-            this.hideLinkPictureBox.Size = new System.Drawing.Size(320, 150);
-            this.hideLinkPictureBox.TabIndex = 79;
-            this.hideLinkPictureBox.TabStop = false;
+            this.label.AutoSize = true;
+            this.label.Font = new System.Drawing.Font("黑体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label.ForeColor = System.Drawing.Color.White;
+            this.label.Location = new System.Drawing.Point(12, 9);
+            this.label.Name = "label";
+            this.label.Size = new System.Drawing.Size(82, 24);
+            this.label.TabIndex = 80;
+            this.label.Text = "label1";
             // 
             // StudentSubwindowBase
             // 
@@ -422,6 +423,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(168)))), ((int)(((byte)(128)))), ((int)(((byte)(194)))));
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.label);
             this.Controls.Add(this.onlineLinkBox);
             this.Controls.Add(this.descriptionBox);
             this.Controls.Add(this.detectCollisionButton);
@@ -432,7 +434,7 @@
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.reviseScheduleButton);
             this.Controls.Add(this.deleteScheduleButton);
-            this.Controls.Add(this.addScheduleButton);
+            this.Controls.Add(this.AddScheduleButton);
             this.Controls.Add(this.onlineLinkRadioButton);
             this.Controls.Add(this.buildingRadioButton);
             this.Controls.Add(this.buildingComboBox);
@@ -447,7 +449,6 @@
             this.Controls.Add(this.hideDurationPictureBox);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.locationPictureBox);
-            this.Controls.Add(this.hideLinkPictureBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "StudentSubwindowBase";
             this.Text = "StudentSubwindow";
@@ -456,7 +457,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.locationPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchByNamePictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.hideDurationPictureBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hideLinkPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -471,7 +471,7 @@
         protected Button okButton;
         protected Button reviseScheduleButton;
         protected Button deleteScheduleButton;
-        protected Button addScheduleButton;
+        protected Button AddScheduleButton;
         protected Button detectCollisionButton;
         protected Button switchPageButton;
 
@@ -492,7 +492,6 @@
         protected PictureBox locationPictureBox;
         protected PictureBox searchByNamePictureBox;
         protected PictureBox hideDurationPictureBox;
-        protected PictureBox hideLinkPictureBox;
         protected ImageList imageList;
         
         private DataGridViewCheckBoxColumn courseCheckBoxColumn;
@@ -504,5 +503,6 @@
         private DataGridViewTextBoxColumn descriptionColumn;
         private DataGridViewTextBoxColumn locationColumn;
         private DataGridViewTextBoxColumn idColumn;
+        protected Label label;
     }
 }

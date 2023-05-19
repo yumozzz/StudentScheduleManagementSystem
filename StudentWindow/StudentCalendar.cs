@@ -37,7 +37,6 @@ namespace StudentScheduleManagementSystem.UI
             {
                 GenerateScheduleTable(time.Week);
             }
-
         }
 
         private void GenerateScheduleTable(int week)
@@ -75,8 +74,8 @@ namespace StudentScheduleManagementSystem.UI
                                             scheduleRecords[4],
                                             scheduleRecords[5],
                                             scheduleRecords[6]);
+                this.scheduleTable.Rows[i - offset - 7].Height = 100;
             }
         }
-
     }
 }

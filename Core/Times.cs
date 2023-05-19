@@ -657,7 +657,7 @@ namespace StudentScheduleManagementSystem.Times
             Console.WriteLine("clock terminate");
         }
 
-        public static void ChangeTime(Time time)
+        public static void SetTime(Time time)
         {
             _localTime = time;
             _offset = time.ToInt();
