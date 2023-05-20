@@ -13,6 +13,7 @@ namespace StudentScheduleManagementSystem.UI
         protected SubwindowType _subwindowType;
         protected long? _originId = null;
         protected bool _showAllData = true;
+        public Action<bool?> PauseTimeDelegate;
 
         #region ctor
 
@@ -204,7 +205,7 @@ namespace StudentScheduleManagementSystem.UI
                 return 0;
             }
 
-            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[8].Value.ToString()!);
+            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
 
             var selected = Schedule.ScheduleBase.GetSharedById(id);
 
@@ -263,12 +264,36 @@ namespace StudentScheduleManagementSystem.UI
                 _showAllData = false;
                 detectCollisionButton.Visible = false;
                 GenerateUserData(_scheduleType);
+                switch (_subwindowType)
+                {
+                    case SubwindowType.Course:
+                        label.Text = "私有课程";
+                        break;
+                    case SubwindowType.Exam:
+                        label.Text = "私有考试";
+                        break;
+                    case SubwindowType.GroupActivity:
+                        label.Text = "私有集体活动";
+                        break;
+                }
             }
             else
             {
                 _showAllData = true;
                 detectCollisionButton.Visible = true;
                 GenerateSharedData(_scheduleType);
+                switch (_subwindowType)
+                {
+                    case SubwindowType.Course:
+                        label.Text = "公有课程";
+                        break;
+                    case SubwindowType.Exam:
+                        label.Text = "公有考试";
+                        break;
+                    case SubwindowType.GroupActivity:
+                        label.Text = "公有集体活动";
+                        break;
+                }
             }
         }
 
@@ -285,10 +310,12 @@ namespace StudentScheduleManagementSystem.UI
             {
                 ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
             }
+            PauseTimeDelegate.Invoke(false);
         }
 
         protected void DeleteScheduleButton_Click(object sender, EventArgs e)
         {
+            PauseTimeDelegate.Invoke(true);
             if (_showAllData)
             {
                 MessageBox.Show("请在个人日程页面选择日程删除！");
@@ -302,7 +329,7 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[8].Value.ToString()!);
+            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
 
             if (MessageBox.Show("名称: " + scheduleData.Rows[selectedRows[0]].Cells[1].Value.ToString() + "\n周次: " +
                                 scheduleData.Rows[selectedRows[0]].Cells[2].Value.ToString() + "\n天次: " +
@@ -316,6 +343,7 @@ namespace StudentScheduleManagementSystem.UI
                 var selected = Schedule.ScheduleBase.GetScheduleById(id);
                 selected!.DeleteSchedule();
             }
+            PauseTimeDelegate.Invoke(false);
             GenerateUserData(_scheduleType);
         }
 
@@ -607,6 +635,8 @@ namespace StudentScheduleManagementSystem.UI
 
         protected void AddScheduleButton_Click(object sender, EventArgs e)
         {
+            PauseTimeDelegate.Invoke(true);
+
             if (!_showAllData)
             {
                 MessageBox.Show("请在公有日程页面选择日程添加！");
@@ -673,7 +703,7 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[8].Value.ToString()!);
+            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
             bool confirm = GetScheduleInfo(true, scheduleData.Rows[selectedRows[0]], out _, out _);
             if (!confirm)
             {
@@ -701,10 +731,13 @@ namespace StudentScheduleManagementSystem.UI
             {
                 ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
             }
+            PauseTimeDelegate.Invoke(false);
         }
 
         protected void ReviseButton_Click(object sender, EventArgs e)
         {
+            PauseTimeDelegate.Invoke(true);
+
             if (_showAllData)
             {
                 MessageBox.Show("请在个人日程页面选择日程修改！");
@@ -724,7 +757,7 @@ namespace StudentScheduleManagementSystem.UI
             this.okButton.Show();
             this.cancelButton.Show();
 
-            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[8].Value.ToString()!);
+            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
             _originId = id;
             var selected = Schedule.ScheduleBase.GetScheduleById(id);
             ClearInput();
@@ -898,6 +931,8 @@ namespace StudentScheduleManagementSystem.UI
             this.okButton.Hide();
             this.cancelButton.Hide();
             this._subwindowState = SubwindowState.Viewing;
+
+            PauseTimeDelegate.Invoke(false);
         }
 
         protected abstract void ReviseScheduleButton_Click(object sender, EventArgs e);
@@ -910,7 +945,7 @@ namespace StudentScheduleManagementSystem.UI
         public StudentCourseSubwindow()
             : base(ScheduleType.Course, SubwindowType.Course) 
         {
-            label.Text = "课程";
+            label.Text = "公有课程";
         }
     }
 
@@ -921,7 +956,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             onlineLinkRadioButton.Enabled = false;
             onlineLinkBox.Enabled = false;
-            label.Text = "考试";
+            label.Text = "公有考试";
         }
     }
 
@@ -930,7 +965,7 @@ namespace StudentScheduleManagementSystem.UI
         public StudentGroupActivitySubwindow()
             : base(ScheduleType.Activity, SubwindowType.GroupActivity) 
         {
-            label.Text = "集体活动";
+            label.Text = "公有集体活动";
         }
     }
 
@@ -1235,6 +1270,8 @@ namespace StudentScheduleManagementSystem.UI
 
         protected override void ReviseScheduleButton_Click(object sender, EventArgs e)
         {
+            PauseTimeDelegate.Invoke(true);
+
             int[] selectedRows = scheduleData.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
@@ -1242,7 +1279,7 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[8].Value.ToString()!);
+            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
             var selected = Schedule.ScheduleBase.GetScheduleById(id);
 
             this.nameBox.Text = selected!.Name;
@@ -1497,6 +1534,8 @@ namespace StudentScheduleManagementSystem.UI
 
         protected override void ReviseScheduleButton_Click(object sender, EventArgs e)
         {
+            PauseTimeDelegate.Invoke(true);
+
             int[] selectedRows = scheduleData.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
@@ -1504,7 +1543,7 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[8].Value.ToString()!);
+            long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
             var selected = Schedule.ScheduleBase.GetScheduleById(id);
 
             nameBox.Text = selected!.Name;

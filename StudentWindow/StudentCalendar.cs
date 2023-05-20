@@ -4,6 +4,9 @@ namespace StudentScheduleManagementSystem.UI
 {
     public partial class StudentScheduleTable : Form
     {
+        private int currentWeek = 0;
+        private int showWeek = 1;
+
         public StudentScheduleTable()
         {
             InitializeComponent();
@@ -25,6 +28,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void GenerateScheduleTable(int week)
         {
+            showWeekLabel.Text = "第 " + week.ToString() + " 周";
             scheduleTable.Rows.Clear();
             int[] widths = { 70, 120, 120, 120, 120, 120, 120, 120 };
             for (int i = 0; i < widths.Length; i++)
@@ -51,7 +55,7 @@ namespace StudentScheduleManagementSystem.UI
                     scheduleRecords[j] = scheduleRecord.Name + "\n（" + TranslateScheduleType(scheduleRecord.ScheduleType) + "）" + "\n" + scheduleRecord.Description;
                     alarmEnalbled[j] = scheduleRecord.AlarmEnabled;
                 }
-                this.scheduleTable.Rows.Add((i - offset + 1).ToString() + ":00",
+                this.scheduleTable.Rows.Add((i - offset + 1).ToString() + ":00\n-\n" + (i - offset + 2).ToString() + ":00",
                                             scheduleRecords[0],
                                             scheduleRecords[1],
                                             scheduleRecords[2],
@@ -86,6 +90,39 @@ namespace StudentScheduleManagementSystem.UI
             return "未知";
         }
 
+        private void ThisWeekScheduleTable_Click(object sender, EventArgs e)
+        {
+            showWeek = Times.Timer.Now.Week;
+            GenerateScheduleTable(showWeek);
+        }
+
+        private void LastWeekScheduleTable_Click(object sender, EventArgs e)
+        {
+            if (showWeek - 1 > 0)
+            {
+                showWeek--;
+                GenerateScheduleTable(showWeek);
+            }
+            else
+            {
+                MessageBox.Show("已经是最早的一周！");
+                return;
+            }
+        }
+
+        private void NextWeekScheduleTable_Click(object sender, EventArgs e)
+        {
+            if (showWeek + 1 <= 16)
+            {
+                showWeek++;
+                GenerateScheduleTable(showWeek);
+            }
+            else
+            {
+                MessageBox.Show("已经是最晚的一周！");
+                return;
+            }
+        }
     }
 
 

@@ -30,6 +30,16 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StudentSubwindowBase));
             this.scheduleData = new System.Windows.Forms.DataGridView();
+            this.courseCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.alarmCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.nameTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.weekTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dayCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.timeCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.durationCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.descriptionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.locationColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.idColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.switchPageButton = new System.Windows.Forms.Button();
             this.nameBox = new System.Windows.Forms.TextBox();
             this.weekBox = new System.Windows.Forms.TextBox();
@@ -55,16 +65,6 @@
             this.searchByNamePictureBox = new System.Windows.Forms.PictureBox();
             this.hideDurationPictureBox = new System.Windows.Forms.PictureBox();
             this.label = new System.Windows.Forms.Label();
-            this.courseCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.alarmCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.nameTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.weekTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dayCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.timeCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.durationCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.descriptionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.locationColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.idColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.locationPictureBox)).BeginInit();
@@ -103,6 +103,85 @@
             this.scheduleData.RowTemplate.Height = 32;
             this.scheduleData.Size = new System.Drawing.Size(714, 605);
             this.scheduleData.TabIndex = 42;
+            // 
+            // courseCheckBoxColumn
+            // 
+            this.courseCheckBoxColumn.Frozen = true;
+            this.courseCheckBoxColumn.HeaderText = "";
+            this.courseCheckBoxColumn.MinimumWidth = 8;
+            this.courseCheckBoxColumn.Name = "courseCheckBoxColumn";
+            this.courseCheckBoxColumn.Width = 30;
+            // 
+            // alarmCheckBoxColumn
+            // 
+            this.alarmCheckBoxColumn.HeaderText = "闹钟";
+            this.alarmCheckBoxColumn.MinimumWidth = 8;
+            this.alarmCheckBoxColumn.Name = "alarmCheckBoxColumn";
+            this.alarmCheckBoxColumn.Width = 55;
+            // 
+            // nameTextBoxColumn
+            // 
+            this.nameTextBoxColumn.HeaderText = "日程名称";
+            this.nameTextBoxColumn.MinimumWidth = 8;
+            this.nameTextBoxColumn.Name = "nameTextBoxColumn";
+            this.nameTextBoxColumn.ReadOnly = true;
+            this.nameTextBoxColumn.Width = 180;
+            // 
+            // weekTextBoxColumn
+            // 
+            this.weekTextBoxColumn.HeaderText = "日程周";
+            this.weekTextBoxColumn.MinimumWidth = 8;
+            this.weekTextBoxColumn.Name = "weekTextBoxColumn";
+            this.weekTextBoxColumn.ReadOnly = true;
+            this.weekTextBoxColumn.Width = 120;
+            // 
+            // dayCheckBoxColumn
+            // 
+            this.dayCheckBoxColumn.HeaderText = "日程日";
+            this.dayCheckBoxColumn.MinimumWidth = 8;
+            this.dayCheckBoxColumn.Name = "dayCheckBoxColumn";
+            this.dayCheckBoxColumn.ReadOnly = true;
+            this.dayCheckBoxColumn.Width = 120;
+            // 
+            // timeCheckBoxColumn
+            // 
+            this.timeCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.timeCheckBoxColumn.HeaderText = "时间";
+            this.timeCheckBoxColumn.MinimumWidth = 8;
+            this.timeCheckBoxColumn.Name = "timeCheckBoxColumn";
+            this.timeCheckBoxColumn.ReadOnly = true;
+            this.timeCheckBoxColumn.Width = 150;
+            // 
+            // durationCheckBoxColumn
+            // 
+            this.durationCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.durationCheckBoxColumn.HeaderText = "时长";
+            this.durationCheckBoxColumn.MinimumWidth = 8;
+            this.durationCheckBoxColumn.Name = "durationCheckBoxColumn";
+            this.durationCheckBoxColumn.ReadOnly = true;
+            this.durationCheckBoxColumn.Width = 150;
+            // 
+            // descriptionColumn
+            // 
+            this.descriptionColumn.HeaderText = "描述";
+            this.descriptionColumn.MinimumWidth = 8;
+            this.descriptionColumn.Name = "descriptionColumn";
+            this.descriptionColumn.Width = 150;
+            // 
+            // locationColumn
+            // 
+            this.locationColumn.HeaderText = "地点/链接";
+            this.locationColumn.MinimumWidth = 8;
+            this.locationColumn.Name = "locationColumn";
+            this.locationColumn.Width = 150;
+            // 
+            // idColumn
+            // 
+            this.idColumn.HeaderText = "ID";
+            this.idColumn.MinimumWidth = 8;
+            this.idColumn.Name = "idColumn";
+            this.idColumn.Visible = false;
+            this.idColumn.Width = 150;
             // 
             // switchPageButton
             // 
@@ -335,88 +414,9 @@
             this.label.ForeColor = System.Drawing.Color.White;
             this.label.Location = new System.Drawing.Point(12, 9);
             this.label.Name = "label";
-            this.label.Size = new System.Drawing.Size(82, 24);
+            this.label.Size = new System.Drawing.Size(154, 24);
             this.label.TabIndex = 80;
-            this.label.Text = "label1";
-            // 
-            // courseCheckBoxColumn
-            // 
-            this.courseCheckBoxColumn.Frozen = true;
-            this.courseCheckBoxColumn.HeaderText = "";
-            this.courseCheckBoxColumn.MinimumWidth = 8;
-            this.courseCheckBoxColumn.Name = "courseCheckBoxColumn";
-            this.courseCheckBoxColumn.Width = 30;
-            // 
-            // alarmCheckBoxColumn
-            // 
-            this.alarmCheckBoxColumn.HeaderText = "闹钟";
-            this.alarmCheckBoxColumn.MinimumWidth = 8;
-            this.alarmCheckBoxColumn.Name = "alarmCheckBoxColumn";
-            this.alarmCheckBoxColumn.Width = 55;
-            // 
-            // nameTextBoxColumn
-            // 
-            this.nameTextBoxColumn.HeaderText = "日程名称";
-            this.nameTextBoxColumn.MinimumWidth = 8;
-            this.nameTextBoxColumn.Name = "nameTextBoxColumn";
-            this.nameTextBoxColumn.ReadOnly = true;
-            this.nameTextBoxColumn.Width = 180;
-            // 
-            // weekTextBoxColumn
-            // 
-            this.weekTextBoxColumn.HeaderText = "日程周";
-            this.weekTextBoxColumn.MinimumWidth = 8;
-            this.weekTextBoxColumn.Name = "weekTextBoxColumn";
-            this.weekTextBoxColumn.ReadOnly = true;
-            this.weekTextBoxColumn.Width = 120;
-            // 
-            // dayCheckBoxColumn
-            // 
-            this.dayCheckBoxColumn.HeaderText = "日程日";
-            this.dayCheckBoxColumn.MinimumWidth = 8;
-            this.dayCheckBoxColumn.Name = "dayCheckBoxColumn";
-            this.dayCheckBoxColumn.ReadOnly = true;
-            this.dayCheckBoxColumn.Width = 120;
-            // 
-            // timeCheckBoxColumn
-            // 
-            this.timeCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.timeCheckBoxColumn.HeaderText = "时间";
-            this.timeCheckBoxColumn.MinimumWidth = 8;
-            this.timeCheckBoxColumn.Name = "timeCheckBoxColumn";
-            this.timeCheckBoxColumn.ReadOnly = true;
-            this.timeCheckBoxColumn.Width = 150;
-            // 
-            // durationCheckBoxColumn
-            // 
-            this.durationCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.durationCheckBoxColumn.HeaderText = "时长";
-            this.durationCheckBoxColumn.MinimumWidth = 8;
-            this.durationCheckBoxColumn.Name = "durationCheckBoxColumn";
-            this.durationCheckBoxColumn.ReadOnly = true;
-            this.durationCheckBoxColumn.Width = 150;
-            // 
-            // descriptionColumn
-            // 
-            this.descriptionColumn.HeaderText = "描述";
-            this.descriptionColumn.MinimumWidth = 8;
-            this.descriptionColumn.Name = "descriptionColumn";
-            this.descriptionColumn.Width = 150;
-            // 
-            // locationColumn
-            // 
-            this.locationColumn.HeaderText = "地点/链接";
-            this.locationColumn.MinimumWidth = 8;
-            this.locationColumn.Name = "locationColumn";
-            this.locationColumn.Width = 150;
-            // 
-            // idColumn
-            // 
-            this.idColumn.HeaderText = "ID";
-            this.idColumn.MinimumWidth = 8;
-            this.idColumn.Name = "idColumn";
-            this.idColumn.Visible = false;
-            this.idColumn.Width = 150;
+            this.label.Text = "showPageType";
             // 
             // StudentSubwindowBase
             // 
