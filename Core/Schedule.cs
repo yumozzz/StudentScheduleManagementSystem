@@ -931,8 +931,6 @@ namespace StudentScheduleManagementSystem.Schedule
         public override ScheduleType @ScheduleType => ScheduleType.Course;
         public static int Earliest => 8;
         public static int Latest => 20;
-        [JsonProperty]
-        public new const bool IsOnline = false;
         [JsonProperty] public string? OnlineLink { get; init; }
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
         public Map.Location.Building? OfflineLocation { get; init; }
@@ -966,6 +964,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentOutOfRangeException(nameof(activeDays));
             }
+            IsOnline = true;
             OnlineLink = onlineLink;
             OfflineLocation = null;
             AddSchedule(specifiedId,
@@ -1003,6 +1002,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentOutOfRangeException(nameof(activeDays));
             }
+            IsOnline = false;
             OnlineLink = null;
             OfflineLocation = location;
             AddSchedule(specifiedId,

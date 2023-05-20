@@ -500,7 +500,7 @@ namespace StudentScheduleManagementSystem.UI
             { }
             else
             {
-                errorMessage.AppendLine("未选择线下地址或线上链接，或程序遇到错误");
+                errorMessage.AppendLine("未选择线下地址或线上链接！");
             }
             if (!errorMessage.Equals(""))
             {
@@ -750,28 +750,28 @@ namespace StudentScheduleManagementSystem.UI
 
             if (_subwindowType == SubwindowType.Course)
             {
-                if (((Schedule.Course)selected).OnlineLink != null)
+                if (((Schedule.Course)selected).IsOnline)
                 {
                     onlineLinkRadioButton.Checked = true;
-                    onlineLinkBox.Text = ((Schedule.Course)selected).OnlineLink;
+                    onlineLinkBox.Text = ((Schedule.Course)selected)!.OnlineLink;
                 }
                 else
                 {
                     buildingRadioButton.Checked = true;
-                    buildingComboBox.Text = ((Schedule.Course)selected).OfflineLocation.Value.Name;
+                    buildingComboBox.Text = ((Schedule.Course)selected!).OfflineLocation!.Value.Name;
                 }
             }
             else if (_subwindowType == SubwindowType.GroupActivity)
             {
-                if (((Schedule.Activity)selected).OnlineLink != null)
+                if (((Schedule.Activity)selected).IsOnline)
                 {
                     onlineLinkRadioButton.Checked = true;
-                    onlineLinkBox.Text = ((Schedule.Activity)selected).OnlineLink;
+                    onlineLinkBox.Text = ((Schedule.Activity)selected)!.OnlineLink;
                 }
                 else
                 {
                     buildingRadioButton.Checked = true;
-                    buildingComboBox.Text = ((Schedule.Activity)selected).OfflineLocation.Value.Name;
+                    buildingComboBox.Text = ((Schedule.Activity)selected!).OfflineLocation!.Value.Name;
                 }
             }
             else
@@ -779,7 +779,6 @@ namespace StudentScheduleManagementSystem.UI
                 buildingRadioButton.Checked = true;
                 buildingComboBox.Text = ((Schedule.Exam)selected).OfflineLocation.Name;
             }
-            
 
             _subwindowState = SubwindowState.ReviseUserSchedule;
             foreach (DataGridViewRow row in scheduleData.Rows)

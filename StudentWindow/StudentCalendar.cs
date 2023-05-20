@@ -1,21 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Diagnostics;
 
 namespace StudentScheduleManagementSystem.UI
 {
     public partial class StudentScheduleTable : Form
     {
-        public delegate void RefreshTimeTableDelegate(Times.Time time);
-
-        private RefreshTimeTableDelegate _resreshTimeTableDelegate;
-
         public StudentScheduleTable()
         {
             InitializeComponent();
@@ -27,7 +15,6 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (scheduleTable.InvokeRequired)
             {
-                _resreshTimeTableDelegate = new(RefreshScheduleTable);
                 this.scheduleTable.Invoke(RefreshScheduleTable, time);
             }
             else if (time is { Day : Day.Monday, Hour : 0})
@@ -54,14 +41,13 @@ namespace StudentScheduleManagementSystem.UI
                 {
                     scheduleRecords[j] = "";
                     long id = Schedule.ScheduleBase.GetRecordAt(i + j * 24).Id;
-                    if (id != 0)
+                    if (id == 0)
                     {
-                        Schedule.ScheduleBase? scheduleRecord = Schedule.ScheduleBase.GetScheduleById(id);
-                        if (scheduleRecord != null)
-                        {
-                            scheduleRecords[j] = scheduleRecord.Name + "\n" + scheduleRecord.Description;
-                        }
+                        continue;
                     }
+                    Schedule.ScheduleBase? scheduleRecord = Schedule.ScheduleBase.GetScheduleById(id);
+                    Debug.Assert(scheduleRecord != null);
+                    scheduleRecords[j] = scheduleRecord.Name + "\n" + scheduleRecord.Description;
                 }
                 this.scheduleTable.Rows.Add((i - offset + 1).ToString() + ":00",
                                             scheduleRecords[0],
