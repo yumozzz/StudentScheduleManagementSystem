@@ -60,6 +60,9 @@
   <metadata name="courseCheckBoxColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <metadata name="alarmCheckBoxColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <metadata name="descriptionColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
@@ -123,7 +126,4 @@
         gGEwAcNgAobBBAyDCRgGEzAMJmAY67O//Q+hjhZjYnp3oAAAAABJRU5ErkJggg==
 </value>
   </data>
-  <metadata name="imageList.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 23</value>
-  </metadata>
 </root>

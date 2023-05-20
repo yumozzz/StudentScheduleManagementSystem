@@ -26,7 +26,7 @@ namespace StudentScheduleManagementSystem.UI
         private void GenerateScheduleTable(int week)
         {
             scheduleTable.Rows.Clear();
-            int[] widths = { 70, 100, 100, 100, 100, 100, 100, 100 };
+            int[] widths = { 70, 120, 120, 120, 120, 120, 120, 120 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleTable.Columns[i].Width = widths[i];
@@ -37,6 +37,7 @@ namespace StudentScheduleManagementSystem.UI
             for (int i = offset + 7; i < offset + 21; i++)
             {
                 string[] scheduleRecords = new string[7];
+                bool[] alarmEnalbled = new bool[7];
                 for (int j = 0; j < 7; j++)
                 {
                     scheduleRecords[j] = "";
@@ -47,7 +48,8 @@ namespace StudentScheduleManagementSystem.UI
                     }
                     Schedule.ScheduleBase? scheduleRecord = Schedule.ScheduleBase.GetScheduleById(id);
                     Debug.Assert(scheduleRecord != null);
-                    scheduleRecords[j] = scheduleRecord.Name + "\n" + scheduleRecord.Description;
+                    scheduleRecords[j] = scheduleRecord.Name + "\n（" + TranslateScheduleType(scheduleRecord.ScheduleType) + "）" + "\n" + scheduleRecord.Description;
+                    alarmEnalbled[j] = scheduleRecord.AlarmEnabled;
                 }
                 this.scheduleTable.Rows.Add((i - offset + 1).ToString() + ":00",
                                             scheduleRecords[0],
@@ -58,7 +60,33 @@ namespace StudentScheduleManagementSystem.UI
                                             scheduleRecords[5],
                                             scheduleRecords[6]);
                 this.scheduleTable.Rows[i - offset - 7].Height = 100;
+                for(int j = 0; j < 7; j++)
+                {
+                    if (alarmEnalbled[j])
+                    {
+                        this.scheduleTable.Rows[i - offset - 7].Cells[j + 1].Style.BackColor = Color.FromArgb(50, 168, 128, 194);
+                    }
+                }
             }
         }
+
+        string TranslateScheduleType(ScheduleType scheduleType)
+        {
+            switch (scheduleType)
+            {
+                case ScheduleType.Course:
+                    return "课程";
+                case ScheduleType.Exam:
+                    return "考试";
+                case ScheduleType.Activity:
+                    return "活动";
+                case ScheduleType.TemporaryAffair:
+                    return "临时事务";
+            }
+            return "未知";
+        }
+
     }
+
+
 }

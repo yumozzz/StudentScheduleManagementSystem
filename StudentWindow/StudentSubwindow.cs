@@ -124,9 +124,10 @@ namespace StudentScheduleManagementSystem.UI
         protected void GenerateSharedData(List<Schedule.ScheduleBase.SharedData> data)
         {
             scheduleData.Rows.Clear();
+            scheduleData.Columns[1].Visible = false;
             scheduleData.Columns[6].Visible = false;
             scheduleData.Columns[7].Visible = false;
-            int[] widths = { 30, 130, 120, 130, 60, 60 };
+            int[] widths = { 30, 55, 130, 120, 130, 60, 60 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleData.Columns[i].Width = widths[i];
@@ -137,6 +138,7 @@ namespace StudentScheduleManagementSystem.UI
                 if (sharedData.RepetitiveType == RepetitiveType.Single)
                 {
                     this.scheduleData.Rows.Add(null,
+                                               false,
                                                sharedData.Name,
                                                sharedData.Timestamp.Week.ToString(),
                                                sharedData.Timestamp.Day.ToString()[..3],
@@ -154,6 +156,7 @@ namespace StudentScheduleManagementSystem.UI
                         days.Append(activeDay.ToString()[..3] + ";");
                     }
                     this.scheduleData.Rows.Add(null,
+                                               false,
                                                sharedData.Name,
                                                "1-16",
                                                days.ToString(),
@@ -171,6 +174,7 @@ namespace StudentScheduleManagementSystem.UI
                         days.Append(activeDay.ToString()[..3] + ";");
                     }
                     this.scheduleData.Rows.Add(null,
+                                               false,
                                                sharedData.Name,
                                                GetBriefWeeks(sharedData.ActiveWeeks).ToString(),
                                                days.ToString(),
@@ -378,11 +382,12 @@ namespace StudentScheduleManagementSystem.UI
         protected override void GenerateUserData(List<Schedule.ScheduleBase> data)
         {
             scheduleData.Rows.Clear();
-            int[] widths = { 30, 130, 120, 130, 60, 60, 150, 150 };
+            int[] widths = { 30, 55, 130, 120, 130, 60, 60, 150, 150 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleData.Columns[i].Width = widths[i];
             }
+            scheduleData.Columns[1].Visible = true;
             scheduleData.Columns[6].Visible = true;
             scheduleData.Columns[7].Visible = true;
 
@@ -433,6 +438,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
 
                 scheduleData.Rows.Add(null,
+                                      schedule.AlarmEnabled,
                                       schedule.Name,
                                       activeWeeks,
                                       days,
@@ -804,11 +810,12 @@ namespace StudentScheduleManagementSystem.UI
         protected override void GenerateUserData(List<Schedule.ScheduleBase> list)
         {
             scheduleData.Rows.Clear();
-            int[] widths = { 30, 130, 120, 130, 60, 60, 150, 150 };
+            int[] widths = { 30, 55, 130, 120, 130, 60, 60, 150, 150 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleData.Columns[i].Width = widths[i];
             }
+            scheduleData.Columns[1].Visible = true;
             scheduleData.Columns[6].Visible = true;
             scheduleData.Columns[7].Visible = true;
 
@@ -855,6 +862,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
 
                 scheduleData.Rows.Add(null,
+                                      schedule.AlarmEnabled,
                                       schedule.Name,
                                       activeWeeks,
                                       days,
@@ -1364,7 +1372,7 @@ namespace StudentScheduleManagementSystem.UI
         protected override void GenerateUserData(List<Schedule.ScheduleBase> list)
         {
             scheduleData.Rows.Clear();
-            int[] widths = { 30, 130, 50, 80, 60, 60, 150, 150 };
+            int[] widths = { 30, 55, 130, 50, 80, 60, 60, 150, 150 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleData.Columns[i].Width = widths[i];
@@ -1376,6 +1384,7 @@ namespace StudentScheduleManagementSystem.UI
             foreach (var affair in converted)
             {
                 scheduleData.Rows.Add(null,
+                                      affair.AlarmEnabled, 
                                       affair.Name,
                                       affair.BeginTime.Week,
                                       affair.BeginTime.Day.ToString()[..3],
@@ -1476,7 +1485,7 @@ namespace StudentScheduleManagementSystem.UI
                 _ = new Schedule.TemporaryAffair(name,
                                                   beginTime,
                                                   descriptionBox.Text == "" ? null : descriptionBox.Text,
-                                                  Map.Location.Buildings[0]);
+                                                  Map.Location.GetBuildingsByName(buildingComboBox.Text)[0]);
                 GenerateUserData(_scheduleType);
                 return;
             }
