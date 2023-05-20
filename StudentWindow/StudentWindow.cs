@@ -65,7 +65,7 @@ namespace StudentScheduleManagementSystem.UI
         private void ExamButton_Click(object sender, EventArgs e)
         {
             mainpage.Controls.Clear();
-            _studentExamSubwindow = new ();
+            _studentExamSubwindow = new();
             _studentExamSubwindow.TopLevel = false;
             _studentExamSubwindow.PauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentExamSubwindow);
@@ -75,7 +75,7 @@ namespace StudentScheduleManagementSystem.UI
         private void GroupActivityButton_Click(object sender, EventArgs e)
         {
             mainpage.Controls.Clear();
-            _studentGroupActivitySubwindow = new ();
+            _studentGroupActivitySubwindow = new();
             _studentGroupActivitySubwindow.TopLevel = false;
             _studentGroupActivitySubwindow.PauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentGroupActivitySubwindow);
@@ -123,28 +123,12 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            int week = weekBox.Text[4] - '0';
-            Day day = Day.Monday;
-            int hour = hourBox.Text[0] - '0';
-            if (weekBox.Text.Length == 6)
-            {
-                week = week * 10 + weekBox.Text[5] - '0';
-            }
-            for(int i = 0; i < 6; i++)
-            {
-                if (dayBox.Text.Equals(Shared.Days[i]))
-                {
-                    day = (Day)i;
-                }
-            }
-            if (hourBox.Text.Length == 5)
-            {
-                hour = hour * 10 + hourBox.Text[1] - '0';
-            }
+            int week = weekBox.SelectedIndex + 1;
+            Day day = (Day)dayBox.SelectedIndex;
+            int hour = hourBox.SelectedIndex;
 
-            if (MessageBox.Show("周次: " + week.ToString() + 
-                                "\n日次: " + day.ToString() + 
-                                "\n时间: " + hour.ToString() + ":00", 
+            if (MessageBox.Show("周次: " + week.ToString() + "\n日次: " + day.ToString() + "\n时间: " + hour.ToString() +
+                                ":00",
                                 "确认时间修改",
                                 MessageBoxButtons.OKCancel) == DialogResult.OK)
             {

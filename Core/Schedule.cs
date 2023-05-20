@@ -1450,7 +1450,7 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
         public new Map.Location.Building OfflineLocation { get; init; }
 
-        public long Next { get; private set; } = 0;
+        private long _next = 0;
 
         #endregion
 
@@ -1475,19 +1475,19 @@ namespace StudentScheduleManagementSystem.Schedule
             long current = _timeline[BeginTime.ToInt()].Id;
             if (current != ScheduleId)
             {
-                while (((TemporaryAffair)_scheduleDictionary[current]).Next != ScheduleId)
+                while (((TemporaryAffair)_scheduleDictionary[current])._next != ScheduleId)
                 {
-                    current = ((TemporaryAffair)_scheduleDictionary[current]).Next;
+                    current = ((TemporaryAffair)_scheduleDictionary[current])._next;
                 }
                 //current = prev(ScheduleId)
-                ((TemporaryAffair)_scheduleDictionary[current]).Next =
-                    ((TemporaryAffair)_scheduleDictionary[ScheduleId]).Next;
+                ((TemporaryAffair)_scheduleDictionary[current])._next =
+                    ((TemporaryAffair)_scheduleDictionary[ScheduleId])._next;
                 Log.Information.Log("已删除该临时日程");
             }
             else
             {
                 //current = head;
-                if (((TemporaryAffair)_scheduleDictionary[current]).Next == 0)
+                if (((TemporaryAffair)_scheduleDictionary[current])._next == 0)
                 {
                     _timeline[BeginTime.ToInt()] = new Record
                     {
@@ -1500,7 +1500,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     _timeline[BeginTime.ToInt()] = new Record
                     {
-                        Id = ((TemporaryAffair)_scheduleDictionary[current]).Next,
+                        Id = ((TemporaryAffair)_scheduleDictionary[current])._next,
                         ScheduleType = ScheduleType.TemporaryAffair,
                         RepetitiveType = RepetitiveType.Single
                     };
@@ -1533,11 +1533,11 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 ScheduleId = GenerateId(null, '5');
                 long current = _timeline[BeginTime.ToInt()].Id;
-                while (((TemporaryAffair)_scheduleDictionary[current]).Next != 0)
+                while (((TemporaryAffair)_scheduleDictionary[current])._next != 0)
                 {
-                    current = ((TemporaryAffair)_scheduleDictionary[current]).Next;
+                    current = ((TemporaryAffair)_scheduleDictionary[current])._next;
                 }
-                ((TemporaryAffair)_scheduleDictionary[current]).Next = ScheduleId;
+                ((TemporaryAffair)_scheduleDictionary[current])._next = ScheduleId;
                 _scheduleDictionary.Add(ScheduleId, this);
                 Log.Information.Log("已在时间轴与表中添加日程");
             }
@@ -1545,6 +1545,18 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 base.AddSchedule(null, '5', true, true);
             }
+        }
+
+        public static TemporaryAffair[] GetAllAt(Times.Time time)
+        {
+            List<TemporaryAffair> list = new();
+            long current = _timeline[time.ToInt()].Id;
+            while (current != 0)
+            {
+                list.Add((TemporaryAffair)_scheduleDictionary[current]);
+                current = ((TemporaryAffair)_scheduleDictionary[current])._next;
+            }
+            return list.ToArray();
         }
 
         #endregion
