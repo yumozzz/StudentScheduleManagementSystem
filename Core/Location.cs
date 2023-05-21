@@ -7,14 +7,35 @@ namespace StudentScheduleManagementSystem.Map
     public static class Location
     {
         private static List<Building> _buildings =
-            new() { Constants.DefaultBuilding, new(0, "Test Building", new(1, 100, 100)) };
+            new() { Constants.DefaultBuilding };
 
         public static List<Building> Buildings
         {
             get => _buildings.GetRange(1, _buildings.Count - 1);
-            set => _buildings = new List<Building>() { Constants.DefaultBuilding }.Concat(value).ToList();
+            set => _buildings = new List<Building> { Constants.DefaultBuilding }.Concat(value).ToList();
         }
-        public static AdjacencyTable GlobalMap { get; set; }
+        public static AdjacencyTable? GlobalMap { get; set; }
+
+        static Location()
+        {
+            (JArray, JArray) information;
+            try
+            {
+                information = FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory);
+            }
+            catch (Exception ex) when (ex is DirectoryNotFoundException or FileNotFoundException)
+            {
+                return;
+            }
+            GlobalMap = new(information.Item1);
+            foreach (JObject obj in information.Item2)
+            {
+                int id = obj["Id"]!.Value<int>();
+                string name = obj["Name"]!.Value<string>()!;
+                Building building = new(id, name, GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
+                Buildings.Add(building);
+            }
+        }
 
         #region structs, classes and enums
 
@@ -451,7 +472,7 @@ namespace StudentScheduleManagementSystem.Map
                     }
                 }
             }
-            bool[] hasVisited = new bool[GlobalMap.Size];
+            bool[] hasVisited = new bool[GlobalMap!.Size];
             int p = 0, e = column - 1, t = 0, cyc = 0;
             while (cyc++ < 10)
             {
@@ -519,7 +540,7 @@ namespace StudentScheduleManagementSystem.Map
         public static List<(Vertex, Vertex)> GetLineEndPoints()
         {
             HashSet<(Vertex, Vertex)> ret = new();
-            for (int i = 0; i < GlobalMap.Size; i++)
+            for (int i = 0; i < GlobalMap!.Size; i++)
             {
                 foreach (var pair in GlobalMap[i])
                 {
@@ -538,7 +559,7 @@ namespace StudentScheduleManagementSystem.Map
         {
             HashSet<(Vertex, Vertex)> set = new();
             List<(Vertex, Point, Point, Vertex)> ret = new();
-            for (int i = 0; i < GlobalMap.Size; i++)
+            for (int i = 0; i < GlobalMap!.Size; i++)
             {
                 foreach (var pair in GlobalMap[i])
                 {
@@ -627,7 +648,7 @@ namespace StudentScheduleManagementSystem.Map
 
         private static int GetClosestPathLength(int startId, int endId)
         {
-            int pointCount = GlobalMap.Size; //点的数量
+            int pointCount = GlobalMap!.Size; //点的数量
             int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distance, int.MaxValue);
             distance[startId] = 0;
@@ -660,19 +681,6 @@ namespace StudentScheduleManagementSystem.Map
             return distance[endId];
         }
 
-        public static void SetUp()
-        {
-            var information = FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory);
-            GlobalMap = new(information.Item1);
-            foreach (JObject obj in information.Item2)
-            {
-                int id = obj["Id"]!.Value<int>();
-                string name = obj["Name"]!.Value<string>()!;
-                Building building = new(id, name, GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
-                Buildings.Add(building);
-            }
-        }
-
         public static JArray SaveAllBuildings() =>
             new(Array.ConvertAll(Buildings.ToArray(),
                                  building => (Id: building.Id, Name: building.Name, CenterId: building.Center.Id)));
@@ -693,7 +701,7 @@ namespace StudentScheduleManagementSystem.Map
             int prevId = points[0];
             for (int i = 1; i < points.Count - 1; i++)
             {
-                Location.Edge? edge = Location.GlobalMap[prevId, i];
+                Location.Edge? edge = Location.GlobalMap![prevId, i];
                 if (!edge.HasValue)
                 {
                     throw new ArgumentException($"there's no edge between vertex {prevId} and {i}");

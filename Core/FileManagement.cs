@@ -16,22 +16,26 @@ namespace StudentScheduleManagementSystem.FileManagement
 
         public static readonly string MakecertDirectory = Environment.CurrentDirectory + "/makecert.exe";
 
-        public static Dictionary<string, JArray> ReadFromUserFile(string fileFolder, string fileName, Func<string, string> DecryptFunc)
+        public static Dictionary<string, JArray> ReadFromUserFile(string fileFolder,
+                                                                  string fileName,
+                                                                  Func<string, string> decryptFunc)
         {
             if (!Directory.Exists(fileFolder))
             {
-                throw new DirectoryNotFoundException();
+                Log.Error.Log("不存在用户文件夹", null);
+                Directory.CreateDirectory(fileFolder);
+                return new();
             }
             #if RWINPLAINTEXT
             if (!File.Exists($"{fileFolder}/{fileName}.json"))
-            #elif RWINENCRYPTION
+                #elif RWINENCRYPTION
             if (!File.Exists($"{fileFolder}/{fileName}.dat"))
-            #else
+                #else
             #error macro_not_defined
-            #endif
+                #endif
             {
-                Log.Warning.Log("不存在用户文件，将新建");
-                return new();
+                Log.Error.Log("不存在用户文件", null);
+                throw new FileNotFoundException();
             }
             #if RWINPLAINTEXT
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
@@ -50,7 +54,10 @@ namespace StudentScheduleManagementSystem.FileManagement
             return dic;
         }
 
-        public static void SaveToUserFile(Dictionary<string, JArray> objects, string fileFolder, string fileName, Func<string,string> EncryptFunc)
+        public static void SaveToUserFile(Dictionary<string, JArray> objects,
+                                          string fileFolder,
+                                          string fileName,
+                                          Func<string, string> encryptFunc)
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -76,7 +83,20 @@ namespace StudentScheduleManagementSystem.FileManagement
         {
             if (!Directory.Exists(fileFolder))
             {
+                Log.Error.Log("不存在地图文件夹", null);
+                Directory.CreateDirectory(fileFolder);
                 throw new DirectoryNotFoundException();
+            }
+            #if RWINPLAINTEXT
+            if (!File.Exists($"{fileFolder}/{fileName}.json"))
+                #elif RWINENCRYPTION
+            if (!File.Exists($"{fileFolder}/{fileName}.dat"))
+                #else
+            #error macro_not_defined
+                #endif
+            {
+                Log.Error.Log("不存在地图文件", null);
+                throw new FileNotFoundException();
             }
             #if RWINPLAINTEXT
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
@@ -116,17 +136,19 @@ namespace StudentScheduleManagementSystem.FileManagement
         {
             if (!Directory.Exists(fileFolder))
             {
-                throw new DirectoryNotFoundException();
+                Log.Error.Log("不存在账号文件夹", null);
+                Directory.CreateDirectory(fileFolder);
+                return new();
             }
             #if RWINPLAINTEXT
             if (!File.Exists($"{fileFolder}/{fileName}.json"))
-            #elif RWINENCRYPTION
+                #elif RWINENCRYPTION
             if (!File.Exists($"{fileFolder}/{fileName}.dat"))
-            #else
+                #else
             #error macro_not_defined
-            #endif
+                #endif
             {
-                Log.Warning.Log("不存在账号文件，将新建");
+                Log.Information.Log("不存在账号文件，将新建");
                 return new();
             }
             #if RWINPLAINTEXT

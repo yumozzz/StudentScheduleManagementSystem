@@ -4,16 +4,11 @@ namespace StudentScheduleManagementSystem.Log
 {
     public static class LogBase
     {
-        public static FileStream? Stream { get; private set; }
+        public static FileStream Stream { get; private set; }
 
         private static readonly int _random = new Random(DateTime.Now.Millisecond).Next();
 
-        public static void Setup()
-        {
-            Setup(Environment.CurrentDirectory);
-        }
-
-        public static void Setup(string filePath)
+        static LogBase()
         {
             if (!Directory.Exists(FileManagement.FileManager.LogFileDirectory))
             {
@@ -24,7 +19,7 @@ namespace StudentScheduleManagementSystem.Log
 
         public static void Close()
         {
-            Stream!.Close();
+            Stream.Close();
         }
     }
 
@@ -33,10 +28,10 @@ namespace StudentScheduleManagementSystem.Log
         public static void Log(string message)
         {
             string log =
-                $"[Log] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
+                $"[Log]\t Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
             var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream!.Write(arr, 0, arr.Length);
-            LogBase.Stream!.Flush();
+            LogBase.Stream.Write(arr, 0, arr.Length);
+            LogBase.Stream.Flush();
         }
     }
 
@@ -45,10 +40,10 @@ namespace StudentScheduleManagementSystem.Log
         public static void Log(string message)
         {
             string log =
-                $"[War] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
+                $"[War]\t Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
             var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream!.Write(arr, 0, arr.Length);
-            LogBase.Stream!.Flush();
+            LogBase.Stream.Write(arr, 0, arr.Length);
+            LogBase.Stream.Flush();
         }
     }
 
@@ -57,14 +52,14 @@ namespace StudentScheduleManagementSystem.Log
         public static void Log(string? message, Exception? ex)
         {
             string log =
-                $"[Err] Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message ?? "No message."}\"\n";
+                $"[Err]\t Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message ?? "No message."}\"\n";
             if (ex != null)
             {
                 log += $"The exception is \"{ex.Message}\"\n{ex.StackTrace}\n";
             }
             var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream!.Write(arr, 0, arr.Length);
-            LogBase.Stream!.Flush();
+            LogBase.Stream.Write(arr, 0, arr.Length);
+            LogBase.Stream.Flush();
         }
     }
 }

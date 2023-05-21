@@ -47,10 +47,10 @@
             this.Close();
         }
 
-        //TODO:退出程序
         private void CloseConfirm_Click(object sender, EventArgs e)
         {
             LogoutConfirm_Click(sender, e);
+            MainProgram.Program.Exit();
         }
 
         private void CourseButton_Click(object sender, EventArgs e)

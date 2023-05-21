@@ -63,8 +63,8 @@ namespace StudentScheduleManagementSystem.MainProgram
             finally
             {
                 Cts.Cancel();
+                Log.Warning.Log("程序退出");
                 Exit();
-                Console.ReadLine();
                 FreeConsole();
             }
         }
@@ -100,7 +100,6 @@ namespace StudentScheduleManagementSystem.MainProgram
             Schedule.TemporaryAffair.CreateInstance(instanceDictionary["TemporaryAffairs"]);
         }
 
-        //TODO:适配UI
         public static bool Login(string inputUserId, string inputPassword)
         {
             try
@@ -212,22 +211,20 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         public static void InitModules()
         {
-            Log.LogBase.Setup();
             var accounts =
                 FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
             foreach (var account in accounts)
             {
                 _accounts.Add(account.UserId, (account.Password, account.PrivateKey));
             }
-            //Map.Location.SetUp();
             Schedule.Schedule.ReadSharedData();
         }
 
         public static void Exit()
         {
-            /*FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap!.SaveInstance(),
-                                                     Map.Location.SaveBuildings(),
-                                                     FileManagement.FileManager.MapFileDirectory);*/
+            FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap.SaveInstance(),
+                                                     Map.Location.SaveAllBuildings(),
+                                                     FileManagement.FileManager.MapFileDirectory);
             FileManagement.FileManager.SaveToUserAccountFile(_accounts.ToList()
                                                                       .Select(kvPair => new UserInformation()
                                                                        {

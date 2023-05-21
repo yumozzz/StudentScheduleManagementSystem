@@ -672,9 +672,12 @@ namespace StudentScheduleManagementSystem.Times
                     _localTime++;
                     _offset++;
                 }
+                else
+                {
+                    Log.Information.Log("计时器停止计时");
+                }
                 Thread.Sleep(BaseTimeoutMs / _acceleration);
             }
-            Console.WriteLine("clock terminate");
         }
 
         public static void SetTime(Time time)
