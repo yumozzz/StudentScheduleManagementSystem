@@ -256,7 +256,7 @@ namespace StudentScheduleManagementSystem.Schedule
             Duration = duration;
             IsOnline = isOnline;
             Description = description;
-            Log.Information.Log($"已为类型为{ScheduleType}的日程{Name}创建基类");
+            Log.Information.Log($"已为类型为{ScheduleType}的日程{Name}创建对象");
         }
 
         public int CompareTo(object? obj)
@@ -314,10 +314,18 @@ namespace StudentScheduleManagementSystem.Schedule
             DeleteSchedule(this);
         }
 
-        protected static void DeleteSchedule(ScheduleBase schedule) 
+        protected static void DeleteSchedule(ScheduleBase schedule)
         {
             _scheduleDictionary.Remove(schedule.ScheduleId);
-            DetectCollision(schedule.RepetitiveType, schedule.ScheduleType, schedule.BeginTime, schedule.Duration, schedule.ActiveWeeks, schedule.ActiveDays, out _, out _, out long[] ids);
+            DetectCollision(schedule.RepetitiveType,
+                            schedule.ScheduleType,
+                            schedule.BeginTime,
+                            schedule.Duration,
+                            schedule.ActiveWeeks,
+                            schedule.ActiveDays,
+                            out _,
+                            out _,
+                            out long[] ids);
             if (ids.Length == 1 && ids[0] == schedule.ScheduleId)
             {
                 _timeline.RemoveMultipleItems(schedule.BeginTime,
@@ -426,7 +434,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(nameof(RepetitiveType));
             }
-            collisionIds = ids.ToArray();
+            collisionIds = ids.Distinct().ToArray();
             return willCollide;
         }
 
@@ -434,13 +442,10 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             long? preProcessId = (ScheduleType, specifiedId) switch
             {
-                (ScheduleType.Course, null) => _courseIdMax + 1,
-                (ScheduleType.Course, _) => specifiedId.Value,
-                (ScheduleType.Exam, null) => _examIdMax + 1,
-                (ScheduleType.Exam, _) => specifiedId.Value,
+                (ScheduleType.Course, null) => _courseIdMax + 1, (ScheduleType.Course, _) => specifiedId.Value,
+                (ScheduleType.Exam, null) => _examIdMax + 1, (ScheduleType.Exam, _) => specifiedId.Value,
                 (ScheduleType.Activity, null) => ((Activity)this).IsGroupActivity ? _groutActivityIdMax + 1 : null,
-                (ScheduleType.Activity, _) => specifiedId.Value,
-                (ScheduleType.TemporaryAffair, null) => null,
+                (ScheduleType.Activity, _) => specifiedId.Value, (ScheduleType.TemporaryAffair, null) => null,
                 (ScheduleType.TemporaryAffair, _) => specifiedId.Value,
                 (_, _) => throw new ArgumentException(null, nameof(ScheduleType)),
             };
@@ -486,7 +491,6 @@ namespace StudentScheduleManagementSystem.Schedule
                                                },
                                                ActiveWeeks,
                                                ActiveDays);
-                   
                 }
                 if (addOnUserTable)
                 {
@@ -509,31 +513,31 @@ namespace StudentScheduleManagementSystem.Schedule
             switch (id / (long)1e9)
             {
                 case 1:
+                {
+                    ref long prevIdMax = ref _courseIdMax;
+                    if (prevIdMax == id)
                     {
-                        ref long prevIdMax = ref _courseIdMax;
-                        if (prevIdMax == id)
-                        {
-                            prevIdMax++;
-                        }
+                        prevIdMax++;
                     }
+                }
                     break;
                 case 2:
+                {
+                    ref long prevIdMax = ref _examIdMax;
+                    if (prevIdMax == id)
                     {
-                        ref long prevIdMax = ref _examIdMax;
-                        if (prevIdMax == id)
-                        {
-                            prevIdMax++;
-                        }
+                        prevIdMax++;
                     }
+                }
                     break;
                 case 3:
+                {
+                    ref long prevIdMax = ref _groutActivityIdMax;
+                    if (prevIdMax == id)
                     {
-                        ref long prevIdMax = ref _groutActivityIdMax;
-                        if (prevIdMax == id)
-                        {
-                            prevIdMax++;
-                        }
+                        prevIdMax++;
                     }
+                }
                     break;
                 default:
                     throw new FormatException($"Item id {id} is invalid");
@@ -606,7 +610,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 foreach (var id in _scheduleDictionary.Keys)
                 {
-                    if (id / (long)1e9 ==1 && id % (long)1e9 != 0)
+                    if (id / (long)1e9 == 1 && id % (long)1e9 != 0)
                     {
                         ret.Add(_scheduleDictionary[id]);
                     }
@@ -678,14 +682,14 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on alarm manipulation
 
-        public void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
+        public virtual void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
         {
             EnableAlarm<object>(alarmTimeUpCallback, null);
         }
 
         //alarmTimeUpCallback should be a public method in class "Alarm" or derived classes of "ScheduleBase"
         //T should be a public nested class in class "Alarm"
-        public void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
+        public virtual void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
         {
             if (AlarmEnabled)
             {
@@ -707,7 +711,7 @@ namespace StudentScheduleManagementSystem.Schedule
             AlarmEnabled = true;
         }
 
-        public void DisableAlarm()
+        public virtual void DisableAlarm()
         {
             if (!AlarmEnabled)
             {
@@ -927,8 +931,6 @@ namespace StudentScheduleManagementSystem.Schedule
         public override ScheduleType @ScheduleType => ScheduleType.Course;
         public static int Earliest => 8;
         public static int Latest => 20;
-        [JsonProperty]
-        public new const bool IsOnline = false;
         [JsonProperty] public string? OnlineLink { get; init; }
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
         public Map.Location.Building? OfflineLocation { get; init; }
@@ -962,9 +964,13 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentOutOfRangeException(nameof(activeDays));
             }
+            IsOnline = true;
             OnlineLink = onlineLink;
             OfflineLocation = null;
-            AddSchedule(specifiedId, '1', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            AddSchedule(specifiedId,
+                        '1',
+                        operationType.HasFlag(ScheduleOperationType.AddOnTimeline),
+                        operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
             if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
             {
                 UpdateSharedData(this);
@@ -996,9 +1002,13 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentOutOfRangeException(nameof(activeDays));
             }
+            IsOnline = false;
             OnlineLink = null;
             OfflineLocation = location;
-            AddSchedule(specifiedId, '1', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            AddSchedule(specifiedId,
+                        '1',
+                        operationType.HasFlag(ScheduleOperationType.AddOnTimeline),
+                        operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
             if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
             {
                 UpdateSharedData(this);
@@ -1121,7 +1131,10 @@ namespace StudentScheduleManagementSystem.Schedule
                 throw new ArgumentOutOfRangeException(nameof(beginTime));
             }
             OfflineLocation = offlineLocation;
-            AddSchedule(specifiedId, '2', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            AddSchedule(specifiedId,
+                        '2',
+                        operationType.HasFlag(ScheduleOperationType.AddOnTimeline),
+                        operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
             if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
             {
                 UpdateSharedData(this);
@@ -1252,7 +1265,10 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(null, nameof(operationType));
             }
-            AddSchedule(specifiedId, isGroupActivity ? '3' : '4', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            AddSchedule(specifiedId,
+                        isGroupActivity ? '3' : '4',
+                        operationType.HasFlag(ScheduleOperationType.AddOnTimeline),
+                        operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
             if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
             {
                 UpdateSharedData(this);
@@ -1288,7 +1304,10 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(null, nameof(operationType));
             }
-            AddSchedule(specifiedId, isGroupActivity ? '3' : '4', operationType.HasFlag(ScheduleOperationType.AddOnTimeline), operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
+            AddSchedule(specifiedId,
+                        isGroupActivity ? '3' : '4',
+                        operationType.HasFlag(ScheduleOperationType.AddOnTimeline),
+                        operationType.HasFlag(ScheduleOperationType.AddOnUserTable));
             if (operationType.HasFlag(ScheduleOperationType.AddOnSharedTable))
             {
                 UpdateSharedData(this);
@@ -1405,9 +1424,8 @@ namespace StudentScheduleManagementSystem.Schedule
         #endregion
     }
 
-    //TODO:同步闹钟情况
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public sealed partial class TemporaryAffairs : Activity
+    public sealed partial class TemporaryAffair : Activity
     {
         #region structs and classes
 
@@ -1427,26 +1445,25 @@ namespace StudentScheduleManagementSystem.Schedule
 
         public override ScheduleType @ScheduleType => ScheduleType.TemporaryAffair;
 
-        [JsonProperty]
         public new const bool IsOnline = false;
 
-        public long Next { get; private set; } = 0;
+        [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
+        public new Map.Location.Building OfflineLocation { get; init; }
+
+        private long _next = 0;
 
         #endregion
 
         #region ctor
 
-        public TemporaryAffairs(string name,
-                                Times.Time beginTime,
-                                string? description,
-                                Map.Location.Building location)
+        public TemporaryAffair(string name, Times.Time beginTime, string? description, Map.Location.Building location)
             : base(RepetitiveType.Single, name, beginTime, 1, false, description)
         {
             OnlineLink = null;
             OfflineLocation = location;
             AddSchedule();
             AlarmEnabled =
-                ((TemporaryAffairs)_scheduleDictionary[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
+                ((TemporaryAffair)_scheduleDictionary[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
         }
 
         #endregion
@@ -1458,19 +1475,19 @@ namespace StudentScheduleManagementSystem.Schedule
             long current = _timeline[BeginTime.ToInt()].Id;
             if (current != ScheduleId)
             {
-                while (((TemporaryAffairs)_scheduleDictionary[current]).Next != ScheduleId)
+                while (((TemporaryAffair)_scheduleDictionary[current])._next != ScheduleId)
                 {
-                    current = ((TemporaryAffairs)_scheduleDictionary[current]).Next;
+                    current = ((TemporaryAffair)_scheduleDictionary[current])._next;
                 }
                 //current = prev(ScheduleId)
-                ((TemporaryAffairs)_scheduleDictionary[current]).Next =
-                    ((TemporaryAffairs)_scheduleDictionary[ScheduleId]).Next;
+                ((TemporaryAffair)_scheduleDictionary[current])._next =
+                    ((TemporaryAffair)_scheduleDictionary[ScheduleId])._next;
                 Log.Information.Log("已删除该临时日程");
             }
             else
             {
                 //current = head;
-                if (((TemporaryAffairs)_scheduleDictionary[current]).Next == 0)
+                if (((TemporaryAffair)_scheduleDictionary[current])._next == 0)
                 {
                     _timeline[BeginTime.ToInt()] = new Record
                     {
@@ -1483,7 +1500,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     _timeline[BeginTime.ToInt()] = new Record
                     {
-                        Id = ((TemporaryAffairs)_scheduleDictionary[current]).Next,
+                        Id = ((TemporaryAffair)_scheduleDictionary[current])._next,
                         ScheduleType = ScheduleType.TemporaryAffair,
                         RepetitiveType = RepetitiveType.Single
                     };
@@ -1516,17 +1533,73 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 ScheduleId = GenerateId(null, '5');
                 long current = _timeline[BeginTime.ToInt()].Id;
-                while (((TemporaryAffairs)_scheduleDictionary[current]).Next != 0)
+                while (((TemporaryAffair)_scheduleDictionary[current])._next != 0)
                 {
-                    current = ((TemporaryAffairs)_scheduleDictionary[current]).Next;
+                    current = ((TemporaryAffair)_scheduleDictionary[current])._next;
                 }
-                ((TemporaryAffairs)_scheduleDictionary[current]).Next = ScheduleId;
+                ((TemporaryAffair)_scheduleDictionary[current])._next = ScheduleId;
                 _scheduleDictionary.Add(ScheduleId, this);
                 Log.Information.Log("已在时间轴与表中添加日程");
             }
             else //没有日程而添加临时日程，只有在此时会生成新的ID并向表中添加新实例
             {
                 base.AddSchedule(null, '5', true, true);
+            }
+        }
+
+        public static TemporaryAffair[] GetAllAt(Times.Time time)
+        {
+            List<TemporaryAffair> list = new();
+            long current = _timeline[time.ToInt()].Id;
+            while (current != 0)
+            {
+                list.Add((TemporaryAffair)_scheduleDictionary[current]);
+                current = ((TemporaryAffair)_scheduleDictionary[current])._next;
+            }
+            return list.ToArray();
+        }
+
+        #endregion
+
+        #region API on alarm manipulation
+
+        public override void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
+        {
+            TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
+            if (affair != this)
+            {
+                affair.EnableAlarm(alarmTimeUpCallback);
+            }
+            else
+            {
+                base.EnableAlarm(alarmTimeUpCallback);
+            }
+        }
+
+        public override void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
+            where T : default
+        {
+            TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
+            if (affair != this)
+            {
+                affair.EnableAlarm(alarmTimeUpCallback);
+            }
+            else
+            {
+                base.EnableAlarm(alarmTimeUpCallback, callbackParameter);
+            }
+        }
+
+        public override void DisableAlarm()
+        {
+            TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
+            if (affair != this)
+            {
+                affair.DisableAlarm();
+            }
+            else
+            {
+                base.DisableAlarm();
             }
         }
 
@@ -1547,11 +1620,12 @@ namespace StudentScheduleManagementSystem.Schedule
                 var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
                 Map.Location.Building location =
                     locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                _ = new TemporaryAffairs(dobj.Name, dobj.Timestamp, dobj.Description, location)
+                _ = new TemporaryAffair(dobj.Name, dobj.Timestamp, dobj.Description, location);
+                if (dobj.AlarmEnabled)
                 {
-                    AlarmEnabled = dobj.AlarmEnabled //should be the same
-                };
-
+                    //just record, actual alarm handling is in method Time.CreateInstance
+                    ((TemporaryAffair)_scheduleDictionary[_timeline[dobj.Timestamp.ToInt()].Id]).AlarmEnabled = true;
+                }
                 Log.Information.Log("已导入临时事务");
             }
         }

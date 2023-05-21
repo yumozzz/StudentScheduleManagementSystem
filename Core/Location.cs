@@ -6,8 +6,15 @@ namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        public static List<Building> Buildings { get; private set; } = new() {Constants.DefaultBuilding, new(0, "Test Building", new(1, 100, 100))};
-        public static AdjacencyTable GlobalMap { get; private set; }
+        private static List<Building> _buildings =
+            new() { Constants.DefaultBuilding, new(0, "Test Building", new(1, 100, 100)) };
+
+        public static List<Building> Buildings
+        {
+            get => _buildings.GetRange(1, _buildings.Count - 1);
+            set => _buildings = new List<Building>() { Constants.DefaultBuilding }.Concat(value).ToList();
+        }
+        public static AdjacencyTable GlobalMap { get; set; }
 
         #region structs, classes and enums
 
@@ -45,15 +52,14 @@ namespace StudentScheduleManagementSystem.Map
 
             public override bool Equals(object? obj)
             {
-                if (obj == null)
+                if (obj is Vertex v)
+                {
+                    return Id == v.Id && X == v.X && Y == v.Y;
+                }
+                else
                 {
                     return false;
                 }
-                if (obj is not Vertex)
-                {
-                    return false;
-                }
-                return Id == ((Vertex)obj).Id && X == ((Vertex)obj).X && Y == ((Vertex)obj).Y;
             }
 
             public override int GetHashCode()
@@ -74,8 +80,8 @@ namespace StudentScheduleManagementSystem.Map
 
         public struct Building //建筑
         {
-            public int Id { get; set; } = -1;
-            public string Name { get; set; } = String.Empty;
+            public int Id { get; set; }
+            public string Name { get; set; }
             public Vertex Center { get; set; }
 
             public Building(int id, string name, Vertex center)
@@ -100,6 +106,18 @@ namespace StudentScheduleManagementSystem.Map
                 return !left.Equals(right);
             }
 
+            public override bool Equals(object? obj)
+            {
+                if (obj is Building b)
+                {
+                    return Id == b.Id && Name == b.Name && Center.Equals(b.Center);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
             public override int GetHashCode()
             {
                 unchecked
@@ -113,19 +131,6 @@ namespace StudentScheduleManagementSystem.Map
                     result += Center.GetHashCode();
                     return result;
                 }
-            }
-
-            public override bool Equals(object? obj)
-            {
-                if (obj == null)
-                {
-                    return false;
-                }
-                if(obj is not Building)
-                {
-                    return false;
-                }
-                return Id == ((Building)obj).Id && Name == ((Building)obj).Name && Center.Equals(((Building)obj).Center);
             }
         }
 
@@ -219,12 +224,12 @@ namespace StudentScheduleManagementSystem.Map
                             {
                                 pointId = next["Id"]!.Value<int>(),
                                 edge = new()
-                                { 
-                                    Weight =
-                                    next["Distance"]!.Value<int>(),
+                                {
+                                    Weight = next["Distance"]!.Value<int>(),
                                     Type = next["EdgeType"]!.Value<string>() switch
                                     {
-                                        "Line" => EdgeType.Line, "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
+                                        "Line" => EdgeType.Line,
+                                        "QuadraticBezierCurve" => EdgeType.QuadraticBezierCurve,
                                         _ => throw new JsonFormatException("Wrong EdgeType")
                                     },
                                     Controls = null,
@@ -270,7 +275,6 @@ namespace StudentScheduleManagementSystem.Map
             }
 
             #if false
-
             public AdjacencyTable(int[,] adjMatrix, (int, int)[] location)
             {
                 if (adjMatrix.GetLength(0) != adjMatrix.GetLength(1))
@@ -322,6 +326,7 @@ namespace StudentScheduleManagementSystem.Map
             }
 
             #endif
+
             public List<(int, int)> this[int id]
             {
                 get
@@ -410,6 +415,7 @@ namespace StudentScheduleManagementSystem.Map
         #endregion
 
         #region API on pathfinding
+
         //重载
         public static List<int> GetClosestPath(Building startBuilding, Building endBuilding)
         {
@@ -419,7 +425,7 @@ namespace StudentScheduleManagementSystem.Map
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
             List<int> points = buildings.ConvertAll(building => building.Center.Id);
-            if (points.Count <=2 || points.Count >= 10)//建筑太多或太少，报错
+            if (points.Count <= 2 || points.Count >= 10) //建筑太多或太少，报错
             {
                 throw new ArgumentException("too many or too few items in parameter \"buildings\"");
             }
@@ -478,7 +484,7 @@ namespace StudentScheduleManagementSystem.Map
                 hasVisited[p] = true;
                 e ^= (1 << (p - 1));
             }
-            res.Add(points[0]);//在建筑的关键点的最后添加一个出发点
+            res.Add(points[0]); //在建筑的关键点的最后添加一个出发点
             //res只是关键的点的路径，并不包含所有点，下面这个finalCircuit才包含所有点
             List<int> finalCircuit = new();
             for (int i = 1; i < res.Count; i++)
@@ -504,7 +510,7 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<Building> GetBuildingsByName(string name)
         {
-            if(name == "default building")
+            if (name == "default building")
             {
                 return new List<Building>() { Constants.DefaultBuilding };
             }
@@ -521,7 +527,7 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     var smallerId = pair.Item1 <= pair.Item2 ? pair.Item1 : pair.Item2;
                     var biggerId = smallerId == pair.Item1 ? pair.Item2 : pair.Item1;
-                    if (GlobalMap[smallerId,biggerId]!.Value.Type==EdgeType.Line)
+                    if (GlobalMap[smallerId, biggerId]!.Value.Type == EdgeType.Line)
                     {
                         ret.Add((GlobalMap.GetVertex(smallerId), GlobalMap.GetVertex(biggerId)));
                     }
@@ -574,7 +580,7 @@ namespace StudentScheduleManagementSystem.Map
             return (subEdges, correspondence);
         }
 
-        private static List<int> GetClosestPath(int startId, int endId)//传参是出发建筑和终点建筑的中心点的id
+        private static List<int> GetClosestPath(int startId, int endId) //传参是出发建筑和终点建筑的中心点的id
         {
             //遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = GlobalMap!.Size; //点的数量
@@ -664,9 +670,7 @@ namespace StudentScheduleManagementSystem.Map
             {
                 int id = obj["Id"]!.Value<int>();
                 string name = obj["Name"]!.Value<string>()!;
-                Building building = new(id,
-                                        name,
-                                        GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
+                Building building = new(id, name, GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
                 Buildings.Add(building);
             }
         }
@@ -702,7 +706,9 @@ namespace StudentScheduleManagementSystem.Map
                 }
                 else
                 {
-                    bezCurveControlPointTuples.Add((Location.GlobalMap.GetVertex(prevId), edge.Value.Controls!.Value.Item1, edge.Value.Controls!.Value.Item2, Location.GlobalMap.GetVertex(i)));
+                    bezCurveControlPointTuples.Add((Location.GlobalMap.GetVertex(prevId),
+                                                    edge.Value.Controls!.Value.Item1, edge.Value.Controls!.Value.Item2,
+                                                    Location.GlobalMap.GetVertex(i)));
                 }
             }
             UI.MapWindow mapWindow = new(lineEndPointPairs, bezCurveControlPointTuples);

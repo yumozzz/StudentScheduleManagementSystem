@@ -29,6 +29,15 @@
         private void InitializeComponent()
         {
             this.header = new System.Windows.Forms.Panel();
+            this.pauseButton = new System.Windows.Forms.Button();
+            this.speedButton = new System.Windows.Forms.Button();
+            this.setTime = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.hourBox = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.dayBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.weekBox = new System.Windows.Forms.ComboBox();
             this.currentTime = new System.Windows.Forms.Label();
             this.logoutButton = new System.Windows.Forms.Button();
             this.mainpageButton = new System.Windows.Forms.PictureBox();
@@ -45,6 +54,15 @@
             // 
             // header
             // 
+            this.header.Controls.Add(this.pauseButton);
+            this.header.Controls.Add(this.speedButton);
+            this.header.Controls.Add(this.setTime);
+            this.header.Controls.Add(this.label3);
+            this.header.Controls.Add(this.hourBox);
+            this.header.Controls.Add(this.label2);
+            this.header.Controls.Add(this.dayBox);
+            this.header.Controls.Add(this.label1);
+            this.header.Controls.Add(this.weekBox);
             this.header.Controls.Add(this.currentTime);
             this.header.Controls.Add(this.logoutButton);
             this.header.Location = new System.Drawing.Point(0, 0);
@@ -54,13 +72,143 @@
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
             this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
             // 
+            // pauseButton
+            // 
+            this.pauseButton.Location = new System.Drawing.Point(967, 3);
+            this.pauseButton.Name = "pauseButton";
+            this.pauseButton.Size = new System.Drawing.Size(112, 34);
+            this.pauseButton.TabIndex = 18;
+            this.pauseButton.Text = "暂停";
+            this.pauseButton.UseVisualStyleBackColor = true;
+            this.pauseButton.Click += new System.EventHandler(this.PauseButton_Click);
+            // 
+            // speedButton
+            // 
+            this.speedButton.Location = new System.Drawing.Point(849, 3);
+            this.speedButton.Name = "speedButton";
+            this.speedButton.Size = new System.Drawing.Size(112, 34);
+            this.speedButton.TabIndex = 17;
+            this.speedButton.Text = "快进";
+            this.speedButton.UseVisualStyleBackColor = true;
+            this.speedButton.Click += new System.EventHandler(this.SpeedButton_Click);
+            // 
+            // setTime
+            // 
+            this.setTime.Location = new System.Drawing.Point(731, 3);
+            this.setTime.Name = "setTime";
+            this.setTime.Size = new System.Drawing.Size(112, 34);
+            this.setTime.TabIndex = 16;
+            this.setTime.Text = "SetTime";
+            this.setTime.UseVisualStyleBackColor = true;
+            this.setTime.Click += new System.EventHandler(this.SetTime_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(567, 8);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(53, 24);
+            this.label3.TabIndex = 13;
+            this.label3.Text = "Hour";
+            // 
+            // hourBox
+            // 
+            this.hourBox.FormattingEnabled = true;
+            this.hourBox.Items.AddRange(new object[] {
+            "0:00",
+            "1:00",
+            "2:00",
+            "3:00",
+            "4:00",
+            "5:00",
+            "6:00",
+            "7:00",
+            "8:00",
+            "9:00",
+            "10:00",
+            "11:00",
+            "12:00",
+            "13:00",
+            "14:00",
+            "15:00",
+            "16:00",
+            "17:00",
+            "18:00",
+            "19:00",
+            "20:00",
+            "21:00",
+            "22:00",
+            "23:00"});
+            this.hourBox.Location = new System.Drawing.Point(626, 5);
+            this.hourBox.Name = "hourBox";
+            this.hourBox.Size = new System.Drawing.Size(99, 32);
+            this.hourBox.TabIndex = 12;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(402, 8);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(44, 24);
+            this.label2.TabIndex = 11;
+            this.label2.Text = "Day";
+            // 
+            // dayBox
+            // 
+            this.dayBox.FormattingEnabled = true;
+            this.dayBox.Items.AddRange(new object[] {
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+            "Sun"});
+            this.dayBox.Location = new System.Drawing.Point(452, 5);
+            this.dayBox.Name = "dayBox";
+            this.dayBox.Size = new System.Drawing.Size(109, 32);
+            this.dayBox.TabIndex = 10;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(210, 8);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(58, 24);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "Week";
+            // 
+            // weekBox
+            // 
+            this.weekBox.FormattingEnabled = true;
+            this.weekBox.Items.AddRange(new object[] {
+            "Week1",
+            "Week2",
+            "Week3",
+            "Week4",
+            "Week5",
+            "Week6",
+            "Week7",
+            "Week8",
+            "Week9",
+            "Week10",
+            "Week11",
+            "Week12",
+            "Week13",
+            "Week14",
+            "Week15",
+            "Week16"});
+            this.weekBox.Location = new System.Drawing.Point(274, 5);
+            this.weekBox.Name = "weekBox";
+            this.weekBox.Size = new System.Drawing.Size(122, 32);
+            this.weekBox.TabIndex = 8;
+            // 
             // currentTime
             // 
             this.currentTime.AutoSize = true;
-            this.currentTime.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.currentTime.Location = new System.Drawing.Point(12, 11);
             this.currentTime.Name = "currentTime";
-            this.currentTime.Size = new System.Drawing.Size(70, 26);
+            this.currentTime.Size = new System.Drawing.Size(68, 24);
             this.currentTime.TabIndex = 2;
             this.currentTime.Text = "Week i";
             // 
@@ -112,7 +260,7 @@
             this.courseButton.UseVisualStyleBackColor = true;
             this.courseButton.Click += new System.EventHandler(this.CourseButton_Click);
             // 
-            // exam
+            // examButton
             // 
             this.examButton.Location = new System.Drawing.Point(12, 187);
             this.examButton.Name = "examButton";
@@ -122,7 +270,7 @@
             this.examButton.UseVisualStyleBackColor = true;
             this.examButton.Click += new System.EventHandler(this.ExamButton_Click);
             // 
-            // GroupActivity
+            // GroupActivityButton
             // 
             this.GroupActivityButton.Location = new System.Drawing.Point(12, 240);
             this.GroupActivityButton.Name = "GroupActivityButton";
@@ -132,7 +280,7 @@
             this.GroupActivityButton.UseVisualStyleBackColor = true;
             this.GroupActivityButton.Click += new System.EventHandler(this.GroupActivityButton_Click);
             // 
-            // personalActivity
+            // personalActivityButton
             // 
             this.personalActivityButton.Location = new System.Drawing.Point(12, 293);
             this.personalActivityButton.Name = "personalActivityButton";
@@ -188,5 +336,14 @@
         private Button GroupActivityButton;
         private Button personalActivityButton;
         private Button temporaryAffairButton;
+        private ComboBox weekBox;
+        private Button setTime;
+        private Label label3;
+        private ComboBox hourBox;
+        private Label label2;
+        private ComboBox dayBox;
+        private Label label1;
+        private Button speedButton;
+        private Button pauseButton;
     }
 }

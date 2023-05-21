@@ -29,13 +29,6 @@
         protected void InitializeComponent()
         {
             this.scheduleData = new System.Windows.Forms.DataGridView();
-            this.courseCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.nameTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.idTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.weekTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dayCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.timeCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.durationCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.weekSelectBox = new StudentScheduleManagementSystem.UI.MultiSelectBox();
             this.daySelectBox = new StudentScheduleManagementSystem.UI.MultiSelectBox();
             this.durationComboBox = new System.Windows.Forms.ComboBox();
@@ -52,6 +45,13 @@
             this.searchCancel = new System.Windows.Forms.Button();
             this.searchByIdBox = new System.Windows.Forms.TextBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.courseCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.nameTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.idTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.weekTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dayCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.timeCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.durationCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -82,67 +82,6 @@
             this.scheduleData.Size = new System.Drawing.Size(714, 645);
             this.scheduleData.TabIndex = 41;
             this.scheduleData.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.ScheduleData_SortCompare);
-            // 
-            // courseCheckBoxColumn
-            // 
-            this.courseCheckBoxColumn.Frozen = true;
-            this.courseCheckBoxColumn.HeaderText = "";
-            this.courseCheckBoxColumn.MinimumWidth = 8;
-            this.courseCheckBoxColumn.Name = "courseCheckBoxColumn";
-            this.courseCheckBoxColumn.Width = 30;
-            // 
-            // nameTextBoxColumn
-            // 
-            this.nameTextBoxColumn.Frozen = true;
-            this.nameTextBoxColumn.HeaderText = "日程名称";
-            this.nameTextBoxColumn.MinimumWidth = 8;
-            this.nameTextBoxColumn.Name = "nameTextBoxColumn";
-            this.nameTextBoxColumn.ReadOnly = true;
-            this.nameTextBoxColumn.Width = 180;
-            // 
-            // idTextBoxColumn
-            // 
-            this.idTextBoxColumn.Frozen = true;
-            this.idTextBoxColumn.HeaderText = "日程ID";
-            this.idTextBoxColumn.MinimumWidth = 8;
-            this.idTextBoxColumn.Name = "idTextBoxColumn";
-            this.idTextBoxColumn.Width = 150;
-            // 
-            // weekTextBoxColumn
-            // 
-            this.weekTextBoxColumn.Frozen = true;
-            this.weekTextBoxColumn.HeaderText = "日程周";
-            this.weekTextBoxColumn.MinimumWidth = 8;
-            this.weekTextBoxColumn.Name = "weekTextBoxColumn";
-            this.weekTextBoxColumn.ReadOnly = true;
-            this.weekTextBoxColumn.Width = 120;
-            // 
-            // dayCheckBoxColumn
-            // 
-            this.dayCheckBoxColumn.Frozen = true;
-            this.dayCheckBoxColumn.HeaderText = "日程日";
-            this.dayCheckBoxColumn.MinimumWidth = 8;
-            this.dayCheckBoxColumn.Name = "dayCheckBoxColumn";
-            this.dayCheckBoxColumn.ReadOnly = true;
-            this.dayCheckBoxColumn.Width = 120;
-            // 
-            // timeCheckBoxColumn
-            // 
-            this.timeCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.timeCheckBoxColumn.HeaderText = "时间";
-            this.timeCheckBoxColumn.MinimumWidth = 8;
-            this.timeCheckBoxColumn.Name = "timeCheckBoxColumn";
-            this.timeCheckBoxColumn.ReadOnly = true;
-            this.timeCheckBoxColumn.Width = 150;
-            // 
-            // durationCheckBoxColumn
-            // 
-            this.durationCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.durationCheckBoxColumn.HeaderText = "时长";
-            this.durationCheckBoxColumn.MinimumWidth = 8;
-            this.durationCheckBoxColumn.Name = "durationCheckBoxColumn";
-            this.durationCheckBoxColumn.ReadOnly = true;
-            this.durationCheckBoxColumn.Width = 150;
             // 
             // weekSelectBox
             // 
@@ -341,6 +280,63 @@
             this.pictureBox2.TabIndex = 61;
             this.pictureBox2.TabStop = false;
             // 
+            // courseCheckBoxColumn
+            // 
+            this.courseCheckBoxColumn.Frozen = true;
+            this.courseCheckBoxColumn.HeaderText = "";
+            this.courseCheckBoxColumn.MinimumWidth = 8;
+            this.courseCheckBoxColumn.Name = "courseCheckBoxColumn";
+            this.courseCheckBoxColumn.Width = 30;
+            // 
+            // nameTextBoxColumn
+            // 
+            this.nameTextBoxColumn.HeaderText = "日程名称";
+            this.nameTextBoxColumn.MinimumWidth = 8;
+            this.nameTextBoxColumn.Name = "nameTextBoxColumn";
+            this.nameTextBoxColumn.ReadOnly = true;
+            this.nameTextBoxColumn.Width = 180;
+            // 
+            // idTextBoxColumn
+            // 
+            this.idTextBoxColumn.HeaderText = "日程ID";
+            this.idTextBoxColumn.MinimumWidth = 8;
+            this.idTextBoxColumn.Name = "idTextBoxColumn";
+            this.idTextBoxColumn.Width = 150;
+            // 
+            // weekTextBoxColumn
+            // 
+            this.weekTextBoxColumn.HeaderText = "日程周";
+            this.weekTextBoxColumn.MinimumWidth = 8;
+            this.weekTextBoxColumn.Name = "weekTextBoxColumn";
+            this.weekTextBoxColumn.ReadOnly = true;
+            this.weekTextBoxColumn.Width = 120;
+            // 
+            // dayCheckBoxColumn
+            // 
+            this.dayCheckBoxColumn.HeaderText = "日程日";
+            this.dayCheckBoxColumn.MinimumWidth = 8;
+            this.dayCheckBoxColumn.Name = "dayCheckBoxColumn";
+            this.dayCheckBoxColumn.ReadOnly = true;
+            this.dayCheckBoxColumn.Width = 120;
+            // 
+            // timeCheckBoxColumn
+            // 
+            this.timeCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.timeCheckBoxColumn.HeaderText = "时间";
+            this.timeCheckBoxColumn.MinimumWidth = 8;
+            this.timeCheckBoxColumn.Name = "timeCheckBoxColumn";
+            this.timeCheckBoxColumn.ReadOnly = true;
+            this.timeCheckBoxColumn.Width = 150;
+            // 
+            // durationCheckBoxColumn
+            // 
+            this.durationCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.durationCheckBoxColumn.HeaderText = "时长";
+            this.durationCheckBoxColumn.MinimumWidth = 8;
+            this.durationCheckBoxColumn.Name = "durationCheckBoxColumn";
+            this.durationCheckBoxColumn.ReadOnly = true;
+            this.durationCheckBoxColumn.Width = 150;
+            // 
             // AdminSubwindowBase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -389,6 +385,11 @@
         protected PictureBox pictureBox1;
         protected Button reviseOK;
         protected Button reviseCancel;
+        private Button searchOK;
+        private TextBox searchByNameBox;
+        private Button searchCancel;
+        private TextBox searchByIdBox;
+        private PictureBox pictureBox2;
         private DataGridViewCheckBoxColumn courseCheckBoxColumn;
         private DataGridViewTextBoxColumn nameTextBoxColumn;
         private DataGridViewTextBoxColumn idTextBoxColumn;
@@ -396,10 +397,5 @@
         private DataGridViewTextBoxColumn dayCheckBoxColumn;
         private DataGridViewTextBoxColumn timeCheckBoxColumn;
         private DataGridViewTextBoxColumn durationCheckBoxColumn;
-        private Button searchOK;
-        private TextBox searchByNameBox;
-        private Button searchCancel;
-        private TextBox searchByIdBox;
-        private PictureBox pictureBox2;
     }
 }
