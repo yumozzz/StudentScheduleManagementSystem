@@ -91,87 +91,79 @@ namespace StudentScheduleManagementSystem
     public class TooManyTemporaryAffairsException : InvalidOperationException { }
     public class EndOfSemester : Exception { };
 
-    public class ActiveWeekComparer : IComparer<Schedule.ScheduleBase.SharedData>
+    public class ArrayComparer : IComparer<int[]>
     {
-        public int Compare(Schedule.ScheduleBase.SharedData? data1, Schedule.ScheduleBase.SharedData? data2)
+        public int Compare(int[] arr1, int[] arr2)
         {
-            int[] weeks1 = data1!.ActiveWeeks, weeks2 = data2!.ActiveWeeks;
-            if (data1.RepetitiveType == RepetitiveType.Single)
-            {
-                weeks1 = new[] { data1.Timestamp.Week };
-            }
-            else if (data1.RepetitiveType == RepetitiveType.MultipleDays)
-            {
-                weeks1 = Constants.AllWeeks;
-            }
-            if (data2.RepetitiveType == RepetitiveType.Single)
-            {
-                weeks2 = new[] { data2.Timestamp.Week };
-            }
-            else if (data2.RepetitiveType == RepetitiveType.MultipleDays)
-            {
-                weeks2 = Constants.AllWeeks;
-            }
-
             int i = 0;
-            for (; i < weeks1.Length && i < weeks2.Length; i++)
+            for (; i < arr1.Length && i < arr2.Length; i++)
             {
-                if (weeks1[i] > weeks2[i])
+                if (arr1[i] > arr2[i])
                 {
                     return 1;
                 }
-                if (weeks1[i] < weeks2[i])
+                if (arr1[i] < arr2[i])
                 {
                     return -1;
                 }
             }
-            if (weeks1.Length == weeks2.Length)
+            if (arr1.Length == arr2.Length)
             {
-                return data1.Id.CompareTo(data2.Id);
+                return 0;
             }
-            if (i == weeks1.Length)
+            if (i == arr1.Length)
             {
                 return -1;
             }
             return 1;
         }
     }
-
-    public class ActiveDayComparer : IComparer<Schedule.ScheduleBase.SharedData>
+    class BuildingJsonConverter : JsonConverter
     {
-        public int Compare(Schedule.ScheduleBase.SharedData? data1, Schedule.ScheduleBase.SharedData? data2)
-        {
-            Day[] days1 = data1!.ActiveDays, days2 = data2!.ActiveDays;
-            if (data1.RepetitiveType == RepetitiveType.Single)
-            {
-                days1 = new[] { data1.Timestamp.Day };
-            }
-            if (data2.RepetitiveType == RepetitiveType.Single)
-            {
-                days2 = new[] { data2.Timestamp.Day };
-            }
+        public override bool CanRead => true;
+        public override bool CanWrite => true;
 
-            int i = 0;
-            for (; i < days1.Length && i < days2.Length; i++)
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(Map.Location.Building);
+        }
+
+        public override object? ReadJson(JsonReader reader,
+                                         Type objectType,
+                                         object? existingValue,
+                                         JsonSerializer serializer)
+        {
+            bool isNullableType = Nullable.GetUnderlyingType(objectType) != null;
+            //Type type = isNullableType ? Nullable.GetUnderlyingType(objectType)! : objectType;
+            if (reader.TokenType == JsonToken.Null)
             {
-                if (days1[i] > days2[i])
+                if (isNullableType)
                 {
-                    return 1;
+                    return null;
                 }
-                if (days1[i] < days2[i])
+                else
                 {
-                    return -1;
+                    throw new JsonFormatException("cannot convert null token to notnull type");
                 }
             }
-            if (days1.Length == days2.Length)
+            if (reader.TokenType != JsonToken.String)
             {
-                return data1.Id.CompareTo(data2.Id);
+                throw new JsonFormatException("cannot convert not string token to string");
             }
-            if (i == days1.Length)
+            var locations = Map.Location.GetBuildingsByName(reader.Value!.ToString()!);
+            Map.Location.Building building =
+                locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+            return building;
+        }
+
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            if (value == null)
             {
-                return -1;
+                writer.WriteNull();
+                return;
             }
-            return 1;
+            writer.WriteValue(((Map.Location.Building)value).Name);
         }
     }
 
@@ -259,7 +251,7 @@ namespace StudentScheduleManagementSystem.UI
     public static class Shared
     {
         public static string[] Weeks =>
-            new string[]
+            new[]
             {
                 "Week1",
                 "Week2",
@@ -278,9 +270,9 @@ namespace StudentScheduleManagementSystem.UI
                 "Week15",
                 "Week16",
             };
-        public static string[] Days => new string[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+        public static string[] Days => new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
         public static string[] Hours =>
-            new string[]
+            new[]
             {
                 "8:00",
                 "9:00",

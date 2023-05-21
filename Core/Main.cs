@@ -132,12 +132,12 @@ namespace StudentScheduleManagementSystem.MainProgram
                 }
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
                                      RepetitiveType.Single,
-                                     Schedule.ScheduleBase.NotifyAllInComingDay,
+                                     Schedule.Schedule.NotifyAllInComingDay,
                                      new Times.Alarm.GeneralAlarmParam()
                                      {
                                          startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
                                      },
-                                     typeof(Schedule.ScheduleBase),
+                                     typeof(Schedule.Schedule),
                                      typeof(Times.Alarm.GeneralAlarmParam),
                                      true,
                                      Constants.EmptyIntArray,
@@ -205,7 +205,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             Times.Timer.Pause = true;
             Times.Alarm.ClearAll();
-            Schedule.ScheduleBase.ClearAll();
+            Schedule.Schedule.ClearAll();
             MessageBox.Show("Log out successfully!");
             Log.Information.Log($"用户{UserId}已登出");
         }
@@ -220,7 +220,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 _accounts.Add(account.UserId, (account.Password, account.PrivateKey));
             }
             //Map.Location.SetUp();
-            Schedule.ScheduleBase.ReadSharedData();
+            Schedule.Schedule.ReadSharedData();
         }
 
         public static void Exit()
@@ -237,7 +237,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                                        })
                                                                       .ToList(),
                                                              FileManagement.FileManager.UserFileDirectory);
-            Schedule.ScheduleBase.SaveSharedData();
+            Schedule.Schedule.SaveSharedData();
             Log.Information.Log("已退出程序");
             Log.LogBase.Close();
         }
@@ -246,7 +246,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 
 namespace StudentScheduleManagementSystem.Schedule
 {
-    public abstract partial class ScheduleBase
+    public abstract partial class Schedule
     {
         public static void NotifyAllInComingDay(long id, object? obj)
         {
@@ -283,7 +283,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                  RepetitiveType.Single,
                                  NotifyAllInComingDay,
                                  new Times.Alarm.GeneralAlarmParam() { startTimestamp = param.startTimestamp + 24 },
-                                 typeof(ScheduleBase),
+                                 typeof(Schedule),
                                  typeof(Times.Alarm.GeneralAlarmParam),
                                  true,
                                  Constants.EmptyIntArray,

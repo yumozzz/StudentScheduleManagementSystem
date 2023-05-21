@@ -28,7 +28,7 @@
         /// </summary>
         protected void InitializeComponent()
         {
-            this.scheduleData = new System.Windows.Forms.DataGridView();
+            this.scheduleDataTable = new System.Windows.Forms.DataGridView();
             this.weekSelectBox = new StudentScheduleManagementSystem.UI.MultiSelectBox();
             this.daySelectBox = new StudentScheduleManagementSystem.UI.MultiSelectBox();
             this.durationComboBox = new System.Windows.Forms.ComboBox();
@@ -52,20 +52,20 @@
             this.dayCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timeCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.durationCheckBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.scheduleDataTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // scheduleData
             // 
-            this.scheduleData.AllowUserToAddRows = false;
-            this.scheduleData.AllowUserToResizeColumns = false;
-            this.scheduleData.AllowUserToResizeRows = false;
-            this.scheduleData.BackgroundColor = System.Drawing.Color.White;
-            this.scheduleData.ColumnHeadersHeight = 34;
-            this.scheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            this.scheduleData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.scheduleDataTable.AllowUserToAddRows = false;
+            this.scheduleDataTable.AllowUserToResizeColumns = false;
+            this.scheduleDataTable.AllowUserToResizeRows = false;
+            this.scheduleDataTable.BackgroundColor = System.Drawing.Color.White;
+            this.scheduleDataTable.ColumnHeadersHeight = 34;
+            this.scheduleDataTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.scheduleDataTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.courseCheckBoxColumn,
             this.nameTextBoxColumn,
             this.idTextBoxColumn,
@@ -73,15 +73,15 @@
             this.dayCheckBoxColumn,
             this.timeCheckBoxColumn,
             this.durationCheckBoxColumn});
-            this.scheduleData.Location = new System.Drawing.Point(5, 5);
-            this.scheduleData.Name = "scheduleData";
-            this.scheduleData.RowHeadersVisible = false;
-            this.scheduleData.RowHeadersWidth = 62;
-            this.scheduleData.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            this.scheduleData.RowTemplate.Height = 32;
-            this.scheduleData.Size = new System.Drawing.Size(714, 645);
-            this.scheduleData.TabIndex = 41;
-            this.scheduleData.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.ScheduleData_SortCompare);
+            this.scheduleDataTable.Location = new System.Drawing.Point(5, 5);
+            this.scheduleDataTable.Name = "scheduleDataTable";
+            this.scheduleDataTable.RowHeadersVisible = false;
+            this.scheduleDataTable.RowHeadersWidth = 62;
+            this.scheduleDataTable.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            this.scheduleDataTable.RowTemplate.Height = 32;
+            this.scheduleDataTable.Size = new System.Drawing.Size(714, 645);
+            this.scheduleDataTable.TabIndex = 41;
+            
             // 
             // weekSelectBox
             // 
@@ -343,8 +343,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(168)))), ((int)(((byte)(128)))), ((int)(((byte)(194)))));
             this.ClientSize = new System.Drawing.Size(1050, 655);
-            this.Controls.Add(this.daySelectBox);
             this.Controls.Add(this.weekSelectBox);
+            this.Controls.Add(this.daySelectBox);
             this.Controls.Add(this.searchByIdBox);
             this.Controls.Add(this.searchCancel);
             this.Controls.Add(this.searchByNameBox);
@@ -354,7 +354,7 @@
             this.Controls.Add(this.reviseOK);
             this.Controls.Add(this.reviseScheduleButton);
             this.Controls.Add(this.deleteScheduleButton);
-            this.Controls.Add(this.scheduleData);
+            this.Controls.Add(this.scheduleDataTable);
             this.Controls.Add(this.durationComboBox);
             this.Controls.Add(this.hourComboBox);
             this.Controls.Add(this.addScheduleButton);
@@ -363,7 +363,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "AdminSubwindowBase";
             this.Text = ",";
-            ((System.ComponentModel.ISupportInitialize)(this.scheduleData)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.scheduleDataTable)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
@@ -373,7 +373,7 @@
 
         #endregion
 
-        protected DataGridView scheduleData;
+        protected DataGridView scheduleDataTable;
         protected MultiSelectBox weekSelectBox;
         protected MultiSelectBox daySelectBox;
         protected ComboBox durationComboBox;

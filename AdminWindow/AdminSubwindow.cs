@@ -5,7 +5,7 @@ namespace StudentScheduleManagementSystem.UI
 {
     public abstract partial class AdminSubwindowBase : Form
     {
-        protected List<Schedule.ScheduleBase.SharedData> _data;
+        protected List<Schedule.SharedData> _data;
         protected ScheduleType _type;
         protected long? _originId = null;
 
@@ -22,34 +22,35 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseCancel.Hide();
             this.searchByNameBox.ForeColor = Color.Black;
             this.searchByIdBox.ForeColor = Color.Gray;
+            this.scheduleDataTable.SortCompare += TableSortCompare;
         }
 
         protected void GenerateFormData(ScheduleType type)
         {
-            _data = Schedule.ScheduleBase.GetSharedByType(type);
+            _data = Schedule.Schedule.GetSharedByType(type);
             GenerateFormData(_data);
         }
 
-        protected void GenerateFormData(List<Schedule.ScheduleBase.SharedData> data)
+        protected void GenerateFormData(List<Schedule.SharedData> data)
         {
-            scheduleData.Rows.Clear();
+            scheduleDataTable.Rows.Clear();
             int[] widths = { 30, 150, 130, 120, 130, 60, 60 };
             for (int i = 0; i < widths.Length; i++)
             {
-                scheduleData.Columns[i].Width = widths[i];
+                scheduleDataTable.Columns[i].Width = widths[i];
             }
 
             foreach (var sharedData in data)
             {
                 if (sharedData.RepetitiveType == RepetitiveType.Single)
                 {
-                    this.scheduleData.Rows.Add(null,
-                                               sharedData.Name,
-                                               sharedData.Id,
-                                               sharedData.Timestamp.Week.ToString(),
-                                               sharedData.Timestamp.Day.ToString()[..3],
-                                               sharedData.Timestamp.Hour.ToString() + ":00",
-                                               sharedData.Duration.ToString() + "小时");
+                    this.scheduleDataTable.Rows.Add(null,
+                                                    sharedData.Name,
+                                                    sharedData.ScheduleId,
+                                                    sharedData.Timestamp.Week.ToString(),
+                                                    sharedData.Timestamp.Day.ToString()[..3],
+                                                    sharedData.Timestamp.Hour.ToString() + ":00",
+                                                    sharedData.Duration.ToString() + "小时");
                 }
                 else if (sharedData.RepetitiveType == RepetitiveType.MultipleDays)
                 {
@@ -58,13 +59,13 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         days.Append(activeDay.ToString()[..3] + ";");
                     }
-                    this.scheduleData.Rows.Add(null,
-                                               sharedData.Name,
-                                               sharedData.Id,
-                                               "1-16",
-                                               days.ToString(),
-                                               sharedData.Timestamp.Hour.ToString() + ":00",
-                                               sharedData.Duration.ToString() + "小时");
+                    this.scheduleDataTable.Rows.Add(null,
+                                                    sharedData.Name,
+                                                    sharedData.ScheduleId,
+                                                    "1-16",
+                                                    days.ToString(),
+                                                    sharedData.Timestamp.Hour.ToString() + ":00",
+                                                    sharedData.Duration.ToString() + "小时");
                 }
                 else
                 {
@@ -73,13 +74,13 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         days.Append(activeDay.ToString()[..3] + ";");
                     }
-                    this.scheduleData.Rows.Add(null,
-                                               sharedData.Name,
-                                               sharedData.Id,
-                                               Shared.GetBriefWeeks(sharedData.ActiveWeeks).ToString(),
-                                               days.ToString(),
-                                               sharedData.Timestamp.Hour.ToString() + ":00",
-                                               sharedData.Duration.ToString() + "小时");
+                    this.scheduleDataTable.Rows.Add(null,
+                                                    sharedData.Name,
+                                                    sharedData.ScheduleId,
+                                                    Shared.GetBriefWeeks(sharedData.ActiveWeeks).ToString(),
+                                                    days.ToString(),
+                                                    sharedData.Timestamp.Hour.ToString() + ":00",
+                                                    sharedData.Duration.ToString() + "小时");
                 }
             }
         }
@@ -225,7 +226,7 @@ namespace StudentScheduleManagementSystem.UI
             int selectedCount = 0, index = 0;
             for (int i = 0; i < _data.Count; i++)
             {
-                if (Convert.ToBoolean(scheduleData.Rows[i].Cells[0].EditedFormattedValue))
+                if (Convert.ToBoolean(scheduleDataTable.Rows[i].Cells[0].EditedFormattedValue))
                 {
                     selectedCount++;
                     index = i;
@@ -242,17 +243,17 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            long id = (long)scheduleData.Rows[index].Cells[2].Value;
+            long id = (long)scheduleDataTable.Rows[index].Cells[2].Value;
 
-            if (MessageBox.Show("周次: " + scheduleData.Rows[index].Cells[3].Value.ToString() + "\n天次: " +
-                                scheduleData.Rows[index].Cells[4].Value.ToString() + "\n时间: " +
-                                scheduleData.Rows[index].Cells[5].Value.ToString() + "\n时长: " +
-                                scheduleData.Rows[index].Cells[6].Value.ToString() + "\n名称: " +
-                                scheduleData.Rows[index].Cells[1].Value.ToString(),
+            if (MessageBox.Show("周次: " + scheduleDataTable.Rows[index].Cells[3].Value.ToString() + "\n天次: " +
+                                scheduleDataTable.Rows[index].Cells[4].Value.ToString() + "\n时间: " +
+                                scheduleDataTable.Rows[index].Cells[5].Value.ToString() + "\n时长: " +
+                                scheduleDataTable.Rows[index].Cells[6].Value.ToString() + "\n名称: " +
+                                scheduleDataTable.Rows[index].Cells[1].Value.ToString(),
                                 "日程信息",
                                 MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
-                Schedule.ScheduleBase.DeleteShared(id);
+                Schedule.Schedule.DeleteShared(id);
                 MessageBox.Show("已成功删除该日程");
                 Log.Information.Log($"成功删除id为{id}的共享日程");
                 GenerateFormData(_type);
@@ -269,7 +270,7 @@ namespace StudentScheduleManagementSystem.UI
             int selectedCount = 0, index = 0;
             for (int i = 0; i < _data.Count; i++)
             {
-                if (Convert.ToBoolean(scheduleData.Rows[i].Cells[0].EditedFormattedValue))
+                if (Convert.ToBoolean(scheduleDataTable.Rows[i].Cells[0].EditedFormattedValue))
                 {
                     selectedCount++;
                     index = i;
@@ -286,8 +287,8 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            long id = (long)scheduleData.Rows[index].Cells[2].Value;
-            var selected = Schedule.ScheduleBase.GetSharedById(id);
+            long id = (long)scheduleDataTable.Rows[index].Cells[2].Value;
+            var selected = Schedule.Schedule.GetSharedById(id);
 
             this.nameBox.Text = selected!.Name;
             RepetitiveType repetitiveType = selected.RepetitiveType;
@@ -321,7 +322,7 @@ namespace StudentScheduleManagementSystem.UI
 
             this.hourComboBox.Text = selected.Timestamp.Hour + ":00";
             this.durationComboBox.Text = selected.Duration + "小时";
-            _originId = selected.Id;
+            _originId = selected.ScheduleId;
             this.reviseScheduleButton.Hide();
             this.addScheduleButton.Hide();
             this.deleteScheduleButton.Hide();
@@ -343,7 +344,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 return;
             }
-            Schedule.ScheduleBase.DeleteShared(_originId!.Value);
+            Schedule.Schedule.DeleteShared(_originId!.Value);
             AddOneSchedule(_originId, true);
             MessageBox.Show("已成功修改该日程");
             Log.Information.Log($"成功修改id为{_originId.Value}的共享日程");
@@ -378,28 +379,46 @@ namespace StudentScheduleManagementSystem.UI
             this.durationComboBox.Text = "";
         }
 
-        private void ScheduleData_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        private void TableSortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
             int column = e.Column.Index;
+            SortOrder order = scheduleDataTable.Columns[column].HeaderCell.SortGlyphDirection;
+            Schedule.SharedData sharedData1 =
+                Schedule.Schedule.GetSharedById(long.Parse(scheduleDataTable.Rows[e.RowIndex1]
+                                                                  .Cells[2]
+                                                                  .Value.ToString()!))!;
+            Schedule.SharedData sharedData2 =
+                Schedule.Schedule.GetSharedById(long.Parse(scheduleDataTable.Rows[e.RowIndex2]
+                                                                  .Cells[2]
+                                                                  .Value.ToString()!))!;
+            //week
             if (column == 3)
             {
-                _data.Sort(new ActiveWeekComparer());
-                if (this.scheduleData.Columns[3].HeaderCell.SortGlyphDirection == SortOrder.Descending)
-                {
-                    _data.Reverse(0, _data.Count);
-                }
-                e.Handled = true;
-                GenerateFormData(_data);
+                e.SortResult =
+                    new ArrayComparer().Compare(sharedData1.RepetitiveType == RepetitiveType.Single
+                                                    ? new[] { sharedData1.Timestamp.Week }
+                                                    : sharedData1.ActiveWeeks,
+                                                sharedData2.RepetitiveType == RepetitiveType.Single
+                                                    ? new[] { sharedData2.Timestamp.Week }
+                                                    : sharedData2.ActiveWeeks);
             }
             else if (column == 4)
             {
-                _data.Sort(new ActiveDayComparer());
-                if (this.scheduleData.Columns[4].HeaderCell.SortGlyphDirection == SortOrder.Descending)
-                {
-                    _data.Reverse(0, _data.Count);
-                }
-                e.Handled = true;
-                GenerateFormData(_data);
+                e.SortResult =
+                    new ArrayComparer().Compare(sharedData1.RepetitiveType == RepetitiveType.Single
+                                                    ? new[] { sharedData1.Timestamp.Day.ToInt() }
+                                                    : Array.ConvertAll(sharedData1.ActiveDays, day => day.ToInt()),
+                                                sharedData1.RepetitiveType == RepetitiveType.Single
+                                                    ? new[] { sharedData1.Timestamp.Day.ToInt() }
+                                                    : Array.ConvertAll(sharedData2.ActiveDays, day => day.ToInt()));
+            }
+            if (e.SortResult == 0)
+            {
+                e.SortResult = sharedData1.ScheduleId.CompareTo(sharedData2.ScheduleId);
+            }
+            if (order == SortOrder.Descending)
+            {
+                e.SortResult = -e.SortResult;
             }
         }
 
@@ -448,7 +467,7 @@ namespace StudentScheduleManagementSystem.UI
                     MessageBox.Show("请输入要搜索的日程名！");
                     return;
                 }
-                var result = Schedule.ScheduleBase.GetSharedByName(this.searchByNameBox.Text);
+                var result = Schedule.Schedule.GetSharedByName(this.searchByNameBox.Text);
                 if (result.Count == 0)
                 {
                     MessageBox.Show("未搜索到日程！");
@@ -463,13 +482,13 @@ namespace StudentScheduleManagementSystem.UI
                     MessageBox.Show("请输入要搜索的日程ID！");
                     return;
                 }
-                var result = Schedule.ScheduleBase.GetSharedById(long.Parse(searchByIdBox.Text));
+                var result = Schedule.Schedule.GetSharedById(long.Parse(searchByIdBox.Text));
                 if (result == null)
                 {
                     MessageBox.Show("未搜索到日程！");
                     return;
                 }
-                GenerateFormData(new List<Schedule.ScheduleBase.SharedData> { result });
+                GenerateFormData(new List<Schedule.SharedData> { result });
             }
         }
 

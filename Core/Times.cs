@@ -273,7 +273,7 @@ namespace StudentScheduleManagementSystem.Times
             var allMethods = new[]
                 {
                     typeof(Alarm).GetMethods(),
-                    typeof(Schedule.ScheduleBase).GetMethods(),
+                    typeof(Schedule.Schedule).GetMethods(),
                     typeof(Schedule.Course).GetMethods(),
                     typeof(Schedule.Exam).GetMethods(),
                     typeof(Schedule.Activity).GetMethods(),
@@ -557,7 +557,7 @@ namespace StudentScheduleManagementSystem.Times
                 var reflectedType = new[]
                 {
                     typeof(Alarm),
-                    typeof(Schedule.ScheduleBase),
+                    typeof(Schedule.Schedule),
                     typeof(Schedule.Course),
                     typeof(Schedule.Exam),
                     typeof(Schedule.Activity),

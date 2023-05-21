@@ -6,7 +6,28 @@ using Newtonsoft.Json.Converters;
 namespace StudentScheduleManagementSystem.Schedule
 {
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public abstract partial class ScheduleBase : IComparable
+    public class SharedData
+    {
+        [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
+        public ScheduleType @ScheduleType { get; set; }
+        [JsonProperty]
+        public long ScheduleId { get; set; }
+        [JsonProperty]
+        public string Name { get; set; }
+        [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
+        public RepetitiveType @RepetitiveType { get; set; }
+        [JsonProperty]
+        public int[] ActiveWeeks { get; set; }
+        [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
+        public Day[] ActiveDays { get; set; }
+        [JsonProperty]
+        public Times.Time Timestamp { get; set; }
+        [JsonProperty]
+        public int Duration { get; set; }
+    }
+
+    [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+    public abstract partial class Schedule : IComparable
     {
         #region structs and classes
 
@@ -29,70 +50,6 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public class SharedData
-        {
-            [JsonConverter(typeof(StringEnumConverter))]
-            public ScheduleType @ScheduleType { get; set; }
-            public long Id { get; set; }
-            public string Name { get; set; }
-            [JsonConverter(typeof(StringEnumConverter))]
-            public RepetitiveType @RepetitiveType { get; set; }
-            [JsonProperty] public int[] ActiveWeeks { get; set; }
-            [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
-            public Day[] ActiveDays { get; set; }
-            public Times.Time Timestamp { get; set; }
-            public int Duration { get; set; }
-        }
-
-        protected class BuildingJsonConverter : JsonConverter
-        {
-            public override bool CanRead => true;
-            public override bool CanWrite => true;
-
-            public override bool CanConvert(Type objectType)
-            {
-                return objectType == typeof(Map.Location.Building);
-            }
-
-            public override object? ReadJson(JsonReader reader,
-                                             Type objectType,
-                                             object? existingValue,
-                                             JsonSerializer serializer)
-            {
-                bool isNullableType = Nullable.GetUnderlyingType(objectType) != null;
-                //Type type = isNullableType ? Nullable.GetUnderlyingType(objectType)! : objectType;
-                if (reader.TokenType == JsonToken.Null)
-                {
-                    if (isNullableType)
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        throw new JsonFormatException("cannot convert null token to notnull type");
-                    }
-                }
-                if (reader.TokenType != JsonToken.String)
-                {
-                    throw new JsonFormatException("cannot convert not string token to string");
-                }
-                var locations = Map.Location.GetBuildingsByName(reader.Value!.ToString()!);
-                Map.Location.Building building =
-                    locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                return building;
-            }
-
-            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-            {
-                if (value == null)
-                {
-                    writer.WriteNull();
-                    return;
-                }
-                writer.WriteValue(((Map.Location.Building)value).Name);
-            }
-        }
-
         #endregion
 
         #region protected fields
@@ -101,7 +58,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static readonly Times.Timeline<Record> _timeline = new();
 
-        protected static readonly Dictionary<long, ScheduleBase> _scheduleDictionary = new();
+        protected static readonly Dictionary<long, Schedule> _scheduleDictionary = new();
 
         protected static long _courseIdMax = 1000000000;
 
@@ -116,7 +73,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 new()
                 {
                     ScheduleType = ScheduleType.Course,
-                    Id = 1000000000,
+                    ScheduleId = 1000000000,
                     Name = "Default",
                     RepetitiveType = RepetitiveType.Single,
                     ActiveDays = Constants.EmptyDayArray,
@@ -130,7 +87,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 new()
                 {
                     ScheduleType = ScheduleType.Exam,
-                    Id = 2000000000,
+                    ScheduleId = 2000000000,
                     Name = "Default",
                     RepetitiveType = RepetitiveType.Single,
                     ActiveDays = Constants.EmptyDayArray,
@@ -144,7 +101,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 new()
                 {
                     ScheduleType = ScheduleType.Activity,
-                    Id = 3000000000,
+                    ScheduleId = 3000000000,
                     Name = "Default",
                     RepetitiveType = RepetitiveType.Single,
                     ActiveDays = Constants.EmptyDayArray,
@@ -190,7 +147,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region ctor and other basic method
 
-        protected ScheduleBase(RepetitiveType repetitiveType,
+        protected Schedule(RepetitiveType repetitiveType,
                                string name,
                                Times.Time beginTime,
                                int duration,
@@ -265,7 +222,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentNullException();
             }
-            ScheduleBase schedule = (ScheduleBase)obj;
+            Schedule schedule = (Schedule)obj;
             if (ScheduleType.CompareTo(schedule.ScheduleType) != 0)
             {
                 return ScheduleType.CompareTo(schedule.ScheduleType);
@@ -314,7 +271,7 @@ namespace StudentScheduleManagementSystem.Schedule
             DeleteSchedule(this);
         }
 
-        protected static void DeleteSchedule(ScheduleBase schedule)
+        protected static void DeleteSchedule(Schedule schedule)
         {
             _scheduleDictionary.Remove(schedule.ScheduleId);
             DetectCollision(schedule.RepetitiveType,
@@ -557,7 +514,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #endregion
 
-        #region API on shared schedule search
+        #region API on shared data search
 
         public static List<SharedData> GetSharedByType(ScheduleType type)
         {
@@ -596,7 +553,13 @@ namespace StudentScheduleManagementSystem.Schedule
         public static List<SharedData> GetSharedByName(string name)
         {
             List<SharedData> ret = new();
-
+            foreach (var data in _sharedDictionary.Values)
+            {
+                if (data.Name.Contains(name))
+                {
+                    ret.Add(data);
+                }    
+            }
             return ret;
         }
 
@@ -604,9 +567,9 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on schedule search
 
-        public static List<ScheduleBase> GetScheduleByType(ScheduleType type)
+        public static List<Schedule> GetScheduleByType(ScheduleType type)
         {
-            List<ScheduleBase> ret = new();
+            List<Schedule> ret = new();
             if (type == ScheduleType.Course)
             {
                 foreach (var id in _scheduleDictionary.Keys)
@@ -655,7 +618,7 @@ namespace StudentScheduleManagementSystem.Schedule
             throw new ArgumentException(null, nameof(type));
         }
 
-        public static ScheduleBase? GetScheduleById(long id)
+        public static Schedule? GetScheduleById(long id)
         {
             if (id is not (>= 1000000000 and <= 9999999999))
             {
@@ -671,11 +634,16 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        //TODO:完成按名字查询日程的函数
-        public static List<ScheduleBase> GetSchedulesByName(string name)
+        public static List<Schedule> GetSchedulesByName(string name)
         {
-            List<ScheduleBase> ret = new();
-
+            List<Schedule> ret = new();
+            foreach (var schedule in _scheduleDictionary.Values)
+            {
+                if (schedule.Name.Contains(name))
+                {
+                    ret.Add(schedule);
+                }
+            }
             return ret;
         }
 
@@ -729,7 +697,7 @@ namespace StudentScheduleManagementSystem.Schedule
         protected static JArray SaveInstance(ScheduleType scheduleType)
         {
             JArray array = new();
-            foreach ((_, ScheduleBase schedule) in _scheduleDictionary)
+            foreach ((_, Schedule schedule) in _scheduleDictionary)
             {
                 if (schedule.ScheduleType != scheduleType)
                 {
@@ -762,11 +730,11 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     if (dobj.Name != "Default")
                     {
-                        _sharedDictionary.Add(dobj.Id, dobj);
+                        _sharedDictionary.Add(dobj.ScheduleId, dobj);
                     }
                     else
                     {
-                        _courseIdMax = dobj.Id;
+                        _courseIdMax = dobj.ScheduleId;
                     }
                 }
             }
@@ -783,11 +751,11 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     if (dobj.Name != "Default")
                     {
-                        _sharedDictionary.Add(dobj.Id, dobj);
+                        _sharedDictionary.Add(dobj.ScheduleId, dobj);
                     }
                     else
                     {
-                        _examIdMax = dobj.Id;
+                        _examIdMax = dobj.ScheduleId;
                     }
                 }
             }
@@ -804,11 +772,11 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     if (dobj.Name != "Default")
                     {
-                        _sharedDictionary.Add(dobj.Id, dobj);
+                        _sharedDictionary.Add(dobj.ScheduleId, dobj);
                     }
                     else
                     {
-                        _groutActivityIdMax = dobj.Id;
+                        _groutActivityIdMax = dobj.ScheduleId;
                     }
                 }
             }
@@ -829,9 +797,9 @@ namespace StudentScheduleManagementSystem.Schedule
         public static void SaveSharedData()
         {
             JArray courses = new(), exams = new(), groupActivities = new(), scheduleCount;
-            _sharedDictionary[1000000000].Id = _courseIdMax;
-            _sharedDictionary[2000000000].Id = _examIdMax;
-            _sharedDictionary[3000000000].Id = _groutActivityIdMax;
+            _sharedDictionary[1000000000].ScheduleId = _courseIdMax;
+            _sharedDictionary[2000000000].ScheduleId = _examIdMax;
+            _sharedDictionary[3000000000].ScheduleId = _groutActivityIdMax;
             foreach ((long id, var data) in _sharedDictionary)
             {
                 JObject obj = JObject.FromObject(data, _serializer);
@@ -867,11 +835,11 @@ namespace StudentScheduleManagementSystem.Schedule
                                                       Encryption.Encrypt.AESEncrypt);
         }
 
-        protected static void UpdateSharedData(ScheduleBase schedule)
+        protected static void UpdateSharedData(Schedule schedule)
         {
             SharedData data = new()
             {
-                Id = schedule.ScheduleId,
+                ScheduleId = schedule.ScheduleId,
                 Name = schedule.Name,
                 RepetitiveType = schedule.RepetitiveType,
                 ActiveWeeks = schedule.ActiveWeeks,
@@ -912,7 +880,7 @@ namespace StudentScheduleManagementSystem.Schedule
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public sealed partial class Course : ScheduleBase, IJsonConvertible, ISchedule
+    public sealed partial class Course : Schedule, IJsonConvertible, ISchedule
     {
         #region structs and classes
 
@@ -1075,13 +1043,13 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Course);
+        public static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.Course);
 
         #endregion
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public sealed partial class Exam : ScheduleBase, IJsonConvertible, ISchedule
+    public sealed partial class Exam : Schedule, IJsonConvertible, ISchedule
     {
         #region structs and classes
 
@@ -1178,13 +1146,13 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Exam);
+        public static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.Exam);
 
         #endregion
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public partial class Activity : ScheduleBase, IJsonConvertible, ISchedule
+    public partial class Activity : Schedule, IJsonConvertible, ISchedule
     {
         #region structs and classes
 
@@ -1425,7 +1393,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.Activity);
+        public static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.Activity);
 
         #endregion
     }
@@ -1514,7 +1482,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     Log.Information.Log("已删除该临时日程");
                 }
             }
-            ScheduleBase schedule = _scheduleDictionary[ScheduleId];
+            Schedule schedule = _scheduleDictionary[ScheduleId];
             _scheduleDictionary.Remove(ScheduleId);
             if (schedule.AlarmEnabled)
             {
@@ -1637,7 +1605,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        public new static JArray SaveInstance() => ScheduleBase.SaveInstance(ScheduleType.TemporaryAffair);
+        public new static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.TemporaryAffair);
 
         #endregion
     }

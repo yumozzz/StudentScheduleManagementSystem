@@ -45,12 +45,12 @@ namespace StudentScheduleManagementSystem.UI
                 for (int j = 0; j < 7; j++)
                 {
                     scheduleRecords[j] = "";
-                    long id = Schedule.ScheduleBase.GetRecordAt(i + j * 24).Id;
+                    long id = Schedule.Schedule.GetRecordAt(i + j * 24).Id;
                     if (id == 0)
                     {
                         continue;
                     }
-                    Schedule.ScheduleBase? scheduleRecord = Schedule.ScheduleBase.GetScheduleById(id);
+                    Schedule.Schedule? scheduleRecord = Schedule.Schedule.GetScheduleById(id);
                     Debug.Assert(scheduleRecord != null);
                     scheduleRecords[j] = scheduleRecord.Name + "\n（" + TranslateScheduleType(scheduleRecord.ScheduleType) + "）" + "\n" + scheduleRecord.Description;
                     alarmEnalbled[j] = scheduleRecord.AlarmEnabled;
