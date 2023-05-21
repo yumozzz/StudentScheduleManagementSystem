@@ -719,7 +719,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new AlarmManipulationException();
             }
-            Times.Alarm.RemoveAlarm(BeginTime, RepetitiveType, ActiveWeeks, ActiveDays);
+            Times.Alarm.RemoveAlarm(BeginTime - 1, RepetitiveType, ActiveWeeks, ActiveDays);
         }
 
         #endregion

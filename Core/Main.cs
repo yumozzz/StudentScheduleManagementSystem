@@ -316,12 +316,12 @@ namespace StudentScheduleManagementSystem.Schedule
             //could not find corresponding schedule, maybe is deleted, so ignore
             catch (KeyNotFoundException)
             {
-                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的课程");
                 return;
             }
             Console.WriteLine($"下一个小时有以下课程：\"{course.Name}\"，时长为{course.Duration}小时。");
             if (course.IsOnline)
             {
+                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的课程");
                 Console.WriteLine($"在线地址为{course.OnlineLink!}");
             }
             else
@@ -354,12 +354,12 @@ namespace StudentScheduleManagementSystem.Schedule
             Exam exam;
             try
             {
-                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的考试");
                 exam = (Exam)_scheduleDictionary[param.scheduleId];
             }
             //could not find corresponding schedule, maybe is deleted, so ignore
             catch (KeyNotFoundException)
             {
+                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的考试");
                 return;
             }
             Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
@@ -390,12 +390,12 @@ namespace StudentScheduleManagementSystem.Schedule
             Activity activity;
             try
             {
-                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的活动");
+                
                 activity = (Activity)_scheduleDictionary[param.scheduleId];
             }
-            //could not find corresponding schedule, maybe is deleted, so ignore
             catch (KeyNotFoundException)
             {
+                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的活动");
                 return;
             }
             Console.WriteLine("下一个小时有以下" + (activity.IsGroupActivity ? "集体" : "个人") +
