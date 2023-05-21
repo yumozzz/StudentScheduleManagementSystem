@@ -173,6 +173,16 @@ namespace StudentScheduleManagementSystem.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap 个人账户__ffffff_128_21601167 {
+            get {
+                object obj = ResourceManager.GetObject("个人账户_#ffffff_128_21601167", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap 关闭__ffffff_128 {
             get {
                 object obj = ResourceManager.GetObject("关闭_#ffffff_128", resourceCulture);
@@ -196,6 +206,16 @@ namespace StudentScheduleManagementSystem.Properties {
         internal static System.Drawing.Bitmap 户外实践__ffffff_128_21601017 {
             get {
                 object obj = ResourceManager.GetObject("户外实践_#ffffff_128_21601017", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 日历时间__ffffff_128_20286020 {
+            get {
+                object obj = ResourceManager.GetObject("日历时间_#ffffff_128_20286020", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -316,6 +336,16 @@ namespace StudentScheduleManagementSystem.Properties {
         internal static System.Drawing.Bitmap 课表__ffffff_128_21601021 {
             get {
                 object obj = ResourceManager.GetObject("课表_#ffffff_128_21601021", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 跑步__ffffff_128_21590258 {
+            get {
+                object obj = ResourceManager.GetObject("跑步_#ffffff_128_21590258", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
