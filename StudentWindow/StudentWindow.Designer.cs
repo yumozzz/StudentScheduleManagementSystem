@@ -28,41 +28,51 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StudentWindow));
             this.header = new System.Windows.Forms.Panel();
+            this.hourBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.dayBox = new System.Windows.Forms.ComboBox();
+            this.weekBox = new System.Windows.Forms.ComboBox();
             this.pauseButton = new System.Windows.Forms.Button();
             this.speedButton = new System.Windows.Forms.Button();
             this.setTime = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.hourBox = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.dayBox = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.weekBox = new System.Windows.Forms.ComboBox();
+            this.daySetBox = new System.Windows.Forms.Label();
+            this.weekSetBox = new System.Windows.Forms.Label();
             this.currentTime = new System.Windows.Forms.Label();
             this.logoutButton = new System.Windows.Forms.Button();
             this.mainpageButton = new System.Windows.Forms.PictureBox();
             this.mainpage = new System.Windows.Forms.Panel();
-            this.ScheduleTableButton = new System.Windows.Forms.Button();
-            this.courseButton = new System.Windows.Forms.Button();
-            this.examButton = new System.Windows.Forms.Button();
-            this.GroupActivityButton = new System.Windows.Forms.Button();
-            this.personalActivityButton = new System.Windows.Forms.Button();
-            this.temporaryAffairButton = new System.Windows.Forms.Button();
+            this.ScheduleTableButton = new System.Windows.Forms.PictureBox();
+            this.courseButton = new System.Windows.Forms.PictureBox();
+            this.examButton = new System.Windows.Forms.PictureBox();
+            this.GroupActivityButton = new System.Windows.Forms.PictureBox();
+            this.personalActivityButton = new System.Windows.Forms.PictureBox();
+            this.temporaryAffairButton = new System.Windows.Forms.PictureBox();
+            this.exitButton = new System.Windows.Forms.PictureBox();
             this.header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ScheduleTableButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.courseButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.examButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.GroupActivityButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.personalActivityButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.temporaryAffairButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.exitButton)).BeginInit();
             this.SuspendLayout();
             // 
             // header
             // 
+            this.header.BackColor = System.Drawing.Color.Transparent;
+            this.header.Controls.Add(this.hourBox);
+            this.header.Controls.Add(this.label1);
+            this.header.Controls.Add(this.dayBox);
+            this.header.Controls.Add(this.weekBox);
             this.header.Controls.Add(this.pauseButton);
             this.header.Controls.Add(this.speedButton);
             this.header.Controls.Add(this.setTime);
-            this.header.Controls.Add(this.label3);
-            this.header.Controls.Add(this.hourBox);
-            this.header.Controls.Add(this.label2);
-            this.header.Controls.Add(this.dayBox);
-            this.header.Controls.Add(this.label1);
-            this.header.Controls.Add(this.weekBox);
+            this.header.Controls.Add(this.daySetBox);
+            this.header.Controls.Add(this.weekSetBox);
             this.header.Controls.Add(this.currentTime);
             this.header.Controls.Add(this.logoutButton);
             this.header.Location = new System.Drawing.Point(0, 0);
@@ -71,45 +81,6 @@
             this.header.TabIndex = 1;
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
             this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
-            // 
-            // pauseButton
-            // 
-            this.pauseButton.Location = new System.Drawing.Point(967, 3);
-            this.pauseButton.Name = "pauseButton";
-            this.pauseButton.Size = new System.Drawing.Size(112, 34);
-            this.pauseButton.TabIndex = 18;
-            this.pauseButton.Text = "暂停";
-            this.pauseButton.UseVisualStyleBackColor = true;
-            this.pauseButton.Click += new System.EventHandler(this.PauseButton_Click);
-            // 
-            // speedButton
-            // 
-            this.speedButton.Location = new System.Drawing.Point(849, 3);
-            this.speedButton.Name = "speedButton";
-            this.speedButton.Size = new System.Drawing.Size(112, 34);
-            this.speedButton.TabIndex = 17;
-            this.speedButton.Text = "快进";
-            this.speedButton.UseVisualStyleBackColor = true;
-            this.speedButton.Click += new System.EventHandler(this.SpeedButton_Click);
-            // 
-            // setTime
-            // 
-            this.setTime.Location = new System.Drawing.Point(731, 3);
-            this.setTime.Name = "setTime";
-            this.setTime.Size = new System.Drawing.Size(112, 34);
-            this.setTime.TabIndex = 16;
-            this.setTime.Text = "SetTime";
-            this.setTime.UseVisualStyleBackColor = true;
-            this.setTime.Click += new System.EventHandler(this.SetTime_Click);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(567, 8);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(53, 24);
-            this.label3.TabIndex = 13;
-            this.label3.Text = "Hour";
             // 
             // hourBox
             // 
@@ -139,19 +110,21 @@
             "21:00",
             "22:00",
             "23:00"});
-            this.hourBox.Location = new System.Drawing.Point(626, 5);
+            this.hourBox.Location = new System.Drawing.Point(640, 5);
             this.hourBox.Name = "hourBox";
-            this.hourBox.Size = new System.Drawing.Size(99, 32);
+            this.hourBox.Size = new System.Drawing.Size(120, 32);
             this.hourBox.TabIndex = 12;
             // 
-            // label2
+            // label1
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(402, 8);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(44, 24);
-            this.label2.TabIndex = 11;
-            this.label2.Text = "Day";
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("黑体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.ForeColor = System.Drawing.Color.White;
+            this.label1.Location = new System.Drawing.Point(610, 12);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(32, 21);
+            this.label1.TabIndex = 19;
+            this.label1.Text = "时";
             // 
             // dayBox
             // 
@@ -164,19 +137,10 @@
             "Fri",
             "Sat",
             "Sun"});
-            this.dayBox.Location = new System.Drawing.Point(452, 5);
+            this.dayBox.Location = new System.Drawing.Point(480, 5);
             this.dayBox.Name = "dayBox";
-            this.dayBox.Size = new System.Drawing.Size(109, 32);
+            this.dayBox.Size = new System.Drawing.Size(120, 32);
             this.dayBox.TabIndex = 10;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(210, 8);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(58, 24);
-            this.label1.TabIndex = 9;
-            this.label1.Text = "Week";
             // 
             // weekBox
             // 
@@ -198,17 +162,77 @@
             "Week14",
             "Week15",
             "Week16"});
-            this.weekBox.Location = new System.Drawing.Point(274, 5);
+            this.weekBox.Location = new System.Drawing.Point(320, 5);
             this.weekBox.Name = "weekBox";
-            this.weekBox.Size = new System.Drawing.Size(122, 32);
+            this.weekBox.Size = new System.Drawing.Size(120, 32);
             this.weekBox.TabIndex = 8;
+            // 
+            // pauseButton
+            // 
+            this.pauseButton.BackColor = System.Drawing.Color.White;
+            this.pauseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.pauseButton.Location = new System.Drawing.Point(1000, 3);
+            this.pauseButton.Name = "pauseButton";
+            this.pauseButton.Size = new System.Drawing.Size(100, 35);
+            this.pauseButton.TabIndex = 18;
+            this.pauseButton.Text = "暂停";
+            this.pauseButton.UseVisualStyleBackColor = false;
+            this.pauseButton.Click += new System.EventHandler(this.PauseButton_Click);
+            // 
+            // speedButton
+            // 
+            this.speedButton.BackColor = System.Drawing.Color.White;
+            this.speedButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.speedButton.Location = new System.Drawing.Point(890, 3);
+            this.speedButton.Name = "speedButton";
+            this.speedButton.Size = new System.Drawing.Size(100, 35);
+            this.speedButton.TabIndex = 17;
+            this.speedButton.Text = "快进";
+            this.speedButton.UseVisualStyleBackColor = false;
+            this.speedButton.Click += new System.EventHandler(this.SpeedButton_Click);
+            // 
+            // setTime
+            // 
+            this.setTime.BackColor = System.Drawing.Color.White;
+            this.setTime.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.setTime.Location = new System.Drawing.Point(780, 3);
+            this.setTime.Name = "setTime";
+            this.setTime.Size = new System.Drawing.Size(100, 35);
+            this.setTime.TabIndex = 16;
+            this.setTime.Text = "SetTime";
+            this.setTime.UseVisualStyleBackColor = false;
+            this.setTime.Click += new System.EventHandler(this.SetTime_Click);
+            // 
+            // daySetBox
+            // 
+            this.daySetBox.AutoSize = true;
+            this.daySetBox.Font = new System.Drawing.Font("黑体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.daySetBox.ForeColor = System.Drawing.Color.White;
+            this.daySetBox.Location = new System.Drawing.Point(450, 12);
+            this.daySetBox.Name = "daySetBox";
+            this.daySetBox.Size = new System.Drawing.Size(32, 21);
+            this.daySetBox.TabIndex = 11;
+            this.daySetBox.Text = "日";
+            // 
+            // weekSetBox
+            // 
+            this.weekSetBox.AutoSize = true;
+            this.weekSetBox.Font = new System.Drawing.Font("黑体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.weekSetBox.ForeColor = System.Drawing.Color.White;
+            this.weekSetBox.Location = new System.Drawing.Point(290, 12);
+            this.weekSetBox.Name = "weekSetBox";
+            this.weekSetBox.Size = new System.Drawing.Size(32, 21);
+            this.weekSetBox.TabIndex = 9;
+            this.weekSetBox.Text = "周";
             // 
             // currentTime
             // 
             this.currentTime.AutoSize = true;
-            this.currentTime.Location = new System.Drawing.Point(12, 11);
+            this.currentTime.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.currentTime.ForeColor = System.Drawing.Color.Transparent;
+            this.currentTime.Location = new System.Drawing.Point(12, 8);
             this.currentTime.Name = "currentTime";
-            this.currentTime.Size = new System.Drawing.Size(68, 24);
+            this.currentTime.Size = new System.Drawing.Size(80, 28);
             this.currentTime.TabIndex = 2;
             this.currentTime.Text = "Week i";
             // 
@@ -226,7 +250,7 @@
             // 
             this.mainpageButton.BackColor = System.Drawing.Color.Transparent;
             this.mainpageButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.SubPageBG;
-            this.mainpageButton.Location = new System.Drawing.Point(171, 53);
+            this.mainpageButton.Location = new System.Drawing.Point(175, 53);
             this.mainpageButton.Name = "mainpageButton";
             this.mainpageButton.Size = new System.Drawing.Size(1060, 665);
             this.mainpageButton.TabIndex = 32;
@@ -235,76 +259,109 @@
             // mainpage
             // 
             this.mainpage.BackColor = System.Drawing.Color.White;
-            this.mainpage.Location = new System.Drawing.Point(176, 58);
+            this.mainpage.Location = new System.Drawing.Point(180, 58);
             this.mainpage.Name = "mainpage";
             this.mainpage.Size = new System.Drawing.Size(1050, 655);
             this.mainpage.TabIndex = 33;
             // 
             // ScheduleTableButton
             // 
-            this.ScheduleTableButton.Location = new System.Drawing.Point(12, 80);
+            this.ScheduleTableButton.BackColor = System.Drawing.Color.Transparent;
+            this.ScheduleTableButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ScheduleTableButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.日历时间__ffffff_128_20286020;
+            this.ScheduleTableButton.Location = new System.Drawing.Point(65, 100);
             this.ScheduleTableButton.Name = "ScheduleTableButton";
-            this.ScheduleTableButton.Size = new System.Drawing.Size(112, 34);
-            this.ScheduleTableButton.TabIndex = 34;
-            this.ScheduleTableButton.Text = "ScheduleTable";
-            this.ScheduleTableButton.UseVisualStyleBackColor = true;
+            this.ScheduleTableButton.Size = new System.Drawing.Size(50, 50);
+            this.ScheduleTableButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ScheduleTableButton.TabIndex = 40;
+            this.ScheduleTableButton.TabStop = false;
             this.ScheduleTableButton.Click += new System.EventHandler(this.ScheduleTableButton_Click);
             // 
             // courseButton
             // 
-            this.courseButton.Location = new System.Drawing.Point(12, 134);
+            this.courseButton.BackColor = System.Drawing.Color.Transparent;
+            this.courseButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.courseButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.课表__ffffff_128_21601021;
+            this.courseButton.Location = new System.Drawing.Point(65, 190);
             this.courseButton.Name = "courseButton";
-            this.courseButton.Size = new System.Drawing.Size(112, 34);
-            this.courseButton.TabIndex = 35;
-            this.courseButton.Text = "course";
-            this.courseButton.UseVisualStyleBackColor = true;
+            this.courseButton.Size = new System.Drawing.Size(50, 50);
+            this.courseButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.courseButton.TabIndex = 41;
+            this.courseButton.TabStop = false;
             this.courseButton.Click += new System.EventHandler(this.CourseButton_Click);
             // 
             // examButton
             // 
-            this.examButton.Location = new System.Drawing.Point(12, 187);
+            this.examButton.BackColor = System.Drawing.Color.Transparent;
+            this.examButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.examButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.试卷__ffffff_128_21601018;
+            this.examButton.Location = new System.Drawing.Point(65, 280);
             this.examButton.Name = "examButton";
-            this.examButton.Size = new System.Drawing.Size(112, 34);
-            this.examButton.TabIndex = 36;
-            this.examButton.Text = "Exam";
-            this.examButton.UseVisualStyleBackColor = true;
+            this.examButton.Size = new System.Drawing.Size(50, 50);
+            this.examButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.examButton.TabIndex = 42;
+            this.examButton.TabStop = false;
             this.examButton.Click += new System.EventHandler(this.ExamButton_Click);
             // 
             // GroupActivityButton
             // 
-            this.GroupActivityButton.Location = new System.Drawing.Point(12, 240);
+            this.GroupActivityButton.BackColor = System.Drawing.Color.Transparent;
+            this.GroupActivityButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.GroupActivityButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.户外实践__ffffff_128_21601017;
+            this.GroupActivityButton.Location = new System.Drawing.Point(65, 370);
             this.GroupActivityButton.Name = "GroupActivityButton";
-            this.GroupActivityButton.Size = new System.Drawing.Size(112, 34);
-            this.GroupActivityButton.TabIndex = 37;
-            this.GroupActivityButton.Text = "GroupActivity";
-            this.GroupActivityButton.UseVisualStyleBackColor = true;
+            this.GroupActivityButton.Size = new System.Drawing.Size(50, 50);
+            this.GroupActivityButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.GroupActivityButton.TabIndex = 43;
+            this.GroupActivityButton.TabStop = false;
             this.GroupActivityButton.Click += new System.EventHandler(this.GroupActivityButton_Click);
             // 
             // personalActivityButton
             // 
-            this.personalActivityButton.Location = new System.Drawing.Point(12, 293);
+            this.personalActivityButton.BackColor = System.Drawing.Color.Transparent;
+            this.personalActivityButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.personalActivityButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.跑步__ffffff_128_21590258;
+            this.personalActivityButton.Location = new System.Drawing.Point(65, 460);
             this.personalActivityButton.Name = "personalActivityButton";
-            this.personalActivityButton.Size = new System.Drawing.Size(112, 34);
-            this.personalActivityButton.TabIndex = 38;
-            this.personalActivityButton.Text = "PersonalActivity";
-            this.personalActivityButton.UseVisualStyleBackColor = true;
+            this.personalActivityButton.Size = new System.Drawing.Size(50, 50);
+            this.personalActivityButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.personalActivityButton.TabIndex = 44;
+            this.personalActivityButton.TabStop = false;
             this.personalActivityButton.Click += new System.EventHandler(this.PersonalActivityButton_Click);
             // 
             // temporaryAffairButton
             // 
-            this.temporaryAffairButton.Location = new System.Drawing.Point(12, 344);
+            this.temporaryAffairButton.BackColor = System.Drawing.Color.Transparent;
+            this.temporaryAffairButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.temporaryAffairButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.个人账户__ffffff_128_21601167;
+            this.temporaryAffairButton.Location = new System.Drawing.Point(65, 550);
             this.temporaryAffairButton.Name = "temporaryAffairButton";
-            this.temporaryAffairButton.Size = new System.Drawing.Size(112, 34);
-            this.temporaryAffairButton.TabIndex = 39;
-            this.temporaryAffairButton.Text = "TemporaryAffair";
-            this.temporaryAffairButton.UseVisualStyleBackColor = true;
+            this.temporaryAffairButton.Size = new System.Drawing.Size(50, 50);
+            this.temporaryAffairButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.temporaryAffairButton.TabIndex = 45;
+            this.temporaryAffairButton.TabStop = false;
             this.temporaryAffairButton.Click += new System.EventHandler(this.TemporaryAffairButton_Click);
+            // 
+            // exitButton
+            // 
+            this.exitButton.BackColor = System.Drawing.Color.Transparent;
+            this.exitButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.exitButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.研究人员__ffffff_128_21601186;
+            this.exitButton.Location = new System.Drawing.Point(65, 640);
+            this.exitButton.Name = "exitButton";
+            this.exitButton.Size = new System.Drawing.Size(50, 50);
+            this.exitButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.exitButton.TabIndex = 46;
+            this.exitButton.TabStop = false;
             // 
             // StudentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1300, 770);
+            this.Controls.Add(this.exitButton);
             this.Controls.Add(this.temporaryAffairButton);
             this.Controls.Add(this.personalActivityButton);
             this.Controls.Add(this.GroupActivityButton);
@@ -320,6 +377,13 @@
             this.header.ResumeLayout(false);
             this.header.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ScheduleTableButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.courseButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.examButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.GroupActivityButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.personalActivityButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.temporaryAffairButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.exitButton)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -330,20 +394,21 @@
         private Button logoutButton;
         private PictureBox mainpageButton;
         private Panel mainpage;
-        private Button ScheduleTableButton;
-        private Button courseButton;
-        private Button examButton;
-        private Button GroupActivityButton;
-        private Button personalActivityButton;
-        private Button temporaryAffairButton;
         private ComboBox weekBox;
         private Button setTime;
-        private Label label3;
         private ComboBox hourBox;
-        private Label label2;
+        private Label daySetBox;
         private ComboBox dayBox;
-        private Label label1;
+        private Label weekSetBox;
         private Button speedButton;
         private Button pauseButton;
+        private PictureBox ScheduleTableButton;
+        private PictureBox courseButton;
+        private PictureBox examButton;
+        private PictureBox GroupActivityButton;
+        private PictureBox personalActivityButton;
+        private PictureBox temporaryAffairButton;
+        private Label label1;
+        private PictureBox exitButton;
     }
 }

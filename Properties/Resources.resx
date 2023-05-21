@@ -142,6 +142,9 @@
   <data name="退出_#a880c2_128_3661364" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\退出_#a880c2_128_3661364.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="日历时间_#ffffff_128_20286020" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\日历时间_#ffffff_128_20286020.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="退出_#a880c2_128_3656183" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\退出_#a880c2_128_3656183.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -151,14 +154,17 @@
   <data name="SearchBG" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SearchBG.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="OPBG(Format)1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\OPBG(Format)1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="考试_#ffffff_128_3471133" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\考试_#ffffff_128_3471133.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="课程提醒_#ffffff_128_34709701" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\课程提醒_#ffffff_128_34709701.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="户外实践_#ffffff_128_21601017" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\户外实践_#ffffff_128_21601017.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="跑步_#ffffff_128_21590258" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\跑步_#ffffff_128_21590258.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ScheduleButtonBackground" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ScheduleButtonBackground.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -166,8 +172,8 @@
   <data name="活动_#ffffff_128_35050391" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\活动_#ffffff_128_35050391.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="课程提醒_#ffffff_128_34709701" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\课程提醒_#ffffff_128_34709701.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="活动_#ffffff_128_3505039" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\活动_#ffffff_128_3505039.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="LoginBackground1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\LoginBackground1.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -196,10 +202,13 @@
   <data name="SubPageBG" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SubPageBG.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="活动_#ffffff_128_3505039" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\活动_#ffffff_128_3505039.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="OPBG(Format)1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OPBG(Format)1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="地图_#ffffff_128_21601004" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\地图_#ffffff_128_21601004.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="个人账户_#ffffff_128_21601167" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\个人账户_#ffffff_128_21601167.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

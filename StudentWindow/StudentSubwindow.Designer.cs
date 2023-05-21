@@ -74,14 +74,13 @@
             // 
             // scheduleData
             // 
-            this.scheduleData.AllowDrop = false;
             this.scheduleData.AllowUserToAddRows = false;
             this.scheduleData.AllowUserToDeleteRows = false;
             this.scheduleData.AllowUserToResizeColumns = false;
             this.scheduleData.AllowUserToResizeRows = false;
             this.scheduleData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-                                                                            | System.Windows.Forms.AnchorStyles.Left) 
-                                                                           | System.Windows.Forms.AnchorStyles.Right)));
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.scheduleData.BackgroundColor = System.Drawing.Color.White;
             this.scheduleData.ColumnHeadersHeight = 34;
             this.scheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -204,6 +203,7 @@
             // 
             this.nameBox.Location = new System.Drawing.Point(736, 47);
             this.nameBox.Name = "nameBox";
+            this.nameBox.ReadOnly = true;
             this.nameBox.Size = new System.Drawing.Size(300, 30);
             this.nameBox.TabIndex = 44;
             // 
@@ -211,6 +211,7 @@
             // 
             this.weekBox.Location = new System.Drawing.Point(736, 107);
             this.weekBox.Name = "weekBox";
+            this.weekBox.ReadOnly = true;
             this.weekBox.Size = new System.Drawing.Size(300, 30);
             this.weekBox.TabIndex = 45;
             // 
@@ -218,6 +219,7 @@
             // 
             this.dayBox.Location = new System.Drawing.Point(736, 168);
             this.dayBox.Name = "dayBox";
+            this.dayBox.ReadOnly = true;
             this.dayBox.Size = new System.Drawing.Size(300, 30);
             this.dayBox.TabIndex = 46;
             // 
@@ -225,6 +227,7 @@
             // 
             this.hourBox.Location = new System.Drawing.Point(736, 227);
             this.hourBox.Name = "hourBox";
+            this.hourBox.ReadOnly = true;
             this.hourBox.Size = new System.Drawing.Size(135, 30);
             this.hourBox.TabIndex = 47;
             // 
@@ -232,6 +235,7 @@
             // 
             this.durationBox.Location = new System.Drawing.Point(901, 227);
             this.durationBox.Name = "durationBox";
+            this.durationBox.ReadOnly = true;
             this.durationBox.Size = new System.Drawing.Size(135, 30);
             this.durationBox.TabIndex = 48;
             // 

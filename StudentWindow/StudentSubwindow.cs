@@ -887,6 +887,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             this.reviseScheduleButton.Click += ReviseScheduleButton_Click;
             this.okButton.Click += OkButton_Click;
+            this.nameBox.ReadOnly = false;
         }
 
         #region table content generator
@@ -1031,6 +1032,7 @@ namespace StudentScheduleManagementSystem.UI
             : base(ScheduleType.Activity, SubwindowType.PersonalActivity)
         {
             GenerateUserData(_scheduleType);
+            this.detectCollisionButton.Hide();
             GenerateSubwindow();
             _showAllData = false;
             _subwindowState = SubwindowState.Viewing;
@@ -1398,6 +1400,7 @@ namespace StudentScheduleManagementSystem.UI
             : base(ScheduleType.TemporaryAffair, SubwindowType.TemporaryAffair)
         {
             GenerateUserData(_scheduleType);
+            this.detectCollisionButton.Hide();
             GenerateSubwindow();
             _showAllData = false;
             _subwindowState = SubwindowState.Viewing;
