@@ -142,6 +142,58 @@ namespace StudentScheduleManagementSystem.Map
             private readonly Node*[] _adjArray;
             private readonly (int, int)[] _locations;
 
+            private readonly int[] _ID;//添加ID，表示_locations中每个（X,Y）坐标的点对应的ID
+
+            //根据给定的点Vertex和边Edge来初始化一张图的邻接表
+            //设点数量为m，边数量为n，时间复杂度为O（m*n）
+
+            /* 有一说一，用指针挺乱的...回头再改改吧 */
+            public AdjacencyTable(List<Vertex> vertexes, List<(Vertex, Vertex)> edges)
+            {
+                this.Size = vertexes.Count;
+                this._adjArray = new Node*[this.Size];
+                this._locations = new (int, int)[this.Size];
+
+                //初始化邻接表的每个点，初始化ID,（X, Y)
+                for (int i = 0; i < vertexes.Count(); i++)
+                {
+                    this._adjArray[i]->pointId = i + 1;
+                    this._locations[i].Item1 = vertexes[i].X;
+                    this._locations[i].Item2 = vertexes[i].Y;
+                }
+                for (int i = 0; i < vertexes.Count(); i++)
+                {
+
+                    for (int j = 0; j < edges.Count; j++)//从头遍历到尾,每个关于该点的边都被加到邻接表的后面
+                    {
+                        //如果邻接表中第vertexes[i]点，是edge[j]的左端点,则将此边和右端点ID写进邻接表。
+                        if (vertexes[i].Id == edges[j].Item1.Id || vertexes[i].Id == edges[j].Item2.Id)
+                        {
+                            Node* Node_p = this._adjArray[i];//Node指针，暂时指向该邻接表的最后一个edge。一开始指向的就是邻接表中第[j]个元素。
+                            int dist = (int)Math.Sqrt(Math.Pow((edges[i].Item1.X - edges[i].Item2.X), 2) + Math.Pow((edges[i].Item1.X - edges[i].Item2.X), 2));
+                            Edge temp_E = new Edge(EdgeType.Line, null, dist);//创建邻接表里的边
+                            Node temp_N = new Node();
+                            temp_N.edge = temp_E;
+                            temp_N.next = null;
+                            *Node_p->next = temp_N;
+                            Node_p = Node_p->next;
+                            this._adjArray[i]->edge = temp_E;
+                            if (vertexes[i].Id == edges[j].Item1.Id)
+                            {
+                                temp_N.pointId = edges[j].Item2.Id;
+                                this._adjArray[i]->pointId = edges[j].Item1.Id;
+                            }
+                            else
+                            {
+                                temp_N.pointId = edges[j].Item1.Id;
+                                this._adjArray[i]->pointId = edges[j].Item2.Id;
+                            }
+                        }
+                    }
+                }
+
+            }
+
             public AdjacencyTable(JArray vertexArray)
             {
                 Size = vertexArray.Count;
