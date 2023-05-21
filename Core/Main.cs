@@ -1,5 +1,6 @@
 ﻿//#define COURSEEXAMTEST
 
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Authentication;
@@ -32,6 +33,8 @@ namespace StudentScheduleManagementSystem.MainProgram
             try
             {
                 AllocConsole();
+                IntPtr hWnd = Process.GetCurrentProcess().MainWindowHandle;
+                //ShowWindow(hWnd, 0);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -72,6 +75,10 @@ namespace StudentScheduleManagementSystem.MainProgram
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool FreeConsole();
+
+        [DllImport("User32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool ShowWindow(IntPtr hWnd, int type);
 
         private static Dictionary<string, JArray> CreateInstanceDictionary() =>
             new()
