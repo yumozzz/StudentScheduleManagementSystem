@@ -256,7 +256,7 @@ namespace StudentScheduleManagementSystem.Schedule
             Duration = duration;
             IsOnline = isOnline;
             Description = description;
-            Log.Information.Log($"已为类型为{ScheduleType}的日程{Name}创建基类");
+            Log.Information.Log($"已为类型为{ScheduleType}的日程{Name}创建对象");
         }
 
         public int CompareTo(object? obj)

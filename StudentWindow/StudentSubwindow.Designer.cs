@@ -74,13 +74,14 @@
             // 
             // scheduleData
             // 
-            this.scheduleData.AllowDrop = true;
+            this.scheduleData.AllowDrop = false;
             this.scheduleData.AllowUserToAddRows = false;
+            this.scheduleData.AllowUserToDeleteRows = false;
             this.scheduleData.AllowUserToResizeColumns = false;
             this.scheduleData.AllowUserToResizeRows = false;
             this.scheduleData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+                                                                            | System.Windows.Forms.AnchorStyles.Left) 
+                                                                           | System.Windows.Forms.AnchorStyles.Right)));
             this.scheduleData.BackgroundColor = System.Drawing.Color.White;
             this.scheduleData.ColumnHeadersHeight = 34;
             this.scheduleData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -163,16 +164,20 @@
             // 
             // descriptionColumn
             // 
+            this.descriptionColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.descriptionColumn.HeaderText = "描述";
             this.descriptionColumn.MinimumWidth = 8;
             this.descriptionColumn.Name = "descriptionColumn";
+            this.descriptionColumn.ReadOnly = true;
             this.descriptionColumn.Width = 150;
             // 
             // locationColumn
             // 
+            this.locationColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.locationColumn.HeaderText = "地点/链接";
             this.locationColumn.MinimumWidth = 8;
             this.locationColumn.Name = "locationColumn";
+            this.locationColumn.ReadOnly = true;
             this.locationColumn.Width = 150;
             // 
             // idColumn

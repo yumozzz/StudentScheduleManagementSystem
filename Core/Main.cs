@@ -125,11 +125,11 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
                                      RepetitiveType.Single,
                                      Schedule.ScheduleBase.NotifyAllInComingDay,
-                                     new Times.Alarm.CBPForGeneralAlarm()
+                                     new Times.Alarm.GeneralAlarmParam()
                                      {
                                          startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
                                      },
-                                     typeof(Times.Alarm.CBPForGeneralAlarm),
+                                     typeof(Times.Alarm.GeneralAlarmParam),
                                      true,
                                      Constants.EmptyIntArray,
                                      Constants.EmptyDayArray);
@@ -241,14 +241,14 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         public static void NotifyAllInComingDay(long id, object? obj)
         {
-            Times.Alarm.CBPForGeneralAlarm param;
+            Times.Alarm.GeneralAlarmParam param;
             if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForGeneralAlarm>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.GeneralAlarmParam>(obj!.ToString()!);
             }
             else
             {
-                param = (Times.Alarm.CBPForGeneralAlarm)obj!;
+                param = (Times.Alarm.GeneralAlarmParam)obj!;
             }
             List<(int, string)> schedules = new();
             for (int i = 0; i < 24;)
@@ -273,8 +273,8 @@ namespace StudentScheduleManagementSystem.Schedule
             Times.Alarm.AddAlarm(param.startTimestamp + 22,
                                  RepetitiveType.Single,
                                  NotifyAllInComingDay,
-                                 new Times.Alarm.CBPForGeneralAlarm() { startTimestamp = param.startTimestamp + 24 },
-                                 typeof(Times.Alarm.CBPForGeneralAlarm),
+                                 new Times.Alarm.GeneralAlarmParam() { startTimestamp = param.startTimestamp + 24 },
+                                 typeof(Times.Alarm.GeneralAlarmParam),
                                  true,
                                  Constants.EmptyIntArray,
                                  Constants.EmptyDayArray);
@@ -289,27 +289,27 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         public static void Notify(long id, object? obj)
         {
-            Times.Alarm.CBPForSpecifiedAlarm param;
+            Times.Alarm.SpecifiedAlarmParam param;
             if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForSpecifiedAlarm>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj!.ToString()!);
             }
             else
             {
-                param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
+                param = (Times.Alarm.SpecifiedAlarmParam)obj!;
             }
             Course course = (Course)_scheduleDictionary[param.scheduleId];
             Console.WriteLine($"下一个小时有以下课程：\"{course.Name}\"，时长为{course.Duration}小时。");
-            if (course.OfflineLocation.HasValue)
+            if (course.IsOnline)
+            {
+                Console.WriteLine($"在线地址为{course.OnlineLink!}");
+            }
+            else
             {
                 Console.WriteLine($"地点为{course.OfflineLocation!.Value.Name}");
                 /*var input = Console.ReadLine();
                 Map.Location.Building from = Map.Location.GetBuildingsByName(input!)[0];
                 Map.Navigate.Show(Map.Location.GetClosestPath(from.Id, course.OfflineLocation.Value.Id));*/
-            }
-            else
-            {
-                Console.WriteLine($"在线地址为{course.OnlineLink!}");
             }
         }
     }
@@ -318,14 +318,18 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         public static void Notify(long id, object? obj)
         {
-            Times.Alarm.CBPForSpecifiedAlarm param;
-            if ((obj?.GetType() ?? typeof(object)) == typeof(JObject))
+            Times.Alarm.SpecifiedAlarmParam param;
+            if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForSpecifiedAlarm>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj!.ToString()!);
+            }
+            else if (obj is Times.Alarm.SpecifiedAlarmParam o)
+            {
+                param = o;
             }
             else
             {
-                param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
+                throw new ArgumentException(null, nameof(obj));
             }
             Exam exam = (Exam)_scheduleDictionary[param.scheduleId];
             Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
@@ -340,14 +344,18 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         public static void Notify(long id, object? obj)
         {
-            Times.Alarm.CBPForSpecifiedAlarm param;
-            if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
+            Times.Alarm.SpecifiedAlarmParam param;
+            if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForSpecifiedAlarm>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj!.ToString()!);
+            }
+            else if (obj is Times.Alarm.SpecifiedAlarmParam o)
+            {
+                param = o;
             }
             else
             {
-                param = (Times.Alarm.CBPForSpecifiedAlarm)obj!;
+                throw new ArgumentException(null, nameof(obj));
             }
             Activity activity = (Activity)_scheduleDictionary[param.scheduleId];
             Console.WriteLine("下一个小时有以下" + (activity.IsGroupActivity ? "集体" : "个人") +
@@ -368,19 +376,23 @@ namespace StudentScheduleManagementSystem.Schedule
 
     public partial class TemporaryAffair
     {
-        public static void FindOptimizedRoute(long id, object? obj)
+        public new static void Notify(long id, object? obj)
         {
-            Times.Alarm.CBPForTemporaryAffair param;
-            if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
+            Times.Alarm.TemporaryAffairParam param;
+            if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.CBPForTemporaryAffair>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.TemporaryAffairParam>(obj!.ToString()!);
+            }
+            else if (obj is Times.Alarm.TemporaryAffairParam o)
+            {
+                param = o;
             }
             else
             {
-                param = (Times.Alarm.CBPForTemporaryAffair)obj!;
+                throw new ArgumentException(null, nameof(obj));
             }
             var points = Map.Location.GetClosestCircuit(new(param.locations));
-            Task.Run(() => Map.Navigate.Show(points));
+            Map.Navigate.Show(points);
         }
     }
 }
@@ -389,17 +401,17 @@ namespace StudentScheduleManagementSystem.Times
 {
     public partial class Alarm
     {
-        public struct CBPForGeneralAlarm
+        public struct GeneralAlarmParam
         {
             public Time startTimestamp;
         }
 
-        public struct CBPForSpecifiedAlarm
+        public struct SpecifiedAlarmParam
         {
             public long scheduleId;
         }
 
-        public struct CBPForTemporaryAffair
+        public struct TemporaryAffairParam
         {
             public Map.Location.Building[] locations;
         }
