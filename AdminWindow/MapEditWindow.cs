@@ -12,7 +12,8 @@
         private int? _xLock = null, _yLock = null;
         private Point? _mouseOver = null, _selected = null;
         private bool _showLabels = false;
-        private bool isInputting = false;
+        private bool _isInputting = false;
+        private bool _needHelp = false;
 
         public MapEditWindow()
         {
@@ -50,16 +51,17 @@
                 catch (ArgumentException) { }
             }
             InitializeComponent();
-            Button buttonOK = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
-            buttonOK.Click += (sender, e) =>
-            {
-                /*TODO:Map.Location.GlobalMap=new()*/
-                Map.Location.Buildings = GetBuildings();
-            };
-            Controls.Add(buttonOK);
+            Button buttonOk = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
             Button buttonCancel =
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
+            buttonOk.Click += (sender, e) =>
+            {
+                Map.Location.GlobalMap = new(GetVertices(), GetEdges());
+                Map.Location.Buildings = GetBuildings();
+                this.Close();
+            };
             buttonCancel.Click += (sender, e) => { this.Close(); };
+            Controls.Add(buttonOk);
             Controls.Add(buttonCancel);
             helpButton.Location = new(528, 0);
             this.KeyDown += OnKeyDown;
@@ -159,7 +161,7 @@
 
         private void OnMouseDown(object sender, EventArgs e)
         {
-            if (isInputting)
+            if (_isInputting)
             {
                 return;
             }
@@ -273,6 +275,9 @@
                     break;
                 case Keys.Escape:
                     _selected = null;
+                    _textBox.Text = "";
+                    _textBox.Hide();
+                    _isInputting = false;
                     e.Handled = true;
                     break;
                 case Keys.Insert:
@@ -280,14 +285,14 @@
                     {
                         break;
                     }
-                    isInputting = true;
+                    _isInputting = true;
                     _textBox.Location = new(_selected.Value.X + 20, _selected.Value.Y + 20);
                     _textBox.Text = _points[_selected.Value]?.Item1 ?? String.Empty;
                     _textBox.Show();
                     e.Handled = true;
                     break;
                 case Keys.Return:
-                    if (!isInputting)
+                    if (!_isInputting)
                     {
                         break;
                     }
@@ -303,13 +308,13 @@
                     Controls.Add(information);
                     information.BringToFront();
                     information.Show();
-                    isInputting = false;
+                    _isInputting = false;
                     _selected = null;
                     _textBox.Hide();
                     goto alt; //identical to a missing break in C/C++
                 case Keys.Menu:
                     alt:
-                    if (isInputting)
+                    if (_isInputting)
                     {
                         break;
                     }
@@ -375,20 +380,18 @@
             return ret;
         }
 
-        bool needHelp = false;
-
         private void button1_Click(object sender, EventArgs e)
         {
-            if (needHelp)
+            if (_needHelp)
             {
                 helpPictureBox.Hide();
-                needHelp = false;
+                _needHelp = false;
             }
             else
             {
                 helpPictureBox.Show();
                 helpPictureBox.BringToFront();
-                needHelp = true;
+                _needHelp = true;
             }
         }
     }

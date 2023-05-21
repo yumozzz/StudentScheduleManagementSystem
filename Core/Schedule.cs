@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Diagnostics;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Diagnostics;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
@@ -346,6 +346,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                         schedule.ActiveWeeks,
                                         schedule.ActiveDays);
             }
+            Log.Information.Log($"已删除id为{schedule.ScheduleId}的日程");
         }
 
         public static bool DetectCollision(RepetitiveType repetitiveType,
@@ -704,6 +705,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                  RepetitiveType,
                                  alarmTimeUpCallback,
                                  callbackParameter,
+                                 this.GetType(),
                                  typeof(T),
                                  false,
                                  ActiveWeeks,
@@ -1351,7 +1353,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                              shared.ActiveWeeks,
                                              shared.ActiveDays,
                                              ScheduleOperationType.UserOpration,
-                                             dobj.ScheduleId);
+                                             dobj.ScheduleId)
+                                { AlarmEnabled = dobj.AlarmEnabled };
                         }
                         else if (dobj.OnlineLink != null)
                         {
@@ -1365,7 +1368,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                              shared.ActiveWeeks,
                                              shared.ActiveDays,
                                              ScheduleOperationType.UserOpration,
-                                             dobj.ScheduleId);
+                                             dobj.ScheduleId)
+                                { AlarmEnabled = dobj.AlarmEnabled };
                         }
                         else
                         {
@@ -1395,7 +1399,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                          false,
                                          dobj.ActiveWeeks,
                                          dobj.ActiveDays,
-                                         ScheduleOperationType.UserOpration) { AlarmEnabled = dobj.AlarmEnabled };
+                                         ScheduleOperationType.UserOpration,
+                                         dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                     }
                     else if (dobj.OnlineLink != null)
                     {
@@ -1408,7 +1413,8 @@ namespace StudentScheduleManagementSystem.Schedule
                                          false,
                                          dobj.ActiveWeeks,
                                          dobj.ActiveDays,
-                                         ScheduleOperationType.UserOpration) { AlarmEnabled = dobj.AlarmEnabled };
+                                         ScheduleOperationType.UserOpration,
+                                         dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                     }
                     else
                     {
@@ -1431,6 +1437,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         private class DeserializedObject
         {
+            public long ScheduleId { get; set; }
             public string Name { get; set; }
             public Times.Time Timestamp { get; set; }
             public string? Description { get; set; }
@@ -1456,12 +1463,12 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region ctor
 
-        public TemporaryAffair(string name, Times.Time beginTime, string? description, Map.Location.Building location)
+        public TemporaryAffair(string name, Times.Time beginTime, string? description, Map.Location.Building location, long? id = null)
             : base(RepetitiveType.Single, name, beginTime, 1, false, description)
         {
             OnlineLink = null;
             OfflineLocation = location;
-            AddSchedule();
+            AddSchedule(id);
             AlarmEnabled =
                 ((TemporaryAffair)_scheduleDictionary[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
         }
@@ -1518,7 +1525,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
-        private void AddSchedule()
+        private void AddSchedule(long? id)
         {
             int offset = BeginTime.ToInt();
 
@@ -1531,7 +1538,7 @@ namespace StudentScheduleManagementSystem.Schedule
             else if (_timeline[offset].ScheduleType ==
                      ScheduleType.TemporaryAffair) //有临时日程而添加临时日程，此时添加的日程与已有日程共享ID和表中的实例
             {
-                ScheduleId = GenerateId(null, '5');
+                ScheduleId = GenerateId(id, '5');
                 long current = _timeline[BeginTime.ToInt()].Id;
                 while (((TemporaryAffair)_scheduleDictionary[current])._next != 0)
                 {
@@ -1620,7 +1627,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
                 Map.Location.Building location =
                     locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                _ = new TemporaryAffair(dobj.Name, dobj.Timestamp, dobj.Description, location);
+                _ = new TemporaryAffair(dobj.Name, dobj.Timestamp, dobj.Description, location, dobj.ScheduleId);
                 if (dobj.AlarmEnabled)
                 {
                     //just record, actual alarm handling is in method Time.CreateInstance

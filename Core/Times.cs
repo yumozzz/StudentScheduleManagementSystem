@@ -268,6 +268,21 @@ namespace StudentScheduleManagementSystem.Times
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public partial class Alarm : IJsonConvertible, IComparable
     {
+        static Alarm()
+        {
+            var allMethods = new[]
+                {
+                    typeof(Alarm).GetMethods(),
+                    typeof(Schedule.ScheduleBase).GetMethods(),
+                    typeof(Schedule.Course).GetMethods(),
+                    typeof(Schedule.Exam).GetMethods(),
+                    typeof(Schedule.Activity).GetMethods(),
+                    typeof(Schedule.TemporaryAffair).GetMethods()
+                }.Aggregate<IEnumerable<MethodInfo>>((arr, elem) => arr.Concat(elem))
+                 .ToArray();
+            _localMethods = Array.ConvertAll(allMethods, method => method.ReflectedType?.FullName + '+' + method.Name);
+        }
+
         #region structs and classes
 
         private struct Record : IUniqueRepetitiveEvent
@@ -288,7 +303,7 @@ namespace StudentScheduleManagementSystem.Times
         private class DeserializedObject
         {
             public object? CallbackParameter { get; set; }
-            public string? CallbackName { get; set; }
+            public string CallbackName { get; set; }
             public string ParameterTypeName { get; set; }
             public RepetitiveType @RepetitiveType { get; set; }
             public int[] ActiveWeeks { get; set; }
@@ -315,25 +330,9 @@ namespace StudentScheduleManagementSystem.Times
         [JsonProperty(propertyName: "ParameterTypeName")]
         private string _parameterTypeName;
 
-        private static readonly string[] localMethods = Array
-                                                       .ConvertAll(new[]
-                                                                       {
-                                                                           typeof(Alarm).GetMethods(),
-                                                                           typeof(Schedule.ScheduleBase).GetMethods(),
-                                                                           typeof(Schedule.Course).GetMethods(),
-                                                                           typeof(Schedule.Exam).GetMethods(),
-                                                                           typeof(Schedule.Activity).GetMethods(),
-                                                                           typeof(Schedule.TemporaryAffair).GetMethods()
-                                                                       }.Aggregate<
-                                                                             IEnumerable<MethodInfo>>((arr, elem) =>
-                                                                             arr.Union(elem))
-                                                                        .Where(methodInfo => methodInfo.IsPublic)
-                                                                        .ToArray(),
-                                                                   methodInfo => methodInfo.Name)
-                                                       .Distinct()
-                                                       .ToArray();
+        private static readonly string[] _localMethods;
 
-        private static readonly string[] localTypes =
+        private static readonly string[] _localTypes =
             Array.ConvertAll(typeof(Alarm).GetNestedTypes(), type => type.FullName ?? "null");
 
         private static readonly Dictionary<long, Alarm> _alarmList = new();
@@ -377,6 +376,7 @@ namespace StudentScheduleManagementSystem.Times
                                     RepetitiveType repetitiveType,
                                     AlarmCallback? alarmTimeUpCallback,
                                     object? callbackParameter,
+                                    Type callbackReflectedType,
                                     Type parameterType,
                                     bool isDailyNotification,
                                     int[] activeWeeks,
@@ -474,6 +474,7 @@ namespace StudentScheduleManagementSystem.Times
             {
                 _dailyNotificationAlarmId = id;
             }
+            string callbackName = callbackReflectedType.FullName + '+' + alarmTimeUpCallback?.Method.Name;
             _alarmList.Add(id,
                            new()
                            {
@@ -483,7 +484,7 @@ namespace StudentScheduleManagementSystem.Times
                                BeginTime = timestamp,
                                _alarmCallback = alarmTimeUpCallback,
                                _callbackParameter = callbackParameter,
-                               _callbackName = alarmTimeUpCallback?.Method.Name ?? "null",
+                               _callbackName = callbackName,
                                _parameterTypeName =
                                    parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
@@ -542,31 +543,35 @@ namespace StudentScheduleManagementSystem.Times
                     throw new JsonFormatException();
                 }
                 //what if callbackName is null?
-                if (!localMethods.Contains(dobj.CallbackName))
+                if (!_localMethods.Contains(dobj.CallbackName))
                 {
                     throw new MethodNotFoundException();
                 }
-                if (!localTypes.Contains(dobj.ParameterTypeName))
+                if (!_localTypes.Contains(dobj.ParameterTypeName))
                 {
                     throw new TypeNotFoundOrInvalidException();
                 }
-                Type type = Assembly.GetExecutingAssembly().GetType(dobj.ParameterTypeName)!;
-                var callbackMethodInfos = new[]
+
+                Type paramType = Assembly.GetExecutingAssembly().GetType(dobj.ParameterTypeName)!;
+                var reflectedTypeFullName = dobj.CallbackName.Split('+')[0];
+                var reflectedType = new[]
                 {
-                    typeof(Alarm).GetMethod(dobj.CallbackName!),
-                    typeof(Schedule.ScheduleBase).GetMethod(dobj.CallbackName!),
-                    typeof(Schedule.Course).GetMethod(dobj.CallbackName!),
-                    typeof(Schedule.Exam).GetMethod(dobj.CallbackName!),
-                    typeof(Schedule.Activity).GetMethod(dobj.CallbackName!),
-                    typeof(Schedule.TemporaryAffair).GetMethod(dobj.CallbackName!)
-                }.First(methodInfo => methodInfo != null);
+                    typeof(Alarm),
+                    typeof(Schedule.ScheduleBase),
+                    typeof(Schedule.Course),
+                    typeof(Schedule.Exam),
+                    typeof(Schedule.Activity),
+                    typeof(Schedule.TemporaryAffair)
+                }.First(type=>type.FullName == reflectedTypeFullName);
+                MethodInfo? methodInfo = reflectedType.GetMethod(dobj.CallbackName.Split('+')[1]);
+
                 AddAlarm(dobj.Timestamp,
                          dobj.RepetitiveType,
                          (AlarmCallback)Delegate.CreateDelegate(typeof(AlarmCallback),
-                                                                callbackMethodInfos ??
-                                                                throw new MethodNotFoundException()),
+                                                                methodInfo ?? throw new MethodNotFoundException()),
                          ((JObject?)dobj.CallbackParameter)?.Value<object>() ?? null,
-                         type,
+                         reflectedType,
+                         paramType,
                          false,
                          dobj.ActiveWeeks,
                          dobj.ActiveDays);
@@ -582,11 +587,11 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     continue;
                 }
-                if (!localMethods.Contains(alarm._callbackName))
+                if (!_localMethods.Contains(alarm._callbackName))
                 {
                     throw new MethodNotFoundException();
                 }
-                if (!localTypes.Contains(alarm._parameterTypeName))
+                if (!_localTypes.Contains(alarm._parameterTypeName))
                 {
                     throw new TypeNotFoundOrInvalidException();
                 }

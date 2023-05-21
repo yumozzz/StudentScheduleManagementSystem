@@ -115,40 +115,6 @@ namespace StudentScheduleManagementSystem.UI
             this.descriptionBox.Text = "";
         }
 
-        protected void OnSwitchAlarm(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.ColumnIndex != 1 || _showAllData)
-            {
-                return;
-            }
-            long id = long.Parse(scheduleData.Rows[e.RowIndex].Cells[9].Value.ToString()!);
-            Schedule.ScheduleBase selected = Schedule.ScheduleBase.GetScheduleById(id)!;
-            Debug.Assert(selected.ScheduleType is not (ScheduleType.Course or ScheduleType.Exam));
-            switch (selected.ScheduleType,
-                    Convert.ToBoolean(scheduleData.Rows[e.RowIndex].Cells[1].EditedFormattedValue))
-            {
-                case (ScheduleType.Activity, true):
-                    selected.EnableAlarm(Schedule.Activity.Notify,
-                                         new Times.Alarm.SpecifiedAlarmParam { scheduleId = id });
-                    break;
-                case (ScheduleType.Activity, false):
-                    selected.DisableAlarm();
-                    break;
-                case (ScheduleType.TemporaryAffair, true):
-                    selected.EnableAlarm(Schedule.TemporaryAffair.Notify,
-                                         new Times.Alarm.TemporaryAffairParam
-                                         {
-                                             locations = Schedule.TemporaryAffair.GetAllAt(selected.BeginTime)
-                                                                 .Select(affair => affair.OfflineLocation)
-                                                                 .ToArray()
-                                         });
-                    break;
-                case (ScheduleType.TemporaryAffair, false):
-                    selected.DisableAlarm();
-                    break;
-            }
-        }
-
         #endregion
 
         #region table content generator
@@ -165,6 +131,7 @@ namespace StudentScheduleManagementSystem.UI
             scheduleData.Columns[1].Visible = false;
             scheduleData.Columns[6].Visible = false;
             scheduleData.Columns[7].Visible = false;
+            scheduleData.Columns[8].Visible = false;
             int[] widths = { 30, 55, 130, 120, 130, 60, 60 };
             for (int i = 0; i < widths.Length; i++)
             {
@@ -428,6 +395,40 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        protected void OnSwitchAlarm(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex != 1 || _showAllData)
+            {
+                return;
+            }
+            long id = long.Parse(scheduleData.Rows[e.RowIndex].Cells[9].Value.ToString()!);
+            Schedule.ScheduleBase selected = Schedule.ScheduleBase.GetScheduleById(id)!;
+            Debug.Assert(selected.ScheduleType is not (ScheduleType.Course or ScheduleType.Exam));
+            switch (selected.ScheduleType,
+                    Convert.ToBoolean(scheduleData.Rows[e.RowIndex].Cells[1].EditedFormattedValue))
+            {
+                case (ScheduleType.Activity, true):
+                    selected.EnableAlarm(Schedule.Activity.Notify,
+                                         new Times.Alarm.SpecifiedAlarmParam { scheduleId = id });
+                    break;
+                case (ScheduleType.Activity, false):
+                    selected.DisableAlarm();
+                    break;
+                case (ScheduleType.TemporaryAffair, true):
+                    selected.EnableAlarm(Schedule.TemporaryAffair.Notify,
+                                         new Times.Alarm.TemporaryAffairParam
+                                         {
+                                             locations = Schedule.TemporaryAffair.GetAllAt(selected.BeginTime)
+                                                                 .Select(affair => affair.OfflineLocation)
+                                                                 .ToArray()
+                                         });
+                    break;
+                case (ScheduleType.TemporaryAffair, false):
+                    selected.DisableAlarm();
+                    break;
+            }
+        }
+
         #endregion
     }
 
@@ -455,6 +456,7 @@ namespace StudentScheduleManagementSystem.UI
             scheduleData.Columns[1].Visible = false;
             scheduleData.Columns[6].Visible = true;
             scheduleData.Columns[7].Visible = true;
+            scheduleData.Columns[8].Visible = true;
 
             foreach (var schedule in data)
             {
@@ -510,7 +512,7 @@ namespace StudentScheduleManagementSystem.UI
                                       schedule.BeginTime.Hour.ToString() + ":00",
                                       schedule.Duration.ToString() + "小时",
                                       schedule.Description ?? "",
-                                      location,
+                                      null,
                                       schedule.ScheduleId);
             }
         }
@@ -520,13 +522,9 @@ namespace StudentScheduleManagementSystem.UI
         #region tool methods
 
         private bool GetScheduleInfo(bool showMessageBox,
-                                     DataGridViewRow selected,
-                                     out string offlineLocationName,
-                                     out string onlineLink)
+                                     DataGridViewRow selected)
         {
             StringBuilder errorMessage = new();
-            offlineLocationName = buildingComboBox.Text;
-            onlineLink = onlineLinkBox.Text;
 
             char[] arr = nameBox.Text.ToCharArray();
             if (arr.Length == 0)
@@ -649,7 +647,7 @@ namespace StudentScheduleManagementSystem.UI
                 var ctor = ctors.FirstOrDefault(ctor => ctor.GetParameters()
                                                             .FirstOrDefault(info => info.ParameterType ==
                                                                                 typeof(Map.Location.Building)) == null);
-                args[5] = descriptionBox.Text == "" ? null : descriptionBox.Text;
+                args[5] = onlineLinkBox.Text == "" ? null : onlineLinkBox.Text;
                 if (_scheduleType == ScheduleType.Course)
                 {
                     args.RemoveAt(6);
@@ -755,7 +753,7 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             long id = long.Parse(scheduleData.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
-            bool confirm = GetScheduleInfo(true, scheduleData.Rows[selectedRows[0]], out _, out _);
+            bool confirm = GetScheduleInfo(true, scheduleData.Rows[selectedRows[0]]);
             if (!confirm)
             {
                 return;
@@ -1159,13 +1157,33 @@ namespace StudentScheduleManagementSystem.UI
             {
                 errorMessage.AppendLine("请输入日程时长！");
             }
-            if (buildingRadioButton.Checked && buildingRadioButton.Visible && buildingComboBox.Text == "")
+            string location = "";
+            if (buildingRadioButton.Checked && buildingRadioButton.Visible)
             {
-                errorMessage.AppendLine("请输入日程地址！");
+                if (buildingComboBox.Text == "")
+                {
+                    errorMessage.AppendLine("请输入日程地址！");
+                }
+                else
+                {
+                    location = $"\n地址: {buildingComboBox.Text}";
+                }
             }
-            else if (onlineLinkRadioButton.Checked && onlineLinkRadioButton.Visible && onlineLinkBox.Text == "")
+            else if (onlineLinkRadioButton.Checked && onlineLinkRadioButton.Visible)
             {
-                errorMessage.AppendLine("请输入日程链接！");
+                if (onlineLinkBox.Text == "")
+                {
+                    errorMessage.AppendLine("请输入日程链接！");
+                }
+                else
+                {
+                    location = $"\n链接: {onlineLinkBox.Text}";
+                }
+            }
+            else if (!buildingRadioButton.Visible && !onlineLinkRadioButton.Visible) { }
+            else
+            {
+                errorMessage.AppendLine("未选择线下地址或线上链接！");
             }
             if (!errorMessage.Equals(""))
             {
@@ -1236,7 +1254,7 @@ namespace StudentScheduleManagementSystem.UI
                                                                   activeDays,
                                                                   timestamp,
                                                                   duration)
-                                               .ToString(),
+                                               .ToString() + location,
                                          "确认日程信息",
                                          MessageBoxButtons.OKCancel) == DialogResult.OK
                        : true;

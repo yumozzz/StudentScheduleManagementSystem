@@ -1,6 +1,7 @@
 ﻿//#define COURSEEXAMTEST
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Authentication;
@@ -136,6 +137,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      {
                                          startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
                                      },
+                                     typeof(Schedule.ScheduleBase),
                                      typeof(Times.Alarm.GeneralAlarmParam),
                                      true,
                                      Constants.EmptyIntArray,
@@ -281,6 +283,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                  RepetitiveType.Single,
                                  NotifyAllInComingDay,
                                  new Times.Alarm.GeneralAlarmParam() { startTimestamp = param.startTimestamp + 24 },
+                                 typeof(ScheduleBase),
                                  typeof(Times.Alarm.GeneralAlarmParam),
                                  true,
                                  Constants.EmptyIntArray,
@@ -305,7 +308,17 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 param = (Times.Alarm.SpecifiedAlarmParam)obj!;
             }
-            Course course = (Course)_scheduleDictionary[param.scheduleId];
+            Course course;
+            try
+            {
+                course = (Course)_scheduleDictionary[param.scheduleId];
+            }
+            //could not find corresponding schedule, maybe is deleted, so ignore
+            catch (KeyNotFoundException)
+            {
+                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的课程");
+                return;
+            }
             Console.WriteLine($"下一个小时有以下课程：\"{course.Name}\"，时长为{course.Duration}小时。");
             if (course.IsOnline)
             {
@@ -338,7 +351,17 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(null, nameof(obj));
             }
-            Exam exam = (Exam)_scheduleDictionary[param.scheduleId];
+            Exam exam;
+            try
+            {
+                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的考试");
+                exam = (Exam)_scheduleDictionary[param.scheduleId];
+            }
+            //could not find corresponding schedule, maybe is deleted, so ignore
+            catch (KeyNotFoundException)
+            {
+                return;
+            }
             Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
             Console.WriteLine($"地点为{exam.OfflineLocation.Name}");
             /*var input = Console.ReadLine();
@@ -364,7 +387,17 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(null, nameof(obj));
             }
-            Activity activity = (Activity)_scheduleDictionary[param.scheduleId];
+            Activity activity;
+            try
+            {
+                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的活动");
+                activity = (Activity)_scheduleDictionary[param.scheduleId];
+            }
+            //could not find corresponding schedule, maybe is deleted, so ignore
+            catch (KeyNotFoundException)
+            {
+                return;
+            }
             Console.WriteLine("下一个小时有以下" + (activity.IsGroupActivity ? "集体" : "个人") +
                               $"活动：\"{activity.Name}\"，时长为{activity.Duration}小时。");
             if (activity.IsOnline)
