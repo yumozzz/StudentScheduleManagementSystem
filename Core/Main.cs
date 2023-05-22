@@ -50,10 +50,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 
                 #endregion
 
-                while (uiThread.IsAlive)
-                {
-                    Thread.Sleep(100);
-                }
+                uiThread.Join();
             }
             /*catch (Exception ex)
             {
@@ -125,9 +122,13 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                    inputUserId,
                                                    Encryption.Encrypt.RSADecrypt));
                 }
-                catch (KeyNotFoundException)
+                catch (Exception ex) when (ex is KeyNotFoundException or FileNotFoundException)
                 {
-                    throw new FileNotFoundException();
+                    MessageBox.Show("用户文件出现错误或不存在，已新建");
+                    FileManagement.FileManager.SaveToUserFile(new(),
+                                                              FileManagement.FileManager.UserFileDirectory,
+                                                              UserId,
+                                                              Encryption.Encrypt.RSADecrypt);
                 }
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
                                      RepetitiveType.Single,
@@ -142,12 +143,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      Constants.EmptyIntArray,
                                      Constants.EmptyDayArray);
                 return true;
-            }
-            catch (FileNotFoundException ex)
-            {
-                Log.Error.Log("用户文件不存在，考虑注册", ex);
-                MessageBox.Show("用户文件不存在，请先注册！");
-                return false;
             }
             catch (Exception ex) when (ex is AuthenticationException or KeyNotFoundException)
             {
@@ -179,9 +174,9 @@ namespace StudentScheduleManagementSystem.MainProgram
                 _accounts.Add(userId, (encoded, Convert.ToBase64String(Encryption.Encrypt.PrivateKey)));
                 return true;
             }
-            catch (FormatException)
+            catch (FormatException ex)
             {
-                Log.Error.Log("用户名或密码格式错误", null);
+                Log.Error.Log("用户名或密码格式错误", ex);
                 MessageBox.Show("用户名或密码格式错误！");
                 return false;
             }

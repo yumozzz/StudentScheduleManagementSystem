@@ -14,13 +14,13 @@
         private bool _showLabels = false;
         private bool _isInputting = false;
         private bool _needHelp = false;
+        private bool _isAlive = true;
 
         public MapEditWindow()
         {
-            /*_lineEndPointPairs = Map.Location.GetLineEndPoints()
+            _lineEndPointPairs = Map.Location.GetLineEndPoints()
                                     .Select(pair => (pair.Item1.ToPoint(), pair.Item2.ToPoint()))
-                                    .ToHashSet();*/
-            _lineEndPointPairs = new();
+                                    .ToHashSet();
             _points = new();
             foreach (var building in Map.Location.Buildings)
             {
@@ -60,7 +60,8 @@
                 Map.Location.Buildings = GetBuildings();
                 this.Close();
             };
-            buttonCancel.Click += (sender, e) => { this.Close(); };
+            buttonCancel.Click += (sender, e) => this.Close();
+            this.FormClosed += (sender, e) => _isAlive = false;
             Controls.Add(buttonOk);
             Controls.Add(buttonCancel);
             helpButton.Location = new(528, 0);
@@ -68,22 +69,19 @@
             pictureBox1.MouseDown += OnMouseDown;
             Thread thread = new(() =>
             {
-                try
+                Thread.Sleep(1000);
+                while (_isAlive)
                 {
-                    while (true)
+                    if (pictureBox1.InvokeRequired)
                     {
-                        if (pictureBox1.InvokeRequired)
-                        {
-                            this.pictureBox1.Invoke(UpdateGraphics);
-                        }
-                        else
-                        {
-                            UpdateGraphics();
-                        }
-                        Thread.Sleep(10);
+                        this.pictureBox1.Invoke(UpdateGraphics);
                     }
+                    else
+                    {
+                        UpdateGraphics();
+                    }
+                    Thread.Sleep(10);
                 }
-                catch (Exception) { }
             });
             Controls.Add(_textBox);
             _textBox.BringToFront();
@@ -137,7 +135,7 @@
             circleCenter.Y -= BigCircRad;
             foreach ((var center, _) in _points)
             {
-                if (Distance(circleCenter, center) < 10.0)
+                if (Distance(circleCenter, center) < 12.0)
                 {
                     graphics.FillEllipse(new SolidBrush(Color.Blue),
                                          new()
@@ -193,7 +191,16 @@
                 else if (_selected != _mouseOver)
                 {
                     Console.WriteLine("add line");
-                    _lineEndPointPairs.Add((_selected.Value, _mouseOver.Value));
+                    bool success;
+                    if ((_selected.Value.X,_selected.Value.Y).CompareTo((_mouseOver.Value.X, _mouseOver.Value.Y))<=0)
+                    {
+                        success = _lineEndPointPairs.Add((_selected.Value, _mouseOver.Value));
+                    }
+                    else
+                    {
+                        success = _lineEndPointPairs.Add((_mouseOver.Value, _selected.Value));
+                    }
+                    Console.WriteLine($"add:{success}");
                     _selected = null;
                 }
             }
@@ -204,16 +211,20 @@
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:
-                    _xLock = _xLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).X;
+                    _xLock = _xLock.HasValue
+                                 ? null
+                                 : (_selected?.X ?? pictureBox1.PointToClient(Control.MousePosition).X);
                     e.Handled = true;
                     if (_xLock.HasValue)
                     {
+                        _selected = null;
                         warnPictureBox.Image = imageList.Images[0];
                         warnPictureBox.Show();
                         warnPictureBox.BringToFront();
                     }
                     else if (_yLock.HasValue)
                     {
+                        _selected = null;
                         warnPictureBox.Image = imageList.Images[1];
                         warnPictureBox.Show();
                         warnPictureBox.BringToFront();
@@ -224,7 +235,9 @@
                     }
                     break;
                 case Keys.ControlKey:
-                    _yLock = _yLock.HasValue ? null : pictureBox1.PointToClient(Control.MousePosition).Y;
+                    _yLock = _yLock.HasValue
+                                 ? null
+                                 : (_selected?.Y ?? pictureBox1.PointToClient(Control.MousePosition).Y);
                     e.Handled = true;
                     if (_yLock.HasValue)
                     {
@@ -248,6 +261,7 @@
                     {
                         break;
                     }
+                    Console.WriteLine("delete point");
                     _points[_selected.Value]?.Item2.Dispose();
                     Controls.Remove(_points[_selected.Value]?.Item2!);
                     _points.Remove(_selected.Value);

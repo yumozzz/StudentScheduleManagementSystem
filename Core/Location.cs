@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 namespace StudentScheduleManagementSystem.Map
 {
     public static class Location
     {
-        private static List<Building> _buildings =
-            new() { Constants.DefaultBuilding };
+        private static List<Building> _buildings = new() { Constants.DefaultBuilding };
 
         public static List<Building> Buildings
         {
@@ -155,67 +153,55 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
-        public unsafe class AdjacencyTable
+        public class AdjacencyTable
         {
             private struct Node
             {
                 public int pointId;
                 public Edge edge;
-                public Node* next;
             }
 
             public int Size { get; init; }
-            private readonly Node*[] _adjArray;
-            private readonly (int, int)[] _locations;
+            private readonly List<Node>[] _adjArray;
+            private readonly Point[] _locations;
 
             public AdjacencyTable(List<Vertex> vertices, List<(Vertex, Vertex)> edges)
             {
                 Size = vertices.Count;
-                _adjArray = new Node*[Size];
-                _locations = vertices.ConvertAll(vertex => (vertex.X, vertex.Y)).ToArray();
+                _adjArray = new List<Node>[Size];
+                for (int i = 0; i < Size; i++)
+                {
+                    _adjArray[i] = new();
+                }
+                _locations = vertices.ConvertAll(vertex => new Point(vertex.X, vertex.Y)).ToArray();
 
                 foreach (var (from, to) in edges)
                 {
-                    int dist = (int)Math.Sqrt((from.X - to.X) * (from.X - to.X) + (from.X - to.X) * (from.X - to.X));
+                    int dist = (int)Math.Sqrt((from.X - to.X) * (from.X - to.X) + (from.Y - to.Y) * (from.Y - to.Y));
                     Edge edge = new(EdgeType.Line, null, dist);
 
-                    Node node = new() { pointId = to.Id, edge = edge, next = null };//from->to
-                    if (_adjArray[from.Id] == null)
-                    {
-                        _adjArray[from.Id] = &node;
-                    }
-                    else
-                    {
-                        Node* ptr = _adjArray[from.Id];
-                        while (ptr->next != null)
-                        {
-                            ptr = ptr->next;
-                        }
-                        ptr->next = &node;
-                    }
+                    Node node = new Node() { pointId = to.Id, edge = edge }; //from->to
+                    _adjArray[from.Id].Add(node);
 
-                    node.pointId = from.Id;//to->from
-                    if (_adjArray[to.Id] == null)
-                    {
-                        _adjArray[to.Id] = &node;
-                    }
-                    else
-                    {
-                        Node* ptr = _adjArray[to.Id];
-                        while (ptr->next != null)
-                        {
-                            ptr = ptr->next;
-                        }
-                        ptr->next = &node;
-                    }
+                    node.pointId = from.Id; //to->from
+                    _adjArray[to.Id].Add(node);
+                }
+                foreach (var nodes in _adjArray)
+                {
+                    nodes.TrimExcess();
                 }
             }
 
             public AdjacencyTable(JArray vertexArray)
             {
                 Size = vertexArray.Count;
-                _adjArray = new Node*[Size];
-                _locations = new (int, int)[Size];
+                _adjArray = new List<Node>[Size];
+                for (int i = 0; i < Size; i++)
+                {
+                    _adjArray[i] = new();
+                }
+                _locations = new Point[Size];
+
                 try
                 {
                     foreach (JObject vertex in vertexArray)
@@ -228,8 +214,7 @@ namespace StudentScheduleManagementSystem.Map
                         {
                             continue;
                         }
-                        Node* cur = _adjArray[id];
-                        _locations[id] = (x, y);
+                        _locations[id] = new(x, y);
                         foreach (JObject next in nexts)
                         {
                             Node node = new()
@@ -245,8 +230,7 @@ namespace StudentScheduleManagementSystem.Map
                                         _ => throw new JsonFormatException("Wrong EdgeType")
                                     },
                                     Controls = null,
-                                },
-                                next = null
+                                }
                             };
                             if (node.pointId >= Size || node.pointId < 0)
                             {
@@ -263,21 +247,16 @@ namespace StudentScheduleManagementSystem.Map
                                 var control2 = JsonConvert.DeserializeObject<Point>(controls.ElementAt(2).ToString());
                                 node.edge.Controls = (control1, control2);
                             }
-                            if (_adjArray[id] == null) //头结点
-                            {
-                                _adjArray[id] = &node;
-                                continue;
-                            }
-                            cur->next = &node; //非头结点
-                            cur = cur->next;
+                            _adjArray[id].Add(node);
                         }
                     }
-                    foreach (var pointer in _adjArray)
+                    foreach (var nodes in _adjArray)
                     {
-                        if (pointer == null)
+                        if (nodes.Count == 0)
                         {
                             throw new JsonFormatException("Id is not continuous");
                         }
+                        nodes.TrimExcess();
                     }
                 }
                 catch (IndexOutOfRangeException)
@@ -341,75 +320,62 @@ namespace StudentScheduleManagementSystem.Map
 
             public List<(int, int)> this[int id]
             {
-                get
-                {
-                    List<(int, int)> list = new();
-                    if (id >= Size || id < 0)
-                    {
-                        throw new IndexOutOfRangeException();
-                    }
-                    Node* cur = _adjArray[id];
-                    while (cur != null)
-                    {
-                        list.Add((cur->pointId, cur->edge.Weight));
-                        cur = cur->next;
-                    }
-                    return list;
-                }
+                get => _adjArray[id].Select(node => (id, node.pointId)).ToList();
             }
 
             public Edge? this[int fromId, int toId]
             {
                 get
                 {
-                    if (fromId >= Size || toId >= Size || (fromId, toId) is not (>= 0, >= 0))
-                    {
-                        throw new IndexOutOfRangeException();
-                    }
-                    Node* cur = _adjArray[fromId];
+                    Node ans = default;
                     bool find = false;
-                    while (cur != null)
+                    foreach (var node in _adjArray[fromId])
                     {
-                        if (cur->pointId == toId)
+                        if (node.pointId == toId)
                         {
                             find = true;
+                            ans = node;
                             break;
                         }
-                        cur = cur->next;
                     }
-                    return find ? cur->edge : null;
+                    if (find)
+                    {
+                        return ans.edge;
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
             }
 
-            public Vertex GetVertex(int id) => new(id, _locations[id].Item1, _locations[id].Item2);
+            public Vertex GetVertex(int id) => new(id, _locations[id].X, _locations[id].Y);
 
             public JArray SaveInstance()
             {
                 JArray root = new();
                 for (int i = 0; i < Size; i++)
                 {
-                    JObject obj = new() { { "Id", i }, { "X", _locations[i].Item1 }, { "Y", _locations[i].Item2 } };
+                    JObject obj = new() { { "Id", i }, { "X", _locations[i].X }, { "Y", _locations[i].Y } };
                     JArray nexts = new();
-                    Node* cur = _adjArray[i];
-                    while (cur != null)
+                    foreach(var node in _adjArray[i])
                     {
                         JObject next = new()
                         {
-                            { "Id", cur->pointId },
-                            { "Distance", cur->edge.Weight },
-                            { "EdgeType", cur->edge.Type == EdgeType.Line ? "Line" : "QuadraticBezierCurve" }
+                            { "Id", node.pointId },
+                            { "Distance", node.edge.Weight },
+                            { "EdgeType", node.edge.Type == EdgeType.Line ? "Line" : "QuadraticBezierCurve" }
                         };
                         JArray controls = new();
-                        if (cur->edge.Type == EdgeType.QuadraticBezierCurve)
+                        if (node.edge.Type == EdgeType.QuadraticBezierCurve)
                         {
-                            JObject control1 = JObject.FromObject(cur->edge.Controls!.Value.Item1);
-                            JObject control2 = JObject.FromObject(cur->edge.Controls!.Value.Item2);
+                            JObject control1 = JObject.FromObject(node.edge.Controls!.Value.Item1);
+                            JObject control2 = JObject.FromObject(node.edge.Controls!.Value.Item2);
                             controls.Add(control1);
                             controls.Add(control2);
                         }
                         next.Add(controls);
                         nexts.Add(next);
-                        cur = cur->next;
                     }
                     obj.Add("Nexts", nexts);
                     root.Add(obj);
@@ -540,6 +506,10 @@ namespace StudentScheduleManagementSystem.Map
         public static List<(Vertex, Vertex)> GetLineEndPoints()
         {
             HashSet<(Vertex, Vertex)> ret = new();
+            if (GlobalMap == null)
+            {
+                return ret.ToList();
+            }
             for (int i = 0; i < GlobalMap!.Size; i++)
             {
                 foreach (var pair in GlobalMap[i])
@@ -559,6 +529,10 @@ namespace StudentScheduleManagementSystem.Map
         {
             HashSet<(Vertex, Vertex)> set = new();
             List<(Vertex, Point, Point, Vertex)> ret = new();
+            if (GlobalMap == null)
+            {
+                return ret.ToList();
+            }
             for (int i = 0; i < GlobalMap!.Size; i++)
             {
                 foreach (var pair in GlobalMap[i])

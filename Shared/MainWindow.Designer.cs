@@ -62,7 +62,6 @@
             this.usernamebox.Size = new System.Drawing.Size(215, 33);
             this.usernamebox.TabIndex = 3;
             this.usernamebox.Text = "2021210001";
-            this.usernamebox.TextChanged += new System.EventHandler(this.UsernameBox_TextChanged);
             // 
             // passwordbox
             // 

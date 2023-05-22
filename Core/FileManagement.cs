@@ -40,13 +40,13 @@ namespace StudentScheduleManagementSystem.FileManagement
             #if RWINPLAINTEXT
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             #elif RWINENCRYPTION
-            string jsonSource = DecryptFunc.Invoke(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
+            string jsonSource = decryptFunc.Invoke(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
             #else
             #error macro_not_defined
             #endif
             JObject obj = JObject.Parse(jsonSource);
             Dictionary<string, JArray> dic = new();
-            foreach ((string key, JToken? token) in obj)
+            foreach ((string key, JToken token) in obj)
             {
                 dic.Add(key, (JArray)token!);
             }
@@ -72,7 +72,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(root.ToString()));
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
-                               Encoding.UTF8.GetBytes(EncryptFunc.Invoke(root.ToString())));
+                               Encoding.UTF8.GetBytes(encryptFunc.Invoke(root.ToString())));
             #else
             #error macro_not_defined
             #endif

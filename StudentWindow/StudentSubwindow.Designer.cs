@@ -250,7 +250,6 @@
             // buildingRadioButton
             // 
             this.buildingRadioButton.AutoSize = true;
-            this.buildingRadioButton.Checked = true;
             this.buildingRadioButton.Location = new System.Drawing.Point(738, 273);
             this.buildingRadioButton.Name = "buildingRadioButton";
             this.buildingRadioButton.Size = new System.Drawing.Size(21, 20);

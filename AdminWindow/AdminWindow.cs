@@ -97,7 +97,6 @@
         {
             _mapEditWindow = new();
             _mapEditWindow.ShowDialog();
-            _mapEditWindow.Close();
             _mapEditWindow.Dispose();
             GC.Collect();
         }

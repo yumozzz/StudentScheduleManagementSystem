@@ -186,19 +186,70 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        protected void ClearInput()
+        protected long DetectCollision(bool showMessageBox)
+        {
+            int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
+            if (selectedRows.Length != 1)
+            {
+                MessageBox.Show("能且只能选择一个日程！");
+                return 0;
+            }
+
+            long id = long.Parse(scheduleDataTable.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
+
+            var selected = Schedule.Schedule.GetSharedById(id);
+
+            bool willCollide = Schedule.Schedule.DetectCollision(selected!.RepetitiveType,
+                                                                     selected.ScheduleType,
+                                                                     selected.Timestamp,
+                                                                     selected.Duration,
+                                                                     selected.ActiveWeeks,
+                                                                     selected.ActiveDays,
+                                                                     out RepetitiveType collisionRepType,
+                                                                     out ScheduleType collisionSchType,
+                                                                     out long[] collisionIds);
+
+            if (willCollide)
+            {
+                StringBuilder types = new();
+                if (collisionSchType.HasFlag(ScheduleType.Course))
+                {
+                    types.Append("课程、");
+                }
+                if (collisionSchType.HasFlag(ScheduleType.Exam))
+                {
+                    types.Append("考试、");
+                }
+                if (collisionSchType.HasFlag(ScheduleType.Activity))
+                {
+                    types.Append("活动、");
+                }
+                if (collisionSchType.HasFlag(ScheduleType.TemporaryAffair))
+                {
+                    types.Append("临时事务、");
+                }
+                Debug.Assert(types.Length != 0);
+                types.Remove(types.Length - 1, 1);
+                MessageBox.Show("该日程与您的类型为" + types.ToString() + "的日程冲突");
+                return 0;
+            }
+            else
+            {
+                if (showMessageBox)
+                {
+                    MessageBox.Show("该日程与您的日程没有冲突");
+                }
+                return id;
+            }
+        }
+
+        protected void ClearInformation()
         {
             this.nameBox.Text = "";
             this.weekBox.Text = "";
             this.dayBox.Text = "";
             this.hourBox.Text = "";
             this.durationBox.Text = "";
-            this.buildingRadioButton.Checked = true;
-            this.onlineLinkRadioButton.Checked = false;
-            this.buildingComboBox.SelectedIndex = -1;
-            this.buildingComboBox.Text = "";
-            this.onlineLinkBox.Text = "";
-            this.descriptionBox.Text = "";
         }
 
         #endregion
@@ -286,63 +337,6 @@ namespace StudentScheduleManagementSystem.UI
 
         protected abstract void GenerateUserData(List<Schedule.Schedule> data);
 
-        protected long DetectCollision(bool showMessageBox)
-        {
-            int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
-            if (selectedRows.Length != 1)
-            {
-                MessageBox.Show("能且只能选择一个日程！");
-                return 0;
-            }
-
-            long id = long.Parse(scheduleDataTable.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
-
-            var selected = Schedule.Schedule.GetSharedById(id);
-
-            bool willCollide = Schedule.Schedule.DetectCollision(selected!.RepetitiveType,
-                                                                     selected.ScheduleType,
-                                                                     selected.Timestamp,
-                                                                     selected.Duration,
-                                                                     selected.ActiveWeeks,
-                                                                     selected.ActiveDays,
-                                                                     out RepetitiveType collisionRepType,
-                                                                     out ScheduleType collisionSchType,
-                                                                     out long[] collisionIds);
-
-            if (willCollide)
-            {
-                StringBuilder types = new();
-                if (collisionSchType.HasFlag(ScheduleType.Course))
-                {
-                    types.Append("课程、");
-                }
-                if (collisionSchType.HasFlag(ScheduleType.Exam))
-                {
-                    types.Append("考试、");
-                }
-                if (collisionSchType.HasFlag(ScheduleType.Activity))
-                {
-                    types.Append("活动、");
-                }
-                if (collisionSchType.HasFlag(ScheduleType.TemporaryAffair))
-                {
-                    types.Append("临时事务、");
-                }
-                Debug.Assert(types.Length != 0);
-                types.Remove(types.Length - 1, 1);
-                MessageBox.Show("该日程与您的类型为" + types.ToString() + "的日程冲突");
-                return 0;
-            }
-            else
-            {
-                if (showMessageBox)
-                {
-                    MessageBox.Show("该日程与您的日程没有冲突");
-                }
-                return id;
-            }
-        }
-
         #endregion
 
         #region envent handler
@@ -389,12 +383,18 @@ namespace StudentScheduleManagementSystem.UI
 
         protected void CancelButton_Click(object sender, EventArgs e)
         {
-            ClearInput();
+            ClearInformation();
             this.AddScheduleButton.Show();
             this.deleteScheduleButton.Show();
             this.reviseScheduleButton.Show();
             this.okButton.Hide();
             this.cancelButton.Hide();
+            this.buildingRadioButton.Checked = false;
+            this.onlineLinkRadioButton.Checked = false;
+            this.buildingComboBox.SelectedIndex = -1;
+            this.buildingComboBox.Text = "";
+            this.onlineLinkBox.Text = "";
+            this.descriptionBox.Text = "";
             this._subwindowState = SubwindowState.Viewing;
             foreach (DataGridViewRow row in scheduleDataTable.Rows)
             {
@@ -539,7 +539,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 scheduleDataTable.Columns[i].Width = widths[i];
             }
-            scheduleDataTable.Columns[1].Visible = false;
+            scheduleDataTable.Columns[1].Visible = _subwindowType == SubwindowType.GroupActivity;
             scheduleDataTable.Columns[6].Visible = true;
             scheduleDataTable.Columns[7].Visible = true;
             scheduleDataTable.Columns[8].Visible = true;
@@ -791,7 +791,7 @@ namespace StudentScheduleManagementSystem.UI
             this.cancelButton.Show();
 
             var selected = Schedule.Schedule.GetSharedById(id);
-            ClearInput();
+            ClearInformation();
             this.nameBox.Text = selected!.Name;
             if (selected.RepetitiveType == RepetitiveType.Single)
             {
@@ -824,49 +824,6 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        protected void OkButton_Click(object sender, EventArgs e)
-        {
-            Debug.Assert((_subwindowState, _originId) is (SubwindowState.ReviseUserSchedule, > (long)1e9) or
-                                                         (SubwindowState.AddUserSchedule, null));
-
-            int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
-            if (selectedRows.Length != 1)
-            {
-                MessageBox.Show("只能选择一个日程！");
-                return;
-            }
-
-            long id = long.Parse(scheduleDataTable.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
-            bool confirm = GetScheduleInfo(true, scheduleDataTable.Rows[selectedRows[0]]);
-            if (!confirm)
-            {
-                return;
-            }
-            if (_subwindowState == SubwindowState.ReviseUserSchedule)
-            {
-                var selected = Schedule.Schedule.GetScheduleById(id);
-                selected!.DeleteSchedule();
-            }
-            AddSchedule(_originId ?? id);
-
-            this.AddScheduleButton.Show();
-            this.deleteScheduleButton.Show();
-            this.reviseScheduleButton.Show();
-            this.okButton.Hide();
-            this.cancelButton.Hide();
-            if (_subwindowState == SubwindowState.ReviseUserSchedule)
-            {
-                GenerateUserData(_scheduleType);
-            }
-            _subwindowState = SubwindowState.Viewing;
-            ClearInput();
-            foreach (DataGridViewRow row in scheduleDataTable.Rows)
-            {
-                ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
-            }
-            PauseTimeDelegate.Invoke(false);
-        }
-
         protected void ReviseButton_Click(object sender, EventArgs e)
         {
             PauseTimeDelegate.Invoke(true);
@@ -893,7 +850,7 @@ namespace StudentScheduleManagementSystem.UI
             long id = long.Parse(scheduleDataTable.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
             _originId = id;
             var selected = Schedule.Schedule.GetScheduleById(id);
-            ClearInput();
+            ClearInformation();
             this.nameBox.Text = selected!.Name;
             if (selected.ScheduleType == ScheduleType.Exam || selected.RepetitiveType == RepetitiveType.Single)
             {
@@ -957,6 +914,55 @@ namespace StudentScheduleManagementSystem.UI
             {
                 ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = true;
             }
+        }
+
+        protected void OkButton_Click(object sender, EventArgs e)
+        {
+            Debug.Assert((_subwindowState, _originId) is (SubwindowState.ReviseUserSchedule, > (long)1e9) or
+                                                         (SubwindowState.AddUserSchedule, null));
+
+            int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
+            if (selectedRows.Length != 1)
+            {
+                MessageBox.Show("只能选择一个日程！");
+                return;
+            }
+
+            long id = long.Parse(scheduleDataTable.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
+            bool confirm = GetScheduleInfo(true, scheduleDataTable.Rows[selectedRows[0]]);
+            if (!confirm)
+            {
+                return;
+            }
+            if (_subwindowState == SubwindowState.ReviseUserSchedule)
+            {
+                var selected = Schedule.Schedule.GetScheduleById(id);
+                selected!.DeleteSchedule();
+            }
+            AddSchedule(_originId ?? id);
+
+            this.AddScheduleButton.Show();
+            this.deleteScheduleButton.Show();
+            this.reviseScheduleButton.Show();
+            this.okButton.Hide();
+            this.cancelButton.Hide();
+            this.buildingRadioButton.Checked = false;
+            this.onlineLinkRadioButton.Checked = false;
+            this.buildingComboBox.SelectedIndex = -1;
+            this.buildingComboBox.Text = "";
+            this.onlineLinkBox.Text = "";
+            this.descriptionBox.Text = "";
+            if (_subwindowState == SubwindowState.ReviseUserSchedule)
+            {
+                GenerateUserData(_scheduleType);
+            }
+            _subwindowState = SubwindowState.Viewing;
+            ClearInformation();
+            foreach (DataGridViewRow row in scheduleDataTable.Rows)
+            {
+                ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
+            }
+            PauseTimeDelegate.Invoke(false);
         }
 
         #endregion
@@ -1064,6 +1070,12 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseScheduleButton.Show();
             this.okButton.Hide();
             this.cancelButton.Hide();
+            this.buildingRadioButton.Checked = false;
+            this.onlineLinkRadioButton.Checked = false;
+            this.buildingComboBox.SelectedIndex = -1;
+            this.buildingComboBox.Text = "";
+            this.onlineLinkBox.Text = "";
+            this.descriptionBox.Text = "";
             this._subwindowState = SubwindowState.Viewing;
 
             PauseTimeDelegate.Invoke(false);

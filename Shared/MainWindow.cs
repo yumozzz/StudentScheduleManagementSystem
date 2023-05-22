@@ -48,80 +48,64 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (usernamebox.Text == "" || passwordbox.Text == "")
             {
-                MessageBox.Show("Empty!");
+                MessageBox.Show("输入为空!");
+                return;
+            }
+            if (!MainProgram.Program.Login(usernamebox.Text, passwordbox.Text))
+            {
+                return;
+            }
+            MessageBox.Show("登录成功!");
+            this.Hide();
+            Thread windowThread, clockThread = new(Times.Timer.Start);
+            MainProgram.Program.Cts = new();
+            if (MainProgram.Program.Identity == Identity.User)
+            {
+                StudentSubwindow = new();
+                windowThread = new(() => StudentSubwindow.ShowDialog());
+                windowThread.SetApartmentState(ApartmentState.STA);
+                windowThread.Start();
+                clockThread.Start();
+                windowThread.Join();
+                MainProgram.Program.Cts.Cancel();
+                StudentSubwindow.Dispose();
             }
             else
             {
-                if (MainProgram.Program.Login(usernamebox.Text, passwordbox.Text))
-                {
-                    MessageBox.Show("Successfully login!");
-                    this.Hide();
-                    Thread windowThread, clockThread = new(Times.Timer.Start);
-                    MainProgram.Program.Cts = new();
-                    if (MainProgram.Program.Identity == Identity.User)
-                    {
-                        StudentSubwindow = new();
-                        windowThread = new(() => StudentSubwindow.ShowDialog());
-                        windowThread.SetApartmentState(ApartmentState.STA);
-                        windowThread.Start();
-                        clockThread.Start();
-                        windowThread.Join();
-                        MainProgram.Program.Cts.Cancel();
-                        StudentSubwindow.Dispose();
-                    }
-                    else
-                    {
-                        AdminSubwindow = new();
-                        windowThread = new(() => AdminSubwindow.ShowDialog());
-                        windowThread.SetApartmentState(ApartmentState.STA);
-                        windowThread.Start();
-                        clockThread.Start();
-                        windowThread.Join();
-                        MainProgram.Program.Cts.Cancel();
-                        AdminSubwindow.Dispose();
-                    }
-                    GC.Collect();
-                    this.Show();
-                }
-                else
-                {
-                    MessageBox.Show("Fail!");
-                }
+                AdminSubwindow = new();
+                windowThread = new(() => AdminSubwindow.ShowDialog());
+                windowThread.SetApartmentState(ApartmentState.STA);
+                windowThread.Start();
+                clockThread.Start();
+                windowThread.Join();
+                MainProgram.Program.Cts.Cancel();
+                AdminSubwindow.Dispose();
             }
+            GC.Collect();
+            this.Show();
         }
 
         private void RegisterButton_Click(object sender, EventArgs e)
         {
             if (usernamebox.Text == "" || passwordbox.Text == "")
             {
-                MessageBox.Show("Empty!");
+                MessageBox.Show("输入为空!");
+                return;
             }
-            else
+            if (!MainProgram.Program.Register(usernamebox.Text, passwordbox.Text))
             {
-                if (MainProgram.Program.Register(usernamebox.Text, passwordbox.Text))
-                {
-                    MessageBox.Show("Successfully register!");
-
-                    this.Hide();
-                    StudentSubwindow = new();
-                    Thread thread = new(() => StudentSubwindow.ShowDialog());
-                    thread.SetApartmentState(ApartmentState.STA);
-                    thread.Start();
-                    thread.Join();
-                    StudentSubwindow.Dispose();
-                    GC.Collect();
-                    this.Show();
-                }
-                else
-                {
-                    MessageBox.Show("Fail!");
-                }
+                return;
             }
-        }
-
-        private void UsernameBox_TextChanged(object sender, EventArgs e)
-        {
-            passwordbox.Text = "";
+            MessageBox.Show("注册成功!");
+            this.Hide();
+            StudentSubwindow = new();
+            Thread thread = new(() => StudentSubwindow.ShowDialog());
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            StudentSubwindow.Dispose();
+            GC.Collect();
+            this.Show();
         }
     }
 }
