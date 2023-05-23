@@ -38,12 +38,6 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        private void Logout_Click(object sender, EventArgs e)
-        {
-            MainProgram.Program.Logout();
-            this.Close();
-        }
-
         private void ScheduleTableButton_Click(object sender, EventArgs e)
         {
             logoutConfirm.Hide();

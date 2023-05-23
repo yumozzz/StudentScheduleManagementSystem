@@ -47,23 +47,26 @@ namespace StudentScheduleManagementSystem.UI
                 for (int j = 0; j < 7; j++)
                 {
                     scheduleRecords[j] = "";
-                    long id = Schedule.Schedule.GetRecordAt(i + j * 24).Id;
+                    long id = Schedule.Schedule.GetRecordAt(i + 1 + j * 24).Id;
                     if (id == 0)
                     {
                         continue;
                     }
                     Schedule.Schedule? scheduleRecord = Schedule.Schedule.GetScheduleById(id);
                     string scheduleName;
+                    string description;
                     if (scheduleRecord!.ScheduleType == ScheduleType.TemporaryAffair)
                     {
                         scheduleName = Array.ConvertAll(Schedule.TemporaryAffair.GetAllAt(scheduleRecord.BeginTime), affair => affair.Name).Aggregate((str, elem) => str = str + "、\n" + elem);
+                        description = "";
                     }
                     else
                     {
                         scheduleName = scheduleRecord.Name;
+                        description = scheduleRecord.Description!;
                     }
                     Debug.Assert(scheduleRecord != null);
-                    scheduleRecords[j] = scheduleName + $"\n（{TranslateScheduleType(scheduleRecord.ScheduleType)}）\n" + scheduleRecord.Description;
+                    scheduleRecords[j] = scheduleName + $"\n（{TranslateScheduleType(scheduleRecord.ScheduleType)}）\n" + description;
                     alarmEnalbled[j] = scheduleRecord.AlarmEnabled;
                 }
                 this.scheduleTable.Rows.Add($"{(i - offset + 1).ToString()}:00\n-\n{(i - offset + 2).ToString()}:00",

@@ -55,8 +55,7 @@
             this.scheduleTable.AllowUserToResizeRows = false;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.scheduleTable.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
-            this.scheduleTable.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.scheduleTable.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+            this.scheduleTable.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
             this.scheduleTable.BackgroundColor = System.Drawing.Color.White;
             this.scheduleTable.ColumnHeadersHeight = 34;
             this.scheduleTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -128,6 +127,7 @@
             this.fridayColumn.HeaderText = "Friday";
             this.fridayColumn.MinimumWidth = 8;
             this.fridayColumn.Name = "fridayColumn";
+            this.fridayColumn.Width = 150;
             // 
             // saturdayColumn
             // 
