@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.login = new System.Windows.Forms.Button();
-            this.usernamebox = new System.Windows.Forms.TextBox();
-            this.passwordbox = new System.Windows.Forms.TextBox();
+            this.usernameBox = new System.Windows.Forms.TextBox();
+            this.passwordBox = new System.Windows.Forms.TextBox();
             this.clear = new System.Windows.Forms.Button();
             this.close = new System.Windows.Forms.Button();
             this.header = new System.Windows.Forms.Panel();
@@ -54,24 +54,24 @@
             // 
             // usernamebox
             // 
-            this.usernamebox.BackColor = System.Drawing.Color.White;
-            this.usernamebox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.usernamebox.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.usernamebox.Location = new System.Drawing.Point(373, 225);
-            this.usernamebox.Name = "usernamebox";
-            this.usernamebox.Size = new System.Drawing.Size(215, 33);
-            this.usernamebox.TabIndex = 3;
-            this.usernamebox.Text = "2021210001";
+            this.usernameBox.BackColor = System.Drawing.Color.White;
+            this.usernameBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.usernameBox.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.usernameBox.Location = new System.Drawing.Point(373, 225);
+            this.usernameBox.Name = "usernameBox";
+            this.usernameBox.Size = new System.Drawing.Size(215, 33);
+            this.usernameBox.TabIndex = 3;
+            this.usernameBox.Text = "2021210001";
             // 
             // passwordbox
             // 
-            this.passwordbox.Font = new System.Drawing.Font("Arial Narrow", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.passwordbox.Location = new System.Drawing.Point(373, 287);
-            this.passwordbox.Name = "passwordbox";
-            this.passwordbox.PasswordChar = '*';
-            this.passwordbox.Size = new System.Drawing.Size(215, 35);
-            this.passwordbox.TabIndex = 4;
-            this.passwordbox.Text = "123456";
+            this.passwordBox.Font = new System.Drawing.Font("Arial Narrow", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.passwordBox.Location = new System.Drawing.Point(373, 287);
+            this.passwordBox.Name = "passwordBox";
+            this.passwordBox.PasswordChar = '*';
+            this.passwordBox.Size = new System.Drawing.Size(215, 35);
+            this.passwordBox.TabIndex = 4;
+            this.passwordBox.Text = "123456";
             // 
             // clear
             // 
@@ -95,7 +95,6 @@
             this.close.TabIndex = 11;
             this.close.Text = "Close";
             this.close.UseVisualStyleBackColor = true;
-            this.close.Click += new System.EventHandler(this.CloseButton_Click);
             // 
             // header
             // 
@@ -129,8 +128,8 @@
             this.Controls.Add(this.header);
             this.Controls.Add(this.close);
             this.Controls.Add(this.clear);
-            this.Controls.Add(this.passwordbox);
-            this.Controls.Add(this.usernamebox);
+            this.Controls.Add(this.passwordBox);
+            this.Controls.Add(this.usernameBox);
             this.Controls.Add(this.login);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "MainWindow";
@@ -144,8 +143,8 @@
         #endregion
 
         private Button login;
-        private TextBox usernamebox;
-        private TextBox passwordbox;
+        private TextBox usernameBox;
+        private TextBox passwordBox;
         private Button clear;
         private Button close;
         private Panel header;

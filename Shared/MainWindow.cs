@@ -1,15 +1,14 @@
-using System.Text;
-
 namespace StudentScheduleManagementSystem.UI
 {
     public partial class MainWindow : Form
     {
-        public static StudentWindow? StudentSubwindow { get; private set; }
-        public static AdminWindow? AdminSubwindow { get; private set; }
+        public static StudentWindow? StudentWindow { get; private set; }
+        public static AdminWindow? AdminWindow { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
+            this.close.Click += (sender, e) => Exit();
         }
 
         private int _x, _y;
@@ -34,24 +33,25 @@ namespace StudentScheduleManagementSystem.UI
 
         private void ClearButton_Click(object sender, EventArgs e)
         {
-            this.usernamebox.Text = "";
-            this.passwordbox.Text = "";
+            this.usernameBox.Text = "";
+            this.passwordBox.Text = "";
         }
 
-        private void CloseButton_Click(object sender, EventArgs e)
+        private void Exit()
         {
             this.Close();
             this.Dispose();
+            MainProgram.Program.Exit();
         }
 
         private void LoginButton_Click(object sender, EventArgs e)
         {
-            if (usernamebox.Text == "" || passwordbox.Text == "")
+            if (usernameBox.Text == "" || passwordBox.Text == "")
             {
                 MessageBox.Show("输入为空!");
                 return;
             }
-            if (!MainProgram.Program.Login(usernamebox.Text, passwordbox.Text))
+            if (!MainProgram.Program.Login(usernameBox.Text, passwordBox.Text))
             {
                 return;
             }
@@ -61,25 +61,35 @@ namespace StudentScheduleManagementSystem.UI
             MainProgram.Program.Cts = new();
             if (MainProgram.Program.Identity == Identity.User)
             {
-                StudentSubwindow = new();
-                windowThread = new(() => StudentSubwindow.ShowDialog());
+                StudentWindow = new();
+                windowThread = new(() => StudentWindow.ShowDialog());
                 windowThread.SetApartmentState(ApartmentState.STA);
                 windowThread.Start();
                 clockThread.Start();
                 windowThread.Join();
                 MainProgram.Program.Cts.Cancel();
-                StudentSubwindow.Dispose();
+                if (StudentWindow.ShouldExitProgram)
+                {
+                    Exit();
+                    return;
+                }
+                StudentWindow.Dispose();
             }
             else
             {
-                AdminSubwindow = new();
-                windowThread = new(() => AdminSubwindow.ShowDialog());
+                AdminWindow = new();
+                windowThread = new(() => AdminWindow.ShowDialog());
                 windowThread.SetApartmentState(ApartmentState.STA);
                 windowThread.Start();
                 clockThread.Start();
                 windowThread.Join();
                 MainProgram.Program.Cts.Cancel();
-                AdminSubwindow.Dispose();
+                if (AdminWindow.ShouldExitProgram)
+                {
+                    Exit();
+                    return;
+                }
+                AdminWindow.Dispose();
             }
             GC.Collect();
             this.Show();
@@ -87,23 +97,24 @@ namespace StudentScheduleManagementSystem.UI
 
         private void RegisterButton_Click(object sender, EventArgs e)
         {
-            if (usernamebox.Text == "" || passwordbox.Text == "")
+            if (usernameBox.Text == "" || passwordBox.Text == "")
             {
                 MessageBox.Show("输入为空!");
                 return;
             }
-            if (!MainProgram.Program.Register(usernamebox.Text, passwordbox.Text))
+            if (!MainProgram.Program.Register(usernameBox.Text, passwordBox.Text))
             {
                 return;
             }
             MessageBox.Show("注册成功!");
             this.Hide();
-            StudentSubwindow = new();
-            Thread thread = new(() => StudentSubwindow.ShowDialog());
+            StudentWindow = new();
+            Thread thread = new(() => StudentWindow.ShowDialog());
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             thread.Join();
-            StudentSubwindow.Dispose();
+            Thread.Sleep(100);
+            StudentWindow.Dispose();
             GC.Collect();
             this.Show();
         }

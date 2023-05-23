@@ -26,13 +26,15 @@ namespace StudentScheduleManagementSystem.Map
                 return;
             }
             GlobalMap = new(information.Item1);
+            List<Building> buildings = new();
             foreach (JObject obj in information.Item2)
             {
                 int id = obj["Id"]!.Value<int>();
                 string name = obj["Name"]!.Value<string>()!;
                 Building building = new(id, name, GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
-                Buildings.Add(building);
+                buildings.Add(building);
             }
+            Buildings = buildings;
         }
 
         #region structs, classes and enums
@@ -163,7 +165,7 @@ namespace StudentScheduleManagementSystem.Map
 
             public int Size { get; init; }
             private readonly List<Node>[] _adjArray;
-            private readonly Point[] _locations;
+            public Point[] Location { get; private set; }
 
             public AdjacencyTable(List<Vertex> vertices, List<(Vertex, Vertex)> edges)
             {
@@ -173,7 +175,7 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     _adjArray[i] = new();
                 }
-                _locations = vertices.ConvertAll(vertex => new Point(vertex.X, vertex.Y)).ToArray();
+                Location = vertices.ConvertAll(vertex => new Point(vertex.X, vertex.Y)).ToArray();
 
                 foreach (var (from, to) in edges)
                 {
@@ -200,7 +202,7 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     _adjArray[i] = new();
                 }
-                _locations = new Point[Size];
+                Location = new Point[Size];
 
                 try
                 {
@@ -214,7 +216,7 @@ namespace StudentScheduleManagementSystem.Map
                         {
                             continue;
                         }
-                        _locations[id] = new(x, y);
+                        Location[id] = new(x, y);
                         foreach (JObject next in nexts)
                         {
                             Node node = new()
@@ -349,16 +351,16 @@ namespace StudentScheduleManagementSystem.Map
                 }
             }
 
-            public Vertex GetVertex(int id) => new(id, _locations[id].X, _locations[id].Y);
+            public Vertex GetVertex(int id) => new(id, Location[id].X, Location[id].Y);
 
             public JArray SaveInstance()
             {
                 JArray root = new();
                 for (int i = 0; i < Size; i++)
                 {
-                    JObject obj = new() { { "Id", i }, { "X", _locations[i].X }, { "Y", _locations[i].Y } };
+                    JObject obj = new() { { "Id", i }, { "X", Location[i].X }, { "Y", Location[i].Y } };
                     JArray nexts = new();
-                    foreach(var node in _adjArray[i])
+                    foreach (var node in _adjArray[i])
                     {
                         JObject next = new()
                         {
@@ -374,7 +376,7 @@ namespace StudentScheduleManagementSystem.Map
                             controls.Add(control1);
                             controls.Add(control2);
                         }
-                        next.Add(controls);
+                        next.Add("Controls", controls);
                         nexts.Add(next);
                     }
                     obj.Add("Nexts", nexts);
@@ -503,9 +505,9 @@ namespace StudentScheduleManagementSystem.Map
             return ret;
         }
 
-        public static List<(Vertex, Vertex)> GetLineEndPoints()
+        public static List<(Point, Point)> GetEdges()
         {
-            HashSet<(Vertex, Vertex)> ret = new();
+            HashSet<(Point, Point)> ret = new();
             if (GlobalMap == null)
             {
                 return ret.ToList();
@@ -518,13 +520,16 @@ namespace StudentScheduleManagementSystem.Map
                     var biggerId = smallerId == pair.Item1 ? pair.Item2 : pair.Item1;
                     if (GlobalMap[smallerId, biggerId]!.Value.Type == EdgeType.Line)
                     {
-                        ret.Add((GlobalMap.GetVertex(smallerId), GlobalMap.GetVertex(biggerId)));
+                        ret.Add((GlobalMap.GetVertex(smallerId).ToPoint(), GlobalMap.GetVertex(biggerId).ToPoint()));
                     }
                 }
             }
             return ret.ToList();
         }
 
+        public static List<Point> GetVertices() => GlobalMap?.Location.ToList() ?? new();
+
+        #if false
         public static List<(Vertex, Point, Point, Vertex)> GetBezierCurveControlPoint()
         {
             HashSet<(Vertex, Vertex)> set = new();
@@ -553,6 +558,8 @@ namespace StudentScheduleManagementSystem.Map
             }
             return ret;
         }
+
+        #endif
 
         #endregion
 
@@ -655,9 +662,19 @@ namespace StudentScheduleManagementSystem.Map
             return distance[endId];
         }
 
-        public static JArray SaveAllBuildings() =>
-            new(Array.ConvertAll(Buildings.ToArray(),
-                                 building => (Id: building.Id, Name: building.Name, CenterId: building.Center.Id)));
+        public static JArray SaveAllBuildings()
+        {
+            JArray ret = new();
+            foreach (var building in Buildings)
+            {
+                JObject obj = new()
+                {
+                    { "Id", building.Id }, { "Name", building.Name }, { "CenterId", building.Center.Id }
+                };
+                ret.Add(obj);
+            }
+            return ret;
+        }
 
         #endregion
     }

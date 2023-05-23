@@ -22,7 +22,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             public string PrivateKey { get; set; }
         }
 
-        internal static CancellationTokenSource Cts { get; set; }
+        internal static CancellationTokenSource Cts { get; set; } = new();
         internal static Dictionary<string, (string, string)> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static string Password { get; private set; } = String.Empty;
@@ -40,7 +40,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
-                Times.Timer.TimeChange += (t) => Console.WriteLine(t.ToString());
+                Times.Timer.TimeChange += t => Console.WriteLine(t.ToString());
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
 
@@ -217,7 +217,7 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         public static void Exit()
         {
-            FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap.SaveInstance(),
+            FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap?.SaveInstance() ?? new(),
                                                      Map.Location.SaveAllBuildings(),
                                                      FileManagement.FileManager.MapFileDirectory);
             FileManagement.FileManager.SaveToUserAccountFile(_accounts.ToList()
@@ -230,8 +230,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                                       .ToList(),
                                                              FileManagement.FileManager.UserFileDirectory);
             Schedule.Schedule.SaveSharedData();
-            Log.Information.Log("已退出程序");
-            Log.LogBase.Close();
         }
     }
 }

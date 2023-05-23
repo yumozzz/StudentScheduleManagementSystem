@@ -119,11 +119,10 @@ namespace StudentScheduleManagementSystem.FileManagement
             JObject root = new() { { "Map", map }, { "Buildings", buildings } };
             #if RWINPLAINTEXT
             File.WriteAllBytes($"{fileFolder}/{fileName}.json",
-                               Encoding.UTF8.GetBytes(JArray.FromObject(root).ToString()));
+                               Encoding.UTF8.GetBytes(root.ToString()));
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
-                               Encoding.UTF8.GetBytes(Encryption.Encrypt.AESEncrypt(JArray.FromObject(root)
-                                                         .ToString())));
+                               Encoding.UTF8.GetBytes(Encryption.Encrypt.AESEncrypt(root.ToString())));
             #else
             #error macro_not_defined
             #endif

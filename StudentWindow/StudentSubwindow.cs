@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Diagnostics;
 using System.Reflection;
-using System.Xml.Linq;
 
 namespace StudentScheduleManagementSystem.UI
 {

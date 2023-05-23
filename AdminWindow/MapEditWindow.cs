@@ -15,12 +15,11 @@
         private bool _isInputting = false;
         private bool _needHelp = false;
         private bool _isAlive = true;
-        private bool _isRefreshing = false;
+        private static readonly object _lock = new();
 
         public MapEditWindow()
         {
-            _lineEndPointPairs = Map.Location.GetLineEndPoints()
-                                    .Select(pair => (pair.Item1.ToPoint(), pair.Item2.ToPoint()))
+            _lineEndPointPairs = Map.Location.GetEdges()
                                     .ToHashSet();
             _points = new();
             foreach (var building in Map.Location.Buildings)
@@ -38,16 +37,11 @@
                 label.Hide();
                 Controls.Add(label);
             }
-            foreach (var pair in _lineEndPointPairs)
+            foreach (var point in Map.Location.GetVertices())
             {
                 try
                 {
-                    _points.Add(pair.Item1, null);
-                }
-                catch (ArgumentException) { }
-                try
-                {
-                    _points.Add(pair.Item2, null);
+                    _points.Add(point, null);
                 }
                 catch (ArgumentException) { }
             }
@@ -57,12 +51,20 @@
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
             buttonOk.Click += (sender, e) =>
             {
-                Map.Location.GlobalMap = new(GetVertices(), GetEdges());
-                Map.Location.Buildings = GetBuildings();
-                this.Close();
+                lock (_lock)
+                {
+                    Map.Location.GlobalMap = new(GetVertices(), GetEdges());
+                    Map.Location.Buildings = GetBuildings();
+                    this.Close();
+                }
             };
-            buttonCancel.Click += (sender, e) => this.Close();
-            this.FormClosed += (sender, e) => _isAlive = false;
+            buttonCancel.Click += (sender, e) =>
+            {
+                lock (_lock)
+                {
+                    this.Close();
+                }
+            };
             Controls.Add(buttonOk);
             Controls.Add(buttonCancel);
             helpButton.Location = new(528, 0);
@@ -70,18 +72,21 @@
             pictureBox1.MouseDown += OnMouseDown;
             Thread thread = new(() =>
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(100);
                 while (_isAlive)
                 {
-                    if (pictureBox1.InvokeRequired)
+                    lock (_lock)
                     {
-                        this.pictureBox1.Invoke(UpdateGraphics);
+                        if (pictureBox1.InvokeRequired)
+                        {
+                            this.pictureBox1.Invoke(UpdateGraphics);
+                        }
+                        else
+                        {
+                            UpdateGraphics();
+                        }
                     }
-                    else
-                    {
-                        UpdateGraphics();
-                    }
-                    Thread.Sleep(10);
+                    Thread.Sleep(15);
                 }
             });
             Controls.Add(_textBox);
@@ -93,6 +98,12 @@
             thread.Start();
         }
 
+        public new void Close()
+        {
+            _isAlive = false;
+            base.Close();
+        }
+
         private double Distance(Point p1, Point p2)
         {
             return Math.Sqrt((p1.X - p2.X) * (p1.X - p2.X) + (p1.Y - p2.Y) * (p1.Y - p2.Y));
@@ -100,7 +111,6 @@
 
         private void UpdateGraphics()
         {
-            _isRefreshing = true;
             pictureBox1.Invalidate();
             Update();
             using Graphics graphics = pictureBox1.CreateGraphics();
@@ -157,7 +167,6 @@
                                      Y = _yLock == null ? circleCenter.Y : _yLock.Value - BigCircRad,
                                      Size = new(2 * BigCircRad, 2 * BigCircRad)
                                  });
-            _isRefreshing = false;
         }
 
         private void OnMouseDown(object sender, EventArgs e)
@@ -178,7 +187,6 @@
             if (_mouseOver == null)
             {
                 _points.Add(mousePositionToPicture, null);
-                Console.WriteLine("add point");
             }
             else
             {
@@ -189,11 +197,9 @@
                     {
                         tuple?.Item2.Hide();
                     }
-                    Console.WriteLine("select");
                 }
                 else if (_selected != _mouseOver)
                 {
-                    Console.WriteLine("add line");
                     bool success;
                     if ((_selected.Value.X,_selected.Value.Y).CompareTo((_mouseOver.Value.X, _mouseOver.Value.Y))<=0)
                     {
@@ -203,7 +209,6 @@
                     {
                         success = _lineEndPointPairs.Add((_mouseOver.Value, _selected.Value));
                     }
-                    Console.WriteLine($"add:{success}");
                     _selected = null;
                 }
             }

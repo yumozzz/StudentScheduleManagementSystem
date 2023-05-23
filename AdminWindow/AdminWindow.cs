@@ -2,10 +2,11 @@
 {
     public partial class AdminWindow : Form
     {
-        private static CourseSubwindow? _courseSubwindow;
-        private static ExamSubwindow? _examSubwindow;
-        private static GroupActivitySubwindow? _groupActivitySubwindow;
-        private static MapEditWindow? _mapEditWindow;
+        private CourseSubwindow? _courseSubwindow;
+        private ExamSubwindow? _examSubwindow;
+        private GroupActivitySubwindow? _groupActivitySubwindow;
+        private MapEditWindow? _mapEditWindow;
+        public bool ShouldExitProgram { get; private set; } = false;
 
         public AdminWindow()
         {
@@ -50,7 +51,7 @@
         private void CloseConfirm_Click(object sender, EventArgs e)
         {
             LogoutConfirm_Click(sender, e);
-            MainProgram.Program.Exit();
+            ShouldExitProgram = true;
         }
 
         private void CourseButton_Click(object sender, EventArgs e)

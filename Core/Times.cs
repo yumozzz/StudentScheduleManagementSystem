@@ -674,7 +674,7 @@ namespace StudentScheduleManagementSystem.Times
             _offset = 0;
             while (!MainProgram.Program.Cts.IsCancellationRequested)
             {
-                if (!Pause && UI.MainWindow.StudentSubwindow != null)
+                if (!Pause && UI.MainWindow.StudentWindow != null)
                 {
                     _timeChangeEventHandler.Invoke(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
