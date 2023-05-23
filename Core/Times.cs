@@ -644,12 +644,21 @@ namespace StudentScheduleManagementSystem.Times
 
     public static class Timer
     {
-        private const int BaseTimeoutMs = 3000;
+        private const int BaseTimeoutMs = 10000;
         private static int _acceleration = 1;
         private static Time _localTime = new();
         private static int _offset = 0;
         public static string LocalTime => _localTime.ToString();
-        public static bool Pause { get; set; } = false;
+        private static bool _pause = false;
+        public static bool Pause
+        {
+            get => _pause;
+            set
+            {
+                Log.Information.Log(value ? "计时器停止计时" : "计时器开始计时");
+                _pause = value;
+            }
+        }
         public static Time Now => _localTime;
         public delegate void TimeChangeEventHandler(Time t);
         private static TimeChangeEventHandler _timeChangeEventHandler;
@@ -671,10 +680,6 @@ namespace StudentScheduleManagementSystem.Times
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
-                }
-                else
-                {
-                    Log.Information.Log("计时器停止计时");
                 }
                 Thread.Sleep(BaseTimeoutMs / _acceleration);
             }

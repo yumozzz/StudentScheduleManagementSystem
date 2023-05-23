@@ -15,6 +15,7 @@
         private bool _isInputting = false;
         private bool _needHelp = false;
         private bool _isAlive = true;
+        private bool _isRefreshing = false;
 
         public MapEditWindow()
         {
@@ -99,6 +100,7 @@
 
         private void UpdateGraphics()
         {
+            _isRefreshing = true;
             pictureBox1.Invalidate();
             Update();
             using Graphics graphics = pictureBox1.CreateGraphics();
@@ -155,6 +157,7 @@
                                      Y = _yLock == null ? circleCenter.Y : _yLock.Value - BigCircRad,
                                      Size = new(2 * BigCircRad, 2 * BigCircRad)
                                  });
+            _isRefreshing = false;
         }
 
         private void OnMouseDown(object sender, EventArgs e)
