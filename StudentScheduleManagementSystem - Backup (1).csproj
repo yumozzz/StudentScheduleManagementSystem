@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="Copy &quot;$(SolutionDir)Core\makecert.exe&quot; &quot;$(SolutionDir)$(OutDir)&quot;&#xD;&#xA;Copy &quot;$(SolutionDir)Shared\map.json&quot; &quot;$(SolutionDir)$(OutDir)map\&quot;" />
+    <Exec Command="Copy &quot;$(SolutionDir)Core\makecert.exe&quot; &quot;$(SolutionDir)$(OutDir)&quot;&#xD;&#xA;Copy &quot;$(SolutionDir)Shared\map.json&quot; &quot;$(SolutionDir)$(OutDir)\map&quot;" />
   </Target>
 
 </Project>

@@ -222,6 +222,7 @@
                     _xLock = _xLock.HasValue
                                  ? null
                                  : (_selected?.X ?? pictureBox1.PointToClient(Control.MousePosition).X);
+                    _selected = null;
                     e.Handled = true;
                     if (_xLock.HasValue)
                     {
@@ -246,6 +247,7 @@
                     _yLock = _yLock.HasValue
                                  ? null
                                  : (_selected?.Y ?? pictureBox1.PointToClient(Control.MousePosition).Y);
+                    _selected = null;
                     e.Handled = true;
                     if (_yLock.HasValue)
                     {
