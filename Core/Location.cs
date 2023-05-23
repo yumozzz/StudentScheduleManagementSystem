@@ -502,7 +502,8 @@ namespace StudentScheduleManagementSystem.Map
                     ret.Add(building);
                 }
             }
-            return ret;
+            //return ret;
+            return new() { new(-1, "random building", new()) };
         }
 
         public static List<(Point, Point)> GetEdges()

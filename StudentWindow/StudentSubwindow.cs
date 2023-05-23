@@ -503,9 +503,10 @@ namespace StudentScheduleManagementSystem.UI
                     selected.EnableAlarm(Schedule.TemporaryAffair.Notify,
                                          new Times.Alarm.TemporaryAffairParam
                                          {
+                                             timestamp = selected.BeginTime,
                                              locations = Schedule.TemporaryAffair.GetAllAt(selected.BeginTime)
                                                                  .Select(affair => affair.OfflineLocation)
-                                                                 .ToArray()
+                                                                 .ToList()
                                          });
                     break;
                 case (ScheduleType.TemporaryAffair, false):
@@ -1580,8 +1581,8 @@ namespace StudentScheduleManagementSystem.UI
             {
                 scheduleDataTable.Columns[i].Width = widths[i];
             }
-            scheduleDataTable.Columns[5].Visible = false;
-            scheduleDataTable.Columns[6].Visible = true;
+            scheduleDataTable.Columns[5].Visible = true;
+            scheduleDataTable.Columns[6].Visible = false;
             scheduleDataTable.Columns[7].Visible = true;
             var converted = data.Select(elem => (Schedule.TemporaryAffair)elem);
             foreach (var affair in converted)

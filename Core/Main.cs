@@ -135,7 +135,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                      Schedule.Schedule.NotifyAllInComingDay,
                                      new Times.Alarm.GeneralAlarmParam()
                                      {
-                                         startTimestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
+                                         timestamp = new() { Week = 1, Day = Day.Tuesday, Hour = 0 }
                                      },
                                      typeof(Schedule.Schedule),
                                      typeof(Times.Alarm.GeneralAlarmParam),
@@ -252,7 +252,7 @@ namespace StudentScheduleManagementSystem.Schedule
             List<(int, string)> schedules = new();
             for (int i = 0; i < 24;)
             {
-                var record = _timeline[param.startTimestamp.ToInt() + i];
+                var record = _timeline[param.timestamp.ToInt() + i];
                 if (record.ScheduleType is ScheduleType.Course or ScheduleType.Exam or ScheduleType.Activity)
                 {
                     schedules.Add((i, _scheduleDictionary[record.Id].Name));
@@ -269,16 +269,16 @@ namespace StudentScheduleManagementSystem.Schedule
                     Console.WriteLine($"{beginTime}:00，{name}。");
                 }
             }
-            Times.Alarm.AddAlarm(param.startTimestamp + 22,
+            Times.Alarm.AddAlarm(param.timestamp + 22,
                                  RepetitiveType.Single,
                                  NotifyAllInComingDay,
-                                 new Times.Alarm.GeneralAlarmParam() { startTimestamp = param.startTimestamp + 24 },
+                                 new Times.Alarm.GeneralAlarmParam() { timestamp = param.timestamp + 24 },
                                  typeof(Schedule),
                                  typeof(Times.Alarm.GeneralAlarmParam),
                                  true,
                                  Constants.EmptyIntArray,
                                  Constants.EmptyDayArray);
-            Times.Alarm.RemoveAlarm(param.startTimestamp - 2,
+            Times.Alarm.RemoveAlarm(param.timestamp - 2,
                                     RepetitiveType.Single,
                                     Constants.EmptyIntArray,
                                     Constants.EmptyDayArray);
@@ -306,20 +306,25 @@ namespace StudentScheduleManagementSystem.Schedule
             //could not find corresponding schedule, maybe is deleted, so ignore
             catch (KeyNotFoundException)
             {
+                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的课程");
                 return;
             }
             Console.WriteLine($"下一个小时有以下课程：\"{course.Name}\"，时长为{course.Duration}小时。");
             if (course.IsOnline)
             {
-                Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的课程");
                 Console.WriteLine($"在线地址为{course.OnlineLink!}");
+                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OnlineLink!);
+                _alarmWindow.ShowDialog();
+                _alarmWindow.Dispose();
+                GC.Collect();
             }
             else
             {
                 Console.WriteLine($"地点为{course.OfflineLocation!.Value.Name}");
-                /*var input = Console.ReadLine();
-                Map.Location.Building from = Map.Location.GetBuildingsByName(input!)[0];
-                Map.Navigate.Show(Map.Location.GetClosestPath(from.Id, course.OfflineLocation.Value.Id));*/
+                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OfflineLocation!.Value);
+                _alarmWindow.ShowDialog();
+                _alarmWindow.Dispose();
+                GC.Collect();
             }
         }
     }
@@ -354,9 +359,10 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
             Console.WriteLine($"地点为{exam.OfflineLocation.Name}");
-            /*var input = Console.ReadLine();
-            Map.Location.Building from = Map.Location.GetBuildingsByName(input!)[0];
-            Map.Navigate.Show(Map.Location.GetClosestPath(from.Id, exam.OfflineLocation.Id));*/
+            UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(exam.Name, exam.OfflineLocation);
+            _alarmWindow.ShowDialog();
+            _alarmWindow.Dispose();
+            GC.Collect();
         }
     }
 
@@ -380,7 +386,6 @@ namespace StudentScheduleManagementSystem.Schedule
             Activity activity;
             try
             {
-                
                 activity = (Activity)_scheduleDictionary[param.scheduleId];
             }
             catch (KeyNotFoundException)
@@ -393,13 +398,18 @@ namespace StudentScheduleManagementSystem.Schedule
             if (activity.IsOnline)
             {
                 Console.WriteLine($"在线地址为{activity.OnlineLink!}");
+                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OnlineLink!);
+                _alarmWindow.ShowDialog();
+                _alarmWindow.Dispose();
+                GC.Collect();
             }
             else
             {
                 Console.WriteLine($"地点为{activity.OfflineLocation!.Value.Name}");
-                /*var input = Console.ReadLine();
-                Map.Location.Building from = Map.Location.GetBuildingsByName(input!)[0];
-                Map.Navigate.Show(Map.Location.GetClosestPath(from.Id,activity.OfflineLocation.Value.Id));*/
+                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OfflineLocation!.Value);
+                _alarmWindow.ShowDialog();
+                _alarmWindow.Dispose();
+                GC.Collect();
             }
         }
     }
@@ -416,13 +426,15 @@ namespace StudentScheduleManagementSystem.Schedule
             else if (obj is Times.Alarm.TemporaryAffairParam o)
             {
                 param = o;
+                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(Array.ConvertAll(TemporaryAffair.GetAllAt(param.timestamp), affair => affair.Name).Aggregate((str, elem) => str = str + '、' + elem), param.locations);
+                _alarmWindow.ShowDialog();
+                _alarmWindow.Dispose();
+                GC.Collect();
             }
             else
             {
                 throw new ArgumentException(null, nameof(obj));
             }
-            var points = Map.Location.GetClosestCircuit(new(param.locations));
-            Map.Navigate.Show(points);
         }
     }
 }
@@ -433,7 +445,7 @@ namespace StudentScheduleManagementSystem.Times
     {
         public struct GeneralAlarmParam
         {
-            public Time startTimestamp;
+            public Time timestamp;
         }
 
         public struct SpecifiedAlarmParam
@@ -443,7 +455,8 @@ namespace StudentScheduleManagementSystem.Times
 
         public struct TemporaryAffairParam
         {
-            public Map.Location.Building[] locations;
+            public Time timestamp;
+            public List<Map.Location.Building> locations;
         }
     }
 }

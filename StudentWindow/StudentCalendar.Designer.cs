@@ -30,6 +30,8 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.scheduleTable = new System.Windows.Forms.DataGridView();
             this.hourColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.mondayColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -51,6 +53,10 @@
             this.scheduleTable.AllowUserToAddRows = false;
             this.scheduleTable.AllowUserToResizeColumns = false;
             this.scheduleTable.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.scheduleTable.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.scheduleTable.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.scheduleTable.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
             this.scheduleTable.BackgroundColor = System.Drawing.Color.White;
             this.scheduleTable.ColumnHeadersHeight = 34;
             this.scheduleTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -63,19 +69,21 @@
             this.fridayColumn,
             this.saturdayColumn,
             this.sundayColumn});
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.scheduleTable.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.scheduleTable.DefaultCellStyle = dataGridViewCellStyle2;
             this.scheduleTable.Location = new System.Drawing.Point(12, 42);
             this.scheduleTable.Name = "scheduleTable";
             this.scheduleTable.RowHeadersVisible = false;
             this.scheduleTable.RowHeadersWidth = 62;
             this.scheduleTable.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.scheduleTable.RowsDefaultCellStyle = dataGridViewCellStyle3;
             this.scheduleTable.RowTemplate.Height = 32;
             this.scheduleTable.Size = new System.Drawing.Size(1026, 601);
             this.scheduleTable.TabIndex = 42;
@@ -85,56 +93,55 @@
             this.hourColumn.HeaderText = "时间";
             this.hourColumn.MinimumWidth = 8;
             this.hourColumn.Name = "hourColumn";
-            this.hourColumn.Width = 150;
+            this.hourColumn.Width = 82;
             // 
             // mondayColumn
             // 
             this.mondayColumn.HeaderText = "Monday";
             this.mondayColumn.MinimumWidth = 8;
             this.mondayColumn.Name = "mondayColumn";
-            this.mondayColumn.Width = 150;
+            this.mondayColumn.Width = 118;
             // 
             // tuesdayColumn
             // 
             this.tuesdayColumn.HeaderText = "Tuesday";
             this.tuesdayColumn.MinimumWidth = 8;
             this.tuesdayColumn.Name = "tuesdayColumn";
-            this.tuesdayColumn.Width = 150;
+            this.tuesdayColumn.Width = 117;
             // 
             // wednesdayColumn
             // 
             this.wednesdayColumn.HeaderText = "Wednesday";
             this.wednesdayColumn.MinimumWidth = 8;
             this.wednesdayColumn.Name = "wednesdayColumn";
-            this.wednesdayColumn.Width = 150;
+            this.wednesdayColumn.Width = 147;
             // 
             // thursdayColumn
             // 
             this.thursdayColumn.HeaderText = "Thursday";
             this.thursdayColumn.MinimumWidth = 8;
             this.thursdayColumn.Name = "thursdayColumn";
-            this.thursdayColumn.Width = 150;
+            this.thursdayColumn.Width = 125;
             // 
             // fridayColumn
             // 
             this.fridayColumn.HeaderText = "Friday";
             this.fridayColumn.MinimumWidth = 8;
             this.fridayColumn.Name = "fridayColumn";
-            this.fridayColumn.Width = 150;
             // 
             // saturdayColumn
             // 
             this.saturdayColumn.HeaderText = "Saturday";
             this.saturdayColumn.MinimumWidth = 8;
             this.saturdayColumn.Name = "saturdayColumn";
-            this.saturdayColumn.Width = 150;
+            this.saturdayColumn.Width = 123;
             // 
             // sundayColumn
             // 
             this.sundayColumn.HeaderText = "Sunday";
             this.sundayColumn.MinimumWidth = 8;
             this.sundayColumn.Name = "sundayColumn";
-            this.sundayColumn.Width = 150;
+            this.sundayColumn.Width = 110;
             // 
             // nextWeekScheduleTable
             // 

@@ -4,7 +4,7 @@ namespace StudentScheduleManagementSystem.UI
 {
     public partial class StudentScheduleTable : Form
     {
-        private int currentWeek = 0;
+        private int _currentWeek = 0;
         private int showWeek = 1;
 
         public StudentScheduleTable()
@@ -28,7 +28,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void GenerateScheduleTable(int week)
         {
-            showWeekLabel.Text = "第 " + week.ToString() + " 周";
+            showWeekLabel.Text = $"第 {week.ToString()} 周";
             scheduleTable.Rows.Clear();
             int[] widths = { 70, 120, 120, 120, 120, 120, 120, 120 };
             for (int i = 0; i < widths.Length; i++)
@@ -36,8 +36,10 @@ namespace StudentScheduleManagementSystem.UI
                 scheduleTable.Columns[i].Width = widths[i];
             }
 
+            //scheduleTable.RowsDefaultCellStyle.WrapMode = true;
+
             int offset = (week - 1) * 7 * 24;
-            
+
             for (int i = offset + 7; i < offset + 21; i++)
             {
                 string[] scheduleRecords = new string[7];
@@ -51,11 +53,20 @@ namespace StudentScheduleManagementSystem.UI
                         continue;
                     }
                     Schedule.Schedule? scheduleRecord = Schedule.Schedule.GetScheduleById(id);
+                    string scheduleName;
+                    if (scheduleRecord!.ScheduleType == ScheduleType.TemporaryAffair)
+                    {
+                        scheduleName = Array.ConvertAll(Schedule.TemporaryAffair.GetAllAt(scheduleRecord.BeginTime), affair => affair.Name).Aggregate((str, elem) => str = str + "、\n" + elem);
+                    }
+                    else
+                    {
+                        scheduleName = scheduleRecord.Name;
+                    }
                     Debug.Assert(scheduleRecord != null);
-                    scheduleRecords[j] = scheduleRecord.Name + "\n（" + TranslateScheduleType(scheduleRecord.ScheduleType) + "）" + "\n" + scheduleRecord.Description;
+                    scheduleRecords[j] = scheduleName + $"\n（{TranslateScheduleType(scheduleRecord.ScheduleType)}）\n" + scheduleRecord.Description;
                     alarmEnalbled[j] = scheduleRecord.AlarmEnabled;
                 }
-                this.scheduleTable.Rows.Add((i - offset + 1).ToString() + ":00\n-\n" + (i - offset + 2).ToString() + ":00",
+                this.scheduleTable.Rows.Add($"{(i - offset + 1).ToString()}:00\n-\n{(i - offset + 2).ToString()}:00",
                                             scheduleRecords[0],
                                             scheduleRecords[1],
                                             scheduleRecords[2],
