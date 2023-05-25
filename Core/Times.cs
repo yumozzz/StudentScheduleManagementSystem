@@ -2,8 +2,6 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
-using static StudentScheduleManagementSystem.Map.Location;
-using System.Xml.Linq;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -335,7 +333,7 @@ namespace StudentScheduleManagementSystem.Times
         private static readonly string[] _localTypes =
             Array.ConvertAll(typeof(Alarm).GetNestedTypes(), type => type.FullName ?? "null");
 
-        private static readonly Dictionary<long, Alarm> _alarmList = new();
+        private static readonly DataStructure.HashTable<long, Alarm> _alarmList = new();
 
         private static readonly JsonSerializerSettings _setting = new()
         {
@@ -689,7 +687,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             _localTime = time;
             _offset = time.ToInt();
-            Log.Warning.Log($"时间已被设定为{_localTime.ToString()}");
+            Log.Information.Log($"时间已被设定为{_localTime.ToString()}");
         }
 
         public static int SetSpeed()

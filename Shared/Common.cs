@@ -118,6 +118,7 @@ namespace StudentScheduleManagementSystem
             return 1;
         }
     }
+
     class BuildingJsonConverter : JsonConverter
     {
         public override bool CanRead => true;
@@ -164,6 +165,74 @@ namespace StudentScheduleManagementSystem
                 return;
             }
             writer.WriteValue(((Map.Location.Building)value).Name);
+        }
+    }
+
+    public static class MergeSort
+    {
+        private static void Merge<T>(T[] array, int L, int R, Func<T, T, int> comparer)
+        {
+            int p1 = L;
+            int i = 0;
+            int mid = L + ((R - L) >> 1);
+            int p2 = mid + 1;
+            T[] help = new T[R - L + 1];
+            while (p1 <= mid && p2 <= R)
+            {
+                if (comparer(array[p1], array[p2]) < 0)
+                {
+                    help[i++] = array[p1++];
+                }
+                else
+                {
+                    help[i++] = array[p2++];
+                }
+            }
+            while (p1 <= mid)
+            {
+                help[i++] = array[p1++];
+            }
+            while (p2 <= R)
+            {
+                help[i++] = array[p2++];
+            }
+            for (int j = 0; j < (R - L + 1); j++)
+            {
+                array[L + j] = help[j];
+            }
+        }
+
+        private static void MergeProcess<T>(T[] array, int L, int R, Func<T, T, int> comparer)
+        {
+            if (L == R)
+            {
+                return;
+            }
+            int mid = L + ((R - L) >> 1);
+            MergeProcess(array, L, mid, comparer);
+            MergeProcess(array, mid + 1, R, comparer);
+            Merge(array, L, R, comparer);
+        }
+
+        public static void Sort<T>(T[] array) where T : IComparable
+        {
+            Sort(array, (t1, t2) => t1.CompareTo(t2));
+        }
+
+        public static void Sort<T>(T[] array, Func<T, T, int> comparer)
+        {
+            if (array == null)
+            {
+                return;
+            }
+            if (array.Length <= 1)
+            {
+                return;
+            }
+            int mid = array.Length >> 1;
+            MergeProcess(array, 0, mid, comparer);
+            MergeProcess(array, mid + 1, array.Length - 1, comparer);
+            Merge(array, 0, array.Length - 1, comparer);
         }
     }
 

@@ -28,116 +28,115 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.login = new System.Windows.Forms.Button();
-            this.usernameBox = new System.Windows.Forms.TextBox();
-            this.passwordBox = new System.Windows.Forms.TextBox();
-            this.clear = new System.Windows.Forms.Button();
-            this.close = new System.Windows.Forms.Button();
-            this.header = new System.Windows.Forms.Panel();
-            this.register = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            login = new Button();
+            usernameBox = new TextBox();
+            passwordBox = new TextBox();
+            clear = new Button();
+            close = new Button();
+            header = new Panel();
+            register = new Button();
+            SuspendLayout();
             // 
             // login
             // 
-            this.login.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.login.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.login.FlatAppearance.BorderSize = 0;
-            this.login.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.login.Font = new System.Drawing.Font("Cambria", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.login.Location = new System.Drawing.Point(210, 347);
-            this.login.Name = "login";
-            this.login.Size = new System.Drawing.Size(378, 40);
-            this.login.TabIndex = 0;
-            this.login.Text = "Login";
-            this.login.UseVisualStyleBackColor = true;
-            this.login.Click += new System.EventHandler(this.LoginButton_Click);
+            login.BackgroundImageLayout = ImageLayout.None;
+            login.FlatAppearance.BorderColor = Color.White;
+            login.FlatAppearance.BorderSize = 0;
+            login.FlatStyle = FlatStyle.Popup;
+            login.Font = new Font("Cambria", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            login.Location = new Point(210, 347);
+            login.Name = "login";
+            login.Size = new Size(378, 40);
+            login.TabIndex = 0;
+            login.Text = "Login";
+            login.UseVisualStyleBackColor = true;
+            login.Click += LoginButton_Click;
             // 
-            // usernamebox
+            // usernameBox
             // 
-            this.usernameBox.BackColor = System.Drawing.Color.White;
-            this.usernameBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.usernameBox.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.usernameBox.Location = new System.Drawing.Point(373, 225);
-            this.usernameBox.Name = "usernameBox";
-            this.usernameBox.Size = new System.Drawing.Size(215, 33);
-            this.usernameBox.TabIndex = 3;
-            this.usernameBox.Text = "2021210001";
+            usernameBox.BackColor = Color.White;
+            usernameBox.BorderStyle = BorderStyle.None;
+            usernameBox.Font = new Font("Arial", 14F, FontStyle.Regular, GraphicsUnit.Point);
+            usernameBox.Location = new Point(373, 225);
+            usernameBox.Name = "usernameBox";
+            usernameBox.Size = new Size(215, 33);
+            usernameBox.TabIndex = 3;
+            usernameBox.Text = "2021210001";
             // 
-            // passwordbox
+            // passwordBox
             // 
-            this.passwordBox.Font = new System.Drawing.Font("Arial Narrow", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.passwordBox.Location = new System.Drawing.Point(373, 287);
-            this.passwordBox.Name = "passwordBox";
-            this.passwordBox.PasswordChar = '*';
-            this.passwordBox.Size = new System.Drawing.Size(215, 35);
-            this.passwordBox.TabIndex = 4;
-            this.passwordBox.Text = "123456";
+            passwordBox.Font = new Font("Arial Narrow", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            passwordBox.Location = new Point(373, 287);
+            passwordBox.Name = "passwordBox";
+            passwordBox.PasswordChar = '*';
+            passwordBox.Size = new Size(215, 35);
+            passwordBox.TabIndex = 4;
+            passwordBox.Text = "123456";
             // 
             // clear
             // 
-            this.clear.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.clear.Font = new System.Drawing.Font("Cambria", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.clear.Location = new System.Drawing.Point(413, 467);
-            this.clear.Name = "clear";
-            this.clear.Size = new System.Drawing.Size(175, 40);
-            this.clear.TabIndex = 8;
-            this.clear.Text = "Clear";
-            this.clear.UseVisualStyleBackColor = true;
-            this.clear.Click += new System.EventHandler(this.ClearButton_Click);
+            clear.FlatStyle = FlatStyle.Popup;
+            clear.Font = new Font("Cambria", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            clear.Location = new Point(413, 467);
+            clear.Name = "clear";
+            clear.Size = new Size(175, 40);
+            clear.TabIndex = 8;
+            clear.Text = "Clear";
+            clear.UseVisualStyleBackColor = true;
+            clear.Click += ClearButton_Click;
             // 
             // close
             // 
-            this.close.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.close.Font = new System.Drawing.Font("Cambria", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.close.Location = new System.Drawing.Point(210, 467);
-            this.close.Name = "close";
-            this.close.Size = new System.Drawing.Size(175, 40);
-            this.close.TabIndex = 11;
-            this.close.Text = "Close";
-            this.close.UseVisualStyleBackColor = true;
+            close.FlatStyle = FlatStyle.Popup;
+            close.Font = new Font("Cambria", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            close.Location = new Point(210, 467);
+            close.Name = "close";
+            close.Size = new Size(175, 40);
+            close.TabIndex = 11;
+            close.Text = "Close";
+            close.UseVisualStyleBackColor = true;
             // 
             // header
             // 
-            this.header.BackgroundImage = global::StudentScheduleManagementSystem.Properties.Resources.LoginBackground;
-            this.header.Location = new System.Drawing.Point(0, 0);
-            this.header.Name = "header";
-            this.header.Size = new System.Drawing.Size(800, 40);
-            this.header.TabIndex = 12;
-            this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
-            this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
+            header.BackgroundImage = Properties.Resources.LoginBackground;
+            header.Location = new Point(0, 0);
+            header.Name = "header";
+            header.Size = new Size(800, 40);
+            header.TabIndex = 12;
+            header.MouseDown += Header_MouseDown;
+            header.MouseMove += Header_MouseMove;
             // 
             // register
             // 
-            this.register.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.register.Font = new System.Drawing.Font("Cambria", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.register.Location = new System.Drawing.Point(210, 407);
-            this.register.Name = "register";
-            this.register.Size = new System.Drawing.Size(378, 40);
-            this.register.TabIndex = 13;
-            this.register.Text = "Register";
-            this.register.UseVisualStyleBackColor = true;
-            this.register.Click += new System.EventHandler(this.RegisterButton_Click);
+            register.FlatStyle = FlatStyle.Popup;
+            register.Font = new Font("Cambria", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            register.Location = new Point(210, 407);
+            register.Name = "register";
+            register.Size = new Size(378, 40);
+            register.TabIndex = 13;
+            register.Text = "Register";
+            register.UseVisualStyleBackColor = true;
+            register.Click += RegisterButton_Click;
             // 
             // MainWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = global::StudentScheduleManagementSystem.Properties.Resources.LoginBackground1;
-            this.ClientSize = new System.Drawing.Size(800, 600);
-            this.Controls.Add(this.register);
-            this.Controls.Add(this.header);
-            this.Controls.Add(this.close);
-            this.Controls.Add(this.clear);
-            this.Controls.Add(this.passwordBox);
-            this.Controls.Add(this.usernameBox);
-            this.Controls.Add(this.login);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "MainWindow";
-            this.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.Text = "Login";
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(144F, 144F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackgroundImage = Properties.Resources.LoginBackground1;
+            ClientSize = new Size(800, 600);
+            Controls.Add(register);
+            Controls.Add(header);
+            Controls.Add(close);
+            Controls.Add(clear);
+            Controls.Add(passwordBox);
+            Controls.Add(usernameBox);
+            Controls.Add(login);
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "MainWindow";
+            RightToLeft = RightToLeft.No;
+            Text = "Login";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

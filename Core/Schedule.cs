@@ -58,7 +58,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static readonly Times.Timeline<Record> _timeline = new();
 
-        protected static readonly Dictionary<long, Schedule> _scheduleDictionary = new();
+        protected static readonly DataStructure.HashTable<long, Schedule> _scheduleDictionary = new();
 
         protected static long _courseIdMax = 1000000000;
 
@@ -66,7 +66,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static long _groutActivityIdMax = 3000000000;
 
-        protected static readonly Dictionary<long, SharedData> _sharedDictionary = new()
+        protected static readonly DataStructure.HashTable<long, SharedData> _sharedDictionary = new()
         {
             {
                 1000000000,

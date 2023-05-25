@@ -37,7 +37,7 @@
                 label.Hide();
                 Controls.Add(label);
             }
-            foreach (var point in Map.Location.GetVertices())
+            foreach (var point in Map.Location.GetPoints())
             {
                 try
                 {
@@ -201,7 +201,7 @@
                 else if (_selected != _mouseOver)
                 {
                     bool success;
-                    if ((_selected.Value.X,_selected.Value.Y).CompareTo((_mouseOver.Value.X, _mouseOver.Value.Y))<=0)
+                    if ((_selected.Value.X, _selected.Value.Y).CompareTo((_mouseOver.Value.X, _mouseOver.Value.Y)) <= 0)
                     {
                         success = _lineEndPointPairs.Add((_selected.Value, _mouseOver.Value));
                     }
@@ -337,7 +337,7 @@
                     _textBox.Hide();
                     goto alt; //identical to a missing break in C/C++
                 case Keys.Menu:
-                    alt:
+                alt:
                     if (_isInputting)
                     {
                         break;

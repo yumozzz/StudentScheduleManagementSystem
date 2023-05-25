@@ -598,7 +598,7 @@ namespace StudentScheduleManagementSystem.UI
                                            schedule.BeginTime.Hour.ToString() + ":00",
                                            schedule.Duration.ToString() + "小时",
                                            schedule.Description ?? "",
-                                           null,
+                                           location,
                                            schedule.ScheduleId);
             }
         }

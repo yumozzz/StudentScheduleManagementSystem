@@ -31,83 +31,87 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MapEditWindow));
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.warnPictureBox = new System.Windows.Forms.PictureBox();
-            this.helpPictureBox = new System.Windows.Forms.PictureBox();
-            this.helpButton = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.warnPictureBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.helpPictureBox)).BeginInit();
-            this.SuspendLayout();
+            pictureBox1 = new PictureBox();
+            imageList = new ImageList(components);
+            warnPictureBox = new PictureBox();
+            helpPictureBox = new PictureBox();
+            helpButton = new Button();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)warnPictureBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)helpPictureBox).BeginInit();
+            SuspendLayout();
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = global::StudentScheduleManagementSystem.Properties.Resources.SchoolMap;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 45);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(779, 1097);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            pictureBox1.Image = Properties.Resources.SchoolMap;
+            pictureBox1.Location = new Point(0, 30);
+            pictureBox1.Margin = new Padding(2, 2, 2, 2);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(519, 731);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 0;
+            pictureBox1.TabStop = false;
             // 
             // imageList
             // 
-            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
-            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList.Images.SetKeyName(0, "xLockPicture.png");
-            this.imageList.Images.SetKeyName(1, "yLockPicture.png");
+            imageList.ColorDepth = ColorDepth.Depth8Bit;
+            imageList.ImageStream = (ImageListStreamer)resources.GetObject("imageList.ImageStream");
+            imageList.TransparentColor = Color.Transparent;
+            imageList.Images.SetKeyName(0, "xLockPicture.png");
+            imageList.Images.SetKeyName(1, "yLockPicture.png");
             // 
-            // warmPictureBox
+            // warnPictureBox
             // 
-            this.warnPictureBox.Location = new System.Drawing.Point(239, 5);
-            this.warnPictureBox.Name = "warnPictureBox";
-            this.warnPictureBox.Size = new System.Drawing.Size(300, 50);
-            this.warnPictureBox.TabIndex = 1;
-            this.warnPictureBox.TabStop = false;
+            warnPictureBox.Location = new Point(159, 3);
+            warnPictureBox.Margin = new Padding(2, 2, 2, 2);
+            warnPictureBox.Name = "warnPictureBox";
+            warnPictureBox.Size = new Size(200, 33);
+            warnPictureBox.TabIndex = 1;
+            warnPictureBox.TabStop = false;
             // 
             // helpPictureBox
             // 
-            this.helpPictureBox.BackColor = System.Drawing.Color.Transparent;
-            this.helpPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("helpPictureBox.Image")));
-            this.helpPictureBox.InitialImage = null;
-            this.helpPictureBox.Location = new System.Drawing.Point(189, 275);
-            this.helpPictureBox.Name = "helpPictureBox";
-            this.helpPictureBox.Size = new System.Drawing.Size(400, 300);
-            this.helpPictureBox.TabIndex = 3;
-            this.helpPictureBox.TabStop = false;
+            helpPictureBox.BackColor = Color.Transparent;
+            helpPictureBox.Image = (Image)resources.GetObject("helpPictureBox.Image");
+            helpPictureBox.InitialImage = null;
+            helpPictureBox.Location = new Point(126, 183);
+            helpPictureBox.Margin = new Padding(2, 2, 2, 2);
+            helpPictureBox.Name = "helpPictureBox";
+            helpPictureBox.Size = new Size(267, 200);
+            helpPictureBox.TabIndex = 3;
+            helpPictureBox.TabStop = false;
             // 
             // helpButton
             // 
-            this.helpButton.Location = new System.Drawing.Point(545, 5);
-            this.helpButton.Name = "helpButton";
-            this.helpButton.Size = new System.Drawing.Size(100, 45);
-            this.helpButton.TabIndex = 4;
-            this.helpButton.Text = "Help";
-            this.helpButton.UseVisualStyleBackColor = true;
-            this.helpButton.Click += new System.EventHandler(this.button1_Click);
+            helpButton.Location = new Point(363, 3);
+            helpButton.Margin = new Padding(2, 2, 2, 2);
+            helpButton.Name = "helpButton";
+            helpButton.Size = new Size(67, 30);
+            helpButton.TabIndex = 4;
+            helpButton.Text = "Help";
+            helpButton.UseVisualStyleBackColor = true;
+            helpButton.Click += button1_Click;
             // 
             // MapEditWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(778, 1144);
-            this.Controls.Add(this.helpButton);
-            this.Controls.Add(this.helpPictureBox);
-            this.Controls.Add(this.warnPictureBox);
-            this.Controls.Add(this.pictureBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.KeyPreview = true;
-            this.Name = "MapEditWindow";
-            this.Text = "MapEdit";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.warnPictureBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.helpPictureBox)).EndInit();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(519, 699);
+            Controls.Add(helpButton);
+            Controls.Add(helpPictureBox);
+            Controls.Add(warnPictureBox);
+            Controls.Add(pictureBox1);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            KeyPreview = true;
+            Margin = new Padding(2, 2, 2, 2);
+            Name = "MapEditWindow";
+            Text = "MapEdit";
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)warnPictureBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)helpPictureBox).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion

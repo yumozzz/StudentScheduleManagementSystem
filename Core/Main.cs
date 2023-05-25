@@ -1,7 +1,6 @@
 ﻿//#define COURSEEXAMTEST
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Authentication;
@@ -23,7 +22,7 @@ namespace StudentScheduleManagementSystem.MainProgram
         }
 
         internal static CancellationTokenSource Cts { get; set; } = new();
-        internal static Dictionary<string, (string, string)> _accounts = new();
+        internal static DataStructure.HashTable<string, (string, string)> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static string Password { get; private set; } = String.Empty;
         public static Identity @Identity { get; private set; }

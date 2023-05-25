@@ -9,7 +9,12 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<Building> Buildings
         {
-            get => _buildings.GetRange(1, _buildings.Count - 1);
+            get
+            {
+                var buildings = _buildings.GetRange(1, _buildings.Count - 1).ToArray();
+                MergeSort.Sort(buildings, (building1, building2) => building1.Name.CompareTo(building2.Name));
+                return buildings.ToList();
+            }
             set => _buildings = new List<Building> { Constants.DefaultBuilding }.Concat(value).ToList();
         }
         public static AdjacencyTable? GlobalMap { get; set; }
@@ -99,7 +104,7 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
-        public struct Building //建筑
+        public struct Building//建筑
         {
             public int Id { get; set; }
             public string Name { get; set; }
@@ -212,10 +217,6 @@ namespace StudentScheduleManagementSystem.Map
                         int x = vertex["X"]!.Value<int>();
                         int y = vertex["Y"]!.Value<int>();
                         JArray nexts = (JArray)vertex["Nexts"]!;
-                        if (nexts.Count == 0)
-                        {
-                            continue;
-                        }
                         Location[id] = new(x, y);
                         foreach (JObject next in nexts)
                         {
@@ -254,10 +255,6 @@ namespace StudentScheduleManagementSystem.Map
                     }
                     foreach (var nodes in _adjArray)
                     {
-                        if (nodes.Count == 0)
-                        {
-                            throw new JsonFormatException("Id is not continuous");
-                        }
                         nodes.TrimExcess();
                     }
                 }
@@ -502,8 +499,7 @@ namespace StudentScheduleManagementSystem.Map
                     ret.Add(building);
                 }
             }
-            //return ret;
-            return new() { new(-1, "random building", new()) };
+            return ret;
         }
 
         public static List<(Point, Point)> GetEdges()
@@ -528,7 +524,7 @@ namespace StudentScheduleManagementSystem.Map
             return ret.ToList();
         }
 
-        public static List<Point> GetVertices() => GlobalMap?.Location.ToList() ?? new();
+        public static List<Point> GetPoints() => GlobalMap?.Location.ToList() ?? new();
 
         #if false
         public static List<(Vertex, Point, Point, Vertex)> GetBezierCurveControlPoint()

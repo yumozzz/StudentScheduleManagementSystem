@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace StudentScheduleManagementSystem.DataStructure
 {
-    internal class Vector<T> : IEnumerable<T>, ICollection<T>
+    public class Vector<T> : IEnumerable<T>, ICollection<T>
     {
         public struct Enumerator : IEnumerator<T>, IEnumerator
         {
@@ -19,9 +23,7 @@ namespace StudentScheduleManagementSystem.DataStructure
                 _current = default;
             }
 
-            public void Dispose()
-            {
-            }
+            public void Dispose() { }
 
             public bool MoveNext()
             {
@@ -108,10 +110,7 @@ namespace StudentScheduleManagementSystem.DataStructure
 
         public IEnumerator<T> GetEnumerator() => new Enumerator(this);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public void Add(T item)
         {
@@ -169,57 +168,193 @@ namespace StudentScheduleManagementSystem.DataStructure
             return found;
         }
     }
-    public class MyDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+
+    public class HashTable<TKey, TValue> : IDictionary<TKey, TValue>
     {
-        private const int InitialCapacity = 10;
-        private const float LoadFactor = 0.75f;
-
-        private Entry<TKey, TValue>[] table;
-        private int count;
-
-        public MyDictionary()
+        private struct Entry
         {
-            table = new Entry<TKey, TValue>[InitialCapacity];
-            count = 0;
+            public int hashCode; // Lower 31 bits of hash code, -1 if unused
+            public int next; // Index of next entry, -1 if last
+            public TKey key; // Key of entry
+            public TValue value; // Value of entry
         }
 
-        public TValue this[TKey key]
+        public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
         {
-            get
+            private readonly HashTable<TKey, TValue> _hashTable;
+            private readonly int _version;
+            private int _index;
+            private KeyValuePair<TKey, TValue> _current;
+
+            internal Enumerator(HashTable<TKey, TValue> hashTable)
             {
-                TValue value;
-                if (TryGetValue(key, out value))
-                {
-                    return value;
-                }
-                throw new KeyNotFoundException();
+                this._hashTable = hashTable;
+                _version = hashTable._version;
+                _index = 0;
+                _current = new();
             }
-            set
+
+            public bool MoveNext()
             {
-                int index = FindEntryIndex(key);
-                if (index >= 0)
+                if (_version != _hashTable._version)
                 {
-                    table[index].Value = value;
+                    throw new InvalidOperationException();
                 }
-                else
+
+                while (_index < _hashTable._count)
                 {
-                    throw new KeyNotFoundException();
+                    if (_hashTable._entries[_index].hashCode >= 0)
+                    {
+                        _current = new KeyValuePair<TKey, TValue>(_hashTable._entries[_index].key,
+                                                                  _hashTable._entries[_index].value);
+                        _index++;
+                        return true;
+                    }
+                    _index++;
+                }
+
+                _index = _hashTable._count + 1;
+                _current = new KeyValuePair<TKey, TValue>();
+                return false;
+            }
+
+            public KeyValuePair<TKey, TValue> Current => _current;
+
+            public void Dispose() { }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    if (_index == 0 || (_index == _hashTable._count + 1))
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    return new KeyValuePair<TKey, TValue>(_current.Key, _current.Value);
+                }
+            }
+
+            DictionaryEntry IDictionaryEnumerator.Entry
+            {
+                get
+                {
+                    if (_index == 0 || (_index == _hashTable._count + 1))
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    return new DictionaryEntry(_current.Key, _current.Value);
+                }
+            }
+
+            void IEnumerator.Reset()
+            {
+                if (_version != _hashTable._version)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                _index = 0;
+                _current = new KeyValuePair<TKey, TValue>();
+            }
+
+            object IDictionaryEnumerator.Key
+            {
+                get
+                {
+                    if (_index == 0 || (_index == _hashTable._count + 1))
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    return _current.Key;
+                }
+            }
+
+            object IDictionaryEnumerator.Value
+            {
+                get
+                {
+                    if (_index == 0 || (_index == _hashTable._count + 1))
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    return _current.Value;
                 }
             }
         }
 
-        public int Count => count;
+        private readonly int[] _primes = new[]
+        {
+            11,
+            23,
+            47,
+            97,
+            197,
+            397,
+            797,
+            1597,
+            3191,
+            6389,
+            12791,
+            25589,
+            51197,
+            102407,
+            204821,
+            409609,
+            819241,
+            1638487,
+            3276967,
+            6553949,
+            13107893,
+            26215771,
+            52431647,
+            104863301,
+            209726639
+        };
+
+        private int[] _buckets;
+        private Entry[] _entries;
+        private int _count;
+        private int _version;
+        private int _freeList;
+        private int _freeCount;
+        private readonly EqualityComparer<TKey> _comparer = EqualityComparer<TKey>.Default;
+
+        public bool IsReadOnly => false;
+        public int Count => _count - _freeCount;
+
+        public HashTable()
+        {
+            int size = 11;
+            _buckets = new int[size];
+            Array.Fill(_buckets, -1);
+            _entries = new Entry[size];
+            _freeList = -1;
+        }
 
         public ICollection<TKey> Keys
         {
             get
             {
-                List<TKey> keys = new List<TKey>(count);
-                foreach (Entry<TKey, TValue> entry in table)
+                List<TKey> keys = new(Count);
+                foreach (var bucket in _buckets)
                 {
-                    if (entry != null)
+                    if (bucket == -1)
                     {
-                        keys.Add(entry.Key);
+                        continue;
+                    }
+                    Entry entry = _entries[bucket];
+                    while (true)
+                    {
+                        keys.Add(entry.key);
+                        if (entry.next == -1)
+                        {
+                            break;
+                        }
+                        entry = _entries[entry.next];
                     }
                 }
                 return keys;
@@ -230,329 +365,239 @@ namespace StudentScheduleManagementSystem.DataStructure
         {
             get
             {
-                List<TValue> values = new List<TValue>(count);
-                foreach (Entry<TKey, TValue> entry in table)
+                List<TValue> values = new(Count);
+                foreach (var bucket in _buckets)
                 {
-                    if (entry != null)
+                    Entry entry = _entries[bucket];
+                    if (bucket == -1)
                     {
-                        values.Add(entry.Value);
+                        continue;
+                    }
+                    while (true)
+                    {
+                        values.Add(entry.value);
+                        if (entry.next == -1)
+                        {
+                            break;
+                        }
+                        entry = _entries[entry.next];
                     }
                 }
                 return values;
             }
         }
 
-        public void Add(TKey key, TValue value)
+        public TValue this[TKey key]
         {
-            if (count >= table.Length * LoadFactor)
+            get
             {
-                ResizeTable();
+                int i = FindEntry(key);
+                return i >= 0 ? _entries[i].value : default;
             }
-
-            int index = GetBucketIndex(key);
-            Entry<TKey, TValue> entry = table[index];
-            while (entry != null)
-            {
-                if (EqualityComparer<TKey>.Default.Equals(entry.Key, key))
-                {
-                    throw new ArgumentException("An element with the same key already exists in the dictionary.");
-                }
-                entry = entry.Next;
-            }
-
-            entry = new Entry<TKey, TValue>(key, value);
-            entry.Next = table[index];
-            table[index] = entry;
-            count++;
+            set => Insert(key, value, false);
         }
 
-        public bool ContainsKey(TKey key)
+        public void Add(TKey key, TValue value)
         {
-            int index = GetBucketIndex(key);
-            Entry<TKey, TValue> entry = table[index];
-            while (entry != null)
+            Insert(key, value, true);
+        }
+
+        public void Add(KeyValuePair<TKey, TValue> keyValuePair)
+        {
+            Add(keyValuePair.Key, keyValuePair.Value);
+        }
+
+        public bool Contains(KeyValuePair<TKey, TValue> keyValuePair)
+        {
+            int i = FindEntry(keyValuePair.Key);
+            if (i >= 0 && EqualityComparer<TValue>.Default.Equals(_entries[i].value, keyValuePair.Value))
             {
-                if (EqualityComparer<TKey>.Default.Equals(entry.Key, key))
-                {
-                    return true;
-                }
-                entry = entry.Next;
+                return true;
             }
-            return false;
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool Remove(KeyValuePair<TKey, TValue> keyValuePair)
+        {
+            int i = FindEntry(keyValuePair.Key);
+            if (i >= 0 && EqualityComparer<TValue>.Default.Equals(_entries[i].value, keyValuePair.Value))
+            {
+                Remove(keyValuePair.Key);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Clear()
+        {
+            if (_count == 0)
+            {
+                return;
+            }
+            for (int i = 0; i < _buckets.Length; i++)
+            {
+                _buckets[i] = -1;
+            }
+            Array.Clear(_entries, 0, _count);
+            _freeList = -1;
+            _count = 0;
+            _freeCount = 0;
+            _version++;
+        }
+
+        public bool ContainsKey(TKey key) => FindEntry(key) >= 0;
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => new Enumerator(this);
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        private int FindEntry(TKey key)
+        {
+            int hashCode = _comparer.GetHashCode(key) & 0x7FFFFFFF;
+            for (int i = _buckets[hashCode % _buckets.Length]; i >= 0; i = _entries[i].next)
+            {
+                if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private void Insert(TKey key, TValue value, bool add)
+        {
+            int hashCode = _comparer.GetHashCode(key) & 0x7FFFFFFF;
+            int targetBucket = hashCode % _buckets.Length;
+
+            for (int i = _buckets[targetBucket]; i >= 0; i = _entries[i].next)
+            {
+                if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key))
+                {
+                    if (add)
+                    {
+                        throw new InvalidOperationException("item already existed");
+                    }
+                    _entries[i].value = value;
+                    _version++;
+                    return;
+                }
+            }
+
+            int index;
+            if (_freeCount > 0)
+            {
+                index = _freeList;
+                _freeList = _entries[index].next;
+                _freeCount--;
+            }
+            else
+            {
+                if (_count == _entries.Length)
+                {
+                    Resize();
+                    targetBucket = hashCode % _buckets.Length;
+                }
+                index = _count;
+                _count++;
+            }
+
+            _entries[index].hashCode = hashCode;
+            _entries[index].next = _buckets[targetBucket];
+            _entries[index].key = key;
+            _entries[index].value = value;
+            _buckets[targetBucket] = index;
+            _version++;
+        }
+
+        private void Resize()
+        {
+            int size = _primes.FirstOrDefault(size => size > _buckets.Length);
+            if (size == _buckets.Length)
+            {
+                throw new Exception("Hashtable too big");
+            }
+            Resize(size);
+        }
+
+        private void Resize(int newSize)
+        {
+            int[] newBuckets = new int[newSize];
+            Array.Fill(newBuckets, -1);
+            Entry[] newEntries = new Entry[newSize];
+            Array.Copy(_entries, 0, newEntries, 0, _count);
+            for (int i = 0; i < _count; i++)
+            {
+                if (newEntries[i].hashCode >= 0)
+                {
+                    int bucket = newEntries[i].hashCode % newSize;
+                    newEntries[i].next = newBuckets[bucket];
+                    newBuckets[bucket] = i;
+                }
+            }
+            _buckets = newBuckets;
+            _entries = newEntries;
         }
 
         public bool Remove(TKey key)
         {
-            int index = GetBucketIndex(key);
-            Entry<TKey, TValue> entry = table[index];
-            Entry<TKey, TValue> previous = null;
-            while (entry != null)
+            int hashCode = _comparer.GetHashCode(key) & 0x7FFFFFFF;
+            int bucket = hashCode % _buckets.Length;
+            int last = -1;
+            for (int i = _buckets[bucket]; i >= 0; last = i, i = _entries[i].next)
             {
-                if (EqualityComparer<TKey>.Default.Equals(entry.Key, key))
+                if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key))
                 {
-                    if (previous == null)
+                    if (last < 0)
                     {
-                        table[index] = entry.Next;
+                        _buckets[bucket] = _entries[i].next;
                     }
                     else
                     {
-                        previous.Next = entry.Next;
+                        _entries[last].next = _entries[i].next;
                     }
-                    count--;
+                    _entries[i].hashCode = -1;
+                    _entries[i].next = _freeList;
+                    _entries[i].key = default;
+                    _entries[i].value = default;
+                    _freeList = i;
+                    _freeCount++;
+                    _version++;
                     return true;
                 }
-                previous = entry;
-                entry = entry.Next;
             }
             return false;
         }
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            int index = GetBucketIndex(key);
-            Entry<TKey, TValue> entry = table[index];
-            while (entry != null)
+            int i = FindEntry(key);
+            if (i >= 0)
             {
-                if (EqualityComparer<TKey>.Default.Equals(entry.Key, key))
-                {
-                    value = entry.Value;
-                    return true;
-                }
-                entry = entry.Next;
-            }
-            value = default(TValue);
-            return false;
-        }
-
-        private int GetBucketIndex(TKey key)
-        {
-            int hashCode = key.GetHashCode() & 0x7FFFFFFF; // Ensure positive hash code
-            return hashCode % table.Length;
-        }
-        private int FindEntryIndex(TKey key)
-        {
-            int index = GetBucketIndex(key);
-            Entry<TKey, TValue> entry = table[index];
-            int i = 0;
-            while (entry != null)
-            {
-                if (EqualityComparer<TKey>.Default.Equals(entry.Key, key))
-                {
-                    return index + i;
-                }
-                entry = entry.Next;
-                i++;
-            }
-            return -1;
-        }
-
-        private void ResizeTable()
-        {
-            int newCapacity = table.Length * 2;
-            Entry<TKey, TValue>[] newTable = new Entry<TKey, TValue>[newCapacity];
-
-            foreach (Entry<TKey, TValue> entry in table)
-            {
-                Entry<TKey, TValue> current = entry;
-                while (current != null)
-                {
-                    int newIndex = GetBucketIndex(current.Key);
-                    Entry<TKey, TValue> next = current.Next;
-                    current.Next = newTable[newIndex];
-                    newTable[newIndex] = current;
-                    current = next;
-                }
-            }
-
-            table = newTable;
-        }
-
-        private class Entry<TKey, TValue>
-        {
-            public TKey Key { get; }
-            public TValue Value { get; set; }
-            public Entry<TKey, TValue> Next { get; set; }
-
-            public Entry(TKey key, TValue value)
-            {
-                Key = key;
-                Value = value;
-                Next = null;
-            }
-        }
-
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            foreach (Entry<TKey, TValue> entry in table)
-            {
-                Entry<TKey, TValue> current = entry;
-                while (current != null)
-                {
-                    yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
-                    current = current.Next;
-                }
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-    }
-
-    class SimpleHashSet<T>
-    {
-        private const int DefaultCapacity = 16;
-        private const double LoadFactor = 0.75;
-
-        private Entry<T>[] buckets;
-        private int count;
-
-        public SimpleHashSet()
-        {
-            buckets = new Entry<T>[DefaultCapacity];
-            count = 0;
-        }
-
-        public bool Add(T item)
-        {
-            EnsureCapacity();
-
-            int bucketIndex = GetBucketIndex(item);
-
-            if (Contains(item, bucketIndex))
-            {
-                return false;
-            }
-
-            Entry<T> entry = new Entry<T>(item, bucketIndex, buckets[bucketIndex]);
-            buckets[bucketIndex] = entry;
-            count++;
-            return true;
-        }
-
-        public bool Remove(T item)
-        {
-            int bucketIndex = GetBucketIndex(item);
-
-            if (buckets[bucketIndex] == null)
-            {
-                return false;
-            }
-
-            if (buckets[bucketIndex].Item.Equals(item))
-            {
-                buckets[bucketIndex] = buckets[bucketIndex].Next;
-                count--;
+                value = _entries[i].value;
                 return true;
             }
-
-            Entry<T> current = buckets[bucketIndex].Next;
-            Entry<T> previous = buckets[bucketIndex];
-
-            while (current != null)
+            else
             {
-                if (current.Item.Equals(item))
+                value = default;
+                return false;
+            }
+        }
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+        {
+            Entry[] entries = this._entries;
+            for (int i = 0; i < _count; i++)
+            {
+                if (entries[i].hashCode >= 0)
                 {
-                    previous.Next = current.Next;
-                    count--;
-                    return true;
+                    array[index++] = new(entries[i].key, entries[i].value);
                 }
-
-                previous = current;
-                current = current.Next;
-            }
-
-            return false;
-        }
-
-        public bool Contains(T item)
-        {
-            int bucketIndex = GetBucketIndex(item);
-
-            return Contains(item, bucketIndex);
-        }
-
-        public void Clear()
-        {
-            Array.Clear(buckets, 0, buckets.Length);
-            count = 0;
-        }
-
-        public int Count
-        {
-            get { return count; }
-        }
-
-        private void EnsureCapacity()
-        {
-            if (count >= buckets.Length * LoadFactor)
-            {
-                Resize();
-            }
-        }
-
-        private void Resize()
-        {
-            int newCapacity = buckets.Length * 2;
-            Entry<T>[] newBuckets = new Entry<T>[newCapacity];
-
-            foreach (Entry<T> entry in buckets)
-            {
-                Entry<T> current = entry;
-
-                while (current != null)
-                {
-                    int newBucketIndex = GetBucketIndex(current.Item, newCapacity);
-                    Entry<T> next = current.Next;
-                    current.Next = newBuckets[newBucketIndex];
-                    newBuckets[newBucketIndex] = current;
-                    current = next;
-                }
-            }
-
-            buckets = newBuckets;
-        }
-
-        private bool Contains(T item, int bucketIndex)
-        {
-            Entry<T> current = buckets[bucketIndex];
-
-            while (current != null)
-            {
-                if (current.Item.Equals(item))
-                {
-                    return true;
-                }
-
-                current = current.Next;
-            }
-
-            return false;
-        }
-
-        private int GetBucketIndex(T item)
-        {
-            return GetBucketIndex(item, buckets.Length);
-        }
-
-        private int GetBucketIndex(T item, int capacity)
-        {
-            int hashCode = item.GetHashCode();
-            int bucketIndex = hashCode & (capacity - 1);  // equivalent to hashCode % capacity
-
-            return bucketIndex;
-        }
-
-        private class Entry<TEntry>
-        {
-            public TEntry Item { get; }
-            public Entry<TEntry> Next { get; set; }
-
-            public Entry(TEntry item, int bucketIndex, Entry<TEntry> next)
-            {
-                Item = item;
-                Next = next;
             }
         }
     }
