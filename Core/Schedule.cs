@@ -10,20 +10,15 @@ namespace StudentScheduleManagementSystem.Schedule
     {
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public ScheduleType @ScheduleType { get; set; }
-        [JsonProperty]
-        public long ScheduleId { get; set; }
-        [JsonProperty]
-        public string Name { get; set; }
+        [JsonProperty] public long ScheduleId { get; set; }
+        [JsonProperty] public string Name { get; set; }
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; set; }
-        [JsonProperty]
-        public int[] ActiveWeeks { get; set; }
+        [JsonProperty] public int[] ActiveWeeks { get; set; }
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public Day[] ActiveDays { get; set; }
-        [JsonProperty]
-        public Times.Time Timestamp { get; set; }
-        [JsonProperty]
-        public int Duration { get; set; }
+        [JsonProperty] public Times.Time Timestamp { get; set; }
+        [JsonProperty] public int Duration { get; set; }
     }
 
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -148,15 +143,15 @@ namespace StudentScheduleManagementSystem.Schedule
         #region ctor and other basic method
 
         protected Schedule(RepetitiveType repetitiveType,
-                               string name,
-                               Times.Time beginTime,
-                               int duration,
-                               bool isOnline,
-                               string? description,
-                               int[] activeWeeks,
-                               Day[] activeDays,
-                               int earliest,
-                               int latest)
+                           string name,
+                           Times.Time beginTime,
+                           int duration,
+                           bool isOnline,
+                           string? description,
+                           int[] activeWeeks,
+                           Day[] activeDays,
+                           int earliest,
+                           int latest)
         {
             if (duration is not (1 or 2 or 3))
             {
@@ -203,8 +198,8 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException("argument \"activeWeeks\" contains elements that are out of bound");
             }
-            Array.Sort(activeWeeks);
-            Array.Sort(activeDays);
+            MergeSort.Sort(activeWeeks);
+            MergeSort.Sort(activeDays);
             RepetitiveType = repetitiveType;
             ActiveDays = activeDays;
             ActiveWeeks = activeWeeks;
@@ -558,7 +553,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 if (data.Name.Contains(name))
                 {
                     ret.Add(data);
-                }    
+                }
             }
             return ret;
         }
@@ -1321,8 +1316,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                              shared.ActiveWeeks,
                                              shared.ActiveDays,
                                              ScheduleOperationType.UserOpration,
-                                             dobj.ScheduleId)
-                                { AlarmEnabled = dobj.AlarmEnabled };
+                                             dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                         }
                         else if (dobj.OnlineLink != null)
                         {
@@ -1336,8 +1330,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                              shared.ActiveWeeks,
                                              shared.ActiveDays,
                                              ScheduleOperationType.UserOpration,
-                                             dobj.ScheduleId)
-                                { AlarmEnabled = dobj.AlarmEnabled };
+                                             dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                         }
                         else
                         {
@@ -1431,7 +1424,11 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region ctor
 
-        public TemporaryAffair(string name, Times.Time beginTime, string? description, Map.Location.Building location, long? id = null)
+        public TemporaryAffair(string name,
+                               Times.Time beginTime,
+                               string? description,
+                               Map.Location.Building location,
+                               long? id = null)
             : base(RepetitiveType.Single, name, beginTime, 1, false, description)
         {
             OnlineLink = null;
@@ -1464,10 +1461,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 //current = head;
                 if (((TemporaryAffair)_scheduleDictionary[current])._next == 0)
                 {
-                    _timeline[BeginTime.ToInt()] = new Record
-                    {
-                        Id = 0, ScheduleType = ScheduleType.Idle, RepetitiveType = RepetitiveType.Null
-                    };
+                    _timeline[BeginTime.ToInt()] = default;
+                    DisableAlarm();
                     Log.Information.Log("已删除该临时日程");
                     Log.Information.Log("已删除该时间点的所有临时日程");
                 }
@@ -1482,15 +1477,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     Log.Information.Log("已删除该临时日程");
                 }
             }
-            Schedule schedule = _scheduleDictionary[ScheduleId];
             _scheduleDictionary.Remove(ScheduleId);
-            if (schedule.AlarmEnabled)
-            {
-                Times.Alarm.RemoveAlarm(schedule.BeginTime,
-                                        schedule.RepetitiveType,
-                                        schedule.ActiveWeeks,
-                                        schedule.ActiveDays);
-            }
         }
 
         private void AddSchedule(long? id)
@@ -1508,9 +1495,15 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 ScheduleId = GenerateId(id, '5');
                 long current = _timeline[BeginTime.ToInt()].Id;
+                int count = 1;
                 while (((TemporaryAffair)_scheduleDictionary[current])._next != 0)
                 {
                     current = ((TemporaryAffair)_scheduleDictionary[current])._next;
+                    count++;
+                    if (count == 9)
+                    {
+                        throw new TooManyTemporaryAffairsException();
+                    }
                 }
                 ((TemporaryAffair)_scheduleDictionary[current])._next = ScheduleId;
                 _scheduleDictionary.Add(ScheduleId, this);

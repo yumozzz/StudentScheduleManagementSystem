@@ -560,7 +560,7 @@ namespace StudentScheduleManagementSystem.Times
                     typeof(Schedule.Exam),
                     typeof(Schedule.Activity),
                     typeof(Schedule.TemporaryAffair)
-                }.First(type=>type.FullName == reflectedTypeFullName);
+                }.First(type => type.FullName == reflectedTypeFullName);
                 MethodInfo? methodInfo = reflectedType.GetMethod(dobj.CallbackName.Split('+')[1]);
 
                 AddAlarm(dobj.Timestamp,

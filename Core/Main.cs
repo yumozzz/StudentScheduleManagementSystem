@@ -34,12 +34,12 @@ namespace StudentScheduleManagementSystem.MainProgram
             {
                 AllocConsole();
                 IntPtr hWnd = Process.GetCurrentProcess().MainWindowHandle;
-                //ShowWindow(hWnd, 0);
+                ShowWindow(hWnd, 0);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
-                Times.Timer.TimeChange += t => Console.WriteLine(t.ToString());
+                Times.Timer.TimeChange += t => Log.Information.Log($"当前时间{t.ToString()}");
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
 
@@ -51,11 +51,11 @@ namespace StudentScheduleManagementSystem.MainProgram
 
                 uiThread.Join();
             }
-            /*catch (Exception ex)
+            catch (Exception ex)
             {
-                Task.Run(() => MessageBox.Show(ex.Message));
-                Log.Error.Log(null, ex);
-            }*/
+                Task.Run(() => MessageBox.Show(ex.Message, "程序运行出现错误"));
+                Log.Error.Log("程序运行出现错误，已退出", ex);
+            }
             finally
             {
                 Cts.Cancel();
@@ -124,10 +124,17 @@ namespace StudentScheduleManagementSystem.MainProgram
                 catch (Exception ex) when (ex is KeyNotFoundException or FileNotFoundException)
                 {
                     MessageBox.Show("用户文件出现错误或不存在，已新建");
+                    Log.Error.Log("用户文件出现错误或不存在", ex);
                     FileManagement.FileManager.SaveToUserFile(new(),
                                                               FileManagement.FileManager.UserFileDirectory,
                                                               UserId,
                                                               Encryption.Encrypt.RSADecrypt);
+                }
+                catch (JsonFormatException ex)
+                {
+                    MessageBox.Show("用户文件读取出错，已退出");
+                    Log.Error.Log("用户文件读取出错，已退出", ex);
+                    return false;
                 }
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
                                      RepetitiveType.Single,
@@ -145,7 +152,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             catch (Exception ex) when (ex is AuthenticationException or KeyNotFoundException)
             {
-                Log.Error.Log("用户名或密码输入错误", null);
+                Log.Error.Log("用户名或密码输入错误", ex);
                 MessageBox.Show("用户名或密码输入错误！");
                 return false;
             }
@@ -179,9 +186,9 @@ namespace StudentScheduleManagementSystem.MainProgram
                 MessageBox.Show("用户名或密码格式错误！");
                 return false;
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
-                Log.Error.Log("用户已存在", null);
+                Log.Error.Log("用户已存在", ex);
                 MessageBox.Show("用户已存在！");
                 return false;
             }
@@ -199,19 +206,27 @@ namespace StudentScheduleManagementSystem.MainProgram
             Times.Timer.Pause = true;
             Times.Alarm.ClearAll();
             Schedule.Schedule.ClearAll();
-            MessageBox.Show("Log out successfully!");
             Log.Information.Log($"用户{UserId}已登出");
         }
 
         public static void InitModules()
         {
-            var accounts =
-                FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
-            foreach (var account in accounts)
+            try
             {
-                _accounts.Add(account.UserId, (account.Password, account.PrivateKey));
+                var accounts =
+                    FileManagement.FileManager.ReadFromUserAccountFile(FileManagement.FileManager.UserFileDirectory);
+                foreach (var account in accounts)
+                {
+                    _accounts.Add(account.UserId, (account.Password, account.PrivateKey));
+                }
+                Schedule.Schedule.ReadSharedData();
             }
-            Schedule.Schedule.ReadSharedData();
+            catch (JsonFormatException ex)
+            {
+                MessageBox.Show("账号文件读取出错，已退出");
+                Log.Error.Log("账号文件读取出错，已退出", ex);
+                throw;
+            }
         }
 
         public static void Exit()
@@ -289,13 +304,17 @@ namespace StudentScheduleManagementSystem.Schedule
         public static void Notify(long id, object? obj)
         {
             Times.Alarm.SpecifiedAlarmParam param;
-            if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
+            if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj.ToString()!);
+            }
+            else if (obj is Times.Alarm.SpecifiedAlarmParam o)
+            {
+                param = o;
             }
             else
             {
-                param = (Times.Alarm.SpecifiedAlarmParam)obj!;
+                throw new ArgumentException(null, nameof(obj));
             }
             Course course;
             try
@@ -312,17 +331,19 @@ namespace StudentScheduleManagementSystem.Schedule
             if (course.IsOnline)
             {
                 Console.WriteLine($"在线地址为{course.OnlineLink!}");
-                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OnlineLink!);
-                _alarmWindow.ShowDialog();
-                _alarmWindow.Dispose();
+                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OnlineLink!);
+                alarmWindow.ShowDialog();
+                alarmWindow.Dispose();
                 GC.Collect();
             }
             else
             {
                 Console.WriteLine($"地点为{course.OfflineLocation!.Value.Name}");
-                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OfflineLocation!.Value);
-                _alarmWindow.ShowDialog();
-                _alarmWindow.Dispose();
+                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OfflineLocation!.Value);
+                Times.Timer.Pause = true;
+                alarmWindow.ShowDialog();
+                alarmWindow.Dispose();
+                Times.Timer.Pause = false;
                 GC.Collect();
             }
         }
@@ -335,7 +356,7 @@ namespace StudentScheduleManagementSystem.Schedule
             Times.Alarm.SpecifiedAlarmParam param;
             if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj.ToString()!);
             }
             else if (obj is Times.Alarm.SpecifiedAlarmParam o)
             {
@@ -358,9 +379,11 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
             Console.WriteLine($"地点为{exam.OfflineLocation.Name}");
-            UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(exam.Name, exam.OfflineLocation);
-            _alarmWindow.ShowDialog();
-            _alarmWindow.Dispose();
+            UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(exam.Name, exam.OfflineLocation);
+            Times.Timer.Pause = true;
+            alarmWindow.ShowDialog();
+            alarmWindow.Dispose();
+            Times.Timer.Pause = false;
             GC.Collect();
         }
     }
@@ -372,7 +395,7 @@ namespace StudentScheduleManagementSystem.Schedule
             Times.Alarm.SpecifiedAlarmParam param;
             if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.SpecifiedAlarmParam>(obj.ToString()!);
             }
             else if (obj is Times.Alarm.SpecifiedAlarmParam o)
             {
@@ -397,17 +420,21 @@ namespace StudentScheduleManagementSystem.Schedule
             if (activity.IsOnline)
             {
                 Console.WriteLine($"在线地址为{activity.OnlineLink!}");
-                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OnlineLink!);
-                _alarmWindow.ShowDialog();
-                _alarmWindow.Dispose();
+                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OnlineLink!);
+                Times.Timer.Pause = true;
+                alarmWindow.ShowDialog();
+                alarmWindow.Dispose();
+                Times.Timer.Pause = false;
                 GC.Collect();
             }
             else
             {
                 Console.WriteLine($"地点为{activity.OfflineLocation!.Value.Name}");
-                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OfflineLocation!.Value);
-                _alarmWindow.ShowDialog();
-                _alarmWindow.Dispose();
+                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OfflineLocation!.Value);
+                Times.Timer.Pause = true;
+                alarmWindow.ShowDialog();
+                alarmWindow.Dispose();
+                Times.Timer.Pause = false;
                 GC.Collect();
             }
         }

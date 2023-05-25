@@ -21,25 +21,35 @@ namespace StudentScheduleManagementSystem.Map
 
         static Location()
         {
-            (JArray, JArray) information;
             try
             {
-                information = FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory);
+                (JArray, JArray) information;
+                try
+                {
+                    information =
+                        FileManagement.FileManager.ReadFromMapFile(FileManagement.FileManager.MapFileDirectory);
+                }
+                catch (Exception ex) when (ex is DirectoryNotFoundException or FileNotFoundException)
+                {
+                    return;
+                }
+                GlobalMap = new(information.Item1);
+                List<Building> buildings = new();
+                foreach (JObject obj in information.Item2)
+                {
+                    int id = obj["Id"]!.Value<int>();
+                    string name = obj["Name"]!.Value<string>()!;
+                    Building building = new(id, name, GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
+                    buildings.Add(building);
+                }
+                Buildings = buildings;
             }
-            catch (Exception ex) when (ex is DirectoryNotFoundException or FileNotFoundException)
+            catch (JsonFormatException ex)
             {
-                return;
+                MessageBox.Show("地图文件读取出错，已退出");
+                Log.Error.Log("地图文件读取出错，已退出", ex);
+                throw;
             }
-            GlobalMap = new(information.Item1);
-            List<Building> buildings = new();
-            foreach (JObject obj in information.Item2)
-            {
-                int id = obj["Id"]!.Value<int>();
-                string name = obj["Name"]!.Value<string>()!;
-                Building building = new(id, name, GlobalMap.GetVertex(obj["CenterId"]!.Value<int>()));
-                buildings.Add(building);
-            }
-            Buildings = buildings;
         }
 
         #region structs, classes and enums

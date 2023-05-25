@@ -169,7 +169,7 @@ namespace StudentScheduleManagementSystem.DataStructure
         }
     }
 
-    public class HashTable<TKey, TValue> : IDictionary<TKey, TValue>
+    public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
     {
         private struct Entry
         {
@@ -481,7 +481,7 @@ namespace StudentScheduleManagementSystem.DataStructure
                 {
                     if (add)
                     {
-                        throw new InvalidOperationException("item already existed");
+                        throw new ArgumentException("item already existed");
                     }
                     _entries[i].value = value;
                     _version++;
