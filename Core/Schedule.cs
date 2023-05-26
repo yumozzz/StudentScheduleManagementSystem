@@ -712,7 +712,8 @@ namespace StudentScheduleManagementSystem.Schedule
         {
             var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
                                                                   "share",
-                                                                  Encryption.Encrypt.AESDecrypt);
+                                                                  Encryption.Encrypt.AESDecrypt,
+                                                                  false);
 
             try
             {

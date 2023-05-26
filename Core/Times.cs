@@ -382,6 +382,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             #region 调用API删除冲突闹钟
 
+            detect_collision:
             int offset = timestamp.ToInt();
             RepetitiveType overrideType = _timeline[offset].RepetitiveType;
             if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复，则自身不可能为临时日程
@@ -422,6 +423,10 @@ namespace StudentScheduleManagementSystem.Times
             }
 
             delete_process:
+            if (overrideType != RepetitiveType.Null && _timeline[offset].Id == _dailyNotificationAlarmId)
+            {
+                throw new InvalidOperationException("overriding daily notification");
+            }
             switch (overrideType, repetitiveType)
             {
                 case (RepetitiveType.Null, _):
@@ -455,6 +460,10 @@ namespace StudentScheduleManagementSystem.Times
                         InvalidOperationException("cannot automatically override alarm whose repetitive type is designated");
                 default:
                     throw new ArgumentException(null, nameof(repetitiveType));
+            }
+            if (overrideType != RepetitiveType.Null)
+            {
+                goto detect_collision;
             }
 
             #endregion
@@ -646,7 +655,6 @@ namespace StudentScheduleManagementSystem.Times
         private static int _acceleration = 1;
         private static Time _localTime = new();
         private static int _offset = 0;
-        public static string LocalTime => _localTime.ToString();
         private static bool _pause = false;
         public static bool Pause
         {

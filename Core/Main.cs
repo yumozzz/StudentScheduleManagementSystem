@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Authentication;
+using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -23,11 +24,12 @@ namespace StudentScheduleManagementSystem.MainProgram
         internal static DataStructure.HashTable<string, (string, string)> _accounts = new();
         public static string UserId { get; private set; } = String.Empty;
         public static string Password { get; private set; } = String.Empty;
-        public static Identity @Identity { get; private set; }
+        public static Identity @Identity { get; private set; } = Identity.Null;
 
         [STAThread]
         public static void Main()
         {
+            Task<DialogResult> result = null;
             try
             {
                 AllocConsole();
@@ -44,21 +46,41 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             catch (EndOfSemester)
             {
-                Task.Run(() => MessageBox.Show("学期结束，程序已退出"));
+                result = Task.Run(() => MessageBox.Show("学期结束，程序已退出"));
                 Log.Warning.Log("学期结束，程序已退出");
-                Logout();
             }
             catch (Exception ex)
             {
-                Task.Run(() => MessageBox.Show(ex.Message, "程序运行出现错误"));
+                result = Task.Run(() => MessageBox.Show(ex.Message, "程序运行出现错误"));
                 Log.Error.Log("程序运行出现错误，已退出", ex);
             }
             finally
             {
+                try
+                {
+                    if (Identity != Identity.Null)
+                    {
+                        Logout();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    result = Task.Run(() => MessageBox.Show(ex.Message, "无法保存用户文件"));
+                    Log.Error.Log("无法保存用户文件", ex);
+                }
                 Cts.Cancel();
                 Log.Warning.Log("程序退出");
-                Exit();
+                try
+                {
+                    Exit();
+                }
+                catch (Exception ex)
+                {
+                    result = Task.Run(() => MessageBox.Show(ex.Message, "无法保存系统文件"));
+                    Log.Error.Log("无法保存系统文件", ex);
+                }
                 FreeConsole();
+                result?.Wait();
             }
         }
 
@@ -116,7 +138,8 @@ namespace StudentScheduleManagementSystem.MainProgram
                     ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
                                                       .UserFileDirectory,
                                                    inputUserId,
-                                                   Encryption.Encrypt.RSADecrypt));
+                                                   Encryption.Encrypt.RSADecrypt,
+                                                   true));
                 }
                 catch (Exception ex) when (ex is KeyNotFoundException or FileNotFoundException)
                 {
@@ -126,11 +149,22 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                               FileManagement.FileManager.UserFileDirectory,
                                                               UserId,
                                                               Encryption.Encrypt.RSADecrypt);
+                    ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
+                                                      .UserFileDirectory,
+                                                   inputUserId,
+                                                   Encryption.Encrypt.RSADecrypt,
+                                                   true));
                 }
                 catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
                 {
                     MessageBox.Show("用户文件读取出错，已退出");
                     Log.Error.Log("用户文件读取出错，已退出", ex);
+                    return false;
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show("该用户已在另一个进程登录");
+                    Log.Error.Log("该用户已在另一个进程登录", ex);
                     return false;
                 }
                 Times.Alarm.AddAlarm(new() { Week = 1, Day = Day.Monday, Hour = 22 },
@@ -203,6 +237,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             Times.Timer.Pause = true;
             Times.Alarm.ClearAll();
             Schedule.Schedule.ClearAll();
+            Identity = Identity.Null;
             Log.Information.Log($"用户{UserId}已登出");
         }
 
@@ -252,13 +287,17 @@ namespace StudentScheduleManagementSystem.Schedule
         public static void NotifyAllInComingDay(long id, object? obj)
         {
             Times.Alarm.GeneralAlarmParam param;
-            if ((obj?.GetType() ?? typeof(int)) == typeof(JObject))
+            if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.GeneralAlarmParam>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.GeneralAlarmParam>(obj.ToString()!);
+            }
+            else if (obj is Times.Alarm.GeneralAlarmParam o)
+            {
+                param = o;
             }
             else
             {
-                param = (Times.Alarm.GeneralAlarmParam)obj!;
+                throw new ArgumentException(null, nameof(obj));
             }
             List<(int, string)> schedules = new();
             for (int i = 0; i < 24;)
@@ -272,18 +311,20 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 i++;
             }
+            StringBuilder builder = new();
             if (schedules.Count != 0)
             {
-                Console.WriteLine("明天有以下非临时日程：");
+                builder.AppendLine("明天有以下非临时日程：");
                 foreach ((int beginTime, string name) in schedules)
                 {
-                    Console.WriteLine($"{beginTime}:00，{name}。");
+                    builder.AppendLine($"{beginTime}:00，{name}。");
                 }
             }
+            MessageBox.Show(builder.ToString(), "每日提醒");
             Times.Alarm.AddAlarm(param.timestamp + 22,
                                  RepetitiveType.Single,
                                  NotifyAllInComingDay,
-                                 new Times.Alarm.GeneralAlarmParam() { timestamp = param.timestamp + 24 },
+                                 new Times.Alarm.GeneralAlarmParam { timestamp = param.timestamp + 24 },
                                  typeof(Schedule),
                                  typeof(Times.Alarm.GeneralAlarmParam),
                                  true,
@@ -444,7 +485,7 @@ namespace StudentScheduleManagementSystem.Schedule
             Times.Alarm.TemporaryAffairParam param;
             if (obj is JObject)
             {
-                param = JsonConvert.DeserializeObject<Times.Alarm.TemporaryAffairParam>(obj!.ToString()!);
+                param = JsonConvert.DeserializeObject<Times.Alarm.TemporaryAffairParam>(obj.ToString()!);
             }
             else if (obj is Times.Alarm.TemporaryAffairParam o)
             {
@@ -454,7 +495,10 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(null, nameof(obj));
             }
-            UI.StudentAlarmWindow alarmWindow = new(Array.ConvertAll(TemporaryAffair.GetAllAt(param.timestamp), affair => affair.Name).Aggregate((str, elem) => str = str + '、' + elem), param.locations);
+            UI.StudentAlarmWindow alarmWindow =
+                new(Array.ConvertAll(TemporaryAffair.GetAllAt(param.timestamp), affair => affair.Name)
+                         .Aggregate((str, elem) => str = str + '、' + elem),
+                    param.locations);
             alarmWindow.ShowDialog();
             alarmWindow.Dispose();
             GC.Collect();

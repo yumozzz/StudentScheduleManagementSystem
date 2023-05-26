@@ -16,9 +16,12 @@ namespace StudentScheduleManagementSystem.FileManagement
 
         public static readonly string MakecertDirectory = Environment.CurrentDirectory + "/makecert.exe";
 
+        private static FileStream? _userFileStream;
+
         public static Dictionary<string, JArray> ReadFromUserFile(string fileFolder,
                                                                   string fileName,
-                                                                  Func<string, string> decryptFunc)
+                                                                  Func<string, string> decryptFunc,
+                                                                  bool monopolize)
         {
             if (!Directory.Exists(fileFolder))
             {
@@ -39,10 +42,16 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             #if RWINPLAINTEXT
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
+            if (monopolize)
+            {
+                _userFileStream = new($"{fileFolder}/{fileName}.json", FileMode.Open);
+            }
             #elif RWINENCRYPTION
             string jsonSource = decryptFunc.Invoke(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
-            #else
-            #error macro_not_defined
+            if (monopolize)
+            {
+                _userFileStream = new($"{fileFolder}/{fileName}.dat", FileMode.Open);
+            }
             #endif
             JObject obj = JObject.Parse(jsonSource);
             Dictionary<string, JArray> dic = new();
@@ -73,10 +82,10 @@ namespace StudentScheduleManagementSystem.FileManagement
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
                                Encoding.UTF8.GetBytes(encryptFunc.Invoke(root.ToString())));
-            #else
-            #error macro_not_defined
             #endif
             Log.Information.Log($"已保存学号为{fileName}的用户信息");
+            _userFileStream?.Close();
+            _userFileStream = null;
         }
 
         public static (JArray, JArray) ReadFromMapFile(string fileFolder, string fileName = "map")
@@ -89,11 +98,9 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             #if RWINPLAINTEXT
             if (!File.Exists($"{fileFolder}/{fileName}.json"))
-                #elif RWINENCRYPTION
+            #elif RWINENCRYPTION
             if (!File.Exists($"{fileFolder}/{fileName}.dat"))
-                #else
-            #error macro_not_defined
-                #endif
+            #endif
             {
                 Log.Error.Log("不存在地图文件", null);
                 throw new FileNotFoundException();
@@ -102,8 +109,6 @@ namespace StudentScheduleManagementSystem.FileManagement
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             #elif RWINENCRYPTION
             string jsonSource = Encryption.Encrypt.AESDecrypt(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
-            #else
-            #error macro_not_defined
             #endif
             JObject root = JObject.Parse(jsonSource);
             Log.Information.Log("已读取地图信息");
@@ -118,13 +123,10 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             JObject root = new() { { "Map", map }, { "Buildings", buildings } };
             #if RWINPLAINTEXT
-            File.WriteAllBytes($"{fileFolder}/{fileName}.json",
-                               Encoding.UTF8.GetBytes(root.ToString()));
+            File.WriteAllBytes($"{fileFolder}/{fileName}.json", Encoding.UTF8.GetBytes(root.ToString()));
             #elif RWINENCRYPTION
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
                                Encoding.UTF8.GetBytes(Encryption.Encrypt.AESEncrypt(root.ToString())));
-            #else
-            #error macro_not_defined
             #endif
             Log.Information.Log("已保存地图信息");
         }
@@ -141,11 +143,9 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             #if RWINPLAINTEXT
             if (!File.Exists($"{fileFolder}/{fileName}.json"))
-                #elif RWINENCRYPTION
+            #elif RWINENCRYPTION
             if (!File.Exists($"{fileFolder}/{fileName}.dat"))
-                #else
-            #error macro_not_defined
-                #endif
+            #endif
             {
                 Log.Information.Log("不存在账号文件，将新建");
                 return new();
@@ -154,8 +154,6 @@ namespace StudentScheduleManagementSystem.FileManagement
             string jsonSource = File.ReadAllText($"{fileFolder}/{fileName}.json");
             #elif RWINENCRYPTION
             string jsonSource = Encryption.Encrypt.AESDecrypt(File.ReadAllText($"{fileFolder}/{fileName}.dat"));
-            #else
-            #error macro_not_defined
             #endif
             var ret = JArray.Parse(jsonSource).ToObject<List<MainProgram.Program.UserInformation>>();
             Log.Information.Log("已读取账号信息");
@@ -177,8 +175,6 @@ namespace StudentScheduleManagementSystem.FileManagement
             File.WriteAllBytes($"{fileFolder}/{fileName}.dat",
                                Encoding.UTF8.GetBytes(Encryption.Encrypt.AESEncrypt(JArray.FromObject(information)
                                                          .ToString())));
-            #else
-            #error macro_not_defined
             #endif
             Log.Information.Log("已保存账号信息");
         }

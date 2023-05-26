@@ -392,7 +392,7 @@ namespace StudentScheduleManagementSystem.DataStructure
             get
             {
                 int i = FindEntry(key);
-                return i >= 0 ? _entries[i].value : default;
+                return i >= 0 ? _entries[i].value : throw new KeyNotFoundException();
             }
             set => Insert(key, value, false);
         }

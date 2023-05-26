@@ -47,8 +47,9 @@ namespace StudentScheduleManagementSystem
 
     public enum Identity
     {
+        Null,
         User,
-        Administrator,
+        Administrator
     }
 
     public interface IUniqueRepetitiveEvent
