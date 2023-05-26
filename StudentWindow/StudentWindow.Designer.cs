@@ -332,7 +332,7 @@
             this.temporaryAffairButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.temporaryAffairButton.TabIndex = 45;
             this.temporaryAffairButton.TabStop = false;
-            this.temporaryAffairButton.Click += new System.EventHandler(this.PersonalActivityButton_Click);
+            this.temporaryAffairButton.Click += new System.EventHandler(this.TemporaryAffairButton_Click);
             // 
             // exitButton
             // 

@@ -11,6 +11,7 @@ namespace StudentScheduleManagementSystem.UI
         protected ScheduleType _scheduleType;
         protected SubwindowState _subwindowState = SubwindowState.Viewing;
         protected SubwindowType _subwindowType;
+        protected readonly HashSet<long> _selectedIds = new();
         protected long? _originId = null;
         protected bool _showAllData = true;
         public Action<bool?> PauseTimeDelegate;
@@ -27,6 +28,10 @@ namespace StudentScheduleManagementSystem.UI
             _subwindowType = subwindowType;
             if (_subwindowType != SubwindowType.PersonalActivity && _subwindowType != SubwindowType.TemporaryAffair)
             {
+                foreach (var schedule in Schedule.Schedule.GetScheduleByType(_scheduleType))
+                {
+                    _selectedIds.Add(schedule.ScheduleId);
+                }
                 GenerateSharedData(scheduleType);
             }
             foreach (var building in Map.Location.Buildings)
@@ -258,16 +263,18 @@ namespace StudentScheduleManagementSystem.UI
         protected void GenerateSharedData(ScheduleType type)
         {
             _sharedData = Schedule.Schedule.GetSharedByType(type);
-            GenerateSharedData(_sharedData);
+            GenerateSharedData(_sharedData.ToArray());
         }
 
-        protected void GenerateSharedData(List<Schedule.SharedData> data)
+        protected void GenerateSharedData(Schedule.SharedData[] data)
         {
+            MergeSort.Sort(ref data, (data1, data2) => data1.ScheduleId.CompareTo(data2.ScheduleId));
             scheduleDataTable.Rows.Clear();
             scheduleDataTable.Columns[1].Visible = false;
             scheduleDataTable.Columns[6].Visible = false;
             scheduleDataTable.Columns[7].Visible = false;
             scheduleDataTable.Columns[8].Visible = false;
+
             int[] widths = { 30, 55, 130, 120, 130, 60, 60 };
             for (int i = 0; i < widths.Length; i++)
             {
@@ -326,15 +333,46 @@ namespace StudentScheduleManagementSystem.UI
                                                     sharedData.ScheduleId);
                 }
             }
+
+            long[] ids = new long[scheduleDataTable.RowCount];
+            for (int i = 0; i < scheduleDataTable.RowCount; i++)
+            {
+                ids[i] = long.Parse(scheduleDataTable.Rows[i].Cells[9].Value.ToString()!);
+            }
+            foreach (var selected in _selectedIds)
+            {
+                int left = 0;
+                int right = ids.Length;
+                int middle = 0;
+                while (left < right)
+                {
+                    middle = left + ((right - left) / 2);
+                    if (ids[middle] > selected)
+                    {
+                        right = middle;
+                    }
+                    else if (ids[middle] < selected)
+                    {
+                        left = middle + 1;
+                    }
+                    else
+                    {
+                        var cell = (DataGridViewCheckBoxCell)scheduleDataTable.Rows[middle].Cells[0];
+                        cell.Style.BackColor = Color.Gray;
+                        cell.ReadOnly = true;
+                        break;
+                    }
+                }
+            }
         }
 
         protected void GenerateUserData(ScheduleType type)
         {
             _userData = Schedule.Schedule.GetScheduleByType(type);
-            GenerateUserData(_userData);
+            GenerateUserData(_userData.ToArray());
         }
 
-        protected abstract void GenerateUserData(List<Schedule.Schedule> data);
+        protected abstract void GenerateUserData(Schedule.Schedule[] data);
 
         #endregion
 
@@ -395,6 +433,7 @@ namespace StudentScheduleManagementSystem.UI
             this.onlineLinkBox.Text = "";
             this.descriptionBox.Text = "";
             this._subwindowState = SubwindowState.Viewing;
+            _originId = null;
             foreach (DataGridViewRow row in scheduleDataTable.Rows)
             {
                 ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
@@ -433,6 +472,7 @@ namespace StudentScheduleManagementSystem.UI
                 selected!.DeleteSchedule();
             }
             PauseTimeDelegate.Invoke(false);
+            _selectedIds.Remove(id);
             GenerateUserData(_scheduleType);
         }
 
@@ -447,8 +487,8 @@ namespace StudentScheduleManagementSystem.UI
 
             if (_showAllData)
             {
-                var result = Schedule.Schedule.GetSharedByName(this.searchByNameBox.Text);
-                if (result.Count == 0)
+                var result = Schedule.Schedule.GetSharedByName(this.searchByNameBox.Text).Where(schedule => schedule.ScheduleType == _scheduleType).ToArray();
+                if (result.Length == 0)
                 {
                     MessageBox.Show("未搜索到日程！");
                     return;
@@ -457,8 +497,8 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                var result = Schedule.Schedule.GetSchedulesByName(this.searchByNameBox.Text);
-                if (result.Count == 0)
+                var result = Schedule.Schedule.GetSchedulesByName(this.searchByNameBox.Text).Where(schedule => schedule.ScheduleType == _scheduleType).ToArray();
+                if (result.Length == 0)
                 {
                     MessageBox.Show("未搜索到日程！");
                     return;
@@ -531,7 +571,7 @@ namespace StudentScheduleManagementSystem.UI
 
         #region table content generator
 
-        protected override void GenerateUserData(List<Schedule.Schedule> data)
+        protected override void GenerateUserData(Schedule.Schedule[] data)
         {
             scheduleDataTable.Rows.Clear();
             int[] widths = { 30, 55, 130, 120, 130, 60, 60, 150, 150 };
@@ -760,6 +800,9 @@ namespace StudentScheduleManagementSystem.UI
                                 new Times.Alarm.SpecifiedAlarmParam { scheduleId = obj.ScheduleId });
                 Log.Information.Log("已自动配置考试闹钟");
             }
+            _selectedIds.Add(id);
+            Debug.Assert(_showAllData);
+            GenerateSharedData(_scheduleType);
         }
 
         #endregion
@@ -975,12 +1018,14 @@ namespace StudentScheduleManagementSystem.UI
         {
             this.reviseScheduleButton.Click += ReviseScheduleButton_Click;
             this.okButton.Click += OkButton_Click;
+            this.getAvailableTime.Click += GetAvailableTime_Click;
             this.nameBox.ReadOnly = false;
+            this.getAvailableTime.Visible = true;
         }
 
         #region table content generator
 
-        protected override void GenerateUserData(List<Schedule.Schedule> data)
+        protected override void GenerateUserData(Schedule.Schedule[] data)
         {
             scheduleDataTable.Rows.Clear();
             int[] widths = { 30, 55, 130, 120, 130, 60, 60, 150, 150 };
@@ -1053,9 +1098,74 @@ namespace StudentScheduleManagementSystem.UI
 
         protected abstract void AddSchedule();
 
+        protected abstract bool GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration);
+
         #endregion
 
         #region event handler
+
+        protected void GetAvailableTime_Click(object sender, EventArgs e)
+        {
+            if (!GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration))
+            {
+                return;
+            }
+
+            StringBuilder availableTime = new("");
+            if (_subwindowType == SubwindowType.TemporaryAffair)
+            {
+                int startTime = (activeWeeks[0] - 1) * 7 * 24 + (int)activeDays[0] * 24;
+                for(int i = startTime + Schedule.TemporaryAffair.Earliest; 
+                        i < startTime + Schedule.TemporaryAffair.Latest; i++)
+                {
+                    ScheduleType scheduleType = Schedule.Schedule.GetRecordAt(i).ScheduleType;
+                    if (scheduleType == ScheduleType.TemporaryAffair || scheduleType == ScheduleType.Idle)
+                    {
+                        availableTime.Append((i - startTime).ToString() + ":00; ");
+                    }
+                }
+            } 
+            else
+            {
+                bool[] availableHourArray = new bool[Schedule.Activity.Latest - Schedule.Activity.Earliest];
+                bool[] availableTimeArray = new bool[Schedule.Activity.Latest - Schedule.Activity.Earliest];
+                for (int i = 0; i < availableHourArray.Length; i++)
+                {
+                    availableHourArray[i] = true;
+                    availableTimeArray[i] = true;
+                }
+                for(int i = 0; i < activeWeeks.Length; i++)
+                {
+                    for(int j = 0; j < activeDays.Length; j++)
+                    {
+                        int startTime = (activeWeeks[i] - 1) * 7 * 24 + (int)activeDays[j] * 24;
+                        for(int k = 0; k < availableHourArray.Length; k++)
+                        {
+                            availableHourArray[k] = availableHourArray[k] && (Schedule.Schedule.GetRecordAt(startTime + Schedule.Activity.Earliest + k).ScheduleType == ScheduleType.Idle);
+                        }
+                    }
+                }
+                for(int i = 0; i < availableTimeArray.Length - duration + 1; i++)
+                {
+                    for(int j = 0; j < duration; j++)
+                    {
+                        availableTimeArray[i] = availableTimeArray[i] && availableHourArray[i + j];
+                    }
+                    if (availableTimeArray[i])
+                    {
+                        availableTime.Append((i + Schedule.Activity.Earliest).ToString() + ":00; ");
+                    }
+                }
+            }
+            if (availableTime.Length > 0)
+            {
+                MessageBox.Show("日程可选时间：" + availableTime.ToString());
+            }
+            else
+            {
+                MessageBox.Show("所选时段没有空闲时间！");
+            }
+        }
 
         protected void OkButton_Click(object sender, EventArgs e)
         {
@@ -1193,6 +1303,53 @@ namespace StudentScheduleManagementSystem.UI
         #endregion
 
         #region tool methods
+
+        protected override bool GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration)
+        {
+            activeWeeks = new int[weekSelectBox.ValidCount];
+            activeDays = new Day[daySelectBox.ValidCount];
+            duration = 0;
+            StringBuilder errorMessage = new("");
+            if(weekSelectBox.ValidCount == 0)
+            {
+                errorMessage.Append("请输入日程周！\n");
+            }
+            if(daySelectBox.ValidCount == 0)
+            {
+                errorMessage.Append("请输入日程日！\n");
+            }
+            if(durationComboBox.Text == "")
+            {
+                errorMessage.Append("请输入日程时长！");
+            }
+            if(errorMessage.Length != 0)
+            {
+                MessageBox.Show(errorMessage.ToString());
+                return false;
+            }
+
+            int j = 0;
+            for(int i = 0; i < 16; i++)
+            {
+                if (weekSelectBox.Selects[i])
+                {
+                    activeWeeks[j] = i + 1;
+                    j++;
+                }
+            }
+            j = 0;
+            for (int i = 0; i < 7; i++)
+            {
+                if (daySelectBox.Selects[i])
+                {
+                    activeDays[j] = (Day)i;
+                    j++;
+                }
+            }
+            duration = durationComboBox.Text[0] - '0';
+
+            return true;
+        }
 
         private bool GetScheduleInfo(bool showMessageBox,
                                      out string name,
@@ -1428,6 +1585,11 @@ namespace StudentScheduleManagementSystem.UI
                                           ScheduleOperationType.UserOpration);
             }
             GenerateUserData(_scheduleType);
+            ClearInformation();
+            this.weekSelectBox.ClearBox();
+            this.daySelectBox.ClearBox();
+            this.hourComboBox.Text = "";
+            this.durationComboBox.Text = "";
         }
 
         #endregion
@@ -1573,7 +1735,7 @@ namespace StudentScheduleManagementSystem.UI
             weekSelectBox.BringToFront();
         }
 
-        protected override void GenerateUserData(List<Schedule.Schedule> data)
+        protected override void GenerateUserData(Schedule.Schedule[] data)
         {
             scheduleDataTable.Rows.Clear();
             int[] widths = { 30, 55, 130, 50, 80, 60, 60, 150, 150 };
@@ -1603,6 +1765,39 @@ namespace StudentScheduleManagementSystem.UI
         #endregion
 
         #region tool methods
+
+        protected override bool GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration)
+        {
+            activeWeeks = Array.Empty<int>();
+            activeDays = Array.Empty<Day>();
+            duration = 1;
+            StringBuilder errorMessage = new("");
+            if (weekSelectBox.Text == "")
+            {
+                errorMessage.Append("请输入日程周！\n");
+            }
+            if (daySelectBox.Text == "")
+            {
+                errorMessage.Append("请输入日程日！\n");
+            }
+            if (errorMessage.Length != 0)
+            {
+                MessageBox.Show(errorMessage.ToString());
+                return false;
+            }
+            
+            activeWeeks = new[] { int.Parse(weekSelectBox.Text[4..]) };
+            for(int i = 0; i < 7; i++)
+            {
+                if(daySelectBox.Text == Shared.Days[i])
+                {
+                    activeDays = new[] { (Day)i};
+                    break;
+                }
+            }
+            
+            return true;
+        }
 
         protected override void AddSchedule()
         {
@@ -1674,6 +1869,8 @@ namespace StudentScheduleManagementSystem.UI
                                                  descriptionBox.Text == "" ? null : descriptionBox.Text,
                                                  Map.Location.GetBuildingsByName(buildingComboBox.Text)[0]);
                 GenerateUserData(_scheduleType);
+                ClearInformation();
+                this.hourComboBox.Text = "";
                 return;
             }
         }

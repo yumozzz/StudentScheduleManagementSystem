@@ -171,7 +171,7 @@ namespace StudentScheduleManagementSystem
 
     public static class MergeSort
     {
-        private static void Merge<T>(T[] array, int L, int R, Func<T, T, int> comparer)
+        private static void Merge<T>(ref T[] array, int L, int R, Func<T, T, int> comparer)
         {
             int p1 = L;
             int i = 0;
@@ -203,24 +203,24 @@ namespace StudentScheduleManagementSystem
             }
         }
 
-        private static void MergeProcess<T>(T[] array, int L, int R, Func<T, T, int> comparer)
+        private static void MergeProcess<T>(ref T[] array, int L, int R, Func<T, T, int> comparer)
         {
-            if (L == R)
+            if (L >= R)
             {
                 return;
             }
             int mid = L + ((R - L) >> 1);
-            MergeProcess(array, L, mid, comparer);
-            MergeProcess(array, mid + 1, R, comparer);
-            Merge(array, L, R, comparer);
+            MergeProcess(ref array, L, mid, comparer);
+            MergeProcess(ref array, mid + 1, R, comparer);
+            Merge(ref array, L, R, comparer);
         }
 
-        public static void Sort<T>(T[] array) where T : IComparable
+        public static void Sort<T>(ref T[] array) where T : IComparable
         {
-            Sort(array, (t1, t2) => t1.CompareTo(t2));
+            Sort(ref array, (t1, t2) => t1.CompareTo(t2));
         }
 
-        public static void Sort<T>(T[] array, Func<T, T, int> comparer)
+        public static void Sort<T>(ref T[] array, Func<T, T, int> comparer)
         {
             if (array == null)
             {
@@ -231,9 +231,9 @@ namespace StudentScheduleManagementSystem
                 return;
             }
             int mid = array.Length >> 1;
-            MergeProcess(array, 0, mid, comparer);
-            MergeProcess(array, mid + 1, array.Length - 1, comparer);
-            Merge(array, 0, array.Length - 1, comparer);
+            MergeProcess(ref array, 0, mid, comparer);
+            MergeProcess(ref array, mid + 1, array.Length - 1, comparer);
+            Merge(ref array, 0, array.Length - 1, comparer);
         }
     }
 

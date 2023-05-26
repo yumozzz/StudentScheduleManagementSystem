@@ -198,8 +198,8 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException("argument \"activeWeeks\" contains elements that are out of bound");
             }
-            MergeSort.Sort(activeWeeks);
-            MergeSort.Sort(activeDays);
+            MergeSort.Sort(ref activeWeeks);
+            MergeSort.Sort(ref activeDays);
             RepetitiveType = repetitiveType;
             ActiveDays = activeDays;
             ActiveWeeks = activeWeeks;
@@ -293,7 +293,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             if (schedule.AlarmEnabled)
             {
-                Times.Alarm.RemoveAlarm(schedule.BeginTime,
+                Times.Alarm.RemoveAlarm(schedule.BeginTime - 1,
                                         schedule.RepetitiveType,
                                         schedule.ActiveWeeks,
                                         schedule.ActiveDays);

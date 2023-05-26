@@ -368,11 +368,11 @@ namespace StudentScheduleManagementSystem.DataStructure
                 List<TValue> values = new(Count);
                 foreach (var bucket in _buckets)
                 {
-                    Entry entry = _entries[bucket];
                     if (bucket == -1)
                     {
                         continue;
                     }
+                    Entry entry = _entries[bucket];
                     while (true)
                     {
                         values.Add(entry.value);

@@ -12,7 +12,7 @@ namespace StudentScheduleManagementSystem.Map
             get
             {
                 var buildings = _buildings.GetRange(1, _buildings.Count - 1).ToArray();
-                MergeSort.Sort(buildings, (building1, building2) => building1.Name.CompareTo(building2.Name));
+                MergeSort.Sort(ref buildings, (building1, building2) => building1.Name.CompareTo(building2.Name));
                 return buildings.ToList();
             }
             set => _buildings = new List<Building> { Constants.DefaultBuilding }.Concat(value).ToList();

@@ -34,7 +34,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             {
                 AllocConsole();
                 IntPtr hWnd = Process.GetCurrentProcess().MainWindowHandle;
-                ShowWindow(hWnd, 0);
+                //ShowWindow(hWnd, 0);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -311,16 +311,20 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 i++;
             }
+
+            Times.Timer.Pause = true;
             StringBuilder builder = new();
             if (schedules.Count != 0)
             {
                 builder.AppendLine("明天有以下非临时日程：");
                 foreach ((int beginTime, string name) in schedules)
                 {
-                    builder.AppendLine($"{beginTime}:00，{name}。");
+                    builder.AppendLine($"\n\t{beginTime}:00，{name}。");
                 }
             }
             MessageBox.Show(builder.ToString(), "每日提醒");
+            Times.Timer.Pause = false;
+
             Times.Alarm.AddAlarm(param.timestamp + 22,
                                  RepetitiveType.Single,
                                  NotifyAllInComingDay,
