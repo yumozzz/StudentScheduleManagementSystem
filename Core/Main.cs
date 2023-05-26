@@ -1,6 +1,4 @@
-﻿//#define COURSEEXAMTEST
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Authentication;
@@ -39,17 +37,16 @@ namespace StudentScheduleManagementSystem.MainProgram
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 InitModules();
-                Times.Timer.TimeChange += t => Log.Information.Log($"当前时间{t.ToString()}");
+                Times.Timer.TimeChange += t => Log.Information.Log($"当前时间为{t.ToString()}");
                 Thread uiThread = new(() => Application.Run(new UI.MainWindow()));
                 uiThread.Start();
-
-                #region test
-
-                //var ta = new Schedule.TemporaryAffairs("name", new(){Hour = 12}, null, Map.Location.GetBuildingsByName("")[0]);
-
-                #endregion
-
                 uiThread.Join();
+            }
+            catch (EndOfSemester)
+            {
+                Task.Run(() => MessageBox.Show("学期结束，程序已退出"));
+                Log.Warning.Log("学期结束，程序已退出");
+                Logout();
             }
             catch (Exception ex)
             {
@@ -130,7 +127,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                               UserId,
                                                               Encryption.Encrypt.RSADecrypt);
                 }
-                catch (JsonFormatException ex)
+                catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
                 {
                     MessageBox.Show("用户文件读取出错，已退出");
                     Log.Error.Log("用户文件读取出错，已退出", ex);
@@ -221,10 +218,10 @@ namespace StudentScheduleManagementSystem.MainProgram
                 }
                 Schedule.Schedule.ReadSharedData();
             }
-            catch (JsonFormatException ex)
+            catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
             {
-                MessageBox.Show("账号文件读取出错，已退出");
-                Log.Error.Log("账号文件读取出错，已退出", ex);
+                MessageBox.Show("账号文件或共享日程文件读取出错，已退出");
+                Log.Error.Log("账号文件或共享日程文件读取出错", ex);
                 throw;
             }
         }
@@ -331,7 +328,7 @@ namespace StudentScheduleManagementSystem.Schedule
             if (course.IsOnline)
             {
                 Console.WriteLine($"在线地址为{course.OnlineLink!}");
-                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OnlineLink!);
+                UI.StudentAlarmWindow alarmWindow = new(course.Name, course.OnlineLink!);
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
                 GC.Collect();
@@ -339,7 +336,7 @@ namespace StudentScheduleManagementSystem.Schedule
             else
             {
                 Console.WriteLine($"地点为{course.OfflineLocation!.Value.Name}");
-                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(course.Name, course.OfflineLocation!.Value);
+                UI.StudentAlarmWindow alarmWindow = new(course.Name, course.OfflineLocation!.Value);
                 Times.Timer.Pause = true;
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
@@ -379,7 +376,7 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
             Console.WriteLine($"地点为{exam.OfflineLocation.Name}");
-            UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(exam.Name, exam.OfflineLocation);
+            UI.StudentAlarmWindow alarmWindow = new(exam.Name, exam.OfflineLocation);
             Times.Timer.Pause = true;
             alarmWindow.ShowDialog();
             alarmWindow.Dispose();
@@ -420,7 +417,7 @@ namespace StudentScheduleManagementSystem.Schedule
             if (activity.IsOnline)
             {
                 Console.WriteLine($"在线地址为{activity.OnlineLink!}");
-                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OnlineLink!);
+                UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OnlineLink!);
                 Times.Timer.Pause = true;
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
@@ -430,7 +427,7 @@ namespace StudentScheduleManagementSystem.Schedule
             else
             {
                 Console.WriteLine($"地点为{activity.OfflineLocation!.Value.Name}");
-                UI.StudentAlarmWindow alarmWindow = new UI.StudentAlarmWindow(activity.Name, activity.OfflineLocation!.Value);
+                UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OfflineLocation!.Value);
                 Times.Timer.Pause = true;
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
@@ -452,15 +449,15 @@ namespace StudentScheduleManagementSystem.Schedule
             else if (obj is Times.Alarm.TemporaryAffairParam o)
             {
                 param = o;
-                UI.StudentAlarmWindow _alarmWindow = new UI.StudentAlarmWindow(Array.ConvertAll(TemporaryAffair.GetAllAt(param.timestamp), affair => affair.Name).Aggregate((str, elem) => str = str + '、' + elem), param.locations);
-                _alarmWindow.ShowDialog();
-                _alarmWindow.Dispose();
-                GC.Collect();
             }
             else
             {
                 throw new ArgumentException(null, nameof(obj));
             }
+            UI.StudentAlarmWindow alarmWindow = new(Array.ConvertAll(TemporaryAffair.GetAllAt(param.timestamp), affair => affair.Name).Aggregate((str, elem) => str = str + '、' + elem), param.locations);
+            alarmWindow.ShowDialog();
+            alarmWindow.Dispose();
+            GC.Collect();
         }
     }
 }

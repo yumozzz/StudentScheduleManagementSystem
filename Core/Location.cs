@@ -44,7 +44,7 @@ namespace StudentScheduleManagementSystem.Map
                 }
                 Buildings = buildings;
             }
-            catch (JsonFormatException ex)
+            catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
             {
                 MessageBox.Show("地图文件读取出错，已退出");
                 Log.Error.Log("地图文件读取出错，已退出", ex);
