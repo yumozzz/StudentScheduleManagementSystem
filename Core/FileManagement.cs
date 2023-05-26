@@ -72,6 +72,8 @@ namespace StudentScheduleManagementSystem.FileManagement
             {
                 Directory.CreateDirectory(fileFolder);
             }
+            _userFileStream?.Close();
+            _userFileStream = null;
             JObject root = new();
             foreach (var @class in objects)
             {
@@ -84,8 +86,6 @@ namespace StudentScheduleManagementSystem.FileManagement
                                Encoding.UTF8.GetBytes(encryptFunc.Invoke(root.ToString())));
             #endif
             Log.Information.Log($"已保存学号为{fileName}的用户信息");
-            _userFileStream?.Close();
-            _userFileStream = null;
         }
 
         public static (JArray, JArray) ReadFromMapFile(string fileFolder, string fileName = "map")
