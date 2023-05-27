@@ -566,9 +566,6 @@ namespace StudentScheduleManagementSystem.UI
                                          new Times.Alarm.TemporaryAffairParam
                                          {
                                              timestamp = selected.BeginTime,
-                                             locations = Schedule.TemporaryAffair.GetAllAt(selected.BeginTime)
-                                                                 .Select(affair => affair.OfflineLocation)
-                                                                 .ToList()
                                          });
                     GenerateUserData(_scheduleType);
                     break;
