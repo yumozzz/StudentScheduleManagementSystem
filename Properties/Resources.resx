@@ -163,8 +163,14 @@
   <data name="户外实践_#ffffff_128_21601017" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\户外实践_#ffffff_128_21601017.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="LoginBG" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LoginBG.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="跑步_#ffffff_128_21590258" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\跑步_#ffffff_128_21590258.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="个人账户_#ffffff_128_21601167" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\个人账户_#ffffff_128_21601167.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ScheduleButtonBackground" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ScheduleButtonBackground.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -208,7 +214,7 @@
   <data name="地图_#ffffff_128_21601004" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\地图_#ffffff_128_21601004.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="个人账户_#ffffff_128_21601167" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\个人账户_#ffffff_128_21601167.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="LoginBG1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LoginBG1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -93,6 +93,26 @@ namespace StudentScheduleManagementSystem.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap LoginBG {
+            get {
+                object obj = ResourceManager.GetObject("LoginBG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap LoginBG1 {
+            get {
+                object obj = ResourceManager.GetObject("LoginBG1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap OPBG {
             get {
                 object obj = ResourceManager.GetObject("OPBG", resourceCulture);
