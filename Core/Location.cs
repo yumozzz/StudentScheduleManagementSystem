@@ -480,7 +480,7 @@ namespace StudentScheduleManagementSystem.Map
             List<int> points = new();
             for(int i=0; i < buildings.Count; i++)
             {
-                points.Add(buildings[i].Center.Id);
+                points.Add(buildings[i].Id);
             }
 
             if (points.Count <= 2 || points.Count >= 10) //建筑太多或太少，报错
@@ -506,71 +506,7 @@ namespace StudentScheduleManagementSystem.Map
                 result.Add(idtrans[shortestPath[i]]);
             }
 
-            string test = "设置断点用的";
-
-            for (int i = 0; i < row; i++)
-            {
-                dp[i, 0] = submap[i, 0];
-            }
-
-            for (int j = 1; j < column; j++)
-            {
-                for (int i = 0; i < row; i++)
-                {
-                    dp[i, j] = int.MaxValue;
-                    int bit = j >> (i - 1);
-                    if ((bit & 1) == 1)
-                    {
-                        continue;
-                    }
-                    for (int k = 1; k < row; k++)
-                    {
-                        int bit2 = j >> (k - 1);
-                        int bit3 = j ^ (1 << (k - 1));
-                        if ((bit2 & 1) == 1 && dp[i, j] > submap[i, k] + dp[k, bit3])
-                        {
-                            dp[i, j] = submap[i, k] + dp[k, bit3];
-                        }
-                    }
-                }
-            }
-            bool[] hasVisited = new bool[GlobalMap!.Size];
-            int p = 0, e = column - 1, t = 0, cyc = 0;
-            while (cyc++ < 10)
-            {
-                int min = int.MaxValue;
-                for (int i = 0; i < row; i++)
-                {
-                    int bit = 1 << (i - 1);
-                    if (!hasVisited[i] && (e & bit) == 1 &&
-                        min > (GlobalMap._adjArray[correspondence[i]][p].edge.Weight + dp[i, e ^ bit]))
-                    {
-                        min = GlobalMap._adjArray[correspondence[i]][p].edge.Weight + dp[i, e ^ bit];
-                        //min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
-                        t = correspondence[i];
-                    }
-                }
-                if (p == t)
-                {
-                    break;
-                }
-                p = t;
-                res.Add(p);
-                hasVisited[p] = true;
-                e ^= (1 << (p - 1));
-            }
-            res.Add(points[0]); //在建筑的关键点的最后添加一个出发点
-            //res只是关键的点的路径，并不包含所有点，下面这个finalCircuit才包含所有点
-            List<int> finalCircuit = new();
-            for (int i = 1; i < res.Count; i++)
-            {
-                List<int> sector = GetClosestPath(res[i - 1], res[i]);
-                foreach (var vertex in sector)
-                {
-                    finalCircuit.Add(vertex);
-                }
-            }
-            return finalCircuit;
+            return result;
         }
 
         //重载，寻找两点最短路径的路径长
