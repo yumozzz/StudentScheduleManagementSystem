@@ -201,7 +201,7 @@
             this.setTime.Name = "setTime";
             this.setTime.Size = new System.Drawing.Size(100, 35);
             this.setTime.TabIndex = 16;
-            this.setTime.Text = "SetTime";
+            this.setTime.Text = "设置时间";
             this.setTime.UseVisualStyleBackColor = false;
             this.setTime.Click += new System.EventHandler(this.SetTime_Click);
             // 

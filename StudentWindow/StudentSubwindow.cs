@@ -53,7 +53,7 @@ namespace StudentScheduleManagementSystem.UI
 
         #region tool methods
 
-        protected static StringBuilder GetBriefWeeks(int[] activeWeeks)
+        protected static StringBuilder GetBriefWeeks(int[] activeWeeks, bool measureIsHour)
         {
             if (activeWeeks.Length == 1)
             {
@@ -73,6 +73,10 @@ namespace StudentScheduleManagementSystem.UI
                             ret.Append(", ");
                         }
                         ret.Append(activeWeeks[i - 1]);
+                        if (measureIsHour)
+                        {
+                            ret.Append(":00");
+                        }
                     }
                     continuity++;
                 }
@@ -90,6 +94,10 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         ret.Append("-" + activeWeeks[i - 1].ToString());
                     }
+                    if (measureIsHour)
+                    {
+                        ret.Append(":00");
+                    }
                     continuity = 0;
                 }
             }
@@ -101,6 +109,10 @@ namespace StudentScheduleManagementSystem.UI
             else
             {
                 ret.Append("-" + activeWeeks[^1].ToString());
+            }
+            if (measureIsHour)
+            {
+                ret.Append(":00");
             }
 
             return ret;
@@ -324,7 +336,7 @@ namespace StudentScheduleManagementSystem.UI
                     this.scheduleDataTable.Rows.Add(null,
                                                     false,
                                                     sharedData.Name,
-                                                    GetBriefWeeks(sharedData.ActiveWeeks).ToString(),
+                                                    GetBriefWeeks(sharedData.ActiveWeeks, false).ToString(),
                                                     days.ToString(),
                                                     sharedData.Timestamp.Hour.ToString() + ":00",
                                                     sharedData.Duration.ToString() + "小时",
@@ -358,7 +370,11 @@ namespace StudentScheduleManagementSystem.UI
                     else
                     {
                         var cell = (DataGridViewCheckBoxCell)scheduleDataTable.Rows[middle].Cells[0];
-                        cell.Style.BackColor = Color.Gray;
+                        var row = (DataGridViewRow)scheduleDataTable.Rows[middle];
+                        for(int j = 0; j < row.Cells.Count; j++)
+                        {
+                            row.Cells[j].Style.BackColor = Color.LightGray;
+                        }
                         cell.ReadOnly = true;
                         break;
                     }
@@ -627,7 +643,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 else
                 {
-                    activeWeeks = GetBriefWeeks(schedule.ActiveWeeks).ToString();
+                    activeWeeks = GetBriefWeeks(schedule.ActiveWeeks, false).ToString();
                 }
 
                 scheduleDataTable.Rows.Add(null,
@@ -851,7 +867,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                this.weekBox.Text = GetBriefWeeks(selected.ActiveWeeks).ToString();
+                this.weekBox.Text = GetBriefWeeks(selected.ActiveWeeks, false).ToString();
                 foreach (Day activeDay in selected.ActiveDays)
                 {
                     this.dayBox.Text += activeDay.ToString()[..3] + "; ";
@@ -910,7 +926,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                this.weekBox.Text = GetBriefWeeks(selected.ActiveWeeks).ToString();
+                this.weekBox.Text = GetBriefWeeks(selected.ActiveWeeks, false).ToString();
                 foreach (Day activeDay in selected.ActiveDays)
                 {
                     this.dayBox.Text += activeDay.ToString()[..3] + "; ";
@@ -1076,7 +1092,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 else
                 {
-                    activeWeeks = GetBriefWeeks(schedule.ActiveWeeks).ToString();
+                    activeWeeks = GetBriefWeeks(schedule.ActiveWeeks, false).ToString();
                 }
 
                 scheduleDataTable.Rows.Add(null,
@@ -1111,7 +1127,7 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            StringBuilder availableTime = new("");
+            List<int> availableTime = new();
             if (_subwindowType == SubwindowType.TemporaryAffair)
             {
                 int startTime = (activeWeeks[0] - 1) * 7 * 24 + (int)activeDays[0] * 24;
@@ -1121,7 +1137,7 @@ namespace StudentScheduleManagementSystem.UI
                     ScheduleType scheduleType = Schedule.Schedule.GetRecordAt(i).ScheduleType;
                     if (scheduleType == ScheduleType.TemporaryAffair || scheduleType == ScheduleType.Idle)
                     {
-                        availableTime.Append((i - startTime).ToString() + ":00; ");
+                        availableTime.Add(i - startTime);
                     }
                 }
             } 
@@ -1153,13 +1169,13 @@ namespace StudentScheduleManagementSystem.UI
                     }
                     if (availableTimeArray[i])
                     {
-                        availableTime.Append((i + Schedule.Activity.Earliest).ToString() + ":00; ");
+                        availableTime.Add(i + Schedule.Activity.Earliest);
                     }
                 }
             }
-            if (availableTime.Length > 0)
+            if (availableTime.Count > 0)
             {
-                MessageBox.Show("日程可选时间：" + availableTime.ToString());
+                MessageBox.Show("日程可选起始时间：" + GetBriefWeeks(availableTime.ToArray(), true));
             }
             else
             {
