@@ -136,7 +136,7 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty] public int Duration { get; init; } = 1;
         [JsonProperty] public bool IsOnline { get; init; }
         [JsonProperty] public string? Description { get; init; }
-        [JsonProperty] public bool AlarmEnabled { get; protected set; }
+        [JsonProperty] public virtual bool AlarmEnabled { get; protected set; }
 
         #endregion
 
@@ -669,7 +669,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                  alarmTimeUpCallback,
                                  callbackParameter,
                                  this.GetType(),
-                                 typeof(T),
+                                 callbackParameter == null ? null : typeof(T),
                                  false,
                                  ActiveWeeks,
                                  ActiveDays); //默认为本日程的重复时间与启用日期
@@ -683,6 +683,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 throw new AlarmManipulationException();
             }
             Times.Alarm.RemoveAlarm(BeginTime - 1, RepetitiveType, ActiveWeeks, ActiveDays);
+            AlarmEnabled = false;
         }
 
         #endregion
@@ -1410,6 +1411,14 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #endregion
 
+        #region private fields
+
+        private long _next = 0;
+
+        private bool _alarmEnabled = false;
+
+        #endregion
+
         #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.TemporaryAffair;
@@ -1418,8 +1427,13 @@ namespace StudentScheduleManagementSystem.Schedule
 
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
         public new Map.Location.Building OfflineLocation { get; init; }
-
-        private long _next = 0;
+        [JsonProperty]
+        public override bool AlarmEnabled
+        {
+            get => ((TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id])._alarmEnabled;
+            protected set =>
+                ((TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id])._alarmEnabled = value;
+        }
 
         #endregion
 
@@ -1435,8 +1449,7 @@ namespace StudentScheduleManagementSystem.Schedule
             OnlineLink = null;
             OfflineLocation = location;
             AddSchedule(id);
-            AlarmEnabled =
-                ((TemporaryAffair)_scheduleDictionary[_timeline[beginTime.ToInt()].Id]).AlarmEnabled; //同步闹钟启用情况
+            _alarmEnabled = AlarmEnabled;
         }
 
         #endregion
@@ -1551,7 +1564,7 @@ namespace StudentScheduleManagementSystem.Schedule
             TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
             if (affair != this)
             {
-                affair.EnableAlarm(alarmTimeUpCallback);
+                affair.EnableAlarm(alarmTimeUpCallback, callbackParameter);
             }
             else
             {

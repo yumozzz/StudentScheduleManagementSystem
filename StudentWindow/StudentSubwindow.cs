@@ -570,9 +570,11 @@ namespace StudentScheduleManagementSystem.UI
                                                                  .Select(affair => affair.OfflineLocation)
                                                                  .ToList()
                                          });
+                    GenerateUserData(_scheduleType);
                     break;
                 case (ScheduleType.TemporaryAffair, false):
                     selected.DisableAlarm();
+                    GenerateUserData(_scheduleType);
                     break;
             }
         }
