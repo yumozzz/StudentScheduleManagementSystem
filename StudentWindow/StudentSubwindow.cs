@@ -195,7 +195,7 @@ namespace StudentScheduleManagementSystem.UI
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
-                MessageBox.Show("能且只能选择一个日程！");
+                MessageBox.Show("能且只能选择一个日程！", "提示");
                 return 0;
             }
 
@@ -234,14 +234,14 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 Debug.Assert(types.Length != 0);
                 types.Remove(types.Length - 1, 1);
-                MessageBox.Show("该日程与您的类型为" + types.ToString() + "的日程冲突");
+                MessageBox.Show("该日程与您的类型为" + types.ToString() + "的日程冲突", "提示");
                 return 0;
             }
             else
             {
                 if (showMessageBox)
                 {
-                    MessageBox.Show("该日程与您的日程没有冲突");
+                    MessageBox.Show("该日程与您的日程没有冲突", "提示");
                 }
                 return id;
             }
@@ -446,14 +446,14 @@ namespace StudentScheduleManagementSystem.UI
             pauseTimeDelegate.Invoke(true);
             if (_showAllData)
             {
-                MessageBox.Show("请在个人日程页面选择日程删除！");
+                MessageBox.Show("请在个人日程页面选择日程删除！", "提示");
                 return;
             }
 
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
-                MessageBox.Show("只能选择一个日程！");
+                MessageBox.Show("只能选择一个日程！", "提示");
                 return;
             }
 
@@ -470,10 +470,12 @@ namespace StudentScheduleManagementSystem.UI
             {
                 var selected = Schedule.Schedule.GetScheduleById(id);
                 selected!.DeleteSchedule();
+                MessageBox.Show("已成功删除该日程", "提示");
+                Log.Information.Log($"成功删除id为{id}的日程");
+                _selectedIds.Remove(id);
+                GenerateUserData(_scheduleType);
             }
             pauseTimeDelegate.Invoke(false);
-            _selectedIds.Remove(id);
-            GenerateUserData(_scheduleType);
         }
 
 
@@ -481,7 +483,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (this.searchByNameBox.Text.Equals(""))
             {
-                MessageBox.Show("请输入要搜索的日程名！");
+                MessageBox.Show("请输入要搜索的日程名！", "提示");
                 return;
             }
 
@@ -492,7 +494,7 @@ namespace StudentScheduleManagementSystem.UI
                                      .ToArray();
                 if (result.Length == 0)
                 {
-                    MessageBox.Show("未搜索到日程！");
+                    MessageBox.Show("未搜索到日程！", "提示");
                     return;
                 }
                 GenerateSharedData(result);
@@ -504,7 +506,7 @@ namespace StudentScheduleManagementSystem.UI
                                      .ToArray();
                 if (result.Length == 0)
                 {
-                    MessageBox.Show("未搜索到日程！");
+                    MessageBox.Show("未搜索到日程！", "提示");
                     return;
                 }
                 GenerateUserData(result);
@@ -704,7 +706,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (!errorMessage.Equals(""))
             {
-                MessageBox.Show(errorMessage.ToString());
+                MessageBox.Show(errorMessage.ToString(), "错误");
                 return false;
             }
 
@@ -819,7 +821,7 @@ namespace StudentScheduleManagementSystem.UI
 
             if (!_showAllData)
             {
-                MessageBox.Show("请在全部日程的页面选择日程添加！");
+                MessageBox.Show("请在全部日程的页面选择日程添加！",  "提示");
                 return;
             }
 
@@ -877,14 +879,14 @@ namespace StudentScheduleManagementSystem.UI
 
             if (_showAllData)
             {
-                MessageBox.Show("请在个人日程页面选择日程修改！");
+                MessageBox.Show("请在个人日程页面选择日程修改！", "提示");
                 return;
             }
 
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
-                MessageBox.Show("只能选择一个日程！");
+                MessageBox.Show("只能选择一个日程！", "提示");
                 return;
             }
 
@@ -971,7 +973,7 @@ namespace StudentScheduleManagementSystem.UI
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
-                MessageBox.Show("只能选择一个日程！");
+                MessageBox.Show("只能选择一个日程！", "提示");
                 return;
             }
 
@@ -1001,6 +1003,7 @@ namespace StudentScheduleManagementSystem.UI
             this.descriptionBox.Text = "";
             if (_subwindowState == SubwindowState.ReviseUserSchedule)
             {
+                Log.Information.Log($"成功修改id为{_originId!.Value}的共享日程");
                 GenerateUserData(_scheduleType);
             }
             _subwindowState = SubwindowState.Viewing;
@@ -1166,11 +1169,11 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (availableTime.Length > 0)
             {
-                MessageBox.Show("日程可选时间：" + availableTime.ToString());
+                MessageBox.Show("日程可选时间：" + availableTime.ToString(), "提示");
             }
             else
             {
-                MessageBox.Show("所选时段没有空闲时间！");
+                MessageBox.Show("所选时段没有空闲时间！", "提示");
             }
         }
 
@@ -1331,7 +1334,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (errorMessage.Length != 0)
             {
-                MessageBox.Show(errorMessage.ToString());
+                MessageBox.Show(errorMessage.ToString(), "错误");
                 return false;
             }
 
@@ -1447,7 +1450,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (!errorMessage.Equals(""))
             {
-                MessageBox.Show(errorMessage.ToString());
+                MessageBox.Show(errorMessage.ToString(), "错误");
                 return false;
             }
 
@@ -1539,7 +1542,7 @@ namespace StudentScheduleManagementSystem.UI
 
             if (beginHour + duration >= Schedule.Activity.Latest)
             {
-                MessageBox.Show("活动结束时间不得晚于规定时间！");
+                MessageBox.Show("活动结束时间不得晚于规定时间！", "提示");
                 return;
             }
 
@@ -1610,7 +1613,7 @@ namespace StudentScheduleManagementSystem.UI
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
-                MessageBox.Show("只能选择一个日程！");
+                MessageBox.Show("只能选择一个日程！", "提示");
                 return;
             }
 
@@ -1789,7 +1792,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (errorMessage.Length != 0)
             {
-                MessageBox.Show(errorMessage.ToString());
+                MessageBox.Show(errorMessage.ToString(), "错误");
                 return false;
             }
 
@@ -1851,7 +1854,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (!errorMessage.Equals(""))
             {
-                MessageBox.Show(errorMessage.ToString());
+                MessageBox.Show(errorMessage.ToString(), "错误");
                 return;
             }
 
@@ -1893,7 +1896,7 @@ namespace StudentScheduleManagementSystem.UI
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
             {
-                MessageBox.Show("只能选择一个日程！");
+                MessageBox.Show("只能选择一个日程！", "提示");
                 return;
             }
 

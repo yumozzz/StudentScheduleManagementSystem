@@ -46,7 +46,7 @@ namespace StudentScheduleManagementSystem.Map
             }
             catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
             {
-                MessageBox.Show("地图文件读取出错，已退出");
+                MessageBox.Show("地图文件读取出错，已退出", "错误");
                 Log.Error.Log("地图文件读取出错，已退出", ex);
                 throw;
             }
@@ -592,6 +592,10 @@ namespace StudentScheduleManagementSystem.Map
             //遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = GlobalMap!.Size; //点的数量
             List<int>[] route = new List<int>[pointCount];
+            for (int i = 0; i < pointCount; i++)
+            {
+                route[i] = new();
+            }
             int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distanceFromStart, int.MaxValue);
             distanceFromStart[startId] = 0;
