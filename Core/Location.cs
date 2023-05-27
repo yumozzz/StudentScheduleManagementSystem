@@ -599,6 +599,7 @@ namespace StudentScheduleManagementSystem.Map
             for (int i = 0; i < pointCount; i++)
             {
                 route[i] = new();
+                isgone[i] = false;
             }
             int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
             Array.Fill(distanceFromStart, 1000000);
@@ -608,13 +609,6 @@ namespace StudentScheduleManagementSystem.Map
 
             for (int i = 0; i < pointCount; i++) //循环len-1次
             {
-                //var nexts = GlobalMap[curId]; //nexts为点[z]
-
-                //int cyc = 0; //遍历的次数，每次循环后++
-                //foreach ((int id, int dist) in nexts)
-
-                //for(int j = 0; j < GlobalMap[curId].Count(); j++)
-                
                 for(int j = 0; j < GlobalMap._adjArray[curId].Count; j++)
                 {
                     int id = GlobalMap._adjArray[curId][j].pointId;
@@ -642,17 +636,12 @@ namespace StudentScheduleManagementSystem.Map
                         tempId = j;
                     }
                 }
-                Console.Write(i);
-                Console.Write(" ");
-                Console.WriteLine(curId);
                 isgone[curId] = true;
                 curId = tempId;
 
             }
-            for (int i = 0; i < route[endId].Count; i++)
-            {
-                Console.WriteLine(route[endId][i]);
-            }
+            //  for(int i = 0; i < route[endId].Count; i++)
+            //      Console.WriteLine(route[endId][i]);
 
             return route[endId];
         }
@@ -661,32 +650,37 @@ namespace StudentScheduleManagementSystem.Map
         {
             int pointCount = GlobalMap!.Size; //点的数量
             int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
-            Array.Fill(distance, int.MaxValue);
+            Array.Fill(distance, 100000);
+            bool[] isgone = new bool[pointCount];
+            Array.Fill(isgone, false);
             distance[startId] = 0;
             int curId = startId;
 
             for (int i = 1; i < pointCount; i++)
             {
-                var nexts = GlobalMap[i]; //nexts为点[z]
-                foreach ((int id, int dist) in nexts)
+                for (int j = 0; j < GlobalMap._adjArray[curId].Count; j++)
                 {
-                    if (distance[i] > distance[id] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
+                    int id = GlobalMap._adjArray[curId][j].pointId;
+                    int dist = GlobalMap._adjArray[curId][j].edge.Weight;
+                    if (distance[id] > distance[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
-                        distance[i] = distance[curId] + dist; //替换从出发点到点[z]的最短距离
+                        distance[id] = distance[curId] + dist; //替换从出发点到点[z]的最短距离
                     }
                 }
 
                 //遍历所有点，寻找下一个距离最近的点
-                int minDistance = int.MaxValue;
-                int tempId = -1;
+                int minDistance = 100000;
+                int tempId = startId;
                 for (int j = 0; j < pointCount; j++)
                 {
-                    if (j != curId && distance[j] >= distance[curId] && distance[j] < minDistance)
+                    if (j != curId && distance[j] >= distance[curId] &&
+                        distance[j] < minDistance && isgone[j] == false)
                     {
                         minDistance = distance[j];
                         tempId = j;
                     }
                 }
+                isgone[curId] = true;
                 curId = tempId;
             }
             return distance[endId];
