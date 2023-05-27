@@ -153,11 +153,10 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                               FileManagement.FileManager.UserFileDirectory,
                                                               UserId,
                                                               Encryption.Encrypt.RSADecrypt);
-                    _ = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
-                                                      .UserFileDirectory,
-                                                   inputUserId,
-                                                   Encryption.Encrypt.RSADecrypt,
-                                                   true);
+                    _ = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
+                                                                    inputUserId,
+                                                                    Encryption.Encrypt.RSADecrypt,
+                                                                    true);
                 }
                 catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
                 {
@@ -508,10 +507,10 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 throw new ArgumentException(null, nameof(obj));
             }
+            var affairs = GetAllAt(param.timestamp);
             UI.StudentAlarmWindow alarmWindow =
-                new(Array.ConvertAll(TemporaryAffair.GetAllAt(param.timestamp), affair => affair.Name)
-                         .Aggregate((str, elem) => str = str + '、' + elem),
-                    param.locations);
+                new(Array.ConvertAll(affairs, affair => affair.Name).Aggregate((str, elem) => str = str + '、' + elem),
+                    affairs.Select(affair => affair.OfflineLocation).ToList());
             alarmWindow.ShowDialog();
             alarmWindow.Dispose();
             GC.Collect();
@@ -536,7 +535,6 @@ namespace StudentScheduleManagementSystem.Times
         public struct TemporaryAffairParam
         {
             public Time timestamp;
-            public List<Map.Location.Building> locations;
         }
     }
 }
