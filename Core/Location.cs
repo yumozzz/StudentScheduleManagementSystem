@@ -411,14 +411,14 @@ namespace StudentScheduleManagementSystem.Map
         {
             int numberOfCities = adjacencyMatrix.GetLength(0);
 
-            List<int> cities = new List<int>();
+            List<int> cities = new();
             for (int i = 0; i < numberOfCities; i++)
             {
                 if (i != startCity)
                     cities.Add(i);
             }
 
-            List<int> shortestPath = new List<int>();
+            List<int> shortestPath = new();
             int shortestDistance = int.MaxValue;
 
             Permute(startCity, adjacencyMatrix, cities, 0, cities.Count - 1, ref shortestPath, ref shortestDistance);
@@ -467,49 +467,22 @@ namespace StudentScheduleManagementSystem.Map
             return distance;
         }
 
-        public static void Swap(List<int> list, int i, int j)
-        {
-            int temp = list[i];
-            list[i] = list[j];
-            list[j] = temp;
-        }
-
-
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
-            List<int> points = new();
-            for(int i=0; i < buildings.Count; i++)
-            {
-                points.Add(buildings[i].Id);
-            }
+            List<int> points = new(buildings.ConvertAll(building => building.Center.Id));
 
             if (points.Count <= 2 || points.Count >= 10) //建筑太多或太少，报错
             {
                 throw new ArgumentException("too many or too few items in parameter \"buildings\"");
             }
             (int[,] submap, int[] correspondence) = CreateSubMap(points);
-            int row = submap.GetLength(0), column = 1 << (row - 1);
-            int[,] dp = new int[20, 1 << 20];
-            List<int> res = new() { points[0] };
-            Dictionary<int, int> idtrans = new Dictionary<int, int>();
-            for (int i = 0; i < points.Count(); i++)
-            {
-                idtrans.Add(i, points[i]);
-            }
 
             int startCity = 0;
-
             List<int> shortestPath = SolveTSP(startCity, submap);
-            List<int> result = new();
-            for (int i = 0; i < shortestPath.Count(); i++)
-            {
-                result.Add(idtrans[shortestPath[i]]);
-            }
-
-            return result;
+            return new(shortestPath.ConvertAll(id => correspondence[id]));
         }
 
-        //重载，寻找两点最短路径的路径长
+        //寻找两点最短路径的路径长
         public static int GetClosestPathLength(Building startBuilding, Building endBuilding)
         {
             return GetClosestPathLength(startBuilding.Center.Id, endBuilding.Center.Id);
@@ -622,14 +595,14 @@ namespace StudentScheduleManagementSystem.Map
             //遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = GlobalMap!.Size; //点的数量
             List<int>[] route = new List<int>[pointCount];
-            bool[] isgone = new bool[pointCount];
+            bool[] visited = new bool[pointCount];
             for (int i = 0; i < pointCount; i++)
             {
                 route[i] = new();
-                isgone[i] = false;
+                visited[i] = false;
             }
             int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
-            Array.Fill(distanceFromStart, 1000000);
+            Array.Fill(distanceFromStart, int.MaxValue);
             distanceFromStart[startId] = 0;
             route[startId].Add(startId);
             int curId = startId;
@@ -652,18 +625,18 @@ namespace StudentScheduleManagementSystem.Map
                 }
 
                 //遍历所有点，寻找下一个距离最近的点
-                int minDistance = 1000000;
+                int minDistance = int.MaxValue;
                 int tempId = startId;
                 for (int j = 0; j < pointCount; j++)
                 {
                     if (j != curId && distanceFromStart[j] >= distanceFromStart[curId] &&
-                        distanceFromStart[j] < minDistance && isgone[j] == false)
+                        distanceFromStart[j] < minDistance && visited[j] == false)
                     {
                         minDistance = distanceFromStart[j];
                         tempId = j;
                     }
                 }
-                isgone[curId] = true;
+                visited[curId] = true;
                 curId = tempId;
 
             }
@@ -677,9 +650,9 @@ namespace StudentScheduleManagementSystem.Map
         {
             int pointCount = GlobalMap!.Size; //点的数量
             int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
-            Array.Fill(distance, 100000);
-            bool[] isgone = new bool[pointCount];
-            Array.Fill(isgone, false);
+            Array.Fill(distance, int.MaxValue);
+            bool[] visited = new bool[pointCount];
+            Array.Fill(visited, false);
             distance[startId] = 0;
             int curId = startId;
 
@@ -696,18 +669,18 @@ namespace StudentScheduleManagementSystem.Map
                 }
 
                 //遍历所有点，寻找下一个距离最近的点
-                int minDistance = 100000;
+                int minDistance = int.MaxValue;
                 int tempId = startId;
                 for (int j = 0; j < pointCount; j++)
                 {
                     if (j != curId && distance[j] >= distance[curId] &&
-                        distance[j] < minDistance && isgone[j] == false)
+                        distance[j] < minDistance && visited[j] == false)
                     {
                         minDistance = distance[j];
                         tempId = j;
                     }
                 }
-                isgone[curId] = true;
+                visited[curId] = true;
                 curId = tempId;
             }
             return distance[endId];
@@ -725,6 +698,13 @@ namespace StudentScheduleManagementSystem.Map
                 ret.Add(obj);
             }
             return ret;
+        }
+
+        private static void Swap(List<int> list, int i, int j)
+        {
+            int temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
         }
 
         #endregion
