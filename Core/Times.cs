@@ -673,6 +673,7 @@ namespace StudentScheduleManagementSystem.Times
         private static Time _localTime = new();
         private static int _offset = 0;
         private static bool _pause = false;
+        private static int _since = 0;
         public static bool Pause
         {
             get => _pause;
@@ -695,21 +696,28 @@ namespace StudentScheduleManagementSystem.Times
         {
             _localTime = new();
             _offset = 0;
+            _since = 10000;
             while (!MainProgram.Program.Cts.IsCancellationRequested)
             {
                 if (!Pause && UI.MainWindow.StudentWindow != null)
                 {
+                    _since += 50;
+                }
+                Thread.Sleep(50);
+                if (_since >= BaseTimeoutMs / _acceleration)
+                {
+                    _since = 0;
                     _timeChangeEventHandler.Invoke(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
                 }
-                Thread.Sleep(BaseTimeoutMs / _acceleration);
             }
         }
 
         public static void SetTime(Time time)
         {
+            _since = 10000;
             _localTime = time;
             _offset = time.ToInt();
             Log.Information.Log($"时间已被设定为{_localTime.ToString()}");
@@ -732,7 +740,7 @@ namespace StudentScheduleManagementSystem.Times
                     Log.Information.Log("时间流速已设定为1x");
                     return 1;
                 default:
-                    return 0;
+                    throw new ArgumentException(null, nameof(_acceleration));
             }
         }
     }
