@@ -570,9 +570,11 @@ namespace StudentScheduleManagementSystem.UI
                                                                  .Select(affair => affair.OfflineLocation)
                                                                  .ToList()
                                          });
+                    GenerateUserData(_scheduleType);
                     break;
                 case (ScheduleType.TemporaryAffair, false):
                     selected.DisableAlarm();
+                    GenerateUserData(_scheduleType);
                     break;
             }
         }
@@ -1765,7 +1767,7 @@ namespace StudentScheduleManagementSystem.UI
         protected override void GenerateUserData(Schedule.Schedule[] data)
         {
             scheduleDataTable.Rows.Clear();
-            int[] widths = { 30, 55, 130, 50, 80, 60, 60, 150, 150 };
+            int[] widths = { 30, 55, 130, 80, 80, 60, 60, 150, 150 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleDataTable.Columns[i].Width = widths[i];

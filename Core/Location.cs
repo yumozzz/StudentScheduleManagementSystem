@@ -327,10 +327,7 @@ namespace StudentScheduleManagementSystem.Map
 
             #endif
 
-            public List<(int, int)> this[int id]
-            {
-                get => _adjArray[id].Select(node => (id, node.pointId)).ToList();
-            }
+            public List<(int, int)> this[int id] => _adjArray[id].Select(node => (id, node.pointId)).ToList();
 
             public Edge? this[int fromId, int toId]
             {
@@ -717,26 +714,29 @@ namespace StudentScheduleManagementSystem.Map
                 throw new ArgumentException("too few points");
             }
             int prevId = points[0];
-            for (int i = 1; i < points.Count - 1; i++)
+            for (int i = 1; i < points.Count; i++)
             {
-                Location.Edge? edge = Location.GlobalMap![prevId, i];
+                Location.Edge? edge = Location.GlobalMap![prevId, points[i]];
                 if (!edge.HasValue)
                 {
-                    throw new ArgumentException($"there's no edge between vertex {prevId} and {i}");
+                    throw new ArgumentException($"there's no edge between vertex {prevId} and {points[i]}");
                 }
                 if (edge.Value.Type == Location.EdgeType.Line)
                 {
-                    lineEndPointPairs.Add((Location.GlobalMap.GetVertex(prevId), Location.GlobalMap.GetVertex(i)));
+                    lineEndPointPairs.Add((Location.GlobalMap.GetVertex(prevId), Location.GlobalMap.GetVertex(points[i])));
                 }
                 else
                 {
                     bezCurveControlPointTuples.Add((Location.GlobalMap.GetVertex(prevId),
                                                     edge.Value.Controls!.Value.Item1, edge.Value.Controls!.Value.Item2,
-                                                    Location.GlobalMap.GetVertex(i)));
+                                                    Location.GlobalMap.GetVertex(points[i])));
                 }
+                prevId = points[i];
             }
             UI.MapWindow mapWindow = new(lineEndPointPairs, bezCurveControlPointTuples);
-            mapWindow.ShowDialog();
+            Thread thread = new(() => mapWindow.ShowDialog());
+            thread.Start();
+            thread.Join();
         }
     }
 }

@@ -33,7 +33,6 @@
                                     controlPoints.Item3,
                                     new(controlPoints.Item4.X, controlPoints.Item4.Y));
             }
-
         }
     }
 }
