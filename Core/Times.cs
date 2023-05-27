@@ -740,7 +740,7 @@ namespace StudentScheduleManagementSystem.Times
                     Log.Information.Log("时间流速已设定为1x");
                     return 1;
                 default:
-                    return 0;
+                    throw new ArgumentException(null, nameof(_acceleration));
             }
         }
     }

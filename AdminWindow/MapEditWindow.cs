@@ -86,7 +86,7 @@
                             UpdateGraphics();
                         }
                     }
-                    Thread.Sleep(15);
+                    Thread.Sleep(150);
                 }
             });
             Controls.Add(_textBox);
