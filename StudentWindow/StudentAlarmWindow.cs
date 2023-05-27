@@ -49,7 +49,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 buildingComboBox.Items.Add(building.Name);
             }
-            this.alarmName.Text = scheduleName;
+            this.alarmName.Text = "闹钟：" + scheduleName;
             this.onlineLinkLinkLabel.Hide();
             this.onlineLinkLabel.Hide();
             _targetBuildings = targetBuildings;
