@@ -126,21 +126,6 @@
             this.hourComboBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.hourComboBox.ForeColor = System.Drawing.SystemColors.WindowText;
             this.hourComboBox.FormattingEnabled = true;
-            this.hourComboBox.Items.AddRange(new object[] {
-            "8:00",
-            "9:00",
-            "10:00",
-            "11:00",
-            "12:00",
-            "13:00",
-            "14:00",
-            "15:00",
-            "16:00",
-            "17:00",
-            "18:00",
-            "19:00",
-            "20:00",
-            "21:00"});
             this.hourComboBox.Location = new System.Drawing.Point(735, 228);
             this.hourComboBox.Name = "hourComboBox";
             this.hourComboBox.Size = new System.Drawing.Size(135, 32);

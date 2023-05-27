@@ -22,8 +22,8 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         internal static CancellationTokenSource Cts { get; set; } = new();
         internal static DataStructure.HashTable<string, (string, string)> _accounts = new();
-        public static string UserId { get; private set; } = String.Empty;
-        public static string Password { get; private set; } = String.Empty;
+        public static string UserId { get; private set; } = string.Empty;
+        public static string Password { get; private set; } = string.Empty;
         public static Identity @Identity { get; private set; } = Identity.Null;
 
         [STAThread]
@@ -34,7 +34,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             {
                 AllocConsole();
                 IntPtr hWnd = Process.GetCurrentProcess().MainWindowHandle;
-                //ShowWindow(hWnd, 0);
+                ShowWindow(hWnd, 0);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -95,6 +95,10 @@ namespace StudentScheduleManagementSystem.MainProgram
         [DllImport("User32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool ShowWindow(IntPtr hWnd, int type);
+
+        [DllImport("gdi32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.I4)]
+        public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
 
         private static Dictionary<string, JArray> CreateInstanceDictionary() =>
             new()
@@ -313,18 +317,22 @@ namespace StudentScheduleManagementSystem.Schedule
                 i++;
             }
 
-            Times.Timer.Pause = true;
             StringBuilder builder = new();
             if (schedules.Count != 0)
             {
                 builder.AppendLine("明天有以下非临时日程：");
+                int i = 0;
                 foreach ((int beginTime, string name) in schedules)
                 {
-                    builder.AppendLine($"\n\t{beginTime}:00，{name}。");
+                    builder.AppendLine($"\n{i}.  {beginTime}:00，{name}。");
                 }
             }
-            MessageBox.Show(builder.ToString(), "每日提醒");
-            Times.Timer.Pause = false;
+            if (!builder.Equals(""))
+            {
+                Times.Timer.Pause = true;
+                MessageBox.Show(builder.ToString(), "每日提醒");
+                Times.Timer.Pause = false;
+            }
 
             Times.Alarm.AddAlarm(param.timestamp + 22,
                                  RepetitiveType.Single,

@@ -26,7 +26,7 @@
             {
                 Label label = new()
                 {
-                    Location = new(building.Center.ToPoint().X + 20, building.Center.ToPoint().Y + 20),
+                    Location = new((int)((building.Center.ToPoint().X + 20) / 1.5), (int)((building.Center.ToPoint().Y + 20) / 1.5)),
                     Size = new(100, 24),
                     Text = building.Name,
                     AutoSize = true,
@@ -88,7 +88,7 @@
                         }
                     }
                     DateTime end = DateTime.Now;
-                    Thread.Sleep(end - begin);
+                    Thread.Sleep((end - begin) / 2);
                 }
             });
             Controls.Add(_textBox);
@@ -221,6 +221,10 @@
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:
+                    if (_textBox.Visible)
+                    {
+                        return;
+                    }
                     _xLock = _xLock.HasValue
                                  ? null
                                  : (_selected?.X ?? pictureBox1.PointToClient(Control.MousePosition).X);
@@ -246,6 +250,10 @@
                     }
                     break;
                 case Keys.ControlKey:
+                    if (_textBox.Visible)
+                    {
+                        return;
+                    }
                     _yLock = _yLock.HasValue
                                  ? null
                                  : (_selected?.Y ?? pictureBox1.PointToClient(Control.MousePosition).Y);
@@ -313,7 +321,7 @@
                     }
                     _isInputting = true;
                     _textBox.Location = new(_selected.Value.X + 20, _selected.Value.Y + 20);
-                    _textBox.Text = _points[_selected.Value]?.Item1 ?? String.Empty;
+                    _textBox.Text = _points[_selected.Value]?.Item1 ?? string.Empty;
                     _textBox.Show();
                     e.Handled = true;
                     break;
@@ -342,20 +350,21 @@
                 alt:
                     if (_isInputting)
                     {
-                        break;
+                        return;
                     }
                     foreach (var tuple in _points.Values)
                     {
-                        if (tuple.HasValue)
+                        if (!tuple.HasValue)
                         {
-                            if (_showLabels)
-                            {
-                                tuple.Value.Item2.Show();
-                            }
-                            else
-                            {
-                                tuple.Value.Item2.Hide();
-                            }
+                            continue;
+                        }
+                        if (_showLabels)
+                        {
+                            tuple.Value.Item2.Show();
+                        }
+                        else
+                        {
+                            tuple.Value.Item2.Hide();
                         }
                     }
                     _showLabels = !_showLabels;

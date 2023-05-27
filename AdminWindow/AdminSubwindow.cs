@@ -86,11 +86,13 @@ namespace StudentScheduleManagementSystem.UI
         }
 
         protected bool GetScheduleInfo(bool showMessageBox,
+                                       int earliest,
+                                       int latest,
                                        out string name,
                                        out RepetitiveType repetitiveType,
                                        out int[] activeWeeks,
                                        out Day[] activeDays,
-                                       out int beginHour,
+                                       out Times.Time beginTime,
                                        out int duration)
         {
             StringBuilder errorMessage = new();
@@ -98,7 +100,7 @@ namespace StudentScheduleManagementSystem.UI
             repetitiveType = RepetitiveType.Null;
             activeWeeks = Constants.EmptyIntArray;
             activeDays = Constants.EmptyDayArray;
-            beginHour = 0;
+            beginTime = new();
             duration = 0;
 
             char[] arr = nameBox.Text.ToCharArray();
@@ -140,11 +142,6 @@ namespace StudentScheduleManagementSystem.UI
             {
                 errorMessage.AppendLine("请输入日程时长！");
             }
-            if (!errorMessage.Equals(""))
-            {
-                MessageBox.Show(errorMessage.ToString(), "错误");
-                return false;
-            }
 
             name = nameBox.Text;
             if (weekSelectBox.ValidCount == 1 && daySelectBox.ValidCount == 1)
@@ -159,6 +156,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 repetitiveType = RepetitiveType.Designated;
             }
+
             activeWeeks = new int[weekSelectBox.ValidCount];
             int activeWeekCount = 0;
             for (int i = 0; i < weekSelectBox.TotalCount; i++)
@@ -175,31 +173,37 @@ namespace StudentScheduleManagementSystem.UI
             {
                 if (daySelectBox.Selects[i])
                 {
-                    activeDays[activeDayCount] = Constants.AllDays[i];
+                    activeDays[activeDayCount] = (Day)i;
                     activeDayCount++;
                 }
             }
 
-            duration = durationComboBox.Text[0] - '0';
-
-            if (hourComboBox.Text.Length == 5)
-            {
-                beginHour = (hourComboBox.Text[0] - '0') * 10 + hourComboBox.Text[1] - '0';
-            }
-            else
-            {
-                beginHour = hourComboBox.Text[0] - '0';
-            }
-
-            Times.Time timestamp;
-
+            duration = durationComboBox?.SelectedIndex + 1 ?? 1;
+            int beginHour = hourComboBox.SelectedIndex + earliest;
             if (repetitiveType == RepetitiveType.Single)
             {
-                timestamp = new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour };
+                beginTime = new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour };
+                activeWeeks = Constants.EmptyIntArray;
+                activeDays = Constants.EmptyDayArray;
+            }
+            else if (repetitiveType == RepetitiveType.MultipleDays)
+            {
+                beginTime = new() { Hour = beginHour };
+                activeWeeks = Constants.EmptyIntArray;
             }
             else
             {
-                timestamp = new() { Hour = beginHour };
+                beginTime = new() { Hour = beginHour };
+            }
+
+            if (beginHour + duration >= latest)
+            {
+                errorMessage.AppendLine("日程结束时间不得晚于最晚时间！");
+            }
+            if (!errorMessage.Equals(""))
+            {
+                MessageBox.Show(errorMessage.ToString(), "错误");
+                return false;
             }
 
             return showMessageBox
@@ -207,9 +211,10 @@ namespace StudentScheduleManagementSystem.UI
                                                                   repetitiveType,
                                                                   activeWeeks,
                                                                   activeDays,
-                                                                  timestamp,
-                                                                  duration)
-                                               .ToString(),
+                                                                  beginTime,
+                                                                  duration,
+                                                                  null,
+                                                                  null),
                                          "确认日程信息",
                                          MessageBoxButtons.OKCancel) == DialogResult.OK
                        : true;
@@ -498,71 +503,37 @@ namespace StudentScheduleManagementSystem.UI
         public CourseSubwindow()
             : base(ScheduleType.Course)
         {
-            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri" };
-            this.daySelectBox.InitializeBox(days);
+            this.daySelectBox.InitializeBox(Shared.Days[..^3]);
+            this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
         }
 
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
             bool confirm = GetScheduleInfo(showMessageBox,
+                                           Schedule.Course.Earliest,
+                                           Schedule.Course.Latest,
                                            out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
                                            out Day[] activeDays,
-                                           out int beginHour,
+                                           out Times.Time beginTime,
                                            out int duration);
-
             if (!confirm)
             {
                 return false;
             }
 
-            if (beginHour + duration >= Schedule.Course.Latest)
-            {
-                MessageBox.Show("课程结束时间不得晚于规定时间！", "提示");
-                return false;
-            }
-
-            if (repetitiveType == RepetitiveType.Single)
-            {
-                _ = new Schedule.Course(RepetitiveType.Single,
-                                        name,
-                                        new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
-                                        duration,
-                                        null,
-                                        Constants.DefaultBuilding,
-                                        Constants.EmptyIntArray,
-                                        Constants.EmptyDayArray,
-                                        ScheduleOperationType.AdminOperation,
-                                        id);
-            }
-            else if (repetitiveType == RepetitiveType.MultipleDays)
-            {
-                _ = new Schedule.Course(RepetitiveType.MultipleDays,
-                                        name,
-                                        new() { Hour = beginHour },
-                                        duration,
-                                        null,
-                                        Constants.DefaultBuilding,
-                                        Constants.EmptyIntArray,
-                                        activeDays,
-                                        ScheduleOperationType.AdminOperation,
-                                        id);
-            }
-            else
-            {
-                _ = new Schedule.Course(RepetitiveType.Designated,
-                                        name,
-                                        new() { Hour = beginHour },
-                                        duration,
-                                        null,
-                                        Constants.DefaultBuilding,
-                                        activeWeeks,
-                                        activeDays,
-                                        ScheduleOperationType.AdminOperation,
-                                        id);
-            }
+            _ = new Schedule.Course(repetitiveType,
+                                    name,
+                                    beginTime,
+                                    duration,
+                                    null,
+                                    Constants.DefaultBuilding,
+                                    activeWeeks,
+                                    activeDays,
+                                    ScheduleOperationType.AdminOperation,
+                                    id);
             if (id == null)
             {
                 MessageBox.Show("已成功添加该课程", "提示");
@@ -577,28 +548,23 @@ namespace StudentScheduleManagementSystem.UI
         public ExamSubwindow()
             : base(ScheduleType.Exam)
         {
-            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-            this.daySelectBox.InitializeBox(days);
+            this.daySelectBox.InitializeBox(Shared.Days[..^3]);
+            this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
         }
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
             bool confirm = GetScheduleInfo(showMessageBox,
+                                           Schedule.Exam.Earliest,
+                                           Schedule.Exam.Latest,
                                            out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
                                            out Day[] activeDays,
-                                           out int beginHour,
+                                           out Times.Time beginTime,
                                            out int duration);
-
             if (!confirm)
             {
-                return false;
-            }
-
-            if (beginHour + duration >= Schedule.Exam.Latest)
-            {
-                MessageBox.Show("考试结束时间不得晚于规定时间！", "提示");
                 return false;
             }
 
@@ -609,7 +575,7 @@ namespace StudentScheduleManagementSystem.UI
             }
 
             _ = new Schedule.Exam(name,
-                                  new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
+                                  beginTime,
                                   duration,
                                   null,
                                   Constants.DefaultBuilding,
@@ -629,74 +595,38 @@ namespace StudentScheduleManagementSystem.UI
         public GroupActivitySubwindow()
             : base(ScheduleType.Activity)
         {
-            string[] days = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-            this.daySelectBox.InitializeBox(days);
+            this.daySelectBox.InitializeBox(Shared.Days);
+            this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>());
         }
 
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
         {
             bool confirm = GetScheduleInfo(showMessageBox,
+                                           Schedule.Activity.Earliest,
+                                           Schedule.Activity.Latest,
                                            out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
                                            out Day[] activeDays,
-                                           out int beginHour,
+                                           out Times.Time beginTime,
                                            out int duration);
-
             if (!confirm)
             {
                 return false;
             }
 
-            if (beginHour + duration >= Schedule.Activity.Latest)
-            {
-                MessageBox.Show("活动结束时间不得晚于规定时间！", "提示");
-                return false;
-            }
-
-            if (repetitiveType == RepetitiveType.Single)
-            {
-                _ = new Schedule.Activity(RepetitiveType.Single,
-                                          name,
-                                          new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
-                                          duration,
-                                          null,
-                                          Constants.DefaultBuilding,
-                                          true,
-                                          Constants.EmptyIntArray,
-                                          Constants.EmptyDayArray,
-                                          ScheduleOperationType.AdminOperation,
-                                          id);
-            }
-            else if (repetitiveType == RepetitiveType.MultipleDays)
-            {
-                _ = new Schedule.Activity(RepetitiveType.MultipleDays,
-                                          nameBox.Text,
-                                          new() { Hour = beginHour },
-                                          duration,
-                                          null,
-                                          Constants.DefaultBuilding,
-                                          true,
-                                          Constants.EmptyIntArray,
-                                          activeDays,
-                                          ScheduleOperationType.AdminOperation,
-                                          id);
-            }
-            else
-            {
-                _ = new Schedule.Activity(RepetitiveType.Designated,
-                                          nameBox.Text,
-                                          new() { Hour = beginHour },
-                                          duration,
-                                          null,
-                                          Constants.DefaultBuilding,
-                                          true,
-                                          activeWeeks,
-                                          activeDays,
-                                          ScheduleOperationType.AdminOperation,
-                                          id);
-            }
+            _ = new Schedule.Activity(repetitiveType,
+                                      name,
+                                      beginTime,
+                                      duration,
+                                      null,
+                                      Constants.DefaultBuilding,
+                                      true,
+                                      activeWeeks,
+                                      activeDays,
+                                      ScheduleOperationType.AdminOperation,
+                                      id);
             if (id == null)
             {
                 MessageBox.Show("已成功添加该活动", "提示");

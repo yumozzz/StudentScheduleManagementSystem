@@ -344,6 +344,8 @@ namespace StudentScheduleManagementSystem.UI
         public static string[] Hours =>
             new[]
             {
+                "6:00",
+                "7:00",
                 "8:00",
                 "9:00",
                 "10:00",
@@ -413,41 +415,51 @@ namespace StudentScheduleManagementSystem.UI
             return ret;
         }
 
-        public static StringBuilder GetScheduleDetail(string name,
+        public static string GetScheduleDetail(string name,
                                                       RepetitiveType repetitiveType,
                                                       int[] activeWeeks,
                                                       Day[] activeDays,
                                                       Times.Time timestamp,
-                                                      int duration)
+                                                      int duration,
+                                                      string? offlineLocationName,
+                                                      string? onlineLink)
         {
-            StringBuilder scheduleDetail = new();
-            scheduleDetail.Append("名称：" + name);
+            StringBuilder builder = new();
+            builder.Append("名称：" + name);
             if (repetitiveType == RepetitiveType.Single)
             {
-                scheduleDetail.Append("\n周次：" + timestamp.Week);
-                scheduleDetail.Append("\n天次：" + timestamp.Day);
+                builder.Append("\n周次：" + timestamp.Week);
+                builder.Append("\n天次：" + timestamp.Day);
             }
             else if (repetitiveType == RepetitiveType.MultipleDays)
             {
-                scheduleDetail.Append("\n周次：" + "1-16");
-                scheduleDetail.Append("\n天次：");
+                builder.Append("\n周次：" + "1-16");
+                builder.Append("\n天次：");
                 foreach (Day activeDay in activeDays)
                 {
-                    scheduleDetail.Append(activeDay.ToString() + "; ");
+                    builder.Append(activeDay.ToString() + "; ");
                 }
             }
             else
             {
-                scheduleDetail.Append("\n周次：" + GetBriefWeeks(activeWeeks));
-                scheduleDetail.Append("\n天次：");
+                builder.Append("\n周次：" + GetBriefWeeks(activeWeeks));
+                builder.Append("\n天次：");
                 foreach (Day activeDay in activeDays)
                 {
-                    scheduleDetail.Append(activeDay.ToString() + "; ");
+                    builder.Append(activeDay.ToString() + "; ");
                 }
             }
+            builder.Append($"\n时间：{timestamp.Hour}:00\n时长：{duration}小时");
+            if (!string.IsNullOrEmpty(offlineLocationName))
+            {
+                builder.Append($"\n地址：{offlineLocationName}");
+            }
+            else if (!string.IsNullOrEmpty(onlineLink))
+            {
+                builder.Append($"\n链接：{onlineLink}");
+            }
 
-            scheduleDetail.Append("\n时间: " + timestamp.Hour + ":00\n时长: " + duration + "小时");
-            return scheduleDetail;
+            return builder.ToString();
         }
     }
 }

@@ -1119,6 +1119,191 @@ namespace StudentScheduleManagementSystem.UI
 
         #region tool methods
 
+        public bool GetScheduleInfo(bool showMessageBox,
+                                    int earliest,
+                                    int latest,
+                                    MultiSelectBox? weekSelectBox,
+                                    MultiSelectBox? daySelectBox,
+                                    ComboBox? weekComboBox,
+                                    ComboBox? dayComboBox,
+                                    ComboBox hourComboBox,
+                                    ComboBox? durationComboBox,
+                                     out string name,
+                                     out RepetitiveType repetitiveType,
+                                     out int[] activeWeeks,
+                                     out Day[] activeDays,
+                                     out Times.Time beginTime,
+                                     out int duration,
+                                     out string offlineLocationName,
+                                     out string onlineLink)
+        {
+            if (!(weekSelectBox == null ^ weekComboBox == null) || !(daySelectBox != null ^ dayComboBox != null))
+            {
+                throw new ArgumentNullException();
+            }
+
+            StringBuilder errorMessage = new();
+            name = "";
+            repetitiveType = RepetitiveType.Null;
+            activeWeeks = Constants.EmptyIntArray;
+            activeDays = Constants.EmptyDayArray;
+            beginTime = new();
+            duration = 0;
+            offlineLocationName = buildingComboBox.Text;
+            onlineLink = onlineLinkBox.Text;
+
+            char[] arr = nameBox.Text.ToCharArray();
+            if (arr.Length == 0)
+            {
+                errorMessage.AppendLine("请输入日程名！");
+            }
+            foreach (char c in arr)
+            {
+                if (c is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
+                              (>= '0' and <= '9') or
+                              (>= 'A' and <= 'Z') or
+                              (>= 'a' and <= 'z') or
+                              '_' or
+                              '-' or
+                              ' '))
+                {
+                    errorMessage.AppendLine("日程名包含非法字符！");
+                    break;
+                }
+            }
+            if (name is "Default" or "default")
+            {
+                errorMessage.AppendLine("日程名不能为保留值！");
+            }
+            if (weekSelectBox is {ValidCount : 0} || weekComboBox is {SelectedIndex : -1})
+            {
+                errorMessage.AppendLine("请输入日程周！");
+            }
+            if (daySelectBox is { ValidCount: 0 } || dayComboBox is {SelectedIndex : -1})
+            {
+                errorMessage.AppendLine("请输入日程日！");
+            }
+            if (hourComboBox.Text == "")
+            {
+                errorMessage.AppendLine("请输入日程时间！");
+            }
+            if (durationComboBox is { Text : ""})
+            {
+                errorMessage.AppendLine("请输入日程时长！");
+            }
+
+            if (buildingRadioButton.Checked && buildingRadioButton.Visible)
+            {
+                if (buildingComboBox.Text == "")
+                {
+                    errorMessage.AppendLine("请输入日程地址！");
+                }
+            }
+            else if (onlineLinkRadioButton.Checked && onlineLinkRadioButton.Visible)
+            {
+                if (onlineLinkBox.Text == "")
+                {
+                    errorMessage.AppendLine("请输入日程链接！");
+                }
+            }
+            else if (!buildingRadioButton.Visible && !onlineLinkRadioButton.Visible) { }
+            else
+            {
+                errorMessage.AppendLine("未选择线下地址或线上链接！");
+            }
+
+            name = nameBox.Text;
+            if ((weekSelectBox is { ValidCount : 1 } && daySelectBox is { ValidCount : 1 }) || (weekComboBox, dayComboBox) is not (null, null))
+            {
+                repetitiveType = RepetitiveType.Single;
+            }
+            else if (weekSelectBox!.ValidCount == 16)
+            {
+                repetitiveType = RepetitiveType.MultipleDays;
+            }
+            else
+            {
+                repetitiveType = RepetitiveType.Designated;
+            }
+
+            activeWeeks = new int[weekSelectBox?.ValidCount ?? 1];
+            if (weekSelectBox != null)
+            {
+                int activeWeekCount = 0;
+                for (int i = 0; i < weekSelectBox.TotalCount; i++)
+                {
+                    if (weekSelectBox.Selects[i])
+                    {
+                        activeWeeks[activeWeekCount] = i + 1;
+                        activeWeekCount++;
+                    }
+                }
+            }
+            else
+            {
+                activeWeeks[0] = weekComboBox!.SelectedIndex + 1;
+            }
+
+            activeDays = new Day[daySelectBox?.ValidCount ?? 1];
+            if (daySelectBox != null)
+            {
+                int activeDayCount = 0;
+                for (int i = 0; i < daySelectBox.TotalCount; i++)
+                {
+                    if (daySelectBox.Selects[i])
+                    {
+                        activeDays[activeDayCount] = (Day)i;
+                        activeDayCount++;
+                    }
+                }
+            }
+            else
+            {
+                activeDays[0] = (Day)dayComboBox!.SelectedIndex;
+            }
+
+            duration = durationComboBox?.SelectedIndex + 1 ?? 1;
+            int beginHour = hourComboBox.SelectedIndex + earliest;
+            if (repetitiveType == RepetitiveType.Single)
+            {
+                beginTime = new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour };
+                activeWeeks = Constants.EmptyIntArray;
+                activeDays = Constants.EmptyDayArray;
+            }
+            else if (repetitiveType == RepetitiveType.MultipleDays)
+            {
+                beginTime = new() { Hour = beginHour };
+                activeWeeks = Constants.EmptyIntArray;
+            }
+            else
+            {
+                beginTime = new() { Hour = beginHour };
+            }
+
+            if (beginHour + duration >= latest)
+            {
+                errorMessage.AppendLine("日程结束时间不得晚于最晚时间！");
+            }
+            if (!errorMessage.Equals(""))
+            {
+                MessageBox.Show(errorMessage.ToString(), "错误");
+                return false;
+            }
+
+            return showMessageBox
+                       ? MessageBox.Show(Shared.GetScheduleDetail(name,
+                                                                  repetitiveType,
+                                                                  activeWeeks,
+                                                                  activeDays,
+                                                                  beginTime,
+                                                                  duration,
+                                                                  buildingComboBox.Text,
+                                                                  onlineLinkBox.Text),
+                                         "确认日程信息",
+                                         MessageBoxButtons.OKCancel) == DialogResult.OK
+                       : true;
+        }
+
         protected abstract void AddSchedule();
 
         protected abstract bool GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration);
@@ -1210,6 +1395,7 @@ namespace StudentScheduleManagementSystem.UI
             this.onlineLinkBox.Text = "";
             this.descriptionBox.Text = "";
             this._subwindowState = SubwindowState.Viewing;
+            ClearInformation();
 
             pauseTimeDelegate.Invoke(false);
         }
@@ -1374,176 +1560,22 @@ namespace StudentScheduleManagementSystem.UI
             return true;
         }
 
-        private bool GetScheduleInfo(bool showMessageBox,
-                                     out string name,
-                                     out RepetitiveType repetitiveType,
-                                     out int[] activeWeeks,
-                                     out Day[] activeDays,
-                                     out int beginHour,
-                                     out int duration,
-                                     out string offlineLocationName,
-                                     out string onlineLink)
-        {
-            StringBuilder errorMessage = new();
-            name = "";
-            repetitiveType = RepetitiveType.Null;
-            activeWeeks = Constants.EmptyIntArray;
-            activeDays = Constants.EmptyDayArray;
-            beginHour = 0;
-            duration = 0;
-            offlineLocationName = buildingComboBox.Text;
-            onlineLink = onlineLinkBox.Text;
-
-            char[] arr = nameBox.Text.ToCharArray();
-            if (arr.Length == 0)
-            {
-                errorMessage.AppendLine("请输入日程名！");
-            }
-            foreach (char c in arr)
-            {
-                if (c is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
-                              (>= '0' and <= '9') or
-                              (>= 'A' and <= 'Z') or
-                              (>= 'a' and <= 'z') or
-                              '_' or
-                              '-' or
-                              ' '))
-                {
-                    errorMessage.AppendLine("日程名包含非法字符！");
-                    break;
-                }
-            }
-            if (name is "Default" or "default")
-            {
-                errorMessage.AppendLine("日程名不能为保留值！");
-            }
-            if (weekSelectBox.ValidCount == 0)
-            {
-                errorMessage.AppendLine("请输入日程周！");
-            }
-            if (daySelectBox.ValidCount == 0)
-            {
-                errorMessage.AppendLine("请输入日程日！");
-            }
-            if (hourComboBox.Text == "")
-            {
-                errorMessage.AppendLine("请输入日程时间！");
-            }
-            if (durationComboBox.Text == "")
-            {
-                errorMessage.AppendLine("请输入日程时长！");
-            }
-            string location = "";
-            if (buildingRadioButton.Checked && buildingRadioButton.Visible)
-            {
-                if (buildingComboBox.Text == "")
-                {
-                    errorMessage.AppendLine("请输入日程地址！");
-                }
-                else
-                {
-                    location = $"\n地址: {buildingComboBox.Text}";
-                }
-            }
-            else if (onlineLinkRadioButton.Checked && onlineLinkRadioButton.Visible)
-            {
-                if (onlineLinkBox.Text == "")
-                {
-                    errorMessage.AppendLine("请输入日程链接！");
-                }
-                else
-                {
-                    location = $"\n链接: {onlineLinkBox.Text}";
-                }
-            }
-            else if (!buildingRadioButton.Visible && !onlineLinkRadioButton.Visible) { }
-            else
-            {
-                errorMessage.AppendLine("未选择线下地址或线上链接！");
-            }
-            if (!errorMessage.Equals(""))
-            {
-                MessageBox.Show(errorMessage.ToString(), "错误");
-                return false;
-            }
-
-            name = nameBox.Text;
-            if (weekSelectBox.ValidCount == 1 && daySelectBox.ValidCount == 1)
-            {
-                repetitiveType = RepetitiveType.Single;
-            }
-            else if (weekSelectBox.ValidCount == 16)
-            {
-                repetitiveType = RepetitiveType.MultipleDays;
-            }
-            else
-            {
-                repetitiveType = RepetitiveType.Designated;
-            }
-
-            activeWeeks = new int[weekSelectBox.ValidCount];
-            int activeWeekCount = 0;
-            for (int i = 0; i < weekSelectBox.TotalCount; i++)
-            {
-                if (weekSelectBox.Selects[i])
-                {
-                    activeWeeks[activeWeekCount] = i + 1;
-                    activeWeekCount++;
-                }
-            }
-
-            activeDays = new Day[daySelectBox.ValidCount];
-            int activeDayCount = 0;
-            for (int i = 0; i < daySelectBox.TotalCount; i++)
-            {
-                if (daySelectBox.Selects[i])
-                {
-                    activeDays[activeDayCount] = Constants.AllDays[i];
-                    activeDayCount++;
-                }
-            }
-
-            duration = durationComboBox.Text[0] - '0';
-            if (hourComboBox.Text.Length == 5)
-            {
-                beginHour = (hourComboBox.Text[0] - '0') * 10 + hourComboBox.Text[1] - '0';
-            }
-            else
-            {
-                beginHour = hourComboBox.Text[0] - '0';
-            }
-
-            Times.Time timestamp;
-            if (repetitiveType == RepetitiveType.Single)
-            {
-                timestamp = new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour };
-            }
-            else
-            {
-                timestamp = new() { Hour = beginHour };
-            }
-
-            return showMessageBox
-                       ? MessageBox.Show(Shared.GetScheduleDetail(name,
-                                                                  repetitiveType,
-                                                                  activeWeeks,
-                                                                  activeDays,
-                                                                  timestamp,
-                                                                  duration)
-                                               .ToString() + location,
-                                         "确认日程信息",
-                                         MessageBoxButtons.OKCancel) == DialogResult.OK
-                       : true;
-        }
-
         protected override void AddSchedule()
         {
             bool confirm = GetScheduleInfo(true,
+                                           Schedule.Activity.Earliest,
+                                           Schedule.Activity.Latest,
+                                           weekSelectBox,
+                                           daySelectBox,
+                                           null,
+                                           null,
+                                           hourComboBox,
+                                           durationComboBox,
                                            out string name,
                                            out RepetitiveType repetitiveType,
                                            out int[] activeWeeks,
                                            out Day[] activeDays,
-                                           out int beginHour,
+                                           out Times.Time beginTime,
                                            out int duration,
                                            out string buildingName,
                                            out string onlineLink);
@@ -1553,58 +1585,30 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
 
-            if (beginHour + duration >= Schedule.Activity.Latest)
-            {
-                MessageBox.Show("活动结束时间不得晚于规定时间！", "提示");
-                return;
-            }
-
-            Times.Time beginTine;
-            int[] weeks;
-            Day[] days;
-            if (repetitiveType == RepetitiveType.Single)
-            {
-                beginTine = new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour };
-                weeks = Constants.EmptyIntArray;
-                days = Constants.EmptyDayArray;
-            }
-            else if (repetitiveType == RepetitiveType.MultipleDays)
-            {
-                beginTine = new() { Hour = beginHour };
-                weeks = Constants.EmptyIntArray;
-                days = activeDays;
-            }
-            else
-            {
-                beginTine = new() { Hour = beginHour };
-                weeks = activeWeeks;
-                days = activeDays;
-            }
-
             if (buildingRadioButton.Checked)
             {
                 _ = new Schedule.Activity(repetitiveType,
                                           name,
-                                          beginTine,
+                                          beginTime,
                                           duration,
                                           descriptionBox.Text == "" ? null : descriptionBox.Text,
                                           Map.Location.GetBuildingsByName(buildingName)[0],
                                           false,
-                                          weeks,
-                                          days,
+                                          activeWeeks,
+                                          activeDays,
                                           ScheduleOperationType.UserOpration);
             }
             else
             {
                 _ = new Schedule.Activity(repetitiveType,
                                           name,
-                                          new() { Week = activeWeeks[0], Day = activeDays[0], Hour = beginHour },
+                                          beginTime,
                                           duration,
                                           descriptionBox.Text == "" ? null : descriptionBox.Text,
                                           onlineLink,
                                           false,
-                                          weeks,
-                                          days,
+                                          activeWeeks,
+                                          activeDays,
                                           ScheduleOperationType.UserOpration);
             }
             GenerateUserData(_scheduleType);
@@ -1791,8 +1795,8 @@ namespace StudentScheduleManagementSystem.UI
 
         protected override bool GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration)
         {
-            activeWeeks = Array.Empty<int>();
-            activeDays = Array.Empty<Day>();
+            activeWeeks = Constants.EmptyIntArray;
+            activeDays = Constants.EmptyDayArray;
             duration = 1;
             StringBuilder errorMessage = new("");
             if (weekSelectBox.Text == "")
@@ -1825,73 +1829,34 @@ namespace StudentScheduleManagementSystem.UI
 
         protected override void AddSchedule()
         {
-            StringBuilder errorMessage = new();
+            bool confirm = GetScheduleInfo(true,
+                                           Schedule.Activity.Earliest,
+                                           Schedule.Activity.Latest,
+                                           null,
+                                           null,
+                                           weekSelectBox,
+                                           daySelectBox,
+                                           hourComboBox,
+                                           null,
+                                           out string name,
+                                           out _,
+                                           out _,
+                                           out _,
+                                           out Times.Time beginTime,
+                                           out _,
+                                           out string buildingName,
+                                           out _);
 
-            char[] arr = nameBox.Text.ToCharArray();
-            if (arr.Length == 0)
+            if (!confirm)
             {
-                errorMessage.AppendLine("请输入日程名！");
-            }
-            foreach (char c in arr)
-            {
-                if (c is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
-                              (>= '0' and <= '9') or
-                              (>= 'A' and <= 'Z') or
-                              (>= 'a' and <= 'z') or
-                              '_' or
-                              '-' or
-                              ' '))
-                {
-                    errorMessage.AppendLine("日程名包含非法字符！");
-                    break;
-                }
-            }
-            if (nameBox.Text is "Default" or "default")
-            {
-                errorMessage.AppendLine("日程名不能为保留值！");
-            }
-            if (weekSelectBox.Text.Equals(""))
-            {
-                errorMessage.AppendLine("请输入日程周！");
-            }
-            if (daySelectBox.Text.Equals(""))
-            {
-                errorMessage.AppendLine("请输入日程日！");
-            }
-            if (hourComboBox.Text == "")
-            {
-                errorMessage.AppendLine("请输入日程时间！");
-            }
-            if (buildingComboBox.Text == "")
-            {
-                errorMessage.AppendLine("请输入日程地址！");
-            }
-            if (!errorMessage.Equals(""))
-            {
-                MessageBox.Show(errorMessage.ToString(), "错误");
                 return;
             }
 
-            string name = nameBox.Text;
-            int activeWeek = weekSelectBox.SelectedIndex + 1;
-            Day activeDay = (Day)daySelectBox.SelectedIndex;
-            int beginHour = hourComboBox.SelectedIndex + Schedule.TemporaryAffair.Earliest;
-
-            Times.Time beginTime = new() { Week = activeWeek, Day = activeDay, Hour = beginHour };
-            if (MessageBox.Show(Shared.GetScheduleDetail(name,
-                                                         RepetitiveType.Single,
-                                                         new int[] { activeWeek },
-                                                         new Day[] { activeDay },
-                                                         beginTime,
-                                                         1)
-                                      .ToString(),
-                                "确认日程信息",
-                                MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 _ = new Schedule.TemporaryAffair(name,
                                                  beginTime,
                                                  descriptionBox.Text == "" ? null : descriptionBox.Text,
-                                                 Map.Location.GetBuildingsByName(buildingComboBox.Text)[0]);
+                                                 Map.Location.GetBuildingsByName(buildingName)[0]);
                 GenerateUserData(_scheduleType);
                 ClearInformation();
                 this.hourComboBox.Text = "";
