@@ -503,7 +503,7 @@ namespace StudentScheduleManagementSystem.UI
         public CourseSubwindow()
             : base(ScheduleType.Course)
         {
-            this.daySelectBox.InitializeBox(Shared.Days[..^3]);
+            this.daySelectBox.InitializeBox(Shared.Days[..^2]);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
         }
 
@@ -548,7 +548,7 @@ namespace StudentScheduleManagementSystem.UI
         public ExamSubwindow()
             : base(ScheduleType.Exam)
         {
-            this.daySelectBox.InitializeBox(Shared.Days[..^3]);
+            this.daySelectBox.InitializeBox(Shared.Days[..^2]);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
         }
 
