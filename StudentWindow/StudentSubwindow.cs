@@ -371,7 +371,7 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         var cell = (DataGridViewCheckBoxCell)scheduleDataTable.Rows[middle].Cells[0];
                         var row = (DataGridViewRow)scheduleDataTable.Rows[middle];
-                        for(int j = 0; j < row.Cells.Count; j++)
+                        for (int j = 0; j < row.Cells.Count; j++)
                         {
                             row.Cells[j].Style.BackColor = Color.LightGray;
                         }
@@ -837,7 +837,7 @@ namespace StudentScheduleManagementSystem.UI
 
             if (!_showAllData)
             {
-                MessageBox.Show("请在全部日程的页面选择日程添加！",  "提示");
+                MessageBox.Show("请在全部日程的页面选择日程添加！", "提示");
                 return;
             }
 
@@ -1142,7 +1142,7 @@ namespace StudentScheduleManagementSystem.UI
                      i < startTime + Schedule.TemporaryAffair.Latest; i++)
                 {
                     ScheduleType scheduleType = Schedule.Schedule.GetRecordAt(i).ScheduleType;
-                    if (scheduleType == ScheduleType.TemporaryAffair || scheduleType == ScheduleType.Idle)
+                    if (scheduleType is ScheduleType.TemporaryAffair or ScheduleType.Idle)
                     {
                         availableTime.Add(i - startTime);
                     }
@@ -1152,22 +1152,19 @@ namespace StudentScheduleManagementSystem.UI
             {
                 bool[] availableHourArray = new bool[Schedule.Activity.Latest - Schedule.Activity.Earliest];
                 bool[] availableTimeArray = new bool[Schedule.Activity.Latest - Schedule.Activity.Earliest];
-                for (int i = 0; i < availableHourArray.Length; i++)
+                Array.Fill(availableHourArray, true);
+                Array.Fill(availableTimeArray, true);
+                foreach (var activeWeek in activeWeeks)
                 {
-                    availableHourArray[i] = true;
-                    availableTimeArray[i] = true;
-                }
-                for (int i = 0; i < activeWeeks.Length; i++)
-                {
-                    for (int j = 0; j < activeDays.Length; j++)
+                    foreach (var activeDay in activeDays)
                     {
-                        int startTime = (activeWeeks[i] - 1) * 7 * 24 + (int)activeDays[j] * 24;
-                        for (int k = 0; k < availableHourArray.Length; k++)
+                        int startTime = (activeWeek - 1) * 7 * 24 + activeDay.ToInt() * 24;
+                        for (int i = 0; i < availableHourArray.Length; i++)
                         {
-                            availableHourArray[k] = availableHourArray[k] &&
-                                                    (Schedule.Schedule
-                                                             .GetRecordAt(startTime + Schedule.Activity.Earliest + k)
-                                                             .ScheduleType == ScheduleType.Idle);
+                            availableHourArray[i] = availableHourArray[i] &&
+                                                    Schedule.Schedule
+                                                            .GetRecordAt(startTime + Schedule.Activity.Earliest + i)
+                                                            .ScheduleType == ScheduleType.Idle;
                         }
                     }
                 }
@@ -1185,7 +1182,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (availableTime.Count > 0)
             {
-                MessageBox.Show("日程可选起始时间：" + GetBriefWeeks(availableTime.ToArray(), true));
+                MessageBox.Show("日程可选起始时间：" + GetBriefWeeks(availableTime.ToArray(), true), "提示");
             }
             else
             {
