@@ -105,12 +105,12 @@
             this.scheduleDataTable.Size = new System.Drawing.Size(714, 605);
             this.scheduleDataTable.TabIndex = 42;
             // 
-            // courseCheckBoxColumn
+            // selectCheckBoxColumn
             // 
             this.selectCheckBoxColumn.Frozen = true;
             this.selectCheckBoxColumn.HeaderText = "";
             this.selectCheckBoxColumn.MinimumWidth = 8;
-            this.selectCheckBoxColumn.Name = "courseCheckBoxColumn";
+            this.selectCheckBoxColumn.Name = "selectCheckBoxColumn";
             this.selectCheckBoxColumn.Width = 30;
             // 
             // alarmCheckBoxColumn
@@ -136,47 +136,47 @@
             this.weekTextBoxColumn.ReadOnly = true;
             this.weekTextBoxColumn.Width = 120;
             // 
-            // dayCheckBoxColumn
+            // dayTextBoxColumn
             // 
             this.dayTextBoxColumn.HeaderText = "日程日";
             this.dayTextBoxColumn.MinimumWidth = 8;
-            this.dayTextBoxColumn.Name = "dayCheckBoxColumn";
+            this.dayTextBoxColumn.Name = "dayTextBoxColumn";
             this.dayTextBoxColumn.ReadOnly = true;
             this.dayTextBoxColumn.Width = 120;
             // 
-            // timeCheckBoxColumn
+            // timeTextBoxColumn
             // 
             this.timeTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.timeTextBoxColumn.HeaderText = "时间";
             this.timeTextBoxColumn.MinimumWidth = 8;
-            this.timeTextBoxColumn.Name = "timeCheckBoxColumn";
+            this.timeTextBoxColumn.Name = "timeTextBoxColumn";
             this.timeTextBoxColumn.ReadOnly = true;
             this.timeTextBoxColumn.Width = 150;
             // 
-            // durationCheckBoxColumn
+            // durationTextBoxColumn
             // 
             this.durationTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.durationTextBoxColumn.HeaderText = "时长";
             this.durationTextBoxColumn.MinimumWidth = 8;
-            this.durationTextBoxColumn.Name = "durationCheckBoxColumn";
+            this.durationTextBoxColumn.Name = "durationTextBoxColumn";
             this.durationTextBoxColumn.ReadOnly = true;
             this.durationTextBoxColumn.Width = 150;
             // 
-            // descriptionColumn
+            // descriptionTextBoxColumn
             // 
             this.descriptionTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.descriptionTextBoxColumn.HeaderText = "描述";
             this.descriptionTextBoxColumn.MinimumWidth = 8;
-            this.descriptionTextBoxColumn.Name = "descriptionColumn";
+            this.descriptionTextBoxColumn.Name = "descriptionTextBoxColumn";
             this.descriptionTextBoxColumn.ReadOnly = true;
             this.descriptionTextBoxColumn.Width = 150;
             // 
-            // locationColumn
+            // locationTextBoxColumn
             // 
             this.locationTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.locationTextBoxColumn.HeaderText = "地点/链接";
             this.locationTextBoxColumn.MinimumWidth = 8;
-            this.locationTextBoxColumn.Name = "locationColumn";
+            this.locationTextBoxColumn.Name = "locationTextBoxColumn";
             this.locationTextBoxColumn.ReadOnly = true;
             this.locationTextBoxColumn.Width = 150;
             // 
@@ -242,6 +242,7 @@
             // 
             // buildingComboBox
             // 
+            this.buildingComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.buildingComboBox.FormattingEnabled = true;
             this.buildingComboBox.Location = new System.Drawing.Point(802, 269);
             this.buildingComboBox.Name = "buildingComboBox";
