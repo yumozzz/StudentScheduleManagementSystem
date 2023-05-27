@@ -28,95 +28,96 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.alarmName = new System.Windows.Forms.Label();
-            this.buildingComboBox = new System.Windows.Forms.ComboBox();
-            this.currentBuildingLabel = new System.Windows.Forms.Label();
-            this.showMapButton = new System.Windows.Forms.Button();
-            this.onlineLinkLinkLabel = new System.Windows.Forms.LinkLabel();
-            this.onlineLinkLabel = new System.Windows.Forms.Label();
-            this.SuspendLayout();
+            alarmName = new Label();
+            buildingComboBox = new ComboBox();
+            currentBuildingLabel = new Label();
+            showMapButton = new Button();
+            onlineLinkLinkLabel = new LinkLabel();
+            onlineLinkLabel = new Label();
+            SuspendLayout();
             // 
             // alarmName
             // 
-            this.alarmName.AutoSize = true;
-            this.alarmName.Font = new System.Drawing.Font("黑体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.alarmName.ForeColor = System.Drawing.Color.White;
-            this.alarmName.Location = new System.Drawing.Point(175, 62);
-            this.alarmName.Name = "alarmName";
-            this.alarmName.Size = new System.Drawing.Size(118, 24);
-            this.alarmName.TabIndex = 0;
-            this.alarmName.Text = "alarmName";
+            alarmName.AutoEllipsis = true;
+            alarmName.Font = new Font("黑体", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            alarmName.ForeColor = Color.White;
+            alarmName.Location = new Point(40, 35);
+            alarmName.Name = "alarmName";
+            alarmName.Size = new Size(400, 60);
+            alarmName.TabIndex = 0;
+            alarmName.Text = "alarmName";
+            alarmName.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // buildingComboBox
             // 
-            this.buildingComboBox.FormattingEnabled = true;
-            this.buildingComboBox.Location = new System.Drawing.Point(147, 136);
-            this.buildingComboBox.Name = "buildingComboBox";
-            this.buildingComboBox.Size = new System.Drawing.Size(182, 32);
-            this.buildingComboBox.TabIndex = 1;
+            buildingComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            buildingComboBox.FormattingEnabled = true;
+            buildingComboBox.Location = new Point(147, 136);
+            buildingComboBox.Name = "buildingComboBox";
+            buildingComboBox.Size = new Size(182, 32);
+            buildingComboBox.TabIndex = 1;
             // 
             // currentBuildingLabel
             // 
-            this.currentBuildingLabel.AutoSize = true;
-            this.currentBuildingLabel.Font = new System.Drawing.Font("黑体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.currentBuildingLabel.ForeColor = System.Drawing.Color.White;
-            this.currentBuildingLabel.Location = new System.Drawing.Point(38, 139);
-            this.currentBuildingLabel.Name = "currentBuildingLabel";
-            this.currentBuildingLabel.Size = new System.Drawing.Size(106, 24);
-            this.currentBuildingLabel.TabIndex = 2;
-            this.currentBuildingLabel.Text = "当前地点";
+            currentBuildingLabel.AutoSize = true;
+            currentBuildingLabel.Font = new Font("黑体", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            currentBuildingLabel.ForeColor = Color.White;
+            currentBuildingLabel.Location = new Point(38, 139);
+            currentBuildingLabel.Name = "currentBuildingLabel";
+            currentBuildingLabel.Size = new Size(106, 24);
+            currentBuildingLabel.TabIndex = 2;
+            currentBuildingLabel.Text = "当前地点";
             // 
             // showMapButton
             // 
-            this.showMapButton.BackColor = System.Drawing.Color.White;
-            this.showMapButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.showMapButton.Location = new System.Drawing.Point(332, 136);
-            this.showMapButton.Name = "showMapButton";
-            this.showMapButton.Size = new System.Drawing.Size(112, 34);
-            this.showMapButton.TabIndex = 3;
-            this.showMapButton.Text = "显示导航";
-            this.showMapButton.UseVisualStyleBackColor = false;
-            this.showMapButton.Click += new System.EventHandler(this.ShowMapButton_Click);
+            showMapButton.BackColor = Color.White;
+            showMapButton.FlatStyle = FlatStyle.Flat;
+            showMapButton.Location = new Point(332, 136);
+            showMapButton.Name = "showMapButton";
+            showMapButton.Size = new Size(112, 34);
+            showMapButton.TabIndex = 3;
+            showMapButton.Text = "显示导航";
+            showMapButton.UseVisualStyleBackColor = false;
+            showMapButton.Click += ShowMapButton_Click;
             // 
             // onlineLinkLinkLabel
             // 
-            this.onlineLinkLinkLabel.AutoSize = true;
-            this.onlineLinkLinkLabel.Location = new System.Drawing.Point(147, 140);
-            this.onlineLinkLinkLabel.Name = "onlineLinkLinkLabel";
-            this.onlineLinkLinkLabel.Size = new System.Drawing.Size(98, 24);
-            this.onlineLinkLinkLabel.TabIndex = 4;
-            this.onlineLinkLinkLabel.TabStop = true;
-            this.onlineLinkLinkLabel.Text = "linkLabel1";
+            onlineLinkLinkLabel.AutoSize = true;
+            onlineLinkLinkLabel.Location = new Point(147, 140);
+            onlineLinkLinkLabel.Name = "onlineLinkLinkLabel";
+            onlineLinkLinkLabel.Size = new Size(98, 24);
+            onlineLinkLinkLabel.TabIndex = 4;
+            onlineLinkLinkLabel.TabStop = true;
+            onlineLinkLinkLabel.Text = "linkLabel1";
             // 
             // onlineLinkLabel
             // 
-            this.onlineLinkLabel.AutoSize = true;
-            this.onlineLinkLabel.Font = new System.Drawing.Font("黑体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.onlineLinkLabel.ForeColor = System.Drawing.Color.White;
-            this.onlineLinkLabel.Location = new System.Drawing.Point(38, 139);
-            this.onlineLinkLabel.Name = "onlineLinkLabel";
-            this.onlineLinkLabel.Size = new System.Drawing.Size(106, 24);
-            this.onlineLinkLabel.TabIndex = 5;
-            this.onlineLinkLabel.Text = "课程链接";
+            onlineLinkLabel.AutoSize = true;
+            onlineLinkLabel.Font = new Font("黑体", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            onlineLinkLabel.ForeColor = Color.White;
+            onlineLinkLabel.Location = new Point(38, 139);
+            onlineLinkLabel.Name = "onlineLinkLabel";
+            onlineLinkLabel.Size = new Size(106, 24);
+            onlineLinkLabel.TabIndex = 5;
+            onlineLinkLabel.Text = "课程链接";
             // 
             // StudentAlarmWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(168)))), ((int)(((byte)(128)))), ((int)(((byte)(194)))));
-            this.ClientSize = new System.Drawing.Size(478, 244);
-            this.Controls.Add(this.buildingComboBox);
-            this.Controls.Add(this.onlineLinkLinkLabel);
-            this.Controls.Add(this.showMapButton);
-            this.Controls.Add(this.currentBuildingLabel);
-            this.Controls.Add(this.alarmName);
-            this.Controls.Add(this.onlineLinkLabel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Name = "StudentAlarmWindow";
-            this.Text = "闹钟";
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(11F, 24F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(168, 128, 194);
+            ClientSize = new Size(478, 244);
+            Controls.Add(buildingComboBox);
+            Controls.Add(onlineLinkLinkLabel);
+            Controls.Add(showMapButton);
+            Controls.Add(currentBuildingLabel);
+            Controls.Add(alarmName);
+            Controls.Add(onlineLinkLabel);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Name = "StudentAlarmWindow";
+            Text = "闹钟";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
