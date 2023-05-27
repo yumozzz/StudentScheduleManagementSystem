@@ -1867,7 +1867,7 @@ namespace StudentScheduleManagementSystem.UI
             string name = nameBox.Text;
             int activeWeek = weekSelectBox.SelectedIndex + 1;
             Day activeDay = (Day)daySelectBox.SelectedIndex;
-            int beginHour = hourComboBox.SelectedIndex;
+            int beginHour = hourComboBox.SelectedIndex + Schedule.TemporaryAffair.Earliest;
 
             Times.Time beginTime = new() { Week = activeWeek, Day = activeDay, Hour = beginHour };
             if (MessageBox.Show(Shared.GetScheduleDetail(name,

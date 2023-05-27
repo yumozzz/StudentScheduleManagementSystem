@@ -421,6 +421,7 @@ namespace StudentScheduleManagementSystem.UI
                                                       int duration)
         {
             StringBuilder scheduleDetail = new();
+            scheduleDetail.Append("名称：" + name);
             if (repetitiveType == RepetitiveType.Single)
             {
                 scheduleDetail.Append("\n周次：" + timestamp.Week);
@@ -445,7 +446,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
             }
 
-            scheduleDetail.Append("\n时间: " + timestamp.Hour + "\n时长: " + duration + "\n名称：" + name);
+            scheduleDetail.Append("\n时间: " + timestamp.Hour + ":00\n时长: " + duration + "小时");
             return scheduleDetail;
         }
     }
