@@ -56,7 +56,7 @@ namespace StudentScheduleManagementSystem.UI
             mainpage.Controls.Clear();
             _studentCourseSubwindow = new();
             _studentCourseSubwindow.TopLevel = false;
-            _studentCourseSubwindow.PauseTimeDelegate = PauseTime;
+            _studentCourseSubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentCourseSubwindow);
             _studentCourseSubwindow.Show();
         }
@@ -68,7 +68,7 @@ namespace StudentScheduleManagementSystem.UI
             mainpage.Controls.Clear();
             _studentExamSubwindow = new();
             _studentExamSubwindow.TopLevel = false;
-            _studentExamSubwindow.PauseTimeDelegate = PauseTime;
+            _studentExamSubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentExamSubwindow);
             _studentExamSubwindow.Show();
         }
@@ -80,7 +80,7 @@ namespace StudentScheduleManagementSystem.UI
             mainpage.Controls.Clear();
             _studentGroupActivitySubwindow = new();
             _studentGroupActivitySubwindow.TopLevel = false;
-            _studentGroupActivitySubwindow.PauseTimeDelegate = PauseTime;
+            _studentGroupActivitySubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentGroupActivitySubwindow);
             _studentGroupActivitySubwindow.Show();
         }
@@ -92,7 +92,7 @@ namespace StudentScheduleManagementSystem.UI
             mainpage.Controls.Clear();
             _studentPersonalActivitySubwindow = new();
             _studentPersonalActivitySubwindow.TopLevel = false;
-            _studentPersonalActivitySubwindow.PauseTimeDelegate = PauseTime;
+            _studentPersonalActivitySubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentPersonalActivitySubwindow);
             _studentPersonalActivitySubwindow.Show();
         }
@@ -104,7 +104,7 @@ namespace StudentScheduleManagementSystem.UI
             mainpage.Controls.Clear();
             _studentTemporaryAffairSubwindow = new();
             _studentTemporaryAffairSubwindow.TopLevel = false;
-            _studentTemporaryAffairSubwindow.PauseTimeDelegate = PauseTime;
+            _studentTemporaryAffairSubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentTemporaryAffairSubwindow);
             _studentTemporaryAffairSubwindow.Show();
         }
