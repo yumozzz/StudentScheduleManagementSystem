@@ -533,6 +533,12 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<Point> GetPoints() => GlobalMap?.Location.ToList() ?? new();
 
+        public static List<Vertex> GetVertices()
+        {
+            int i = 0;
+            return GlobalMap?.Location.ToList().ConvertAll(point => point.ToVertex(i++)) ?? new();
+        }
+
         #if false
         public static List<(Vertex, Point, Point, Vertex)> GetBezierCurveControlPoint()
         {

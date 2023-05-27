@@ -224,6 +224,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             AddOneSchedule(null, true);
             Log.Information.Log($"成功添加共享日程");
+            ClearInput();
         }
 
         protected void DeleteSchedule_Click(object sender, EventArgs e)

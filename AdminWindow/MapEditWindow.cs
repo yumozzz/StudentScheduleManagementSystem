@@ -19,10 +19,11 @@
 
         public MapEditWindow()
         {
+            InitializeComponent();
             _lineEndPointPairs = Map.Location.GetEdges()
                                     .ToHashSet();
             _points = new();
-            foreach (var building in Map.Location.Buildings)
+            /*foreach (var building in Map.Location.Buildings)
             {
                 Label label = new()
                 {
@@ -44,8 +45,28 @@
                     _points.Add(point, null);
                 }
                 catch (ArgumentException) { }
+            }*/
+            foreach (var vertex in Map.Location.GetVertices())
+            {
+                try
+                {
+                    _points.Add(vertex.ToPoint(), null);
+                    Label label = new()
+                    {
+                        Location = new((vertex.X + 5), (vertex.Y + 20)),
+                        Size = new(50, 24),
+                        Text = vertex.Id.ToString(),
+                        Font = fontLabel.Font,
+                        AutoSize = true,
+                        BackColor = Color.FromArgb(50, 168, 128, 194)
+                    };
+                    Controls.Add(label);
+                    label.BringToFront();
+                    label.Show();
+                }
+                catch (ArgumentException) { }
             }
-            InitializeComponent();
+            
             Button buttonOk = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
             Button buttonCancel =
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
@@ -406,6 +427,7 @@
             int index = 0;
             foreach (var kvPair in _points)
             {
+
                 if (!kvPair.Value.HasValue)
                 {
                     continue;
