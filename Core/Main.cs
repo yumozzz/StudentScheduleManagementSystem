@@ -46,7 +46,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             catch (EndOfSemester)
             {
-                result = Task.Run(() => MessageBox.Show("学期结束，程序已退出"));
+                result = Task.Run(() => MessageBox.Show("学期结束，程序已退出", "提示"));
                 Log.Warning.Log("学期结束，程序已退出");
             }
             catch (Exception ex)
@@ -143,27 +143,27 @@ namespace StudentScheduleManagementSystem.MainProgram
                 }
                 catch (Exception ex) when (ex is KeyNotFoundException or FileNotFoundException)
                 {
-                    MessageBox.Show("用户文件出现错误或不存在，已新建");
+                    MessageBox.Show("用户文件出现错误或不存在，已新建", "提示");
                     Log.Error.Log("用户文件出现错误或不存在", ex);
                     FileManagement.FileManager.SaveToUserFile(new(),
                                                               FileManagement.FileManager.UserFileDirectory,
                                                               UserId,
                                                               Encryption.Encrypt.RSADecrypt);
-                    ReadFromInstanceDictionary(FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
+                    _ = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager
                                                       .UserFileDirectory,
                                                    inputUserId,
                                                    Encryption.Encrypt.RSADecrypt,
-                                                   true));
+                                                   true);
                 }
                 catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
                 {
-                    MessageBox.Show("用户文件读取出错，已退出");
+                    MessageBox.Show("用户文件读取出错，已退出", "错误");
                     Log.Error.Log("用户文件读取出错，已退出", ex);
                     return false;
                 }
                 catch (IOException ex)
                 {
-                    MessageBox.Show("该用户已在另一个进程登录");
+                    MessageBox.Show("该用户已在另一个进程登录", "错误");
                     Log.Error.Log("该用户已在另一个进程登录", ex);
                     return false;
                 }
@@ -184,7 +184,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             catch (Exception ex) when (ex is AuthenticationException or KeyNotFoundException)
             {
                 Log.Error.Log("用户名或密码输入错误", ex);
-                MessageBox.Show("用户名或密码输入错误！");
+                MessageBox.Show("用户名或密码输入错误！", "错误");
                 return false;
             }
         }
@@ -205,6 +205,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                 }
                 UserId = userId;
                 Password = password;
+                Identity = identity;
                 Encryption.Encrypt.GeneratePrivateKey(password);
                 Times.Timer.Pause = false;
                 var encoded = Encryption.Encrypt.MD5Digest(userId, password, identity);
@@ -213,14 +214,14 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             catch (FormatException ex)
             {
+                MessageBox.Show("用户名或密码格式错误！", "错误");
                 Log.Error.Log("用户名或密码格式错误", ex);
-                MessageBox.Show("用户名或密码格式错误！");
                 return false;
             }
             catch (ArgumentException ex)
             {
+                MessageBox.Show("用户已存在！", "错误");
                 Log.Error.Log("用户已存在", ex);
-                MessageBox.Show("用户已存在！");
                 return false;
             }
         }
@@ -255,7 +256,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
             catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
             {
-                MessageBox.Show("账号文件或共享日程文件读取出错，已退出");
+                MessageBox.Show("账号文件或共享日程文件读取出错，已退出", "错误");
                 Log.Error.Log("账号文件或共享日程文件读取出错", ex);
                 throw;
             }
