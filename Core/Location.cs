@@ -406,9 +406,83 @@ namespace StudentScheduleManagementSystem.Map
             return GetClosestPath(startBuilding.Center.Id, endBuilding.Center.Id);
         }
 
+
+        public static List<int> SolveTSP(int startCity, int[,] adjacencyMatrix)
+        {
+            int numberOfCities = adjacencyMatrix.GetLength(0);
+
+            List<int> cities = new List<int>();
+            for (int i = 0; i < numberOfCities; i++)
+            {
+                if (i != startCity)
+                    cities.Add(i);
+            }
+
+            List<int> shortestPath = new List<int>();
+            int shortestDistance = int.MaxValue;
+
+            Permute(startCity, adjacencyMatrix, cities, 0, cities.Count - 1, ref shortestPath, ref shortestDistance);
+
+            shortestPath.Insert(0, startCity);
+            shortestPath.Add(startCity);
+
+            return shortestPath;
+        }
+
+        public static void Permute(int startCity, int[,] adjacencyMatrix, List<int> cities, int left, int right, ref List<int> shortestPath, ref int shortestDistance)
+        {
+            if (left == right)
+            {
+                int currentDistance = CalculatePathDistance(cities, startCity, adjacencyMatrix);
+                if (currentDistance < shortestDistance)
+                {
+                    shortestDistance = currentDistance;
+                    shortestPath = new List<int>(cities);
+                }
+            }
+            else
+            {
+                for (int i = left; i <= right; i++)
+                {
+                    Swap(cities, left, i);
+                    Permute(startCity, adjacencyMatrix, cities, left + 1, right, ref shortestPath, ref shortestDistance);
+                    Swap(cities, left, i);
+                }
+            }
+        }
+
+        public static int CalculatePathDistance(List<int> path, int startCity, int[,] adjacencyMatrix)
+        {
+            int distance = 0;
+            int previousCity = startCity;
+
+            foreach (int city in path)
+            {
+                distance += adjacencyMatrix[previousCity, city];
+                previousCity = city;
+            }
+
+            distance += adjacencyMatrix[previousCity, startCity];
+
+            return distance;
+        }
+
+        public static void Swap(List<int> list, int i, int j)
+        {
+            int temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
+        }
+
+
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
-            List<int> points = buildings.ConvertAll(building => building.Center.Id);
+            List<int> points = new();
+            for(int i=0; i < buildings.Count; i++)
+            {
+                points.Add(buildings[i].Center.Id);
+            }
+
             if (points.Count <= 2 || points.Count >= 10) //建筑太多或太少，报错
             {
                 throw new ArgumentException("too many or too few items in parameter \"buildings\"");
@@ -417,6 +491,22 @@ namespace StudentScheduleManagementSystem.Map
             int row = submap.GetLength(0), column = 1 << (row - 1);
             int[,] dp = new int[20, 1 << 20];
             List<int> res = new() { points[0] };
+            Dictionary<int, int> idtrans = new Dictionary<int, int>();
+            for (int i = 0; i < points.Count(); i++)
+            {
+                idtrans.Add(i, points[i]);
+            }
+
+            int startCity = 0;
+
+            List<int> shortestPath = SolveTSP(startCity, submap);
+            List<int> result = new();
+            for (int i = 0; i < shortestPath.Count(); i++)
+            {
+                result.Add(idtrans[shortestPath[i]]);
+            }
+
+            string test = "设置断点用的";
 
             for (int i = 0; i < row; i++)
             {
@@ -453,9 +543,10 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     int bit = 1 << (i - 1);
                     if (!hasVisited[i] && (e & bit) == 1 &&
-                        min > (GlobalMap[correspondence[i], p]?.Weight ?? int.MaxValue) + dp[i, e ^ bit])
+                        min > (GlobalMap._adjArray[correspondence[i]][p].edge.Weight + dp[i, e ^ bit]))
                     {
-                        min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
+                        min = GlobalMap._adjArray[correspondence[i]][p].edge.Weight + dp[i, e ^ bit];
+                        //min = GlobalMap[correspondence[i], p]!.Value.Weight + dp[i, e ^ bit];
                         t = correspondence[i];
                     }
                 }
