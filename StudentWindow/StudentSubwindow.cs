@@ -1803,6 +1803,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 errorMessage.Append("请输入日程日！\n");
             }
+
             if (errorMessage.Length != 0)
             {
                 MessageBox.Show(errorMessage.ToString(), "错误");

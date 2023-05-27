@@ -1174,8 +1174,8 @@ namespace StudentScheduleManagementSystem.Schedule
         #region public properties
 
         public override ScheduleType @ScheduleType => ScheduleType.Activity;
-        public static int Earliest => 8;
-        public static int Latest => 20;
+        public static int Earliest => 6;
+        public static int Latest => 22;
         [JsonProperty] public bool IsGroupActivity { get; init; }
         [JsonProperty] public string? OnlineLink { get; init; } = null;
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]

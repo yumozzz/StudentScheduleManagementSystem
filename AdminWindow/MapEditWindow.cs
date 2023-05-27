@@ -75,6 +75,7 @@
                 Thread.Sleep(100);
                 while (_isAlive)
                 {
+                    DateTime begin = DateTime.Now;
                     lock (_lock)
                     {
                         if (pictureBox1.InvokeRequired)
@@ -86,7 +87,8 @@
                             UpdateGraphics();
                         }
                     }
-                    Thread.Sleep(150);
+                    DateTime end = DateTime.Now;
+                    Thread.Sleep(end - begin);
                 }
             });
             Controls.Add(_textBox);

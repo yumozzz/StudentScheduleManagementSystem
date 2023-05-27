@@ -696,7 +696,7 @@ namespace StudentScheduleManagementSystem.Times
         {
             _localTime = new();
             _offset = 0;
-            _since = 10000;
+            _since = BaseTimeoutMs;
             while (!MainProgram.Program.Cts.IsCancellationRequested)
             {
                 if (!Pause && UI.MainWindow.StudentWindow != null)
@@ -717,7 +717,7 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void SetTime(Time time)
         {
-            _since = 10000;
+            _since = BaseTimeoutMs;
             _localTime = time;
             _offset = time.ToInt();
             Log.Information.Log($"时间已被设定为{_localTime.ToString()}");
