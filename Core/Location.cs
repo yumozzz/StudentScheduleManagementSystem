@@ -46,7 +46,7 @@ namespace StudentScheduleManagementSystem.Map
             }
             catch (Exception ex) when (ex is JsonFormatException or InvalidCastException)
             {
-                MessageBox.Show("地图文件读取出错，已退出");
+                MessageBox.Show("地图文件读取出错，已退出", "错误");
                 Log.Error.Log("地图文件读取出错，已退出", ex);
                 throw;
             }
@@ -172,14 +172,14 @@ namespace StudentScheduleManagementSystem.Map
 
         public class AdjacencyTable
         {
-            private struct Node
+            public struct Node
             {
                 public int pointId;
                 public Edge edge;
             }
 
             public int Size { get; init; }
-            private readonly List<Node>[] _adjArray;
+            public List<Node>[] _adjArray;
             public Point[] Location { get; private set; }
 
             public AdjacencyTable(List<Vertex> vertices, List<(Vertex, Vertex)> edges)
@@ -592,45 +592,65 @@ namespace StudentScheduleManagementSystem.Map
             //遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = GlobalMap!.Size; //点的数量
             List<int>[] route = new List<int>[pointCount];
+            bool[] isgone = new bool[pointCount];
+            for (int i = 0; i < pointCount; i++)
+            {
+                route[i] = new();
+            }
             int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
-            Array.Fill(distanceFromStart, int.MaxValue);
+            Array.Fill(distanceFromStart, 1000000);
             distanceFromStart[startId] = 0;
             route[startId].Add(startId);
             int curId = startId;
 
             for (int i = 0; i < pointCount; i++) //循环len-1次
             {
-                var nexts = GlobalMap[i]; //nexts为点[z]
-                int cyc = 0; //遍历的次数，每次循环后++
-                foreach ((int id, int dist) in nexts)
-                {
-                    if (distanceFromStart[i] > distanceFromStart[id] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
-                    {
-                        distanceFromStart[i] = distanceFromStart[curId] + dist; //替换从出发点到点[z]的最短距离
+                //var nexts = GlobalMap[curId]; //nexts为点[z]
 
-                        route[cyc] = route[curId];
-                        route[cyc].Add(cyc++); //记录此时的路线在list中,同时temp++
+                //int cyc = 0; //遍历的次数，每次循环后++
+                //foreach ((int id, int dist) in nexts)
+
+                //for(int j = 0; j < GlobalMap[curId].Count(); j++)
+                
+                for(int j = 0; j < GlobalMap._adjArray[curId].Count; j++)
+                {
+                    int id = GlobalMap._adjArray[curId][j].pointId;
+                    int dist = GlobalMap._adjArray[curId][j].edge.Weight;
+                    if (distanceFromStart[id] > distanceFromStart[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
+                    {
+                        distanceFromStart[id] = distanceFromStart[curId] + dist; //替换从出发点到点[z]的最短距离
+                        for(int k = 0; k < route[curId].Count;k++)
+                        {
+                            route[id].Add(route[curId][k]);
+                        }
+                        route[id].Add(id); //记录此时的路线在list中,同时temp++
                     }
                 }
 
                 //遍历所有点，寻找下一个距离最近的点
-                int minDistance = int.MaxValue;
-                int tempId = -1;
+                int minDistance = 1000000;
+                int tempId = startId;
                 for (int j = 0; j < pointCount; j++)
                 {
                     if (j != curId && distanceFromStart[j] >= distanceFromStart[curId] &&
-                        distanceFromStart[j] < minDistance)
+                        distanceFromStart[j] < minDistance && isgone[j] == false)
                     {
                         minDistance = distanceFromStart[j];
                         tempId = j;
                     }
                 }
+                Console.Write(i);
+                Console.Write(" ");
+                Console.WriteLine(curId);
+                isgone[curId] = true;
                 curId = tempId;
+
             }
             for (int i = 0; i < route[endId].Count; i++)
             {
                 Console.WriteLine(route[endId][i]);
             }
+
             return route[endId];
         }
 

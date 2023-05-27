@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace StudentScheduleManagementSystem.Times
 {
@@ -372,20 +373,25 @@ namespace StudentScheduleManagementSystem.Times
 
         public static void AddAlarm(Time timestamp,
                                     RepetitiveType repetitiveType,
-                                    AlarmCallback? alarmTimeUpCallback,
+                                    AlarmCallback alarmTimeUpCallback,
                                     object? callbackParameter,
                                     Type callbackReflectedType,
-                                    Type parameterType,
+                                    Type? parameterType,
                                     bool isDailyNotification,
                                     int[] activeWeeks,
                                     Day[] activeDays)
         {
+            if (callbackParameter == null ^ parameterType == null)
+            {
+                throw new
+                    InvalidOperationException("alarm callback parameter and its full name is not null or notnull at the same time");
+            }
             #region 调用API删除冲突闹钟
 
             detect_collision:
             int offset = timestamp.ToInt();
             RepetitiveType overrideType = _timeline[offset].RepetitiveType;
-            if (repetitiveType == RepetitiveType.MultipleDays) //多日按周重复，包含每天重复与每周重复，则自身不可能为临时日程
+            if (repetitiveType == RepetitiveType.MultipleDays)
             {
                 int[] dayOffsets = Array.ConvertAll(activeDays, day => day.ToInt());
                 foreach (var dayOffset in dayOffsets)
@@ -393,7 +399,7 @@ namespace StudentScheduleManagementSystem.Times
                     offset = 24 * dayOffset + timestamp.Hour;
                     while (offset < Constants.TotalHours)
                     {
-                        if (_timeline[offset].RepetitiveType != RepetitiveType.Null) //有闹钟
+                        if (_timeline[offset].RepetitiveType != RepetitiveType.Null)
                         {
                             overrideType = _timeline[offset].RepetitiveType;
                             goto delete_process; //跳出多重循环
@@ -449,7 +455,7 @@ namespace StudentScheduleManagementSystem.Times
                                                   out _);
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
-                    Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays!; //不可能为null
+                    Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays; //不可能为null
                     activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
                     Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟已被合并");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟已被合并");
@@ -481,7 +487,20 @@ namespace StudentScheduleManagementSystem.Times
             {
                 _dailyNotificationAlarmId = id;
             }
-            string callbackName = callbackReflectedType.FullName + '+' + alarmTimeUpCallback?.Method.Name;
+            string callbackName = callbackReflectedType.FullName + '+' + alarmTimeUpCallback.Method.Name;
+            string parameterTypeName;
+            if (parameterType == null)
+            {
+                parameterTypeName = "null";
+            }
+            else if (parameterType.FullName == null)
+            {
+                throw new ArgumentException(null, nameof(parameterType));
+            }
+            else
+            {
+                parameterTypeName = parameterType.FullName;
+            }
             _alarmList.Add(id,
                            new()
                            {
@@ -492,14 +511,8 @@ namespace StudentScheduleManagementSystem.Times
                                _alarmCallback = alarmTimeUpCallback,
                                _callbackParameter = callbackParameter,
                                _callbackName = callbackName,
-                               _parameterTypeName =
-                                   parameterType.FullName ?? throw new TypeNotFoundOrInvalidException()
+                               _parameterTypeName = parameterTypeName
                            }); //内部调用无需创造临时实例，直接向表中添加实例即可
-            if (alarmTimeUpCallback == null)
-            {
-                Log.Warning.Log("没有传递回调方法");
-                Console.WriteLine("Null alarmTimeUpCallback");
-            }
             if (repetitiveType == RepetitiveType.Single)
             {
                 Log.Information.Log($"已添加{timestamp.ToString()}点的闹钟");
@@ -528,7 +541,6 @@ namespace StudentScheduleManagementSystem.Times
         internal static void TriggerAlarm(int offset)
         {
             long alarmId = _timeline[offset].Id;
-            //Console.WriteLine(alarmId);
             if (alarmId != 0)
             {
                 _alarmList[alarmId]._alarmCallback?.Invoke(alarmId, _alarmList[alarmId]._callbackParameter);
@@ -554,12 +566,17 @@ namespace StudentScheduleManagementSystem.Times
                 {
                     throw new MethodNotFoundException();
                 }
-                if (!_localTypes.Contains(dobj.ParameterTypeName))
+                if (dobj.ParameterTypeName != "null" && !_localTypes.Contains(dobj.ParameterTypeName))
                 {
                     throw new TypeNotFoundOrInvalidException();
                 }
 
-                Type paramType = Assembly.GetExecutingAssembly().GetType(dobj.ParameterTypeName)!;
+                Type? paramType = Assembly.GetExecutingAssembly().GetType(dobj.ParameterTypeName);
+                if (paramType == null ^ dobj.CallbackParameter == null)
+                {
+                    throw new
+                        JsonFormatException("alarm callback parameter and its full name is not null or notnull at the same time");
+                }
                 var reflectedTypeFullName = dobj.CallbackName.Split('+')[0];
                 var reflectedType = new[]
                 {
@@ -656,6 +673,7 @@ namespace StudentScheduleManagementSystem.Times
         private static Time _localTime = new();
         private static int _offset = 0;
         private static bool _pause = false;
+        private static int _since = 0;
         public static bool Pause
         {
             get => _pause;
@@ -678,21 +696,28 @@ namespace StudentScheduleManagementSystem.Times
         {
             _localTime = new();
             _offset = 0;
+            _since = 10000;
             while (!MainProgram.Program.Cts.IsCancellationRequested)
             {
                 if (!Pause && UI.MainWindow.StudentWindow != null)
                 {
+                    _since += 50;
+                }
+                Thread.Sleep(50);
+                if (_since >= BaseTimeoutMs / _acceleration)
+                {
+                    _since = 0;
                     _timeChangeEventHandler.Invoke(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;
                 }
-                Thread.Sleep(BaseTimeoutMs / _acceleration);
             }
         }
 
         public static void SetTime(Time time)
         {
+            _since = 10000;
             _localTime = time;
             _offset = time.ToInt();
             Log.Information.Log($"时间已被设定为{_localTime.ToString()}");
@@ -715,7 +740,7 @@ namespace StudentScheduleManagementSystem.Times
                     Log.Information.Log("时间流速已设定为1x");
                     return 1;
                 default:
-                    return 0;
+                    throw new ArgumentException(null, nameof(_acceleration));
             }
         }
     }

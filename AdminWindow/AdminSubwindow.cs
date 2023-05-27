@@ -142,7 +142,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (!errorMessage.Equals(""))
             {
-                MessageBox.Show(errorMessage.ToString());
+                MessageBox.Show(errorMessage.ToString(), "错误");
                 return false;
             }
 
@@ -234,12 +234,12 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (selectedCount == 0)
             {
-                MessageBox.Show("请选择要删除的日程！");
+                MessageBox.Show("请选择要删除的日程！", "提示");
                 return;
             }
             if (selectedCount >= 2)
             {
-                MessageBox.Show("请一次选择一个日程删除！");
+                MessageBox.Show("请一次选择一个日程删除！", "提示");
                 return;
             }
 
@@ -254,13 +254,9 @@ namespace StudentScheduleManagementSystem.UI
                                 MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 Schedule.Schedule.DeleteShared(id);
-                MessageBox.Show("已成功删除该日程");
+                MessageBox.Show("已成功删除该日程", "提示");
                 Log.Information.Log($"成功删除id为{id}的共享日程");
                 GenerateFormData(_type);
-            }
-            else
-            {
-                MessageBox.Show("已取消删除该日程");
             }
         }
 
@@ -278,12 +274,12 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (selectedCount == 0)
             {
-                MessageBox.Show("请选择要修改的日程！");
+                MessageBox.Show("请选择要修改的日程！", "提示");
                 return;
             }
             if (selectedCount >= 2)
             {
-                MessageBox.Show("请一次选择一个日程修改！");
+                MessageBox.Show("请一次选择一个日程修改！", "提示");
                 return;
             }
 
@@ -346,7 +342,6 @@ namespace StudentScheduleManagementSystem.UI
             }
             Schedule.Schedule.DeleteShared(_originId!.Value);
             AddOneSchedule(_originId, true);
-            MessageBox.Show("已成功修改该日程");
             Log.Information.Log($"成功修改id为{_originId.Value}的共享日程");
             GenerateFormData(_type);
 
@@ -464,13 +459,13 @@ namespace StudentScheduleManagementSystem.UI
             {
                 if (this.searchByNameBox.Text.Equals(""))
                 {
-                    MessageBox.Show("请输入要搜索的日程名！");
+                    MessageBox.Show("请输入要搜索的日程名！", "提示");
                     return;
                 }
                 var result = Schedule.Schedule.GetSharedByName(this.searchByNameBox.Text);
                 if (result.Count == 0)
                 {
-                    MessageBox.Show("未搜索到日程！");
+                    MessageBox.Show("未搜索到日程！", "提示");
                     return;
                 }
                 GenerateFormData(result);
@@ -479,13 +474,13 @@ namespace StudentScheduleManagementSystem.UI
             {
                 if (this.searchByIdBox.Text.Equals(""))
                 {
-                    MessageBox.Show("请输入要搜索的日程ID！");
+                    MessageBox.Show("请输入要搜索的日程ID！", "提示");
                     return;
                 }
                 var result = Schedule.Schedule.GetSharedById(long.Parse(searchByIdBox.Text));
                 if (result == null)
                 {
-                    MessageBox.Show("未搜索到日程！");
+                    MessageBox.Show("未搜索到日程！", "提示");
                     return;
                 }
                 GenerateFormData(new List<Schedule.SharedData> { result });
@@ -525,7 +520,7 @@ namespace StudentScheduleManagementSystem.UI
 
             if (beginHour + duration >= Schedule.Course.Latest)
             {
-                MessageBox.Show("课程结束时间不得晚于规定时间！");
+                MessageBox.Show("课程结束时间不得晚于规定时间！", "提示");
                 return false;
             }
 
@@ -570,7 +565,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (id == null)
             {
-                MessageBox.Show("已成功添加该课程");
+                MessageBox.Show("已成功添加该课程", "提示");
             }
             GenerateFormData(_type);
             return true;
@@ -603,13 +598,13 @@ namespace StudentScheduleManagementSystem.UI
 
             if (beginHour + duration >= Schedule.Exam.Latest)
             {
-                MessageBox.Show("考试结束时间不得晚于规定时间！");
+                MessageBox.Show("考试结束时间不得晚于规定时间！", "提示");
                 return false;
             }
 
             if (repetitiveType != RepetitiveType.Single)
             {
-                MessageBox.Show("只能选择一个周次和一个天次！");
+                MessageBox.Show("只能选择一个周次和一个天次！", "提示");
                 return false;
             }
 
@@ -622,7 +617,7 @@ namespace StudentScheduleManagementSystem.UI
                                   id);
             if (id == null)
             {
-                MessageBox.Show("已成功添加该课程");
+                MessageBox.Show("已成功添加该课程", "提示");
             }
             GenerateFormData(_type);
             return true;
@@ -656,7 +651,7 @@ namespace StudentScheduleManagementSystem.UI
 
             if (beginHour + duration >= Schedule.Activity.Latest)
             {
-                MessageBox.Show("活动结束时间不得晚于规定时间！");
+                MessageBox.Show("活动结束时间不得晚于规定时间！", "提示");
                 return false;
             }
 
@@ -704,7 +699,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (id == null)
             {
-                MessageBox.Show("已成功添加该活动");
+                MessageBox.Show("已成功添加该活动", "提示");
             }
             GenerateFormData(_type);
             return true;
