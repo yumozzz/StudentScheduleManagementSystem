@@ -179,7 +179,7 @@ namespace StudentScheduleManagementSystem.Map
             }
 
             public int Size { get; init; }
-            public List<Node>[] _adjArray;
+            private readonly List<Node>[] _adjArray;
             public Point[] Location { get; private set; }
 
             public AdjacencyTable(List<Vertex> vertices, List<(Vertex, Vertex)> edges)
@@ -635,10 +635,10 @@ namespace StudentScheduleManagementSystem.Map
 
             for (int i = 0; i < pointCount; i++) //循环len-1次
             {
-                for (int j = 0; j < GlobalMap._adjArray[curId].Count; j++)
+                for (int j = 0; j < GlobalMap[curId].Count; j++)
                 {
-                    int id = GlobalMap._adjArray[curId][j].pointId;
-                    int dist = GlobalMap._adjArray[curId][j].edge.Weight;
+                    int id = GlobalMap[curId][j].Item2;
+                    int dist = GlobalMap[curId, id]!.Value.Weight;
                     if (distanceFromStart[id] > distanceFromStart[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
                         distanceFromStart[id] = distanceFromStart[curId] + dist; //替换从出发点到点[z]的最短距离
@@ -684,10 +684,10 @@ namespace StudentScheduleManagementSystem.Map
 
             for (int i = 1; i < pointCount; i++)
             {
-                for (int j = 0; j < GlobalMap._adjArray[curId].Count; j++)
+                for (int j = 0; j < GlobalMap[curId].Count; j++)
                 {
-                    int id = GlobalMap._adjArray[curId][j].pointId;
-                    int dist = GlobalMap._adjArray[curId][j].edge.Weight;
+                    int id = GlobalMap[curId][j].Item2;
+                    int dist = GlobalMap[curId, id]!.Value.Weight;
                     if (distance[id] > distance[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
                         distance[id] = distance[curId] + dist; //替换从出发点到点[z]的最短距离
