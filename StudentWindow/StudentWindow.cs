@@ -21,7 +21,17 @@ namespace StudentScheduleManagementSystem.UI
             pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
             speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
             Times.Timer.SetPauseState += (pause) => { pauseButton.Text = pause ? "继续" : "暂停"; };
-            Log.LogBase.LogGenerated += OnLogGenerated;
+            Log.LogBase.LogGenerated += (message) =>
+            {
+                if (logListBox.InvokeRequired)
+                {
+                    logListBox.Invoke(OnLogGenerated, message);
+                }
+                else
+                {
+                    OnLogGenerated(message);
+                }
+            };
             logListBox.Hide();
         }
 
@@ -47,7 +57,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void ScheduleTableButton_Click(object sender, EventArgs e)
         {
-            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -59,7 +68,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void CourseButton_Click(object sender, EventArgs e)
         {
-            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -83,7 +91,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void GroupActivityButton_Click(object sender, EventArgs e)
         {
-            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -95,7 +102,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void PersonalActivityButton_Click(object sender, EventArgs e)
         {
-            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -107,7 +113,6 @@ namespace StudentScheduleManagementSystem.UI
 
         private void TemporaryAffairButton_Click(object sender, EventArgs e)
         {
-            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -200,8 +205,19 @@ namespace StudentScheduleManagementSystem.UI
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
-            mainpage.Controls.Add(logListBox);
-            logListBox.Show();
+            if (logListBox.InvokeRequired)
+            {
+                logListBox.Invoke(() =>
+                {
+                    mainpage.Controls.Add(logListBox);
+                    Show();
+                });
+            }
+            else
+            {
+                mainpage.Controls.Add(logListBox);
+                logListBox.Show();
+            }
         }
 
         private void ExitButton_Click(object sender, EventArgs e)
@@ -224,13 +240,16 @@ namespace StudentScheduleManagementSystem.UI
                 logListBox.Items.RemoveAt(0);
             }
             logListBox.Items.Add(message);
-            Graphics graphics = logListBox.CreateGraphics();
-            float width = 0f;
-            foreach (var item in logListBox.Items)
+            if (logListBox.Visible)
             {
-                width = Math.Max(width, graphics.MeasureString(item.ToString()!.Replace("\r\n", " ").Replace('\n', ' '), logListBox.Font).Width);
+                Graphics graphics = logListBox.CreateGraphics();
+                float width = 0f;
+                foreach (var item in logListBox.Items)
+                {
+                    width = Math.Max(width, graphics.MeasureString(item.ToString()!.Replace("\r\n", " ").Replace('\n', ' '), logListBox.Font).Width);
+                }
+                logListBox.HorizontalExtent = Convert.ToInt32(width) + 20;
             }
-            logListBox.HorizontalExtent = Convert.ToInt32(width) + 20;
         }
     }
 }

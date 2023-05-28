@@ -11,7 +11,17 @@
         public AdminWindow()
         {
             InitializeComponent();
-            Log.LogBase.LogGenerated += OnLogGenerated;
+            Log.LogBase.LogGenerated += (message) =>
+            {
+                if (logListBox.InvokeRequired)
+                {
+                    logListBox.Invoke(OnLogGenerated, message);
+                }
+                else
+                {
+                    OnLogGenerated(message);
+                }
+            };
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             this.logListBox.Hide();
@@ -100,15 +110,6 @@
             this.closeConfirm.Show();
         }
 
-        private void LogButton_Click(object sender, EventArgs e)
-        {
-            this.logoutConfirm.Hide();
-            this.closeConfirm.Hide();
-            mainpage.Controls.Clear();
-            mainpage.Controls.Add(logListBox);
-            this.logListBox.Show();
-        }
-
         private void MapEditButton_Click(object sender, EventArgs e)
         {
             _mapEditWindow = new();
@@ -117,20 +118,44 @@
             GC.Collect();
         }
 
+        private void LogButton_Click(object sender, EventArgs e)
+        {
+            this.logoutConfirm.Hide();
+            this.closeConfirm.Hide();
+            mainpage.Controls.Clear();
+            if (logListBox.InvokeRequired)
+            {
+                logListBox.Invoke(() =>
+                {
+                    mainpage.Controls.Add(logListBox);
+                    Show();
+                });
+            }
+            else
+            {
+                mainpage.Controls.Add(logListBox);
+                logListBox.Show();
+            }
+        }
+
         private void OnLogGenerated(string message)
         {
+            Console.WriteLine("add log");
             if (logListBox.Items.Count > 100)
             {
                 logListBox.Items.RemoveAt(0);
             }
             logListBox.Items.Add(message);
-            Graphics graphics = logListBox.CreateGraphics();
-            float width = 0f;
-            foreach (var item in logListBox.Items)
+            if (logListBox.Visible)
             {
-                width = Math.Max(width, graphics.MeasureString(item.ToString()!.Replace("\r\n", " ").Replace('\n', ' '), logListBox.Font).Width);
+                Graphics graphics = logListBox.CreateGraphics();
+                float width = 0f;
+                foreach (var item in logListBox.Items)
+                {
+                    width = Math.Max(width, graphics.MeasureString(item.ToString()!.Replace("\r\n", " ").Replace('\n', ' '), logListBox.Font).Width);
+                }
+                logListBox.HorizontalExtent = Convert.ToInt32(width) + 20;
             }
-            logListBox.HorizontalExtent = Convert.ToInt32(width) + 20;
         }
     }
 }

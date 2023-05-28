@@ -25,6 +25,14 @@ namespace StudentScheduleManagementSystem.Log
             Stream = new(FileManagement.FileManager.LogFileDirectory + $"/{DateTime.Now.ToString("dd_HHmmss")}_{_random}.log", FileMode.Create);
         }
 
+        public static void Log(string message)
+        {
+            var arr = Encoding.UTF8.GetBytes(message);
+            _logEventHandler?.Invoke(message);
+            Stream.Write(arr, 0, arr.Length);
+            Stream.Flush();
+        }
+
         public static void Close()
         {
             Stream.Close();
@@ -37,9 +45,7 @@ namespace StudentScheduleManagementSystem.Log
         {
             string log =
                 $"[Log]\t Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
-            var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream.Write(arr, 0, arr.Length);
-            LogBase.Stream.Flush();
+            LogBase.Log(log);
         }
     }
 
@@ -49,9 +55,7 @@ namespace StudentScheduleManagementSystem.Log
         {
             string log =
                 $"[War]\t Actual time <{DateTime.Now.ToString("dd HH:mm:ss.fff")}>, System time <{Times.Timer.Now.ToString()}>: \"{message}\"\n";
-            var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream.Write(arr, 0, arr.Length);
-            LogBase.Stream.Flush();
+            LogBase.Log(log);
         }
     }
 
@@ -65,9 +69,7 @@ namespace StudentScheduleManagementSystem.Log
             {
                 log += $"The exception is \"{ex.Message}\"\n{ex.StackTrace}\n";
             }
-            var arr = Encoding.UTF8.GetBytes(log);
-            LogBase.Stream.Write(arr, 0, arr.Length);
-            LogBase.Stream.Flush();
+            LogBase.Log(log);
         }
     }
 }
