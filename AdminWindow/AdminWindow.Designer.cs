@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AdminWindow));
             this.header = new System.Windows.Forms.Panel();
             this.mainpage = new System.Windows.Forms.Panel();
+            this.logListBox = new System.Windows.Forms.ListBox();
             this.exitButton = new System.Windows.Forms.PictureBox();
             this.courseButton = new System.Windows.Forms.PictureBox();
             this.activityButton = new System.Windows.Forms.PictureBox();
@@ -39,7 +40,6 @@
             this.closeConfirm = new System.Windows.Forms.PictureBox();
             this.examButton = new System.Windows.Forms.PictureBox();
             this.mapEditButton = new System.Windows.Forms.PictureBox();
-            this.logListBox = new System.Windows.Forms.ListBox();
             this.logButton = new System.Windows.Forms.PictureBox();
             this.mainpage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.exitButton)).BeginInit();
@@ -72,6 +72,16 @@
             this.mainpage.Name = "mainpage";
             this.mainpage.Size = new System.Drawing.Size(1050, 655);
             this.mainpage.TabIndex = 25;
+            // 
+            // logListBox
+            // 
+            this.logListBox.BackColor = System.Drawing.Color.White;
+            this.logListBox.FormattingEnabled = true;
+            this.logListBox.ItemHeight = 24;
+            this.logListBox.Location = new System.Drawing.Point(10, 13);
+            this.logListBox.Name = "logListBox";
+            this.logListBox.Size = new System.Drawing.Size(1030, 628);
+            this.logListBox.TabIndex = 0;
             // 
             // exitButton
             // 
@@ -172,15 +182,6 @@
             this.mapEditButton.TabStop = false;
             this.mapEditButton.Click += new System.EventHandler(this.MapEditButton_Click);
             // 
-            // logListBox
-            // 
-            this.logListBox.FormattingEnabled = true;
-            this.logListBox.ItemHeight = 24;
-            this.logListBox.Location = new System.Drawing.Point(10, 13);
-            this.logListBox.Name = "logListBox";
-            this.logListBox.Size = new System.Drawing.Size(1030, 628);
-            this.logListBox.TabIndex = 0;
-            // 
             // logButton
             // 
             this.logButton.BackColor = System.Drawing.Color.Transparent;
@@ -202,6 +203,7 @@
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1300, 770);
+            this.Controls.Add(this.closeConfirm);
             this.Controls.Add(this.logButton);
             this.Controls.Add(this.mapEditButton);
             this.Controls.Add(this.examButton);
@@ -210,7 +212,6 @@
             this.Controls.Add(this.exitButton);
             this.Controls.Add(this.header);
             this.Controls.Add(this.logoutConfirm);
-            this.Controls.Add(this.closeConfirm);
             this.Controls.Add(this.mainpage);
             this.Controls.Add(this.mainpageButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;

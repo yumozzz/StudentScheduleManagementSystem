@@ -105,6 +105,7 @@
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
             this.logListBox.Show();
+            this.logListBox.BringToFront();
         }
 
         private void MapEditButton_Click(object sender, EventArgs e)

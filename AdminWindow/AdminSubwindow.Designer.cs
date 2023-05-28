@@ -28,7 +28,7 @@
         /// </summary>
         protected void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.scheduleDataTable = new System.Windows.Forms.DataGridView();
             this.courseCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.nameTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -53,6 +53,7 @@
             this.searchCancel = new System.Windows.Forms.Button();
             this.searchByIdBox = new System.Windows.Forms.TextBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.label = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleDataTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -75,21 +76,21 @@
             this.dayCheckBoxColumn,
             this.timeCheckBoxColumn,
             this.durationCheckBoxColumn});
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.scheduleDataTable.DefaultCellStyle = dataGridViewCellStyle1;
-            this.scheduleDataTable.Location = new System.Drawing.Point(5, 5);
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.scheduleDataTable.DefaultCellStyle = dataGridViewCellStyle2;
+            this.scheduleDataTable.Location = new System.Drawing.Point(5, 45);
             this.scheduleDataTable.Name = "scheduleDataTable";
             this.scheduleDataTable.RowHeadersVisible = false;
             this.scheduleDataTable.RowHeadersWidth = 62;
             this.scheduleDataTable.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.scheduleDataTable.RowTemplate.Height = 32;
-            this.scheduleDataTable.Size = new System.Drawing.Size(714, 645);
+            this.scheduleDataTable.Size = new System.Drawing.Size(714, 605);
             this.scheduleDataTable.TabIndex = 41;
             // 
             // courseCheckBoxColumn
@@ -331,12 +332,24 @@
             this.pictureBox2.TabIndex = 61;
             this.pictureBox2.TabStop = false;
             // 
+            // label
+            // 
+            this.label.AutoSize = true;
+            this.label.Font = new System.Drawing.Font("黑体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label.ForeColor = System.Drawing.Color.White;
+            this.label.Location = new System.Drawing.Point(12, 9);
+            this.label.Name = "label";
+            this.label.Size = new System.Drawing.Size(154, 24);
+            this.label.TabIndex = 81;
+            this.label.Text = "showPageType";
+            // 
             // AdminSubwindowBase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(168)))), ((int)(((byte)(128)))), ((int)(((byte)(194)))));
             this.ClientSize = new System.Drawing.Size(1050, 655);
+            this.Controls.Add(this.label);
             this.Controls.Add(this.weekSelectBox);
             this.Controls.Add(this.daySelectBox);
             this.Controls.Add(this.searchByIdBox);
@@ -391,5 +404,6 @@
         private DataGridViewTextBoxColumn dayCheckBoxColumn;
         private DataGridViewTextBoxColumn timeCheckBoxColumn;
         private DataGridViewTextBoxColumn durationCheckBoxColumn;
+        protected Label label;
     }
 }
