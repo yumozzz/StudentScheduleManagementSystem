@@ -399,7 +399,8 @@ namespace StudentScheduleManagementSystem.Times
                     offset = 24 * dayOffset + timestamp.Hour;
                     while (offset < Constants.TotalHours)
                     {
-                        if (_timeline[offset].RepetitiveType != RepetitiveType.Null)
+                        overrideType = _timeline[offset].RepetitiveType;
+                        if (overrideType != RepetitiveType.Null)
                         {
                             overrideType = _timeline[offset].RepetitiveType;
                             goto delete_process; //跳出多重循环
@@ -415,7 +416,8 @@ namespace StudentScheduleManagementSystem.Times
                     foreach (var activeDay in activeDays)
                     {
                         offset = new Time() { Week = activeWeek, Day = activeDay, Hour = timestamp.Hour }.ToInt();
-                        if (_timeline[offset].RepetitiveType != RepetitiveType.Null)
+                        overrideType = _timeline[offset].RepetitiveType;
+                        if (overrideType != RepetitiveType.Null)
                         {
                             overrideType = _timeline[offset].RepetitiveType;
                             goto delete_process; //跳出多重循环
@@ -429,9 +431,12 @@ namespace StudentScheduleManagementSystem.Times
             }
 
             delete_process:
-            if (overrideType != RepetitiveType.Null && _timeline[offset].Id == _dailyNotificationAlarmId)
+            if (overrideType != RepetitiveType.Null)
             {
-                throw new InvalidOperationException("overriding daily notification");
+                if (offset < Constants.TotalHours && _timeline[offset].Id == _dailyNotificationAlarmId)
+                {
+                    throw new InvalidOperationException("overriding daily notification");
+                }
             }
             switch (overrideType, repetitiveType)
             {
