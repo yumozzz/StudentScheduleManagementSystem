@@ -1,4 +1,6 @@
-﻿#define SHOWPOINTID
+﻿//#define SHOWPOINTID
+
+using System.ComponentModel;
 
 namespace StudentScheduleManagementSystem.UI
 {
@@ -21,7 +23,6 @@ namespace StudentScheduleManagementSystem.UI
 
         public MapEditWindow()
         {
-            InitializeComponent();
             _lineEndPointPairs = Map.Location.GetEdges()
                                     .ToHashSet();
             _points = new();
@@ -51,7 +52,8 @@ namespace StudentScheduleManagementSystem.UI
             {
                 Label label = new()
                 {
-                    Location = new((int)((building.Center.ToPoint().X + 20) / 1.5), (int)((building.Center.ToPoint().Y + 20) / 1.5)),
+                    //Location = new((int)((building.Center.ToPoint().X + 20) / 1.5), (int)((building.Center.ToPoint().Y + 20) / 1.5)),
+                    Location = new(building.Center.ToPoint().X + 20, building.Center.ToPoint().Y + 20),
                     Size = new(100, 24),
                     Text = building.Name,
                     AutoSize = true,
@@ -76,25 +78,33 @@ namespace StudentScheduleManagementSystem.UI
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
             buttonOk.Click += (sender, e) =>
             {
-                lock (_lock)
-                {
-                    Map.Location.GlobalMap = new(GetVertices(), GetEdges());
-                    Map.Location.Buildings = GetBuildings();
-                    this.Close();
-                }
+                Map.Location.GlobalMap = new(GetVertices(), GetEdges());
+                Map.Location.Buildings = GetBuildings();
+                this.Close();
             };
             buttonCancel.Click += (sender, e) =>
             {
-                lock (_lock)
-                {
-                    this.Close();
-                }
+                this.Close();
             };
+            
             Controls.Add(buttonOk);
             Controls.Add(buttonCancel);
-            helpButton.Location = new(528, 0);
+            Controls.Add(_textBox);
+            InitializeComponent();
             this.KeyDown += OnKeyDown;
             pictureBox1.MouseDown += OnMouseDown;
+            helpButton.Click += (sender, e) =>
+            {
+                if (helpPictureBox.Visible)
+                {
+                    helpPictureBox.Hide();
+                }
+                else
+                {
+                    helpPictureBox.Show();
+                }
+            };
+
             Thread thread = new(() =>
             {
                 Thread.Sleep(100);
@@ -116,19 +126,21 @@ namespace StudentScheduleManagementSystem.UI
                     Thread.Sleep((end - begin) / 2);
                 }
             });
-            Controls.Add(_textBox);
+            
             _textBox.BringToFront();
             _textBox.Hide();
             warnPictureBox.Hide();
             helpPictureBox.Hide();
-            helpPictureBox.SendToBack();
+            helpPictureBox.BringToFront();
             thread.Start();
         }
 
-        public new void Close()
+        protected override void OnClosing(CancelEventArgs e)
         {
-            _isAlive = false;
-            base.Close();
+            lock(_lock)
+            {
+                _isAlive = false;
+            }
         }
 
         private double Distance(Point p1, Point p2)
@@ -139,7 +151,6 @@ namespace StudentScheduleManagementSystem.UI
         private void UpdateGraphics()
         {
             pictureBox1.Invalidate();
-            Update();
             using Graphics graphics = pictureBox1.CreateGraphics();
             using Pen pen = new(Color.Red, 2);
             using Brush brush = new SolidBrush(Color.Red);
@@ -194,6 +205,7 @@ namespace StudentScheduleManagementSystem.UI
                                      Y = _yLock == null ? circleCenter.Y : _yLock.Value - BigCircRad,
                                      Size = new(2 * BigCircRad, 2 * BigCircRad)
                                  });
+            //Update();
         }
 
         private void OnMouseDown(object sender, EventArgs e)
@@ -243,6 +255,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
+            Console.WriteLine(e.KeyCode.ToString());
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:
@@ -372,10 +385,11 @@ namespace StudentScheduleManagementSystem.UI
                     goto alt; //identical to a missing break in C/C++
                 case Keys.Menu:
                 alt:
-                    if (_isInputting)
+                    if (_isInputting || !e.KeyData.HasFlag(Keys.Alt))
                     {
                         return;
                     }
+                    _showLabels = !_showLabels;
                     foreach (var tuple in _points.Values)
                     {
                         if (!tuple.HasValue)
@@ -391,7 +405,6 @@ namespace StudentScheduleManagementSystem.UI
                             tuple.Value.Item2.Hide();
                         }
                     }
-                    _showLabels = !_showLabels;
                     e.Handled = true;
                     break;
             }

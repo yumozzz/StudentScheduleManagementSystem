@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Forms;
 
 namespace StudentScheduleManagementSystem.UI
 {
@@ -16,9 +18,10 @@ namespace StudentScheduleManagementSystem.UI
         {
             InitializeComponent();
             Times.Timer.TimeChange += SetLocalTime;
-            pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause;};
+            pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
             speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
             Times.Timer.SetPauseState += (pause) => { pauseButton.Text = pause ? "继续" : "暂停"; };
+            Log.LogBase.LogGenerated += OnLogGenerated;
             logListBox.Hide();
         }
 
@@ -114,7 +117,7 @@ namespace StudentScheduleManagementSystem.UI
             _studentTemporaryAffairSubwindow.Show();
         }
 
-        private void SetTimeButtonClick(object sender, EventArgs e)
+        private void SetTimeButton_Click(object sender, EventArgs e)
         {
             StringBuilder errorMessage = new();
             if (weekBox.Text.Equals(""))
@@ -196,6 +199,8 @@ namespace StudentScheduleManagementSystem.UI
             _studentTemporaryAffairSubwindow?.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
+            mainpage.Controls.Clear();
+            mainpage.Controls.Add(logListBox);
             logListBox.Show();
         }
 
@@ -210,6 +215,22 @@ namespace StudentScheduleManagementSystem.UI
             _studentTemporaryAffairSubwindow?.Hide();
             logoutConfirm.Show();
             closeConfirm.Show();
+        }
+
+        private void OnLogGenerated(string message)
+        {
+            if (logListBox.Items.Count > 100)
+            {
+                logListBox.Items.RemoveAt(0);
+            }
+            logListBox.Items.Add(message);
+            Graphics graphics = logListBox.CreateGraphics();
+            float width = 0f;
+            foreach (var item in logListBox.Items)
+            {
+                width = Math.Max(width, graphics.MeasureString(item.ToString()!.Replace("\r\n", " ").Replace('\n', ' '), logListBox.Font).Width);
+            }
+            logListBox.HorizontalExtent = Convert.ToInt32(width) + 20;
         }
     }
 }
