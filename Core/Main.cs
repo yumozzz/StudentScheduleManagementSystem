@@ -34,7 +34,7 @@ namespace StudentScheduleManagementSystem.MainProgram
             {
                 AllocConsole();
                 IntPtr hWnd = Process.GetCurrentProcess().MainWindowHandle;
-                ShowWindow(hWnd, 0);
+                //ShowWindow(hWnd, 0);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
