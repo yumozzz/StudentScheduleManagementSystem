@@ -751,7 +751,8 @@ namespace StudentScheduleManagementSystem.Map
                 Location.Edge? edge = Location.GlobalMap![prevId, points[i]];
                 if (!edge.HasValue)
                 {
-                    throw new ArgumentException($"there's no edge between vertex {prevId} and {points[i]}");
+                    //throw new ArgumentException($"there's no edge between vertex {prevId} and {points[i]}");
+                    continue;
                 }
                 if (edge.Value.Type == Location.EdgeType.Line)
                 {
@@ -767,9 +768,9 @@ namespace StudentScheduleManagementSystem.Map
                 prevId = points[i];
             }
             UI.MapWindow mapWindow = new(lineEndPointPairs, bezCurveControlPointTuples);
-            Thread thread = new(() => mapWindow.ShowDialog());
-            thread.Start();
-            thread.Join();
+            mapWindow.ShowDialog();
+            mapWindow.Dispose();
+            GC.Collect();
         }
     }
 }

@@ -65,7 +65,9 @@ namespace StudentScheduleManagementSystem.UI
             Map.Location.Building currentBuilding = Map.Location.GetBuildingsByName(buildingComboBox.Text)[0];
             _targetBuildings.Add(currentBuilding);
             List<int> points = _targetBuildings.Count == 2 ? Map.Location.GetClosestPath(currentBuilding, _targetBuildings[0]) : Map.Location.GetClosestCircuit(_targetBuildings);
+            this.Hide();
             Map.Navigate.Show(points);
+            this.Close();
         }
     }
 }
