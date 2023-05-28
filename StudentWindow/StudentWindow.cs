@@ -42,7 +42,6 @@ namespace StudentScheduleManagementSystem.UI
                     pauseButton.Text = pause ? "继续" : "暂停";
                 }
             };
-
             logListBox.Hide();
         }
 

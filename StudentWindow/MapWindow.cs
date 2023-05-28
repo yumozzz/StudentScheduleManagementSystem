@@ -1,4 +1,6 @@
-﻿namespace StudentScheduleManagementSystem.UI
+﻿using System.Net;
+
+namespace StudentScheduleManagementSystem.UI
 {
     public partial class MapWindow : Form
     {
@@ -21,24 +23,38 @@
             InitializeComponent();
         }
 
+        private void DrawPoint(Graphics graphics, Point point)
+        {
+            graphics.FillEllipse(new SolidBrush(Color.Red),
+                                 new()
+                                 {
+                                     Location = new(point.X - 5, point.Y - 5),
+                                     Size = new(10, 10)
+                                 });
+        }
+
         protected void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
-            using Pen pen = new(Color.Red, 2);
+            using Pen penLine = new(Color.Red, 4);
 
             foreach (var endPoints in _lineEndPointPairs)
             {
-                graphics.DrawLine(pen,
+                graphics.DrawLine(penLine,
                                   endPoints.Item1.ToPoint(),
                                   endPoints.Item2.ToPoint());
+                DrawPoint(graphics, endPoints.Item1.ToPoint());
+                DrawPoint(graphics, endPoints.Item2.ToPoint());
             }
             foreach (var controlPoints in _bezCurveControlPointTuples)
             {
-                graphics.DrawBezier(pen,
+                graphics.DrawBezier(penLine,
                                     controlPoints.Item1.ToPoint(),
                                     controlPoints.Item2,
                                     controlPoints.Item3,
                                     controlPoints.Item4.ToPoint());
+                DrawPoint(graphics, controlPoints.Item1.ToPoint());
+                DrawPoint(graphics, controlPoints.Item4.ToPoint());
             }
         }
     }
