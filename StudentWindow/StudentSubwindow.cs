@@ -14,7 +14,6 @@ namespace StudentScheduleManagementSystem.UI
         protected readonly HashSet<long> _selectedIds = new();
         protected long? _originId = null;
         protected bool _showAllData = true;
-        public Action<bool?> pauseTimeDelegate;
 
         #region ctor
 
@@ -454,12 +453,12 @@ namespace StudentScheduleManagementSystem.UI
             {
                 ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
             }
-            pauseTimeDelegate.Invoke(false);
+            Times.Timer.Pause = false;
         }
 
         protected void DeleteScheduleButton_Click(object sender, EventArgs e)
         {
-            pauseTimeDelegate.Invoke(true);
+            Times.Timer.Pause = true;
             if (_showAllData)
             {
                 MessageBox.Show("请在个人日程页面选择日程删除！", "提示");
@@ -491,7 +490,7 @@ namespace StudentScheduleManagementSystem.UI
                 _selectedIds.Remove(id);
                 GenerateUserData(_scheduleType);
             }
-            pauseTimeDelegate.Invoke(false);
+            Times.Timer.Pause = false;
         }
 
 
@@ -832,7 +831,7 @@ namespace StudentScheduleManagementSystem.UI
 
         protected void AddScheduleButton_Click(object sender, EventArgs e)
         {
-            pauseTimeDelegate.Invoke(true);
+            Times.Timer.Pause = true;
 
             if (!_showAllData)
             {
@@ -890,7 +889,7 @@ namespace StudentScheduleManagementSystem.UI
 
         protected void ReviseButton_Click(object sender, EventArgs e)
         {
-            pauseTimeDelegate.Invoke(true);
+            Times.Timer.Pause = true;
 
             if (_showAllData)
             {
@@ -1027,7 +1026,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 ((DataGridViewCheckBoxCell)row.Cells[0]).ReadOnly = false;
             }
-            pauseTimeDelegate.Invoke(false);
+            Times.Timer.Pause = false;
         }
 
         #endregion
@@ -1396,7 +1395,7 @@ namespace StudentScheduleManagementSystem.UI
             this._subwindowState = SubwindowState.Viewing;
             ClearInformation();
 
-            pauseTimeDelegate.Invoke(false);
+            Times.Timer.Pause = false;
         }
 
         protected abstract void ReviseScheduleButton_Click(object sender, EventArgs e);
@@ -1624,7 +1623,7 @@ namespace StudentScheduleManagementSystem.UI
 
         protected override void ReviseScheduleButton_Click(object sender, EventArgs e)
         {
-            pauseTimeDelegate.Invoke(true);
+            Times.Timer.Pause = true;
 
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)
@@ -1869,7 +1868,7 @@ namespace StudentScheduleManagementSystem.UI
 
         protected override void ReviseScheduleButton_Click(object sender, EventArgs e)
         {
-            pauseTimeDelegate.Invoke(true);
+            Times.Timer.Pause = true;
 
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
             if (selectedRows.Length != 1)

@@ -141,8 +141,8 @@ namespace StudentScheduleManagementSystem.UI
             pictureBox1.Invalidate();
             Update();
             using Graphics graphics = pictureBox1.CreateGraphics();
-            Pen pen = new(Color.Red, 2);
-            Brush brush = new SolidBrush(Color.Red);
+            using Pen pen = new(Color.Red, 2);
+            using Brush brush = new SolidBrush(Color.Red);
 
             foreach ((var center, _) in _points)
             {
@@ -306,7 +306,6 @@ namespace StudentScheduleManagementSystem.UI
                     {
                         break;
                     }
-                    Console.WriteLine("delete point");
                     _points[_selected.Value]?.Item2.Dispose();
                     Controls.Remove(_points[_selected.Value]?.Item2!);
                     _points.Remove(_selected.Value);
