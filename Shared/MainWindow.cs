@@ -55,7 +55,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 return;
             }
-            this.usernameBox.Text = ""
+            this.usernameBox.Text = "";
             this.passwordBox.Text = "";
             MessageBox.Show("µÇÂ¼³É¹¦!");
             this.Hide();
