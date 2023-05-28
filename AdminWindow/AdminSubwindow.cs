@@ -24,6 +24,7 @@ namespace StudentScheduleManagementSystem.UI
             this.searchByNameBox.ForeColor = Color.Black;
             this.searchByIdBox.ForeColor = Color.Gray;
             this.scheduleDataTable.SortCompare += TableSortCompare;
+            this.searchCancel.Click += (sender, e) => GenerateFormData(_type);
         }
 
         protected void GenerateFormData(ScheduleType type)
@@ -157,6 +158,10 @@ namespace StudentScheduleManagementSystem.UI
             {
                 repetitiveType = RepetitiveType.Designated;
             }
+            if (repetitiveType != RepetitiveType.Single && _type == ScheduleType.Exam)
+            {
+                errorMessage.AppendLine("考试不能为重复日程！");
+            }
 
             activeWeeks = new int[weekSelectBox.ValidCount];
             int activeWeekCount = 0;
@@ -223,7 +228,21 @@ namespace StudentScheduleManagementSystem.UI
 
         protected void AddSchedule_Click(object sender, EventArgs e)
         {
-            AddOneSchedule(null, true);
+            bool confirm = GetScheduleInfo(true,
+                                           Schedule.Activity.Earliest,
+                                           Schedule.Activity.Latest,
+                                           out string name,
+                                           out RepetitiveType repetitiveType,
+                                           out int[] activeWeeks,
+                                           out Day[] activeDays,
+                                           out Times.Time beginTime,
+                                           out int duration);
+            if (!confirm)
+            {
+                return;
+            }
+
+            AddSchedule(null, name, repetitiveType, activeWeeks, activeDays, beginTime, duration);
             Log.Information.Log($"成功添加共享日程");
             ClearInput();
         }
@@ -333,13 +352,18 @@ namespace StudentScheduleManagementSystem.UI
             this.reviseCancel.Show();
         }
 
-        protected abstract bool AddOneSchedule(long? id, bool showMessageBox);
+        protected abstract bool AddSchedule(long? id,
+                                            string name,
+                                            RepetitiveType repetitiveType,
+                                            int[] activeWeeks,
+                                            Day[] activeDays,
+                                            Times.Time beginTime,
+                                            int duration);
 
         private void ReviseOK_Click(object sender, EventArgs e)
         {
-            bool success = true;
-            int earliest = Schedule.Course.Earliest;
-            int latest = Schedule.Course.Latest;
+            int earliest = 0;
+            int latest = 0;
 
             switch (_subwindowType)
             {
@@ -357,6 +381,12 @@ namespace StudentScheduleManagementSystem.UI
                     break;
             }
 
+            bool valid = GetScheduleInfo(false, earliest, latest, out _, out _, out _, out _, out _, out _);
+            if (!valid)
+            {
+                return;
+            }
+
             bool confirm = GetScheduleInfo(true,
                                            earliest,
                                            latest,
@@ -366,14 +396,13 @@ namespace StudentScheduleManagementSystem.UI
                                            out Day[] activeDays,
                                            out Times.Time beginTime,
                                            out int duration);
-
             if (!confirm)
             {
                 return;
             }
 
             Schedule.Schedule.DeleteShared(_originId!.Value);
-            AddOneSchedule(_originId, false);
+            AddSchedule(_originId, name, repetitiveType, activeWeeks, activeDays, beginTime, duration);
             Log.Information.Log($"成功修改id为{_originId.Value}的共享日程");
             GenerateFormData(_type);
 
@@ -412,12 +441,12 @@ namespace StudentScheduleManagementSystem.UI
             SortOrder order = scheduleDataTable.Columns[column].HeaderCell.SortGlyphDirection;
             Schedule.SharedData sharedData1 =
                 Schedule.Schedule.GetSharedById(long.Parse(scheduleDataTable.Rows[e.RowIndex1]
-                                                                  .Cells[2]
-                                                                  .Value.ToString()!))!;
+                                                                            .Cells[2]
+                                                                            .Value.ToString()!))!;
             Schedule.SharedData sharedData2 =
                 Schedule.Schedule.GetSharedById(long.Parse(scheduleDataTable.Rows[e.RowIndex2]
-                                                                  .Cells[2]
-                                                                  .Value.ToString()!))!;
+                                                                            .Cells[2]
+                                                                            .Value.ToString()!))!;
             //week
             if (column == 3)
             {
@@ -519,11 +548,6 @@ namespace StudentScheduleManagementSystem.UI
                 GenerateFormData(new List<Schedule.SharedData> { result });
             }
         }
-
-        private void SearchCancel_Click(object sender, EventArgs e)
-        {
-            GenerateFormData(_type);
-        }
     }
 
     public sealed class CourseSubwindow : AdminSubwindowBase
@@ -538,22 +562,14 @@ namespace StudentScheduleManagementSystem.UI
         }
 
 
-        protected override bool AddOneSchedule(long? id, bool showMessageBox)
+        protected override bool AddSchedule(long? id,
+                                            string name,
+                                            RepetitiveType repetitiveType,
+                                            int[] activeWeeks,
+                                            Day[] activeDays,
+                                            Times.Time beginTime,
+                                            int duration)
         {
-            bool confirm = GetScheduleInfo(showMessageBox,
-                                           Schedule.Course.Earliest,
-                                           Schedule.Course.Latest,
-                                           out string name,
-                                           out RepetitiveType repetitiveType,
-                                           out int[] activeWeeks,
-                                           out Day[] activeDays,
-                                           out Times.Time beginTime,
-                                           out int duration);
-            if (!confirm)
-            {
-                return false;
-            }
-
             _ = new Schedule.Course(repetitiveType,
                                     name,
                                     beginTime,
@@ -584,28 +600,14 @@ namespace StudentScheduleManagementSystem.UI
             this._subwindowType = SubwindowType.Exam;
         }
 
-        protected override bool AddOneSchedule(long? id, bool showMessageBox)
+        protected override bool AddSchedule(long? id,
+                                            string name,
+                                            RepetitiveType repetitiveType,
+                                            int[] activeWeeks,
+                                            Day[] activeDays,
+                                            Times.Time beginTime,
+                                            int duration)
         {
-            bool confirm = GetScheduleInfo(showMessageBox,
-                                           Schedule.Exam.Earliest,
-                                           Schedule.Exam.Latest,
-                                           out string name,
-                                           out RepetitiveType repetitiveType,
-                                           out int[] activeWeeks,
-                                           out Day[] activeDays,
-                                           out Times.Time beginTime,
-                                           out int duration);
-            if (!confirm)
-            {
-                return false;
-            }
-
-            if (repetitiveType != RepetitiveType.Single)
-            {
-                MessageBox.Show("只能选择一个周次和一个天次！", "提示");
-                return false;
-            }
-
             _ = new Schedule.Exam(name,
                                   beginTime,
                                   duration,
@@ -634,22 +636,14 @@ namespace StudentScheduleManagementSystem.UI
         }
 
 
-        protected override bool AddOneSchedule(long? id, bool showMessageBox)
+        protected override bool AddSchedule(long? id,
+                                            string name,
+                                            RepetitiveType repetitiveType,
+                                            int[] activeWeeks,
+                                            Day[] activeDays,
+                                            Times.Time beginTime,
+                                            int duration)
         {
-            bool confirm = GetScheduleInfo(showMessageBox,
-                                           Schedule.Activity.Earliest,
-                                           Schedule.Activity.Latest,
-                                           out string name,
-                                           out RepetitiveType repetitiveType,
-                                           out int[] activeWeeks,
-                                           out Day[] activeDays,
-                                           out Times.Time beginTime,
-                                           out int duration);
-            if (!confirm)
-            {
-                return false;
-            }
-
             _ = new Schedule.Activity(repetitiveType,
                                       name,
                                       beginTime,

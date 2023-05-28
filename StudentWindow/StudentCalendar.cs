@@ -4,8 +4,7 @@ namespace StudentScheduleManagementSystem.UI
 {
     public partial class StudentScheduleTable : Form
     {
-        private int _currentWeek = 0;
-        private int showWeek = 1;
+        private int _displayedWeek = 1;
 
         public StudentScheduleTable()
         {
@@ -20,7 +19,7 @@ namespace StudentScheduleManagementSystem.UI
             {
                 this.scheduleTable.Invoke(RefreshScheduleTable, time);
             }
-            else if (time is { Day : Day.Monday, Hour : 0})
+            else if (time is { Day : Day.Monday, Hour : 0 })
             {
                 GenerateScheduleTable(time.Week);
             }
@@ -35,8 +34,6 @@ namespace StudentScheduleManagementSystem.UI
             {
                 scheduleTable.Columns[i].Width = widths[i];
             }
-
-            //scheduleTable.RowsDefaultCellStyle.WrapMode = true;
 
             int offset = (week - 1) * 7 * 24;
 
@@ -57,7 +54,10 @@ namespace StudentScheduleManagementSystem.UI
                     string description;
                     if (scheduleRecord!.ScheduleType == ScheduleType.TemporaryAffair)
                     {
-                        scheduleName = Array.ConvertAll(Schedule.TemporaryAffair.GetAllAt(scheduleRecord.BeginTime), affair => affair.Name).Aggregate((str, elem) => str = str + "、\n" + elem);
+                        scheduleName = Array
+                                      .ConvertAll(Schedule.TemporaryAffair.GetAllAt(scheduleRecord.BeginTime),
+                                                  affair => affair.Name)
+                                      .Aggregate((str, elem) => str = str + "、\n" + elem);
                         description = "";
                     }
                     else
@@ -66,7 +66,8 @@ namespace StudentScheduleManagementSystem.UI
                         description = scheduleRecord.Description!;
                     }
                     Debug.Assert(scheduleRecord != null);
-                    scheduleRecords[j] = scheduleName + $"\n（{TranslateScheduleType(scheduleRecord.ScheduleType)}）\n" + description;
+                    scheduleRecords[j] = scheduleName + $"\n（{TranslateScheduleType(scheduleRecord.ScheduleType)}）\n" +
+                                         description;
                     alarmEnalbled[j] = scheduleRecord.AlarmEnabled;
                 }
                 this.scheduleTable.Rows.Add($"{(i - offset + 1).ToString()}:00\n-\n{(i - offset + 2).ToString()}:00",
@@ -78,11 +79,12 @@ namespace StudentScheduleManagementSystem.UI
                                             scheduleRecords[5],
                                             scheduleRecords[6]);
                 this.scheduleTable.Rows[i - offset - 7].Height = 150;
-                for(int j = 0; j < 7; j++)
+                for (int j = 0; j < 7; j++)
                 {
                     if (alarmEnalbled[j])
                     {
-                        this.scheduleTable.Rows[i - offset - 7].Cells[j + 1].Style.ForeColor = Color.FromArgb(50, 168, 128, 194);
+                        this.scheduleTable.Rows[i - offset - 7].Cells[j + 1].Style.ForeColor =
+                            Color.FromArgb(50, 168, 128, 194);
                     }
                 }
             }
@@ -106,16 +108,16 @@ namespace StudentScheduleManagementSystem.UI
 
         private void ThisWeekScheduleTable_Click(object sender, EventArgs e)
         {
-            showWeek = Times.Timer.Now.Week;
-            GenerateScheduleTable(showWeek);
+            _displayedWeek = Times.Timer.Now.Week;
+            GenerateScheduleTable(_displayedWeek);
         }
 
         private void LastWeekScheduleTable_Click(object sender, EventArgs e)
         {
-            if (showWeek - 1 > 0)
+            if (_displayedWeek - 1 > 0)
             {
-                showWeek--;
-                GenerateScheduleTable(showWeek);
+                _displayedWeek--;
+                GenerateScheduleTable(_displayedWeek);
             }
             else
             {
@@ -126,10 +128,10 @@ namespace StudentScheduleManagementSystem.UI
 
         private void NextWeekScheduleTable_Click(object sender, EventArgs e)
         {
-            if (showWeek + 1 <= 16)
+            if (_displayedWeek + 1 <= 16)
             {
-                showWeek++;
-                GenerateScheduleTable(showWeek);
+                _displayedWeek++;
+                GenerateScheduleTable(_displayedWeek);
             }
             else
             {
@@ -137,23 +139,5 @@ namespace StudentScheduleManagementSystem.UI
                 return;
             }
         }
-
-
-
-        private void scheduleTable_Scroll(object sender, ScrollEventArgs e)
-        {
-            //int iScrollIndex = scheduleTable.FirstDisplayedScrollingRowIndex;
-
-            //Update();
-
-            //if (iScrollIndex >= 0 && iScrollIndex < scheduleTable.RowCount)
-            //{
-            //    scheduleTable.FirstDisplayedScrollingRowIndex = iScrollIndex;
-            //}
-
-            //scheduleTable.Invalidate();
-        }
     }
-
-
 }

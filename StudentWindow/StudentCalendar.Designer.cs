@@ -87,7 +87,6 @@
             this.scheduleTable.RowTemplate.Height = 32;
             this.scheduleTable.Size = new System.Drawing.Size(1026, 601);
             this.scheduleTable.TabIndex = 42;
-            this.scheduleTable.Scroll += new System.Windows.Forms.ScrollEventHandler(this.scheduleTable_Scroll);
             // 
             // hourColumn
             // 
