@@ -36,7 +36,7 @@
             weekBox = new ComboBox();
             pauseButton = new Button();
             speedButton = new Button();
-            setTime = new Button();
+            setTimeButton = new Button();
             daySetBox = new Label();
             weekSetBox = new Label();
             currentTime = new Label();
@@ -73,7 +73,7 @@
             header.Controls.Add(weekBox);
             header.Controls.Add(pauseButton);
             header.Controls.Add(speedButton);
-            header.Controls.Add(setTime);
+            header.Controls.Add(setTimeButton);
             header.Controls.Add(daySetBox);
             header.Controls.Add(weekSetBox);
             header.Controls.Add(currentTime);
@@ -135,7 +135,6 @@
             pauseButton.TabIndex = 18;
             pauseButton.Text = "暂停";
             pauseButton.UseVisualStyleBackColor = false;
-            pauseButton.Click += PauseButton_Click;
             // 
             // speedButton
             // 
@@ -147,19 +146,18 @@
             speedButton.TabIndex = 17;
             speedButton.Text = "快进";
             speedButton.UseVisualStyleBackColor = false;
-            speedButton.Click += SpeedButton_Click;
             // 
             // setTime
             // 
-            setTime.BackColor = Color.White;
-            setTime.FlatStyle = FlatStyle.Flat;
-            setTime.Location = new Point(780, 3);
-            setTime.Name = "setTime";
-            setTime.Size = new Size(100, 35);
-            setTime.TabIndex = 16;
-            setTime.Text = "设置时间";
-            setTime.UseVisualStyleBackColor = false;
-            setTime.Click += SetTime_Click;
+            setTimeButton.BackColor = Color.White;
+            setTimeButton.FlatStyle = FlatStyle.Flat;
+            setTimeButton.Location = new Point(780, 3);
+            setTimeButton.Name = "setTimeButton";
+            setTimeButton.Size = new Size(100, 35);
+            setTimeButton.TabIndex = 16;
+            setTimeButton.Text = "设置时间";
+            setTimeButton.UseVisualStyleBackColor = false;
+            setTimeButton.Click += SetTimeButtonClick;
             // 
             // daySetBox
             // 
@@ -373,7 +371,7 @@
         private PictureBox mainpageButton;
         private Panel mainpage;
         private ComboBox weekBox;
-        private Button setTime;
+        private Button setTimeButton;
         private ComboBox hourBox;
         private Label daySetBox;
         private ComboBox dayBox;

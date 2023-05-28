@@ -1,4 +1,6 @@
-﻿namespace StudentScheduleManagementSystem.UI
+﻿#define SHOWPOINTID
+
+namespace StudentScheduleManagementSystem.UI
 {
     public partial class MapEditWindow : Form
     {
@@ -23,7 +25,29 @@
             _lineEndPointPairs = Map.Location.GetEdges()
                                     .ToHashSet();
             _points = new();
-            /*foreach (var building in Map.Location.Buildings)
+            #if SHOWPOINTID
+            foreach (var vertex in Map.Location.GetVertices())
+            {
+                try
+                {
+                    _points.Add(vertex.ToPoint(), null);
+                    Label label = new()
+                    {
+                        Location = new((vertex.X + 5), (vertex.Y + 20)),
+                        Size = new(50, 24),
+                        Text = vertex.Id.ToString(),
+                        Font = fontLabel.Font,
+                        AutoSize = true,
+                        BackColor = Color.FromArgb(50, 168, 128, 194)
+                    };
+                    Controls.Add(label);
+                    label.BringToFront();
+                    label.Show();
+                }
+                catch (ArgumentException) { }
+            }
+            #else
+            foreach (var building in Map.Location.Buildings)
             {
                 Label label = new()
                 {
@@ -45,28 +69,8 @@
                     _points.Add(point, null);
                 }
                 catch (ArgumentException) { }
-            }*/
-            foreach (var vertex in Map.Location.GetVertices())
-            {
-                try
-                {
-                    _points.Add(vertex.ToPoint(), null);
-                    Label label = new()
-                    {
-                        Location = new((vertex.X + 5), (vertex.Y + 20)),
-                        Size = new(50, 24),
-                        Text = vertex.Id.ToString(),
-                        Font = fontLabel.Font,
-                        AutoSize = true,
-                        BackColor = Color.FromArgb(50, 168, 128, 194)
-                    };
-                    Controls.Add(label);
-                    label.BringToFront();
-                    label.Show();
-                }
-                catch (ArgumentException) { }
             }
-            
+            #endif
             Button buttonOk = new() { Text = "OK", Name = "OK", Location = new(0, 0), Size = new(150, 45) };
             Button buttonCancel =
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
@@ -137,8 +141,8 @@
             pictureBox1.Invalidate();
             Update();
             using Graphics graphics = pictureBox1.CreateGraphics();
-            Pen pen = new(Color.Red, 2);
-            Brush brush = new SolidBrush(Color.Red);
+            using Pen pen = new(Color.Red, 2);
+            using Brush brush = new SolidBrush(Color.Red);
 
             foreach ((var center, _) in _points)
             {
@@ -302,7 +306,6 @@
                     {
                         break;
                     }
-                    Console.WriteLine("delete point");
                     _points[_selected.Value]?.Item2.Dispose();
                     Controls.Remove(_points[_selected.Value]?.Item2!);
                     _points.Remove(_selected.Value);

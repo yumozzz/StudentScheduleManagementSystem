@@ -35,9 +35,9 @@
             // pictureBox1
             // 
             pictureBox1.Image = Properties.Resources.SchoolMap;
-            pictureBox1.Location = new Point(0, 45);
+            pictureBox1.Location = new Point(0, 0);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(779, 1097);
+            pictureBox1.Size = new Size(778, 1096);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
@@ -45,9 +45,9 @@
             // 
             // MapWindow
             // 
-            AutoScaleDimensions = new SizeF(11F, 24F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(778, 1144);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.ClientSize = new System.Drawing.Size(778, 1048);
             Controls.Add(pictureBox1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Name = "MapWindow";

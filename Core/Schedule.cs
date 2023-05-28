@@ -662,7 +662,6 @@ namespace StudentScheduleManagementSystem.Schedule
             if (callbackParameter == null)
             {
                 Log.Warning.Log("没有传递回调参数");
-                Console.WriteLine("Null \"callbackParameter\", check twice");
             }
             Times.Alarm.AddAlarm(BeginTime - 1,
                                  RepetitiveType,
