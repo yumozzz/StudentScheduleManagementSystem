@@ -507,6 +507,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             this.daySelectBox.InitializeBox(Shared.Days[..^2]);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
+            this.label.Text = "课程";
         }
 
 
@@ -552,6 +553,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             this.daySelectBox.InitializeBox(Shared.Days[..^2]);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
+            this.label.Text = "考试";
         }
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
@@ -599,6 +601,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             this.daySelectBox.InitializeBox(Shared.Days);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>());
+            this.label.Text = "集体活动";
         }
 
 

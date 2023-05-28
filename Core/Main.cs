@@ -323,7 +323,7 @@ namespace StudentScheduleManagementSystem.Schedule
                 int i = 0;
                 foreach ((int beginTime, string name) in schedules)
                 {
-                    builder.AppendLine($"\n{i}.  {beginTime}:00，{name}。");
+                    builder.AppendLine($"\n{++i}.  {beginTime}:00，{name}。");
                 }
             }
             if (!builder.Equals(""))

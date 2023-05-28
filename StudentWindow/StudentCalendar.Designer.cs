@@ -78,6 +78,7 @@
             this.scheduleTable.DefaultCellStyle = dataGridViewCellStyle2;
             this.scheduleTable.Location = new System.Drawing.Point(12, 42);
             this.scheduleTable.Name = "scheduleTable";
+            this.scheduleTable.ReadOnly = true;
             this.scheduleTable.RowHeadersVisible = false;
             this.scheduleTable.RowHeadersWidth = 62;
             this.scheduleTable.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
@@ -86,12 +87,14 @@
             this.scheduleTable.RowTemplate.Height = 32;
             this.scheduleTable.Size = new System.Drawing.Size(1026, 601);
             this.scheduleTable.TabIndex = 42;
+            this.scheduleTable.Scroll += new System.Windows.Forms.ScrollEventHandler(this.scheduleTable_Scroll);
             // 
             // hourColumn
             // 
             this.hourColumn.HeaderText = "时间";
             this.hourColumn.MinimumWidth = 8;
             this.hourColumn.Name = "hourColumn";
+            this.hourColumn.ReadOnly = true;
             this.hourColumn.Width = 82;
             // 
             // mondayColumn
@@ -99,6 +102,7 @@
             this.mondayColumn.HeaderText = "Monday";
             this.mondayColumn.MinimumWidth = 8;
             this.mondayColumn.Name = "mondayColumn";
+            this.mondayColumn.ReadOnly = true;
             this.mondayColumn.Width = 118;
             // 
             // tuesdayColumn
@@ -106,6 +110,7 @@
             this.tuesdayColumn.HeaderText = "Tuesday";
             this.tuesdayColumn.MinimumWidth = 8;
             this.tuesdayColumn.Name = "tuesdayColumn";
+            this.tuesdayColumn.ReadOnly = true;
             this.tuesdayColumn.Width = 117;
             // 
             // wednesdayColumn
@@ -113,6 +118,7 @@
             this.wednesdayColumn.HeaderText = "Wednesday";
             this.wednesdayColumn.MinimumWidth = 8;
             this.wednesdayColumn.Name = "wednesdayColumn";
+            this.wednesdayColumn.ReadOnly = true;
             this.wednesdayColumn.Width = 147;
             // 
             // thursdayColumn
@@ -120,6 +126,7 @@
             this.thursdayColumn.HeaderText = "Thursday";
             this.thursdayColumn.MinimumWidth = 8;
             this.thursdayColumn.Name = "thursdayColumn";
+            this.thursdayColumn.ReadOnly = true;
             this.thursdayColumn.Width = 125;
             // 
             // fridayColumn
@@ -127,6 +134,7 @@
             this.fridayColumn.HeaderText = "Friday";
             this.fridayColumn.MinimumWidth = 8;
             this.fridayColumn.Name = "fridayColumn";
+            this.fridayColumn.ReadOnly = true;
             this.fridayColumn.Width = 150;
             // 
             // saturdayColumn
@@ -134,6 +142,7 @@
             this.saturdayColumn.HeaderText = "Saturday";
             this.saturdayColumn.MinimumWidth = 8;
             this.saturdayColumn.Name = "saturdayColumn";
+            this.saturdayColumn.ReadOnly = true;
             this.saturdayColumn.Width = 123;
             // 
             // sundayColumn
@@ -141,6 +150,7 @@
             this.sundayColumn.HeaderText = "Sunday";
             this.sundayColumn.MinimumWidth = 8;
             this.sundayColumn.Name = "sundayColumn";
+            this.sundayColumn.ReadOnly = true;
             this.sundayColumn.Width = 110;
             // 
             // nextWeekScheduleTable

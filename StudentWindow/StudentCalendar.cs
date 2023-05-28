@@ -77,12 +77,12 @@ namespace StudentScheduleManagementSystem.UI
                                             scheduleRecords[4],
                                             scheduleRecords[5],
                                             scheduleRecords[6]);
-                this.scheduleTable.Rows[i - offset - 7].Height = 100;
+                this.scheduleTable.Rows[i - offset - 7].Height = 150;
                 for(int j = 0; j < 7; j++)
                 {
                     if (alarmEnalbled[j])
                     {
-                        this.scheduleTable.Rows[i - offset - 7].Cells[j + 1].Style.BackColor = Color.FromArgb(50, 168, 128, 194);
+                        this.scheduleTable.Rows[i - offset - 7].Cells[j + 1].Style.ForeColor = Color.FromArgb(50, 168, 128, 194);
                     }
                 }
             }
@@ -136,6 +136,22 @@ namespace StudentScheduleManagementSystem.UI
                 MessageBox.Show("已经是最晚的一周！");
                 return;
             }
+        }
+
+
+
+        private void scheduleTable_Scroll(object sender, ScrollEventArgs e)
+        {
+            //int iScrollIndex = scheduleTable.FirstDisplayedScrollingRowIndex;
+
+            //Update();
+
+            //if (iScrollIndex >= 0 && iScrollIndex < scheduleTable.RowCount)
+            //{
+            //    scheduleTable.FirstDisplayedScrollingRowIndex = iScrollIndex;
+            //}
+
+            //scheduleTable.Invalidate();
         }
     }
 

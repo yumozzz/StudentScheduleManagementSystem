@@ -20,8 +20,19 @@ namespace StudentScheduleManagementSystem.UI
             Times.Timer.TimeChange += SetLocalTime;
             pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
             speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
-            Times.Timer.SetPauseState += (pause) => { pauseButton.Text = pause ? "继续" : "暂停"; };
-            Log.LogBase.LogGenerated += OnLogGenerated;
+            Times.Timer.SetPauseState += (pause) =>
+            { 
+                if (pauseButton.InvokeRequired)
+                {
+                    pauseButton.Invoke(() => Text = pause ? "继续" : "暂停");
+                }
+                else
+                {
+                    pauseButton.Text = pause ? "继续" : "暂停";
+                }
+            };
+
+                Log.LogBase.LogGenerated += OnLogGenerated;
             logListBox.Hide();
         }
 
