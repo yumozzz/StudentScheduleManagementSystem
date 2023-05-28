@@ -20,7 +20,6 @@ namespace StudentScheduleManagementSystem.UI
             Times.Timer.TimeChange += SetLocalTime;
             pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
             speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
-            Times.Timer.SetPauseState += (pause) => { pauseButton.Text = pause ? "继续" : "暂停"; };
             Log.LogBase.LogGenerated += (message) =>
             {
                 if (logListBox.InvokeRequired)
@@ -44,7 +43,6 @@ namespace StudentScheduleManagementSystem.UI
                 }
             };
 
-                Log.LogBase.LogGenerated += OnLogGenerated;
             logListBox.Hide();
         }
 
@@ -160,15 +158,16 @@ namespace StudentScheduleManagementSystem.UI
             Day day = (Day)dayBox.SelectedIndex;
             int hour = hourBox.SelectedIndex;
 
-            if (MessageBox.Show("周次: " + week.ToString() + "\n日次: " + day.ToString() + "\n时间: " + hour.ToString() +
-                                ":00",
+            if (MessageBox.Show($"周次：{week.ToString()}\n日次：{day.ToString()}\n时间：{hour.ToString()}:00",
                                 "确认时间修改",
                                 MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 Times.Time time = new() { Week = week, Day = day, Hour = hour };
                 Times.Timer.SetTime(time);
-                Log.Information.Log("时间设置为: " + time.ToString());
             }
+            weekBox.SelectedIndex = -1;
+            dayBox.SelectedIndex = -1;
+            hourBox.SelectedIndex = -1;
         }
 
         public void SetLocalTime(Times.Time time)

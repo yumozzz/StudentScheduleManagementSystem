@@ -59,7 +59,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         protected static long _examIdMax = 2000000000;
 
-        protected static long _groutActivityIdMax = 3000000000;
+        protected static long _groupActivityIdMax = 3000000000;
 
         protected static readonly DataStructure.HashTable<long, SharedData> _sharedDictionary = new()
         {
@@ -397,7 +397,7 @@ namespace StudentScheduleManagementSystem.Schedule
             {
                 (ScheduleType.Course, null) => _courseIdMax + 1, (ScheduleType.Course, _) => specifiedId.Value,
                 (ScheduleType.Exam, null) => _examIdMax + 1, (ScheduleType.Exam, _) => specifiedId.Value,
-                (ScheduleType.Activity, null) => ((Activity)this).IsGroupActivity ? _groutActivityIdMax + 1 : null,
+                (ScheduleType.Activity, null) => ((Activity)this).IsGroupActivity ? _groupActivityIdMax + 1 : null,
                 (ScheduleType.Activity, _) => specifiedId.Value, (ScheduleType.TemporaryAffair, null) => null,
                 (ScheduleType.TemporaryAffair, _) => specifiedId.Value,
                 (_, _) => throw new ArgumentException(null, nameof(ScheduleType)),
@@ -485,7 +485,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     break;
                 case 3:
                 {
-                    ref long prevIdMax = ref _groutActivityIdMax;
+                    ref long prevIdMax = ref _groupActivityIdMax;
                     if (prevIdMax == id)
                     {
                         prevIdMax++;
@@ -772,7 +772,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     else
                     {
-                        _groutActivityIdMax = dobj.ScheduleId;
+                        _groupActivityIdMax = dobj.ScheduleId;
                     }
                 }
             }
@@ -795,7 +795,7 @@ namespace StudentScheduleManagementSystem.Schedule
             JArray courses = new(), exams = new(), groupActivities = new(), scheduleCount;
             _sharedDictionary[1000000000].ScheduleId = _courseIdMax;
             _sharedDictionary[2000000000].ScheduleId = _examIdMax;
-            _sharedDictionary[3000000000].ScheduleId = _groutActivityIdMax;
+            _sharedDictionary[3000000000].ScheduleId = _groupActivityIdMax;
             foreach ((long id, var data) in _sharedDictionary)
             {
                 JObject obj = JObject.FromObject(data, _serializer);
@@ -843,32 +843,53 @@ namespace StudentScheduleManagementSystem.Schedule
                 Timestamp = schedule.BeginTime,
                 Duration = schedule.Duration
             };
-            if (schedule.ScheduleId <= _courseIdMax) //修改课程，更新
-            {
-                data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
-                _sharedDictionary[schedule.ScheduleId] = data;
-                return;
-            }
-            Debug.Assert(schedule.ScheduleId == _courseIdMax + 1);
+            
             switch (schedule.ScheduleId / (long)1e9) //不存在，则新建
             {
                 case 1:
-                    _courseIdMax++;
-                    Debug.Assert(_courseIdMax == schedule.ScheduleId);
-                    data.ScheduleType = ScheduleType.Course;
-                    _sharedDictionary.Add(schedule.ScheduleId, data);
+                    if (schedule.ScheduleId <= _courseIdMax) //修改课程，更新
+                    {
+                        data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
+                        _sharedDictionary[schedule.ScheduleId] = data;
+                    }
+                    else
+                    {
+                        Debug.Assert(schedule.ScheduleId == _courseIdMax + 1);
+                        _courseIdMax++;
+                        Debug.Assert(_courseIdMax == schedule.ScheduleId);
+                        data.ScheduleType = ScheduleType.Course;
+                        _sharedDictionary.Add(schedule.ScheduleId, data);
+                    }
                     break;
                 case 2:
-                    _examIdMax++;
-                    Debug.Assert(_examIdMax == schedule.ScheduleId);
-                    data.ScheduleType = ScheduleType.Exam;
-                    _sharedDictionary.Add(schedule.ScheduleId, data);
+                    if (schedule.ScheduleId <= _examIdMax) //修改课程，更新
+                    {
+                        data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
+                        _sharedDictionary[schedule.ScheduleId] = data;
+                    }
+                    else
+                    {
+                        Debug.Assert(schedule.ScheduleId == _examIdMax + 1);
+                        _examIdMax++;
+                        Debug.Assert(_examIdMax == schedule.ScheduleId);
+                        data.ScheduleType = ScheduleType.Exam;
+                        _sharedDictionary.Add(schedule.ScheduleId, data);
+                    }
                     break;
                 case 3:
-                    _groutActivityIdMax++;
-                    Debug.Assert(_groutActivityIdMax == schedule.ScheduleId);
-                    data.ScheduleType = ScheduleType.Activity;
-                    _sharedDictionary.Add(schedule.ScheduleId, data);
+                    if (schedule.ScheduleId <= _groupActivityIdMax) //修改课程，更新
+                    {
+                        data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
+                        _sharedDictionary[schedule.ScheduleId] = data;
+                    }
+                    else
+                    {
+                        Debug.Assert(schedule.ScheduleId == _groupActivityIdMax + 1);
+                        _groupActivityIdMax++;
+                        Debug.Assert(_groupActivityIdMax == schedule.ScheduleId);
+                        data.ScheduleType = ScheduleType.Activity;
+                        _sharedDictionary.Add(schedule.ScheduleId, data);
+                    }
                     break;
             }
         }
@@ -1001,14 +1022,33 @@ namespace StudentScheduleManagementSystem.Schedule
                     if (dobj.OfflineLocation != null)
                     {
                         var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                        Map.Location.Building location =
-                            locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                        Map.Location.Building building;
+                        if (locations.Count == 1)
+                        {
+                            building = locations[0];
+                        }
+                        else if (locations.Distinct().Count() == locations.Count)
+                        {
+                            building = locations.First((building) => building.Name == dobj.OfflineLocation.Value.Name);
+                        }
+                        else
+                        {
+                            locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Value.Name).ToList();
+                            if (locations.Count == 1)
+                            {
+                                building = locations[0];
+                            }
+                            else
+                            {
+                                throw new AmbiguousLocationMatchException();
+                            }
+                        }
                         _ = new Course(shared.RepetitiveType,
                                        shared.Name,
                                        shared.Timestamp,
                                        shared.Duration,
                                        dobj.Description,
-                                       location,
+                                       building,
                                        shared.ActiveWeeks,
                                        shared.ActiveDays,
                                        ScheduleOperationType.UserOpration,
@@ -1125,13 +1165,32 @@ namespace StudentScheduleManagementSystem.Schedule
                 {
                     var shared = _sharedDictionary[dobj.ScheduleId];
                     var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
-                    Map.Location.Building location =
-                        locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                    Map.Location.Building building;
+                    if (locations.Count == 1)
+                    {
+                        building = locations[0];
+                    }
+                    else if (locations.Distinct().Count() == locations.Count)
+                    {
+                        building = locations.First((building) => building.Name == dobj.OfflineLocation.Name);
+                    }
+                    else
+                    {
+                        locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Name).ToList();
+                        if (locations.Count == 1)
+                        {
+                            building = locations[0];
+                        }
+                        else
+                        {
+                            throw new AmbiguousLocationMatchException();
+                        }
+                    }
                     _ = new Exam(shared.Name,
                                  shared.Timestamp,
                                  shared.Duration,
                                  dobj.Description,
-                                 location,
+                                 building,
                                  ScheduleOperationType.UserOpration,
                                  dobj.ScheduleId) { AlarmEnabled = dobj.AlarmEnabled };
                     Log.Information.Log($"已导入ID为{dobj.ScheduleId}的考试");
@@ -1306,14 +1365,33 @@ namespace StudentScheduleManagementSystem.Schedule
                         if (dobj.OfflineLocation != null)
                         {
                             var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                            Map.Location.Building location =
-                                locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                            Map.Location.Building building;
+                            if (locations.Count == 1)
+                            {
+                                building = locations[0];
+                            }
+                            else if (locations.Distinct().Count() == locations.Count)
+                            {
+                                building = locations.First((building) => building.Name == dobj.OfflineLocation.Value.Name);
+                            }
+                            else
+                            {
+                                locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Value.Name).ToList();
+                                if (locations.Count == 1)
+                                {
+                                    building = locations[0];
+                                }
+                                else
+                                {
+                                    throw new AmbiguousLocationMatchException();
+                                }
+                            }
                             _ = new Activity(shared.RepetitiveType,
                                              shared.Name,
                                              shared.Timestamp,
                                              shared.Duration,
                                              dobj.Description,
-                                             location,
+                                             building,
                                              true,
                                              shared.ActiveWeeks,
                                              shared.ActiveDays,
@@ -1351,14 +1429,33 @@ namespace StudentScheduleManagementSystem.Schedule
                     if (dobj.OfflineLocation != null)
                     {
                         var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);
-                        Map.Location.Building location =
-                            locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+                        Map.Location.Building building;
+                        if (locations.Count == 1)
+                        {
+                            building = locations[0];
+                        }
+                        else if (locations.Distinct().Count() == locations.Count)
+                        {
+                            building = locations.First((building) => building.Name == dobj.OfflineLocation.Value.Name);
+                        }
+                        else
+                        {
+                            locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Value.Name).ToList();
+                            if (locations.Count == 1)
+                            {
+                                building = locations[0];
+                            }
+                            else
+                            {
+                                throw new AmbiguousLocationMatchException();
+                            }
+                        }
                         _ = new Activity(dobj.RepetitiveType,
                                          dobj.Name,
                                          dobj.Timestamp,
                                          dobj.Duration,
                                          dobj.Description,
-                                         location,
+                                         building,
                                          false,
                                          dobj.ActiveWeeks,
                                          dobj.ActiveDays,
@@ -1475,8 +1572,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 //current = head;
                 if (((TemporaryAffair)_scheduleDictionary[current])._next == 0)
                 {
+                    if (AlarmEnabled)
+                    {
+                        DisableAlarm();
+                    }
                     _timeline[BeginTime.ToInt()] = default;
-                    DisableAlarm();
                     Log.Information.Log("已删除该临时日程");
                     Log.Information.Log("已删除该时间点的所有临时日程");
                 }
@@ -1600,9 +1700,28 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
 
                 var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Name);
-                Map.Location.Building location =
-                    locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
-                _ = new TemporaryAffair(dobj.Name, dobj.Timestamp, dobj.Description, location, dobj.ScheduleId);
+                Map.Location.Building building;
+                if (locations.Count == 1)
+                {
+                    building = locations[0];
+                }
+                else if (locations.Distinct().Count() == locations.Count)
+                {
+                    building = locations.First((building) => building.Name == dobj.OfflineLocation.Name);
+                }
+                else
+                {
+                    locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Name).ToList();
+                    if (locations.Count == 1)
+                    {
+                        building = locations[0];
+                    }
+                    else
+                    {
+                        throw new AmbiguousLocationMatchException();
+                    }
+                }
+                _ = new TemporaryAffair(dobj.Name, dobj.Timestamp, dobj.Description, building, dobj.ScheduleId);
                 if (dobj.AlarmEnabled)
                 {
                     //just record, actual alarm handling is in method Time.CreateInstance

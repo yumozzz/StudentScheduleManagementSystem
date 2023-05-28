@@ -351,6 +351,8 @@ namespace StudentScheduleManagementSystem.Times
 
         [JsonProperty, JsonConverter(typeof(StringEnumConverter))]
         public RepetitiveType @RepetitiveType { get; private init; } = RepetitiveType.Single;
+        [JsonProperty]
+        public int[] ActiveWeeks { get; private init; }
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
         public Day[] ActiveDays { get; private init; }
         public long AlarmId { get; private init; } = 0;
@@ -508,6 +510,7 @@ namespace StudentScheduleManagementSystem.Times
                            {
                                RepetitiveType = repetitiveType,
                                ActiveDays = activeDays,
+                               ActiveWeeks = activeWeeks,
                                AlarmId = id,
                                BeginTime = timestamp,
                                _alarmCallback = alarmTimeUpCallback,

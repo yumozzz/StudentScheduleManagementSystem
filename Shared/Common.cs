@@ -136,7 +136,6 @@ namespace StudentScheduleManagementSystem
                                          JsonSerializer serializer)
         {
             bool isNullableType = Nullable.GetUnderlyingType(objectType) != null;
-            //Type type = isNullableType ? Nullable.GetUnderlyingType(objectType)! : objectType;
             if (reader.TokenType == JsonToken.Null)
             {
                 if (isNullableType)
@@ -153,8 +152,27 @@ namespace StudentScheduleManagementSystem
                 throw new JsonFormatException("cannot convert not string token to string");
             }
             var locations = Map.Location.GetBuildingsByName(reader.Value!.ToString()!);
-            Map.Location.Building building =
-                locations.Count == 1 ? locations[0] : throw new AmbiguousLocationMatchException();
+            Map.Location.Building building;
+            if (locations.Count == 1)
+            {
+                building = locations[0];
+            }
+            else if (locations.Distinct().Count() == locations.Count)
+            {
+                building = locations.First((building) => building.Name == reader.Value!.ToString()!);
+            }
+            else
+            {
+                locations = locations.Where((building) => building.Name == reader.Value!.ToString()!).ToList();
+                if (locations.Count == 1)
+                {
+                    building = locations[0];
+                }
+                else
+                {
+                    throw new AmbiguousLocationMatchException();
+                }
+            }
             return building;
         }
 

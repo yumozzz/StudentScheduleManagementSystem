@@ -280,7 +280,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                                                                       .ToList(),
                                                              FileManagement.FileManager.UserFileDirectory);
             Schedule.Schedule.SaveSharedData();
-            Log.LogBase.Close();
+            //Log.LogBase.Close();
         }
     }
 }

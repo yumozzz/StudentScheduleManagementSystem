@@ -474,12 +474,12 @@ namespace StudentScheduleManagementSystem.UI
 
             long id = long.Parse(scheduleDataTable.Rows[selectedRows[0]].Cells[9].Value.ToString()!);
 
-            if (MessageBox.Show("名称: " + scheduleDataTable.Rows[selectedRows[0]].Cells[1].Value.ToString() + "\n周次: " +
-                                scheduleDataTable.Rows[selectedRows[0]].Cells[2].Value.ToString() + "\n天次: " +
-                                scheduleDataTable.Rows[selectedRows[0]].Cells[3].Value.ToString() + "\n时间: " +
-                                scheduleDataTable.Rows[selectedRows[0]].Cells[4].Value.ToString() + "\n时长: " +
-                                scheduleDataTable.Rows[selectedRows[0]].Cells[5].Value.ToString() + "\n地点/链接：" +
-                                scheduleDataTable.Rows[selectedRows[0]].Cells[6].Value.ToString(),
+            if (MessageBox.Show("名称: " + scheduleDataTable.Rows[selectedRows[0]].Cells[2].Value.ToString() + "\n周次: " +
+                                scheduleDataTable.Rows[selectedRows[0]].Cells[3].Value.ToString() + "\n天次: " +
+                                scheduleDataTable.Rows[selectedRows[0]].Cells[4].Value.ToString() + "\n时间: " +
+                                scheduleDataTable.Rows[selectedRows[0]].Cells[5].Value.ToString() + "\n时长: " +
+                                scheduleDataTable.Rows[selectedRows[0]].Cells[6].Value.ToString() + "\n地点/链接：" +
+                                scheduleDataTable.Rows[selectedRows[0]].Cells[7].Value.ToString(),
                                 "确认日程信息",
                                 MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
@@ -821,7 +821,7 @@ namespace StudentScheduleManagementSystem.UI
                 Log.Information.Log("已自动配置考试闹钟");
             }
             _selectedIds.Add(id);
-            Debug.Assert(_showAllData);
+            //Debug.Assert(_showAllData);
             GenerateSharedData(_scheduleType);
         }
 
@@ -1034,11 +1034,18 @@ namespace StudentScheduleManagementSystem.UI
 
     public abstract class PersonalScheduleSubwinowBase : StudentSubwindowBase
     {
+        protected ComboBox? weekComboBox;
+        protected ComboBox? dayComboBox;
+        protected ComboBox hourComboBox = new();
+        protected MultiSelectBox? weekSelectBox;
+        protected MultiSelectBox? daySelectBox;
+        protected ComboBox? durationComboBox;
+
         protected PersonalScheduleSubwinowBase(ScheduleType scheduleType, SubwindowType subwindowType)
             : base(scheduleType, subwindowType)
         {
             this.reviseScheduleButton.Click += ReviseScheduleButton_Click;
-            this.okButton.Click += OkButton_Click;
+            this.okButton.Click += ReviseOkButton_Click;
             this.getAvailableTime.Click += GetAvailableTime_Click;
             this.nameBox.ReadOnly = false;
             this.getAvailableTime.Visible = true;
@@ -1302,7 +1309,7 @@ namespace StudentScheduleManagementSystem.UI
                        : true;
         }
 
-        protected abstract void AddSchedule();
+        protected abstract bool AddSchedule(bool showMessageBox);
 
         protected abstract bool GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration);
 
@@ -1373,13 +1380,35 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        protected void OkButton_Click(object sender, EventArgs e)
+        protected void ReviseOkButton_Click(object sender, EventArgs e)
         {
             Debug.Assert(_subwindowState is SubwindowState.ReviseUserSchedule && _originId != null);
 
+            bool confirm = GetScheduleInfo(true,
+                                           Schedule.Activity.Earliest,
+                                           Schedule.Activity.Latest,
+                                           weekSelectBox,
+                                           daySelectBox,
+                                           weekComboBox,
+                                           dayComboBox,
+                                           hourComboBox,
+                                           _subwindowType == SubwindowType.PersonalActivity ? durationComboBox : null,
+                                           out string name,
+                                           out RepetitiveType repetitiveType,
+                                           out int[] activeWeeks,
+                                           out Day[] activeDays,
+                                           out Times.Time beginTime,
+                                           out int duration,
+                                           out string offlineLocationName,
+                                           out string onlineLink);
+            if (!confirm)
+            {
+                return;
+            }
+
             var selected = Schedule.Schedule.GetScheduleById(_originId.Value);
             selected!.DeleteSchedule();
-            AddSchedule();
+            AddSchedule(false);
 
             this.AddScheduleButton.Show();
             this.deleteScheduleButton.Show();
@@ -1393,13 +1422,33 @@ namespace StudentScheduleManagementSystem.UI
             this.onlineLinkBox.Text = "";
             this.descriptionBox.Text = "";
             this._subwindowState = SubwindowState.Viewing;
-            ClearInformation();
+
+            ClearPersonalInformation();
 
             Times.Timer.Pause = false;
         }
 
         protected abstract void ReviseScheduleButton_Click(object sender, EventArgs e);
 
+        protected void ClearPersonalInformation()
+        {
+            ClearInformation();
+            if (this.weekComboBox!=null)
+            {
+                this.weekComboBox.Text = "";
+            }
+            if (this.dayComboBox != null)
+            {
+                this.dayComboBox.Text = "";
+            }
+            this.weekSelectBox?.ClearBox();
+            this.daySelectBox?.ClearBox();
+            if (this.durationBox != null)
+            {
+                this.durationBox.Text = "";
+            }
+            this.hourComboBox.Text = "";
+        }
         #endregion
     }
 
@@ -1434,20 +1483,18 @@ namespace StudentScheduleManagementSystem.UI
 
     public sealed class StudentPersonalActivitySubwindow : PersonalScheduleSubwinowBase
     {
-        private MultiSelectBox weekSelectBox = new();
-        private MultiSelectBox daySelectBox = new();
-        private ComboBox hourComboBox = new();
-        private ComboBox durationComboBox = new();
-
         public StudentPersonalActivitySubwindow()
             : base(ScheduleType.Activity, SubwindowType.PersonalActivity)
         {
             GenerateUserData(_scheduleType);
             this.detectCollisionButton.Hide();
+            weekSelectBox = new();
+            daySelectBox = new();
+            durationComboBox = new();
             GenerateSubwindow();
             _showAllData = false;
             _subwindowState = SubwindowState.Viewing;
-            this.AddScheduleButton.Click += (sender, e) => AddSchedule();
+            this.AddScheduleButton.Click += (sender, e) => AddSchedule(true);
             label.Text = "个人活动";
         }
 
@@ -1558,29 +1605,29 @@ namespace StudentScheduleManagementSystem.UI
             return true;
         }
 
-        protected override void AddSchedule()
+        protected override bool AddSchedule(bool showMessageBox)
         {
-            bool confirm = GetScheduleInfo(true,
+            bool confirm = GetScheduleInfo(showMessageBox,
                                            Schedule.Activity.Earliest,
                                            Schedule.Activity.Latest,
                                            weekSelectBox,
                                            daySelectBox,
-                                           null,
-                                           null,
+                                           weekComboBox,
+                                           dayComboBox,
                                            hourComboBox,
                                            durationComboBox,
-                                           out string name,
-                                           out RepetitiveType repetitiveType,
-                                           out int[] activeWeeks,
-                                           out Day[] activeDays,
-                                           out Times.Time beginTime,
-                                           out int duration,
-                                           out string buildingName,
-                                           out string onlineLink);
+                                             out string name,
+                                             out RepetitiveType repetitiveType,
+                                             out int[] activeWeeks,
+                                             out Day[] activeDays,
+                                             out Times.Time beginTime,
+                                             out int duration,
+                                             out string buildingName,
+                                             out string onlineLink);
 
             if (!confirm)
             {
-                return;
+                return false;
             }
 
             if (buildingRadioButton.Checked)
@@ -1610,11 +1657,12 @@ namespace StudentScheduleManagementSystem.UI
                                           ScheduleOperationType.UserOpration);
             }
             GenerateUserData(_scheduleType);
-            ClearInformation();
             this.weekSelectBox.ClearBox();
             this.daySelectBox.ClearBox();
             this.hourComboBox.Text = "";
             this.durationComboBox.Text = "";
+            ClearPersonalInformation();
+            return true;
         }
 
         #endregion
@@ -1693,19 +1741,17 @@ namespace StudentScheduleManagementSystem.UI
 
     public sealed class StudentTemporaryAffairSubwindow : PersonalScheduleSubwinowBase
     {
-        private ComboBox weekSelectBox = new();
-        private ComboBox daySelectBox = new();
-        private ComboBox hourComboBox = new();
-
         public StudentTemporaryAffairSubwindow()
             : base(ScheduleType.TemporaryAffair, SubwindowType.TemporaryAffair)
         {
             GenerateUserData(_scheduleType);
             this.detectCollisionButton.Hide();
+            weekComboBox = new();
+            dayComboBox = new();
             GenerateSubwindow();
             _showAllData = false;
             _subwindowState = SubwindowState.Viewing;
-            this.AddScheduleButton.Click += (sender, e) => AddSchedule();
+            this.AddScheduleButton.Click += (sender, e) => AddSchedule(true);
             this.onlineLinkRadioButton.Enabled = false;
             this.onlineLinkBox.Enabled = false;
             this.hideDurationPictureBox.Show();
@@ -1727,27 +1773,27 @@ namespace StudentScheduleManagementSystem.UI
             hourComboBox.Size = weekBox.Size;
             Controls.Add(hourComboBox);
 
-            weekSelectBox.BackColor = Color.White;
-            weekSelectBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            weekSelectBox.DropDownWidth = 130;
-            weekSelectBox.FlatStyle = FlatStyle.Flat;
-            weekSelectBox.FormattingEnabled = true;
-            weekSelectBox.Items.AddRange(Shared.Weeks.ToArray<object>());
-            weekSelectBox.Location = weekBox.Location;
-            weekSelectBox.Name = "weekSelectBox";
-            weekSelectBox.Size = weekBox.Size;
-            Controls.Add(weekSelectBox);
+            weekComboBox.BackColor = Color.White;
+            weekComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            weekComboBox.DropDownWidth = 130;
+            weekComboBox.FlatStyle = FlatStyle.Flat;
+            weekComboBox.FormattingEnabled = true;
+            weekComboBox.Items.AddRange(Shared.Weeks.ToArray<object>());
+            weekComboBox.Location = weekBox.Location;
+            weekComboBox.Name = "weekSelectBox";
+            weekComboBox.Size = weekBox.Size;
+            Controls.Add(weekComboBox);
 
-            daySelectBox.BackColor = Color.White;
-            daySelectBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            daySelectBox.DropDownWidth = 130;
-            daySelectBox.FlatStyle = FlatStyle.Flat;
-            daySelectBox.FormattingEnabled = true;
-            daySelectBox.Items.AddRange(Shared.Days.ToArray<object>());
-            daySelectBox.Location = dayBox.Location;
-            daySelectBox.Name = "daySelectBox";
-            daySelectBox.Size = dayBox.Size;
-            Controls.Add(daySelectBox);
+            dayComboBox.BackColor = Color.White;
+            dayComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            dayComboBox.DropDownWidth = 130;
+            dayComboBox.FlatStyle = FlatStyle.Flat;
+            dayComboBox.FormattingEnabled = true;
+            dayComboBox.Items.AddRange(Shared.Days.ToArray<object>());
+            dayComboBox.Location = dayBox.Location;
+            dayComboBox.Name = "daySelectBox";
+            dayComboBox.Size = dayBox.Size;
+            Controls.Add(dayComboBox);
 
             weekBox.Hide();
             dayBox.Hide();
@@ -1756,8 +1802,8 @@ namespace StudentScheduleManagementSystem.UI
             hideDurationPictureBox.Show();
             switchPageButton.Hide();
             hourComboBox.BringToFront();
-            daySelectBox.BringToFront();
-            weekSelectBox.BringToFront();
+            dayComboBox.BringToFront();
+            weekComboBox.BringToFront();
         }
 
         protected override void GenerateUserData(Schedule.Schedule[] data)
@@ -1797,11 +1843,11 @@ namespace StudentScheduleManagementSystem.UI
             activeDays = Constants.EmptyDayArray;
             duration = 1;
             StringBuilder errorMessage = new("");
-            if (weekSelectBox.Text == "")
+            if (weekComboBox.Text == "")
             {
                 errorMessage.Append("请输入日程周！\n");
             }
-            if (daySelectBox.Text == "")
+            if (dayComboBox.Text == "")
             {
                 errorMessage.Append("请输入日程日！\n");
             }
@@ -1812,10 +1858,10 @@ namespace StudentScheduleManagementSystem.UI
                 return false;
             }
 
-            activeWeeks = new[] { int.Parse(weekSelectBox.Text[4..]) };
+            activeWeeks = new[] { int.Parse(weekComboBox.Text[4..]) };
             for (int i = 0; i < 7; i++)
             {
-                if (daySelectBox.Text == Shared.Days[i])
+                if (dayComboBox.Text == Shared.Days[i])
                 {
                     activeDays = new[] { (Day)i };
                     break;
@@ -1825,15 +1871,15 @@ namespace StudentScheduleManagementSystem.UI
             return true;
         }
 
-        protected override void AddSchedule()
+        protected override bool AddSchedule(bool showMessageBox)
         {
-            bool confirm = GetScheduleInfo(true,
+            bool confirm = GetScheduleInfo(showMessageBox,
                                            Schedule.Activity.Earliest,
                                            Schedule.Activity.Latest,
                                            null,
                                            null,
-                                           weekSelectBox,
-                                           daySelectBox,
+                                           weekComboBox,
+                                           dayComboBox,
                                            hourComboBox,
                                            null,
                                            out string name,
@@ -1847,7 +1893,7 @@ namespace StudentScheduleManagementSystem.UI
 
             if (!confirm)
             {
-                return;
+                return false;
             }
 
             {
@@ -1856,9 +1902,9 @@ namespace StudentScheduleManagementSystem.UI
                                                  descriptionBox.Text == "" ? null : descriptionBox.Text,
                                                  Map.Location.GetBuildingsByName(buildingName)[0]);
                 GenerateUserData(_scheduleType);
-                ClearInformation();
+                ClearPersonalInformation();
                 this.hourComboBox.Text = "";
-                return;
+                return true;
             }
         }
 
@@ -1881,8 +1927,8 @@ namespace StudentScheduleManagementSystem.UI
             var selected = Schedule.Schedule.GetScheduleById(id);
 
             nameBox.Text = selected!.Name;
-            weekSelectBox.Text = "Week" + selected.BeginTime.Week;
-            daySelectBox.Text = Shared.Days[(int)selected.BeginTime.Day];
+            weekComboBox.Text = "Week" + selected.BeginTime.Week;
+            dayComboBox.Text = Shared.Days[(int)selected.BeginTime.Day];
             descriptionBox.Text = selected.Description ?? "";
             hourComboBox.Text = selected.BeginTime.Hour + ":00";
             buildingComboBox.Text = ((Schedule.TemporaryAffair)selected).OfflineLocation.Name;
