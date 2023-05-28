@@ -8,6 +8,14 @@ namespace StudentScheduleManagementSystem.Log
 
         private static readonly int _random = new Random(DateTime.Now.Millisecond).Next();
 
+        public delegate void LogEventHandler(string message);
+        private static LogEventHandler? _logEventHandler;
+        public static event LogEventHandler LogGenerated
+        {
+            add => _logEventHandler += value;
+            remove => _logEventHandler -= value;
+        }
+
         static LogBase()
         {
             if (!Directory.Exists(FileManagement.FileManager.LogFileDirectory))

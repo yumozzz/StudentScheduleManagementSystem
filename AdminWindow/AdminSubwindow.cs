@@ -434,7 +434,8 @@ namespace StudentScheduleManagementSystem.UI
                                   (>= 'a' and <= 'z') or
                                   '_' or
                                   '-' or
-                                  ' '))
+                                  ' ' or
+                                  '\b'))
             {
                 e.Handled = true;
             }
@@ -448,7 +449,7 @@ namespace StudentScheduleManagementSystem.UI
         private void SearchByIdBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             _searchByName = false;
-            if (e.KeyChar is not (>= '0' and <= '9'))
+            if (e.KeyChar is not ((>= '0' and <= '9') or '\b'))
             {
                 e.Handled = true;
             }

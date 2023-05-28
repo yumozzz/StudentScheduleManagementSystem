@@ -11,6 +11,7 @@
         public AdminWindow()
         {
             InitializeComponent();
+            Log.LogBase.LogGenerated += OnLogGenerated;
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             this.logListBox.Hide();
@@ -104,6 +105,7 @@
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
+            mainpage.Controls.Add(logListBox);
             this.logListBox.Show();
         }
 
@@ -113,6 +115,22 @@
             _mapEditWindow.ShowDialog();
             _mapEditWindow.Dispose();
             GC.Collect();
+        }
+
+        private void OnLogGenerated(string message)
+        {
+            if (logListBox.Items.Count > 100)
+            {
+                logListBox.Items.RemoveAt(0);
+            }
+            logListBox.Items.Add(message);
+            Graphics graphics = logListBox.CreateGraphics();
+            float width = 0f;
+            foreach (var item in logListBox.Items)
+            {
+                width = Math.Max(width, graphics.MeasureString(item.ToString()!.Replace("\r\n", " ").Replace('\n', ' '), logListBox.Font).Width);
+            }
+            logListBox.HorizontalExtent = Convert.ToInt32(width) + 20;
         }
     }
 }
