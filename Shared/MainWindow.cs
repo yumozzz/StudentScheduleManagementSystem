@@ -118,10 +118,5 @@ namespace StudentScheduleManagementSystem.UI
             GC.Collect();
             this.Show();
         }
-
-        private void UsernameBox_TextChanged(object sender, EventArgs e)
-        {
-            this.passwordBox.Text = "";
-        }
     }
 }

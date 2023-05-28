@@ -203,6 +203,16 @@ namespace StudentScheduleManagementSystem.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap 党员日志__ffffff_128_21601025 {
+            get {
+                object obj = ResourceManager.GetObject("党员日志_#ffffff_128_21601025", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap 关闭__ffffff_128 {
             get {
                 object obj = ResourceManager.GetObject("关闭_#ffffff_128", resourceCulture);

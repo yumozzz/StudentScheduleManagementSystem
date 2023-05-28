@@ -662,7 +662,6 @@ namespace StudentScheduleManagementSystem.Schedule
             if (callbackParameter == null)
             {
                 Log.Warning.Log("没有传递回调参数");
-                Console.WriteLine("Null \"callbackParameter\", check twice");
             }
             Times.Alarm.AddAlarm(BeginTime - 1,
                                  RepetitiveType,
@@ -844,12 +843,13 @@ namespace StudentScheduleManagementSystem.Schedule
                 Timestamp = schedule.BeginTime,
                 Duration = schedule.Duration
             };
-            /*if (_correspondenceDictionary.TryGetValue(schedule.ScheduleId, out _)) //字典中已存在（课程或考试），则更新//不允许更新，必须先删除再添加
+            if (schedule.ScheduleId <= _courseIdMax) //修改课程，更新
             {
-                data.ScheduleType = _correspondenceDictionary[schedule.ScheduleId].ScheduleType;
-                _correspondenceDictionary[schedule.ScheduleId] = data;
+                data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
+                _sharedDictionary[schedule.ScheduleId] = data;
                 return;
-            }*/
+            }
+            Debug.Assert(schedule.ScheduleId == _courseIdMax + 1);
             switch (schedule.ScheduleId / (long)1e9) //不存在，则新建
             {
                 case 1:

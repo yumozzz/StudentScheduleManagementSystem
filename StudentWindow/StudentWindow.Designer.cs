@@ -36,12 +36,13 @@
             weekBox = new ComboBox();
             pauseButton = new Button();
             speedButton = new Button();
-            setTime = new Button();
+            setTimeButton = new Button();
             daySetBox = new Label();
             weekSetBox = new Label();
             currentTime = new Label();
             mainpageButton = new PictureBox();
             mainpage = new Panel();
+            logListBox = new ListBox();
             ScheduleTableButton = new PictureBox();
             courseButton = new PictureBox();
             examButton = new PictureBox();
@@ -51,8 +52,10 @@
             exitButton = new PictureBox();
             logoutConfirm = new PictureBox();
             closeConfirm = new PictureBox();
+            logButton = new PictureBox();
             header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)mainpageButton).BeginInit();
+            mainpage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)ScheduleTableButton).BeginInit();
             ((System.ComponentModel.ISupportInitialize)courseButton).BeginInit();
             ((System.ComponentModel.ISupportInitialize)examButton).BeginInit();
@@ -62,6 +65,7 @@
             ((System.ComponentModel.ISupportInitialize)exitButton).BeginInit();
             ((System.ComponentModel.ISupportInitialize)logoutConfirm).BeginInit();
             ((System.ComponentModel.ISupportInitialize)closeConfirm).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)logButton).BeginInit();
             SuspendLayout();
             // 
             // header
@@ -73,7 +77,7 @@
             header.Controls.Add(weekBox);
             header.Controls.Add(pauseButton);
             header.Controls.Add(speedButton);
-            header.Controls.Add(setTime);
+            header.Controls.Add(setTimeButton);
             header.Controls.Add(daySetBox);
             header.Controls.Add(weekSetBox);
             header.Controls.Add(currentTime);
@@ -81,8 +85,6 @@
             header.Name = "header";
             header.Size = new Size(1300, 45);
             header.TabIndex = 1;
-            header.MouseDown += Header_MouseDown;
-            header.MouseMove += Header_MouseMove;
             // 
             // hourBox
             // 
@@ -135,7 +137,6 @@
             pauseButton.TabIndex = 18;
             pauseButton.Text = "暂停";
             pauseButton.UseVisualStyleBackColor = false;
-            pauseButton.Click += PauseButton_Click;
             // 
             // speedButton
             // 
@@ -147,19 +148,18 @@
             speedButton.TabIndex = 17;
             speedButton.Text = "快进";
             speedButton.UseVisualStyleBackColor = false;
-            speedButton.Click += SpeedButton_Click;
             // 
-            // setTime
+            // setTimeButton
             // 
-            setTime.BackColor = Color.White;
-            setTime.FlatStyle = FlatStyle.Flat;
-            setTime.Location = new Point(780, 3);
-            setTime.Name = "setTime";
-            setTime.Size = new Size(100, 35);
-            setTime.TabIndex = 16;
-            setTime.Text = "设置时间";
-            setTime.UseVisualStyleBackColor = false;
-            setTime.Click += SetTime_Click;
+            setTimeButton.BackColor = Color.White;
+            setTimeButton.FlatStyle = FlatStyle.Flat;
+            setTimeButton.Location = new Point(780, 3);
+            setTimeButton.Name = "setTimeButton";
+            setTimeButton.Size = new Size(100, 35);
+            setTimeButton.TabIndex = 16;
+            setTimeButton.Text = "设置时间";
+            setTimeButton.UseVisualStyleBackColor = false;
+            setTimeButton.Click += SetTimeButton_Click;
             // 
             // daySetBox
             // 
@@ -212,6 +212,19 @@
             mainpage.Size = new Size(1050, 655);
             mainpage.TabIndex = 33;
             // 
+            // logListBox
+            // 
+            logListBox.BackColor = SystemColors.Window;
+            logListBox.FormattingEnabled = true;
+            logListBox.HorizontalScrollbar = true;
+            logListBox.ItemHeight = 24;
+            logListBox.Location = new Point(10, 13);
+            logListBox.Name = "logListBox";
+            logListBox.ScrollAlwaysVisible = true;
+            logListBox.SelectionMode = SelectionMode.None;
+            logListBox.Size = new Size(1030, 628);
+            logListBox.TabIndex = 49;
+            // 
             // ScheduleTableButton
             // 
             ScheduleTableButton.BackColor = Color.Transparent;
@@ -230,7 +243,7 @@
             courseButton.BackColor = Color.Transparent;
             courseButton.Cursor = Cursors.Hand;
             courseButton.Image = Properties.Resources.课表__ffffff_128_21601021;
-            courseButton.Location = new Point(65, 190);
+            courseButton.Location = new Point(65, 177);
             courseButton.Name = "courseButton";
             courseButton.Size = new Size(50, 50);
             courseButton.SizeMode = PictureBoxSizeMode.Zoom;
@@ -243,7 +256,7 @@
             examButton.BackColor = Color.Transparent;
             examButton.Cursor = Cursors.Hand;
             examButton.Image = Properties.Resources.试卷__ffffff_128_21601018;
-            examButton.Location = new Point(65, 280);
+            examButton.Location = new Point(65, 254);
             examButton.Name = "examButton";
             examButton.Size = new Size(50, 50);
             examButton.SizeMode = PictureBoxSizeMode.Zoom;
@@ -256,7 +269,7 @@
             GroupActivityButton.BackColor = Color.Transparent;
             GroupActivityButton.Cursor = Cursors.Hand;
             GroupActivityButton.Image = Properties.Resources.户外实践__ffffff_128_21601017;
-            GroupActivityButton.Location = new Point(65, 370);
+            GroupActivityButton.Location = new Point(65, 331);
             GroupActivityButton.Name = "GroupActivityButton";
             GroupActivityButton.Size = new Size(50, 50);
             GroupActivityButton.SizeMode = PictureBoxSizeMode.Zoom;
@@ -269,7 +282,7 @@
             personalActivityButton.BackColor = Color.Transparent;
             personalActivityButton.Cursor = Cursors.Hand;
             personalActivityButton.Image = Properties.Resources.跑步__ffffff_128_21590258;
-            personalActivityButton.Location = new Point(65, 460);
+            personalActivityButton.Location = new Point(65, 408);
             personalActivityButton.Name = "personalActivityButton";
             personalActivityButton.Size = new Size(50, 50);
             personalActivityButton.SizeMode = PictureBoxSizeMode.Zoom;
@@ -282,7 +295,7 @@
             temporaryAffairButton.BackColor = Color.Transparent;
             temporaryAffairButton.Cursor = Cursors.Hand;
             temporaryAffairButton.Image = Properties.Resources.个人账户__ffffff_128_21601167;
-            temporaryAffairButton.Location = new Point(65, 550);
+            temporaryAffairButton.Location = new Point(65, 485);
             temporaryAffairButton.Name = "temporaryAffairButton";
             temporaryAffairButton.Size = new Size(50, 50);
             temporaryAffairButton.SizeMode = PictureBoxSizeMode.Zoom;
@@ -295,7 +308,7 @@
             exitButton.BackColor = Color.Transparent;
             exitButton.Cursor = Cursors.Hand;
             exitButton.Image = Properties.Resources.研究人员__ffffff_128_21601186;
-            exitButton.Location = new Point(65, 640);
+            exitButton.Location = new Point(65, 639);
             exitButton.Name = "exitButton";
             exitButton.Size = new Size(50, 50);
             exitButton.SizeMode = PictureBoxSizeMode.Zoom;
@@ -329,6 +342,19 @@
             closeConfirm.Visible = false;
             closeConfirm.Click += CloseConfirm_Click;
             // 
+            // logButton
+            // 
+            logButton.BackColor = Color.Transparent;
+            logButton.Cursor = Cursors.Hand;
+            logButton.Image = Properties.Resources.党员日志__ffffff_128_21601025;
+            logButton.Location = new Point(65, 562);
+            logButton.Name = "logButton";
+            logButton.Size = new Size(50, 50);
+            logButton.SizeMode = PictureBoxSizeMode.Zoom;
+            logButton.TabIndex = 50;
+            logButton.TabStop = false;
+            logButton.Click += LogButton_Click;
+            // 
             // StudentWindow
             // 
             AutoScaleDimensions = new SizeF(11F, 24F);
@@ -337,6 +363,7 @@
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1300, 770);
+            Controls.Add(logButton);
             Controls.Add(logoutConfirm);
             Controls.Add(closeConfirm);
             Controls.Add(exitButton);
@@ -355,6 +382,7 @@
             header.ResumeLayout(false);
             header.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)mainpageButton).EndInit();
+            mainpage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)ScheduleTableButton).EndInit();
             ((System.ComponentModel.ISupportInitialize)courseButton).EndInit();
             ((System.ComponentModel.ISupportInitialize)examButton).EndInit();
@@ -364,6 +392,7 @@
             ((System.ComponentModel.ISupportInitialize)exitButton).EndInit();
             ((System.ComponentModel.ISupportInitialize)logoutConfirm).EndInit();
             ((System.ComponentModel.ISupportInitialize)closeConfirm).EndInit();
+            ((System.ComponentModel.ISupportInitialize)logButton).EndInit();
             ResumeLayout(false);
         }
 
@@ -373,7 +402,7 @@
         private PictureBox mainpageButton;
         private Panel mainpage;
         private ComboBox weekBox;
-        private Button setTime;
+        private Button setTimeButton;
         private ComboBox hourBox;
         private Label daySetBox;
         private ComboBox dayBox;
@@ -390,5 +419,7 @@
         private PictureBox exitButton;
         private PictureBox logoutConfirm;
         private PictureBox closeConfirm;
+        private ListBox logListBox;
+        private PictureBox logButton;
     }
 }

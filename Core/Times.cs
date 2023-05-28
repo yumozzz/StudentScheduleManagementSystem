@@ -445,12 +445,10 @@ namespace StudentScheduleManagementSystem.Times
                 case (RepetitiveType.Single, RepetitiveType.Single):
                     throw new ItemAlreadyExistedException();
                 case (RepetitiveType.Single, RepetitiveType.MultipleDays):
-                    Console.WriteLine($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
                     RemoveAlarm(timestamp, overrideType, Constants.EmptyIntArray, Constants.EmptyDayArray);
                     break;
                 case (RepetitiveType.MultipleDays, RepetitiveType.Single):
-                    Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟在{timestamp.ToString()}上已被覆盖");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟在{timestamp.ToString()}上已被覆盖");
                     _timeline.RemoveMultipleItems(timestamp,
                                                   1,
@@ -462,7 +460,6 @@ namespace StudentScheduleManagementSystem.Times
                 case (RepetitiveType.MultipleDays, RepetitiveType.MultipleDays):
                     Day[] oldActiveDays = _alarmList[_timeline[offset].Id].ActiveDays; //不可能为null
                     activeDays = activeDays.Union(oldActiveDays).ToArray(); //合并启用日（去重）
-                    Console.WriteLine($"id为{_timeline[offset].Id}的重复闹钟已被合并");
                     Log.Warning.Log($"id为{_timeline[offset].Id}的重复闹钟已被合并");
                     RemoveAlarm(timestamp, overrideType, Constants.AllWeeks, oldActiveDays); //删除原重复闹钟
                     break;
@@ -679,6 +676,7 @@ namespace StudentScheduleManagementSystem.Times
         private static int _offset = 0;
         private static bool _pause = false;
         private static int _since = 0;
+        public static Time Now => _localTime;
         public static bool Pause
         {
             get => _pause;
@@ -686,15 +684,24 @@ namespace StudentScheduleManagementSystem.Times
             {
                 Log.Information.Log(value ? "计时器停止计时" : "计时器开始计时");
                 _pause = value;
+                _pauseStateChangeEventHandler?.Invoke(_pause);
             }
         }
-        public static Time Now => _localTime;
+        
         public delegate void TimeChangeEventHandler(Time t);
-        private static TimeChangeEventHandler _timeChangeEventHandler;
+        private static TimeChangeEventHandler? _timeChangeEventHandler;
         public static event TimeChangeEventHandler TimeChange
         {
             add => _timeChangeEventHandler += value;
             remove => _timeChangeEventHandler -= value;
+        }
+
+        public delegate void PauseStateChangeEventHandler(bool pause);
+        private static PauseStateChangeEventHandler? _pauseStateChangeEventHandler;
+        public static event PauseStateChangeEventHandler SetPauseState
+        {
+            add => _pauseStateChangeEventHandler += value;
+            remove => _pauseStateChangeEventHandler -= value;
         }
 
         public static void Start()
@@ -712,7 +719,7 @@ namespace StudentScheduleManagementSystem.Times
                 if (_since >= BaseTimeoutMs / _acceleration)
                 {
                     _since = 0;
-                    _timeChangeEventHandler.Invoke(_localTime);
+                    _timeChangeEventHandler?.Invoke(_localTime);
                     Alarm.TriggerAlarm(_offset); //触发这个时间点的闹钟（如果有的话）
                     _localTime++;
                     _offset++;

@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Forms;
 
 namespace StudentScheduleManagementSystem.UI
 {
@@ -16,6 +18,11 @@ namespace StudentScheduleManagementSystem.UI
         {
             InitializeComponent();
             Times.Timer.TimeChange += SetLocalTime;
+            pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
+            speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
+            Times.Timer.SetPauseState += (pause) => { pauseButton.Text = pause ? "继续" : "暂停"; };
+            Log.LogBase.LogGenerated += OnLogGenerated;
+            logListBox.Hide();
         }
 
         private int _x, _y;
@@ -40,6 +47,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void ScheduleTableButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -51,65 +59,65 @@ namespace StudentScheduleManagementSystem.UI
 
         private void CourseButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
             _studentCourseSubwindow = new();
             _studentCourseSubwindow.TopLevel = false;
-            _studentCourseSubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentCourseSubwindow);
             _studentCourseSubwindow.Show();
         }
 
         private void ExamButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
             _studentExamSubwindow = new();
             _studentExamSubwindow.TopLevel = false;
-            _studentExamSubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentExamSubwindow);
             _studentExamSubwindow.Show();
         }
 
         private void GroupActivityButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
             _studentGroupActivitySubwindow = new();
             _studentGroupActivitySubwindow.TopLevel = false;
-            _studentGroupActivitySubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentGroupActivitySubwindow);
             _studentGroupActivitySubwindow.Show();
         }
 
         private void PersonalActivityButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
             _studentPersonalActivitySubwindow = new();
             _studentPersonalActivitySubwindow.TopLevel = false;
-            _studentPersonalActivitySubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentPersonalActivitySubwindow);
             _studentPersonalActivitySubwindow.Show();
         }
 
         private void TemporaryAffairButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
             _studentTemporaryAffairSubwindow = new();
             _studentTemporaryAffairSubwindow.TopLevel = false;
-            _studentTemporaryAffairSubwindow.pauseTimeDelegate = PauseTime;
             mainpage.Controls.Add(_studentTemporaryAffairSubwindow);
             _studentTemporaryAffairSubwindow.Show();
         }
 
-        private void SetTime_Click(object sender, EventArgs e)
+        private void SetTimeButtonClick(object sender, EventArgs e)
         {
             StringBuilder errorMessage = new();
             if (weekBox.Text.Equals(""))
@@ -142,31 +150,6 @@ namespace StudentScheduleManagementSystem.UI
                 Times.Time time = new() { Week = week, Day = day, Hour = hour };
                 Times.Timer.SetTime(time);
                 Log.Information.Log("时间设置为: " + time.ToString());
-            }
-        }
-
-        private void SpeedButton_Click(object sender, EventArgs e)
-        {
-            Times.Timer.SetSpeed();
-        }
-
-        private void PauseButton_Click(object sender, EventArgs e)
-        {
-            PauseTime(null);
-        }
-
-        public void PauseTime(bool? pauseTime)
-        {
-            Times.Timer.Pause = pauseTime.HasValue ? pauseTime.Value : !Times.Timer.Pause;
-            if (Times.Timer.Pause)
-            {
-                pauseButton.Text = "继续";
-                Log.Information.Log("时间暂停: " + currentTime.Text);
-            }
-            else
-            {
-                pauseButton.Text = "暂停";
-                Log.Information.Log("时间恢复: " + currentTime.Text);
             }
         }
 
@@ -206,8 +189,24 @@ namespace StudentScheduleManagementSystem.UI
             ShouldExitProgram = true;
         }
 
+        private void LogButton_Click(object sender, EventArgs e)
+        {
+            _studentScheduleTable?.Hide();
+            _studentCourseSubwindow?.Hide();
+            _studentExamSubwindow?.Hide();
+            _studentGroupActivitySubwindow?.Hide();
+            _studentPersonalActivitySubwindow?.Hide();
+            _studentTemporaryAffairSubwindow?.Hide();
+            logoutConfirm.Hide();
+            closeConfirm.Hide();
+            mainpage.Controls.Clear();
+            mainpage.Controls.Add(logListBox);
+            logListBox.Show();
+        }
+
         private void ExitButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             _studentScheduleTable?.Hide();
             _studentCourseSubwindow?.Hide();
             _studentExamSubwindow?.Hide();
@@ -216,6 +215,22 @@ namespace StudentScheduleManagementSystem.UI
             _studentTemporaryAffairSubwindow?.Hide();
             logoutConfirm.Show();
             closeConfirm.Show();
+        }
+
+        private void OnLogGenerated(string message)
+        {
+            if (logListBox.Items.Count > 100)
+            {
+                logListBox.Items.RemoveAt(0);
+            }
+            logListBox.Items.Add(message);
+            Graphics graphics = logListBox.CreateGraphics();
+            float width = 0f;
+            foreach (var item in logListBox.Items)
+            {
+                width = Math.Max(width, graphics.MeasureString(item.ToString()!.Replace("\r\n", " ").Replace('\n', ' '), logListBox.Font).Width);
+            }
+            logListBox.HorizontalExtent = Convert.ToInt32(width) + 20;
         }
     }
 }

@@ -377,10 +377,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的课程");
                 return;
             }
-            Console.WriteLine($"下一个小时有以下课程：\"{course.Name}\"，时长为{course.Duration}小时。");
             if (course.IsOnline)
             {
-                Console.WriteLine($"在线地址为{course.OnlineLink!}");
                 UI.StudentAlarmWindow alarmWindow = new(course.Name, course.OnlineLink!);
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
@@ -388,7 +386,6 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             else
             {
-                Console.WriteLine($"地点为{course.OfflineLocation!.Value.Name}");
                 UI.StudentAlarmWindow alarmWindow = new(course.Name, course.OfflineLocation!.Value);
                 Times.Timer.Pause = true;
                 alarmWindow.ShowDialog();
@@ -427,8 +424,6 @@ namespace StudentScheduleManagementSystem.Schedule
                 Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的考试");
                 return;
             }
-            Console.WriteLine($"下一个小时有以下考试：\"{exam.Name}\"，时长为{exam.Duration}小时。");
-            Console.WriteLine($"地点为{exam.OfflineLocation.Name}");
             UI.StudentAlarmWindow alarmWindow = new(exam.Name, exam.OfflineLocation);
             Times.Timer.Pause = true;
             alarmWindow.ShowDialog();
@@ -465,11 +460,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的活动");
                 return;
             }
-            Console.WriteLine("下一个小时有以下" + (activity.IsGroupActivity ? "集体" : "个人") +
-                              $"活动：\"{activity.Name}\"，时长为{activity.Duration}小时。");
             if (activity.IsOnline)
             {
-                Console.WriteLine($"在线地址为{activity.OnlineLink!}");
                 UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OnlineLink!);
                 Times.Timer.Pause = true;
                 alarmWindow.ShowDialog();
@@ -479,7 +471,6 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             else
             {
-                Console.WriteLine($"地点为{activity.OfflineLocation!.Value.Name}");
                 UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OfflineLocation!.Value);
                 Times.Timer.Pause = true;
                 alarmWindow.ShowDialog();

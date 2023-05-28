@@ -83,7 +83,7 @@
             // 
             // helpButton
             // 
-            this.helpButton.Location = new System.Drawing.Point(544, 4);
+            this.helpButton.Location = new System.Drawing.Point(528, 0);
             this.helpButton.Name = "helpButton";
             this.helpButton.Size = new System.Drawing.Size(100, 45);
             this.helpButton.TabIndex = 4;

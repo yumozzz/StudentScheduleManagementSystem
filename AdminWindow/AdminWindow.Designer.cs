@@ -29,175 +29,206 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AdminWindow));
-            this.header = new System.Windows.Forms.Panel();
-            this.mainpage = new System.Windows.Forms.Panel();
-            this.exitButton = new System.Windows.Forms.PictureBox();
-            this.courseButton = new System.Windows.Forms.PictureBox();
-            this.activityButton = new System.Windows.Forms.PictureBox();
-            this.mainpageButton = new System.Windows.Forms.PictureBox();
-            this.logoutConfirm = new System.Windows.Forms.PictureBox();
-            this.closeConfirm = new System.Windows.Forms.PictureBox();
-            this.examButton = new System.Windows.Forms.PictureBox();
-            this.mapEditButton = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.exitButton)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.courseButton)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.activityButton)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.logoutConfirm)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.closeConfirm)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.examButton)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mapEditButton)).BeginInit();
-            this.SuspendLayout();
+            header = new Panel();
+            mainpage = new Panel();
+            logListBox = new ListBox();
+            exitButton = new PictureBox();
+            courseButton = new PictureBox();
+            activityButton = new PictureBox();
+            mainpageButton = new PictureBox();
+            logoutConfirm = new PictureBox();
+            closeConfirm = new PictureBox();
+            examButton = new PictureBox();
+            mapEditButton = new PictureBox();
+            logButton = new PictureBox();
+            mainpage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)exitButton).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)courseButton).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)activityButton).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)mainpageButton).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)logoutConfirm).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)closeConfirm).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)examButton).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)mapEditButton).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)logButton).BeginInit();
+            SuspendLayout();
             // 
             // header
             // 
-            this.header.BackColor = System.Drawing.Color.Transparent;
-            this.header.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.header.Location = new System.Drawing.Point(0, 0);
-            this.header.Name = "header";
-            this.header.Size = new System.Drawing.Size(1300, 45);
-            this.header.TabIndex = 23;
-            this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Header_MouseDown);
-            this.header.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Header_MouseMove);
+            header.BackColor = Color.Transparent;
+            header.ForeColor = SystemColors.ControlText;
+            header.Location = new Point(0, 0);
+            header.Name = "header";
+            header.Size = new Size(1300, 45);
+            header.TabIndex = 23;
+            header.MouseDown += Header_MouseDown;
+            header.MouseMove += Header_MouseMove;
             // 
             // mainpage
             // 
-            this.mainpage.BackColor = System.Drawing.Color.White;
-            this.mainpage.Location = new System.Drawing.Point(180, 58);
-            this.mainpage.Name = "mainpage";
-            this.mainpage.Size = new System.Drawing.Size(1050, 655);
-            this.mainpage.TabIndex = 25;
+            mainpage.BackColor = Color.White;
+            mainpage.Location = new Point(180, 58);
+            mainpage.Name = "mainpage";
+            mainpage.Size = new Size(1050, 655);
+            mainpage.TabIndex = 25;
+            // 
+            // logListBox
+            // 
+            logListBox.FormattingEnabled = true;
+            logListBox.HorizontalScrollbar = true;
+            logListBox.ItemHeight = 24;
+            logListBox.Location = new Point(10, 13);
+            logListBox.Name = "logListBox";
+            logListBox.ScrollAlwaysVisible = true;
+            logListBox.SelectionMode = SelectionMode.None;
+            logListBox.Size = new Size(1030, 628);
+            logListBox.TabIndex = 0;
             // 
             // exitButton
             // 
-            this.exitButton.BackColor = System.Drawing.Color.Transparent;
-            this.exitButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.exitButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.研究人员__ffffff_128_21601186;
-            this.exitButton.Location = new System.Drawing.Point(65, 610);
-            this.exitButton.Name = "exitButton";
-            this.exitButton.Size = new System.Drawing.Size(50, 50);
-            this.exitButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.exitButton.TabIndex = 26;
-            this.exitButton.TabStop = false;
-            this.exitButton.Click += new System.EventHandler(this.ExitButton_Click);
+            exitButton.BackColor = Color.Transparent;
+            exitButton.Cursor = Cursors.Hand;
+            exitButton.Image = Properties.Resources.研究人员__ffffff_128_21601186;
+            exitButton.Location = new Point(65, 610);
+            exitButton.Name = "exitButton";
+            exitButton.Size = new Size(50, 50);
+            exitButton.SizeMode = PictureBoxSizeMode.Zoom;
+            exitButton.TabIndex = 26;
+            exitButton.TabStop = false;
+            exitButton.Click += ExitButton_Click;
             // 
             // courseButton
             // 
-            this.courseButton.BackColor = System.Drawing.Color.Transparent;
-            this.courseButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.courseButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.课表__ffffff_128_21601021;
-            this.courseButton.Location = new System.Drawing.Point(65, 130);
-            this.courseButton.Name = "courseButton";
-            this.courseButton.Size = new System.Drawing.Size(50, 50);
-            this.courseButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.courseButton.TabIndex = 27;
-            this.courseButton.TabStop = false;
-            this.courseButton.Click += new System.EventHandler(this.CourseButton_Click);
-            // 
-            // examButton
-            // 
-            this.examButton.BackColor = System.Drawing.Color.Transparent;
-            this.examButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.examButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.试卷__ffffff_128_21601018;
-            this.examButton.Location = new System.Drawing.Point(65, 250);
-            this.examButton.Name = "examButton";
-            this.examButton.Size = new System.Drawing.Size(50, 50);
-            this.examButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.examButton.TabIndex = 29;
-            this.examButton.TabStop = false;
-            this.examButton.Click += new System.EventHandler(this.ExamButton_Click);
+            courseButton.BackColor = Color.Transparent;
+            courseButton.Cursor = Cursors.Hand;
+            courseButton.Image = Properties.Resources.课表__ffffff_128_21601021;
+            courseButton.Location = new Point(65, 130);
+            courseButton.Name = "courseButton";
+            courseButton.Size = new Size(50, 50);
+            courseButton.SizeMode = PictureBoxSizeMode.Zoom;
+            courseButton.TabIndex = 27;
+            courseButton.TabStop = false;
+            courseButton.Click += CourseButton_Click;
             // 
             // activityButton
             // 
-            this.activityButton.BackColor = System.Drawing.Color.Transparent;
-            this.activityButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.activityButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.户外实践__ffffff_128_21601017;
-            this.activityButton.Location = new System.Drawing.Point(65, 370);
-            this.activityButton.Name = "activityButton";
-            this.activityButton.Size = new System.Drawing.Size(50, 50);
-            this.activityButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.activityButton.TabIndex = 28;
-            this.activityButton.TabStop = false;
-            this.activityButton.Click += new System.EventHandler(this.ActivityButton_Click);
+            activityButton.BackColor = Color.Transparent;
+            activityButton.Cursor = Cursors.Hand;
+            activityButton.Image = Properties.Resources.户外实践__ffffff_128_21601017;
+            activityButton.Location = new Point(65, 322);
+            activityButton.Name = "activityButton";
+            activityButton.Size = new Size(50, 50);
+            activityButton.SizeMode = PictureBoxSizeMode.Zoom;
+            activityButton.TabIndex = 28;
+            activityButton.TabStop = false;
+            activityButton.Click += ActivityButton_Click;
             // 
             // mainpageButton
             // 
-            this.mainpageButton.BackColor = System.Drawing.Color.Transparent;
-            this.mainpageButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.SubPageBG;
-            this.mainpageButton.Location = new System.Drawing.Point(175, 53);
-            this.mainpageButton.Name = "mainpageButton";
-            this.mainpageButton.Size = new System.Drawing.Size(1060, 665);
-            this.mainpageButton.TabIndex = 31;
-            this.mainpageButton.TabStop = false;
+            mainpageButton.BackColor = Color.Transparent;
+            mainpageButton.Image = Properties.Resources.SubPageBG;
+            mainpageButton.Location = new Point(175, 53);
+            mainpageButton.Name = "mainpageButton";
+            mainpageButton.Size = new Size(1060, 665);
+            mainpageButton.TabIndex = 31;
+            mainpageButton.TabStop = false;
             // 
             // logoutConfirm
             // 
-            this.logoutConfirm.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.logoutConfirm.Image = global::StudentScheduleManagementSystem.Properties.Resources.退出__a880c2_128_3661364;
-            this.logoutConfirm.Location = new System.Drawing.Point(500, 300);
-            this.logoutConfirm.Name = "logoutConfirm";
-            this.logoutConfirm.Size = new System.Drawing.Size(150, 150);
-            this.logoutConfirm.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.logoutConfirm.TabIndex = 33;
-            this.logoutConfirm.TabStop = false;
-            this.logoutConfirm.Click += new System.EventHandler(this.LogoutConfirm_Click);
+            logoutConfirm.Cursor = Cursors.Hand;
+            logoutConfirm.Image = Properties.Resources.退出__a880c2_128_3661364;
+            logoutConfirm.Location = new Point(500, 300);
+            logoutConfirm.Name = "logoutConfirm";
+            logoutConfirm.Size = new Size(150, 150);
+            logoutConfirm.SizeMode = PictureBoxSizeMode.Zoom;
+            logoutConfirm.TabIndex = 33;
+            logoutConfirm.TabStop = false;
+            logoutConfirm.Click += LogoutConfirm_Click;
             // 
             // closeConfirm
             // 
-            this.closeConfirm.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.closeConfirm.Image = global::StudentScheduleManagementSystem.Properties.Resources.退出__a880c2_128_3656183;
-            this.closeConfirm.Location = new System.Drawing.Point(750, 300);
-            this.closeConfirm.Name = "closeConfirm";
-            this.closeConfirm.Size = new System.Drawing.Size(150, 150);
-            this.closeConfirm.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.closeConfirm.TabIndex = 34;
-            this.closeConfirm.TabStop = false;
-            this.closeConfirm.Click += new System.EventHandler(this.CloseConfirm_Click);
+            closeConfirm.Cursor = Cursors.Hand;
+            closeConfirm.Image = Properties.Resources.退出__a880c2_128_3656183;
+            closeConfirm.Location = new Point(750, 300);
+            closeConfirm.Name = "closeConfirm";
+            closeConfirm.Size = new Size(150, 150);
+            closeConfirm.SizeMode = PictureBoxSizeMode.Zoom;
+            closeConfirm.TabIndex = 34;
+            closeConfirm.TabStop = false;
+            closeConfirm.Click += CloseConfirm_Click;
+            // 
+            // examButton
+            // 
+            examButton.BackColor = Color.Transparent;
+            examButton.Cursor = Cursors.Hand;
+            examButton.Image = Properties.Resources.试卷__ffffff_128_21601018;
+            examButton.Location = new Point(65, 226);
+            examButton.Name = "examButton";
+            examButton.Size = new Size(50, 50);
+            examButton.SizeMode = PictureBoxSizeMode.Zoom;
+            examButton.TabIndex = 29;
+            examButton.TabStop = false;
+            examButton.Click += ExamButton_Click;
             // 
             // mapEditButton
             // 
-            this.mapEditButton.BackColor = System.Drawing.Color.Transparent;
-            this.mapEditButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.mapEditButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.地图__ffffff_128_21601004;
-            this.mapEditButton.Location = new System.Drawing.Point(65, 490);
-            this.mapEditButton.Name = "mapEditButton";
-            this.mapEditButton.Size = new System.Drawing.Size(50, 50);
-            this.mapEditButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.mapEditButton.TabIndex = 35;
-            this.mapEditButton.TabStop = false;
-            this.mapEditButton.Click += new System.EventHandler(this.MapEditButton_Click);
+            mapEditButton.BackColor = Color.Transparent;
+            mapEditButton.Cursor = Cursors.Hand;
+            mapEditButton.Image = Properties.Resources.地图__ffffff_128_21601004;
+            mapEditButton.Location = new Point(65, 418);
+            mapEditButton.Name = "mapEditButton";
+            mapEditButton.Size = new Size(50, 50);
+            mapEditButton.SizeMode = PictureBoxSizeMode.Zoom;
+            mapEditButton.TabIndex = 35;
+            mapEditButton.TabStop = false;
+            mapEditButton.Click += MapEditButton_Click;
+            // 
+            // logButton
+            // 
+            logButton.BackColor = Color.Transparent;
+            logButton.Cursor = Cursors.Hand;
+            logButton.Image = Properties.Resources.党员日志__ffffff_128_21601025;
+            logButton.Location = new Point(65, 514);
+            logButton.Name = "logButton";
+            logButton.Size = new Size(50, 50);
+            logButton.SizeMode = PictureBoxSizeMode.Zoom;
+            logButton.TabIndex = 36;
+            logButton.TabStop = false;
+            logButton.Click += LogButton_Click;
             // 
             // AdminWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(1300, 770);
-            this.Controls.Add(this.mapEditButton);
-            this.Controls.Add(this.examButton);
-            this.Controls.Add(this.activityButton);
-            this.Controls.Add(this.courseButton);
-            this.Controls.Add(this.exitButton);
-            this.Controls.Add(this.header);
-            this.Controls.Add(this.logoutConfirm);
-            this.Controls.Add(this.closeConfirm);
-            this.Controls.Add(this.mainpage);
-            this.Controls.Add(this.mainpageButton);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "AdminWindow";
-            this.Text = "AdminWindow";
-            ((System.ComponentModel.ISupportInitialize)(this.exitButton)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.courseButton)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.activityButton)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mainpageButton)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.logoutConfirm)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.closeConfirm)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.examButton)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mapEditButton)).EndInit();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(11F, 24F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
+            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
+            BackgroundImageLayout = ImageLayout.Stretch;
+            ClientSize = new Size(1300, 770);
+            Controls.Add(logButton);
+            Controls.Add(mapEditButton);
+            Controls.Add(examButton);
+            Controls.Add(activityButton);
+            Controls.Add(courseButton);
+            Controls.Add(exitButton);
+            Controls.Add(header);
+            Controls.Add(logoutConfirm);
+            Controls.Add(closeConfirm);
+            Controls.Add(mainpage);
+            Controls.Add(mainpageButton);
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "AdminWindow";
+            Text = "AdminWindow";
+            mainpage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)exitButton).EndInit();
+            ((System.ComponentModel.ISupportInitialize)courseButton).EndInit();
+            ((System.ComponentModel.ISupportInitialize)activityButton).EndInit();
+            ((System.ComponentModel.ISupportInitialize)mainpageButton).EndInit();
+            ((System.ComponentModel.ISupportInitialize)logoutConfirm).EndInit();
+            ((System.ComponentModel.ISupportInitialize)closeConfirm).EndInit();
+            ((System.ComponentModel.ISupportInitialize)examButton).EndInit();
+            ((System.ComponentModel.ISupportInitialize)mapEditButton).EndInit();
+            ((System.ComponentModel.ISupportInitialize)logButton).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -211,5 +242,7 @@
         private PictureBox closeConfirm;
         private PictureBox examButton;
         private PictureBox mapEditButton;
+        private ListBox logListBox;
+        private PictureBox logButton;
     }
 }
