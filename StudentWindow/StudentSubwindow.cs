@@ -1383,22 +1383,6 @@ namespace StudentScheduleManagementSystem.UI
         {
             Debug.Assert(_subwindowState is SubwindowState.ReviseUserSchedule && _originId != null);
 
-            bool valid = GetScheduleInfo(false,
-                                         Schedule.Activity.Earliest,
-                                         Schedule.Activity.Latest,
-                                         out _,
-                                         out _,
-                                         out _,
-                                         out _,
-                                         out _,
-                                         out _,
-                                         out _,
-                                         out _);
-            if (!valid)
-            {
-                return;
-            }
-
             bool confirm = GetScheduleInfo(true,
                                            Schedule.Activity.Earliest,
                                            Schedule.Activity.Latest,

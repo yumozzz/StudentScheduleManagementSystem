@@ -381,12 +381,6 @@ namespace StudentScheduleManagementSystem.UI
                     break;
             }
 
-            bool valid = GetScheduleInfo(false, earliest, latest, out _, out _, out _, out _, out _, out _);
-            if (!valid)
-            {
-                return;
-            }
-
             bool confirm = GetScheduleInfo(true,
                                            earliest,
                                            latest,
