@@ -1299,10 +1299,16 @@ namespace StudentScheduleManagementSystem.Schedule
                     try
                     {
                         var shared = _sharedDictionary[dobj.ScheduleId];
-                        Debug.Assert((dobj.RepetitiveType, dobj.Name, dobj.Timestamp, dobj.Duration, dobj.ActiveWeeks,
-                                      dobj.ActiveDays) ==
-                                     (shared.RepetitiveType, shared.Name, shared.Timestamp, shared.Duration,
-                                      shared.ActiveWeeks, shared.ActiveDays));
+                        if ((dobj.RepetitiveType, dobj.Name, dobj.Timestamp, dobj.Duration) !=
+                            (shared.RepetitiveType, shared.Name, shared.Timestamp, shared.Duration))
+                        {
+                            throw new JsonFormatException();
+                        }
+                        if (!dobj.ActiveWeeks.SequenceEqual(shared.ActiveWeeks) ||
+                            !dobj.ActiveDays.SequenceEqual(shared.ActiveDays))
+                        {
+                            throw new JsonFormatException();
+                        }
                         if (dobj.OfflineLocation != null)
                         {
                             var locations = Map.Location.GetBuildingsByName(dobj.OfflineLocation.Value.Name);

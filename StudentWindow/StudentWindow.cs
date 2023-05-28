@@ -20,7 +20,6 @@ namespace StudentScheduleManagementSystem.UI
             Times.Timer.TimeChange += SetLocalTime;
             pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
             speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
-            Times.Timer.SetPauseState += (pause) => { pauseButton.Text = pause ? "继续" : "暂停"; };
             Log.LogBase.LogGenerated += (message) =>
             {
                 if (logListBox.InvokeRequired)
@@ -43,8 +42,6 @@ namespace StudentScheduleManagementSystem.UI
                     pauseButton.Text = pause ? "继续" : "暂停";
                 }
             };
-
-                Log.LogBase.LogGenerated += OnLogGenerated;
             logListBox.Hide();
         }
 
@@ -167,7 +164,6 @@ namespace StudentScheduleManagementSystem.UI
             {
                 Times.Time time = new() { Week = week, Day = day, Hour = hour };
                 Times.Timer.SetTime(time);
-                Log.Information.Log("时间设置为: " + time.ToString());
             }
         }
 
