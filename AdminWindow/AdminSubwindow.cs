@@ -8,6 +8,7 @@ namespace StudentScheduleManagementSystem.UI
         protected List<Schedule.SharedData> _data;
         protected ScheduleType _type;
         protected long? _originId = null;
+        protected SubwindowType _subwindowType;
 
         private AdminSubwindowBase()
             : this(ScheduleType.Idle) { }
@@ -337,17 +338,42 @@ namespace StudentScheduleManagementSystem.UI
         private void ReviseOK_Click(object sender, EventArgs e)
         {
             bool success = true;
-            try
+            int earliest = Schedule.Course.Earliest;
+            int latest = Schedule.Course.Latest;
+
+            switch (_subwindowType)
             {
-                success = AddOneSchedule(_originId, false);
+                case SubwindowType.Course:
+                    earliest = Schedule.Course.Earliest;
+                    latest = Schedule.Course.Latest;
+                    break;
+                case SubwindowType.Exam:
+                    earliest = Schedule.Exam.Earliest;
+                    latest = Schedule.Exam.Latest;
+                    break;
+                case SubwindowType.GroupActivity:
+                    earliest = Schedule.Activity.Earliest;
+                    latest = Schedule.Activity.Latest;
+                    break;
             }
-            catch (ArgumentException) { }
-            if (!success)
+
+            bool confirm = GetScheduleInfo(true,
+                                           earliest,
+                                           latest,
+                                           out string name,
+                                           out RepetitiveType repetitiveType,
+                                           out int[] activeWeeks,
+                                           out Day[] activeDays,
+                                           out Times.Time beginTime,
+                                           out int duration);
+
+            if (!confirm)
             {
                 return;
             }
+
             Schedule.Schedule.DeleteShared(_originId!.Value);
-            AddOneSchedule(_originId, true);
+            AddOneSchedule(_originId, false);
             Log.Information.Log($"成功修改id为{_originId.Value}的共享日程");
             GenerateFormData(_type);
 
@@ -376,8 +402,8 @@ namespace StudentScheduleManagementSystem.UI
             this.nameBox.Text = "";
             this.weekSelectBox.ClearBox();
             this.daySelectBox.ClearBox();
-            this.hourComboBox.Text = "";
-            this.durationComboBox.Text = "";
+            this.hourComboBox.SelectedIndex = -1;
+            this.durationComboBox.SelectedIndex = -1;
         }
 
         private void TableSortCompare(object sender, DataGridViewSortCompareEventArgs e)
@@ -508,6 +534,7 @@ namespace StudentScheduleManagementSystem.UI
             this.daySelectBox.InitializeBox(Shared.Days[..^2]);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
             this.label.Text = "课程";
+            this._subwindowType = SubwindowType.Course;
         }
 
 
@@ -554,6 +581,7 @@ namespace StudentScheduleManagementSystem.UI
             this.daySelectBox.InitializeBox(Shared.Days[..^2]);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>()[2..^2]);
             this.label.Text = "考试";
+            this._subwindowType = SubwindowType.Exam;
         }
 
         protected override bool AddOneSchedule(long? id, bool showMessageBox)
@@ -602,6 +630,7 @@ namespace StudentScheduleManagementSystem.UI
             this.daySelectBox.InitializeBox(Shared.Days);
             this.hourComboBox.Items.AddRange(Shared.Hours.ToArray<object>());
             this.label.Text = "集体活动";
+            this._subwindowType = SubwindowType.GroupActivity;
         }
 
 

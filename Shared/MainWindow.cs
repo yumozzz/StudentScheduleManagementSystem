@@ -55,6 +55,8 @@ namespace StudentScheduleManagementSystem.UI
             {
                 return;
             }
+            this.usernameBox.Text = ""
+            this.passwordBox.Text = "";
             MessageBox.Show("µÇÂ¼³É¹¦!");
             this.Hide();
             Thread windowThread, clockThread = new(Times.Timer.Start);

@@ -847,48 +847,75 @@ namespace StudentScheduleManagementSystem.Schedule
             switch (schedule.ScheduleId / (long)1e9) //不存在，则新建
             {
                 case 1:
-                    if (schedule.ScheduleId <= _courseIdMax) //修改课程，更新
+                    if (schedule.ScheduleId <= _courseIdMax + 1) //修改课程，更新
                     {
-                        data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
-                        _sharedDictionary[schedule.ScheduleId] = data;
+                        if (schedule.ScheduleId == _courseIdMax + 1)
+                        {
+                            _courseIdMax++;
+                            Debug.Assert(_courseIdMax == schedule.ScheduleId);
+                        }
+                        data.ScheduleType = ScheduleType.Course;
+                        if (_scheduleDictionary.ContainsKey(schedule.ScheduleId))
+                        {
+                            Debug.Assert(false);
+                            _sharedDictionary[schedule.ScheduleId] = data;
+                        }
+                        else
+                        {
+                            _sharedDictionary.Add(schedule.ScheduleId, data);
+                        }
                     }
                     else
                     {
-                        Debug.Assert(schedule.ScheduleId == _courseIdMax + 1);
-                        _courseIdMax++;
-                        Debug.Assert(_courseIdMax == schedule.ScheduleId);
-                        data.ScheduleType = ScheduleType.Course;
-                        _sharedDictionary.Add(schedule.ScheduleId, data);
+                        throw new ArgumentException(null, nameof(schedule.ScheduleId));
                     }
                     break;
                 case 2:
-                    if (schedule.ScheduleId <= _examIdMax) //修改课程，更新
+                    if (schedule.ScheduleId <= _examIdMax + 1) //修改课程，更新
                     {
-                        data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
-                        _sharedDictionary[schedule.ScheduleId] = data;
+                        if (schedule.ScheduleId == _examIdMax + 1)
+                        {
+                            _examIdMax++;
+                            Debug.Assert(_examIdMax == schedule.ScheduleId);
+                        }
+                        data.ScheduleType = ScheduleType.Exam;
+                        if (_scheduleDictionary.ContainsKey(schedule.ScheduleId))
+                        {
+                            Debug.Assert(false);
+                            _sharedDictionary[schedule.ScheduleId] = data;
+                        }
+                        else
+                        {
+                            _sharedDictionary.Add(schedule.ScheduleId, data);
+                        }
                     }
                     else
                     {
-                        Debug.Assert(schedule.ScheduleId == _examIdMax + 1);
-                        _examIdMax++;
-                        Debug.Assert(_examIdMax == schedule.ScheduleId);
-                        data.ScheduleType = ScheduleType.Exam;
-                        _sharedDictionary.Add(schedule.ScheduleId, data);
+                        throw new ArgumentException(null, nameof(schedule.ScheduleId));
                     }
                     break;
                 case 3:
-                    if (schedule.ScheduleId <= _groupActivityIdMax) //修改课程，更新
+                    if (schedule.ScheduleId <= _groupActivityIdMax + 1) //修改课程，更新
                     {
-                        data.ScheduleType = _sharedDictionary[schedule.ScheduleId].ScheduleType;
-                        _sharedDictionary[schedule.ScheduleId] = data;
+                        if (schedule.ScheduleId == _groupActivityIdMax + 1)
+                        {
+                            _groupActivityIdMax++;
+                            Debug.Assert(_groupActivityIdMax == schedule.ScheduleId);
+                        }
+                        data.ScheduleType = ScheduleType.Activity;
+                        if (_scheduleDictionary.ContainsKey(schedule.ScheduleId))
+                        {
+                            Debug.Assert(false);
+                            _sharedDictionary[schedule.ScheduleId] = data;
+                        }
+                        else
+                        {
+                            _sharedDictionary.Add(schedule.ScheduleId, data);
+                        }
                     }
                     else
                     {
-                        Debug.Assert(schedule.ScheduleId == _groupActivityIdMax + 1);
-                        _groupActivityIdMax++;
-                        Debug.Assert(_groupActivityIdMax == schedule.ScheduleId);
-                        data.ScheduleType = ScheduleType.Activity;
-                        _sharedDictionary.Add(schedule.ScheduleId, data);
+                        throw new ArgumentException(null, nameof(schedule.ScheduleId));
                     }
                     break;
             }
