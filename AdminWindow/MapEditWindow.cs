@@ -1,5 +1,7 @@
 ﻿//#define SHOWPOINTID
 
+using System.ComponentModel;
+
 namespace StudentScheduleManagementSystem.UI
 {
     public partial class MapEditWindow : Form
@@ -76,19 +78,13 @@ namespace StudentScheduleManagementSystem.UI
                 new() { Text = "Cancel", Name = "Cancel", Location = new(628, 0), Size = new(150, 45) };
             buttonOk.Click += (sender, e) =>
             {
-                lock (_lock)
-                {
-                    Map.Location.GlobalMap = new(GetVertices(), GetEdges());
-                    Map.Location.Buildings = GetBuildings();
-                    this.Close();
-                }
+                Map.Location.GlobalMap = new(GetVertices(), GetEdges());
+                Map.Location.Buildings = GetBuildings();
+                this.Close();
             };
             buttonCancel.Click += (sender, e) =>
             {
-                lock (_lock)
-                {
-                    this.Close();
-                }
+                this.Close();
             };
             
             Controls.Add(buttonOk);
@@ -139,10 +135,12 @@ namespace StudentScheduleManagementSystem.UI
             thread.Start();
         }
 
-        public new void Close()
+        protected override void OnClosing(CancelEventArgs e)
         {
-            _isAlive = false;
-            base.Close();
+            lock(_lock)
+            {
+                _isAlive = false;
+            }
         }
 
         private double Distance(Point p1, Point p2)

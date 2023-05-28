@@ -117,7 +117,7 @@ namespace StudentScheduleManagementSystem.UI
             _studentTemporaryAffairSubwindow.Show();
         }
 
-        private void SetTimeButtonClick(object sender, EventArgs e)
+        private void SetTimeButton_Click(object sender, EventArgs e)
         {
             StringBuilder errorMessage = new();
             if (weekBox.Text.Equals(""))
