@@ -13,6 +13,7 @@
             InitializeComponent();
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
+            this.logListBox.Hide();
         }
 
         //窗口拖动
@@ -56,6 +57,7 @@
 
         private void CourseButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -67,6 +69,7 @@
 
         private void ExamButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -78,6 +81,7 @@
 
         private void ActivityButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             this.logoutConfirm.Hide();
             this.closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -89,9 +93,18 @@
 
         private void ExitButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             mainpage.Controls.Clear();
             this.logoutConfirm.Show();
             this.closeConfirm.Show();
+        }
+
+        private void LogButton_Click(object sender, EventArgs e)
+        {
+            this.logoutConfirm.Hide();
+            this.closeConfirm.Hide();
+            mainpage.Controls.Clear();
+            this.logListBox.Show();
         }
 
         private void MapEditButton_Click(object sender, EventArgs e)

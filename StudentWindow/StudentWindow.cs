@@ -19,6 +19,7 @@ namespace StudentScheduleManagementSystem.UI
             pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause;};
             speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
             Times.Timer.SetPauseState += (pause) => { pauseButton.Text = pause ? "继续" : "暂停"; };
+            logListBox.Hide();
         }
 
         private int _x, _y;
@@ -43,6 +44,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void ScheduleTableButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -54,6 +56,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void CourseButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -65,6 +68,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void ExamButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -76,6 +80,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void GroupActivityButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -87,6 +92,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void PersonalActivityButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -98,6 +104,7 @@ namespace StudentScheduleManagementSystem.UI
 
         private void TemporaryAffairButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -179,8 +186,22 @@ namespace StudentScheduleManagementSystem.UI
             ShouldExitProgram = true;
         }
 
+        private void LogButton_Click(object sender, EventArgs e)
+        {
+            _studentScheduleTable?.Hide();
+            _studentCourseSubwindow?.Hide();
+            _studentExamSubwindow?.Hide();
+            _studentGroupActivitySubwindow?.Hide();
+            _studentPersonalActivitySubwindow?.Hide();
+            _studentTemporaryAffairSubwindow?.Hide();
+            logoutConfirm.Hide();
+            closeConfirm.Hide();
+            logListBox.Show();
+        }
+
         private void ExitButton_Click(object sender, EventArgs e)
         {
+            logListBox.Hide();
             _studentScheduleTable?.Hide();
             _studentCourseSubwindow?.Hide();
             _studentExamSubwindow?.Hide();

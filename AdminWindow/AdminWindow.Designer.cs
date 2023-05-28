@@ -39,6 +39,9 @@
             this.closeConfirm = new System.Windows.Forms.PictureBox();
             this.examButton = new System.Windows.Forms.PictureBox();
             this.mapEditButton = new System.Windows.Forms.PictureBox();
+            this.logListBox = new System.Windows.Forms.ListBox();
+            this.logButton = new System.Windows.Forms.PictureBox();
+            this.mainpage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.exitButton)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.courseButton)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.activityButton)).BeginInit();
@@ -47,6 +50,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.closeConfirm)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.examButton)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.mapEditButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.logButton)).BeginInit();
             this.SuspendLayout();
             // 
             // header
@@ -63,6 +67,7 @@
             // mainpage
             // 
             this.mainpage.BackColor = System.Drawing.Color.White;
+            this.mainpage.Controls.Add(this.logListBox);
             this.mainpage.Location = new System.Drawing.Point(180, 58);
             this.mainpage.Name = "mainpage";
             this.mainpage.Size = new System.Drawing.Size(1050, 655);
@@ -94,25 +99,12 @@
             this.courseButton.TabStop = false;
             this.courseButton.Click += new System.EventHandler(this.CourseButton_Click);
             // 
-            // examButton
-            // 
-            this.examButton.BackColor = System.Drawing.Color.Transparent;
-            this.examButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.examButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.试卷__ffffff_128_21601018;
-            this.examButton.Location = new System.Drawing.Point(65, 250);
-            this.examButton.Name = "examButton";
-            this.examButton.Size = new System.Drawing.Size(50, 50);
-            this.examButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.examButton.TabIndex = 29;
-            this.examButton.TabStop = false;
-            this.examButton.Click += new System.EventHandler(this.ExamButton_Click);
-            // 
             // activityButton
             // 
             this.activityButton.BackColor = System.Drawing.Color.Transparent;
             this.activityButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.activityButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.户外实践__ffffff_128_21601017;
-            this.activityButton.Location = new System.Drawing.Point(65, 370);
+            this.activityButton.Location = new System.Drawing.Point(65, 322);
             this.activityButton.Name = "activityButton";
             this.activityButton.Size = new System.Drawing.Size(50, 50);
             this.activityButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -154,18 +146,53 @@
             this.closeConfirm.TabStop = false;
             this.closeConfirm.Click += new System.EventHandler(this.CloseConfirm_Click);
             // 
+            // examButton
+            // 
+            this.examButton.BackColor = System.Drawing.Color.Transparent;
+            this.examButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.examButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.试卷__ffffff_128_21601018;
+            this.examButton.Location = new System.Drawing.Point(65, 226);
+            this.examButton.Name = "examButton";
+            this.examButton.Size = new System.Drawing.Size(50, 50);
+            this.examButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.examButton.TabIndex = 29;
+            this.examButton.TabStop = false;
+            this.examButton.Click += new System.EventHandler(this.ExamButton_Click);
+            // 
             // mapEditButton
             // 
             this.mapEditButton.BackColor = System.Drawing.Color.Transparent;
             this.mapEditButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.mapEditButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.地图__ffffff_128_21601004;
-            this.mapEditButton.Location = new System.Drawing.Point(65, 490);
+            this.mapEditButton.Location = new System.Drawing.Point(65, 418);
             this.mapEditButton.Name = "mapEditButton";
             this.mapEditButton.Size = new System.Drawing.Size(50, 50);
             this.mapEditButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.mapEditButton.TabIndex = 35;
             this.mapEditButton.TabStop = false;
             this.mapEditButton.Click += new System.EventHandler(this.MapEditButton_Click);
+            // 
+            // logListBox
+            // 
+            this.logListBox.FormattingEnabled = true;
+            this.logListBox.ItemHeight = 24;
+            this.logListBox.Location = new System.Drawing.Point(10, 13);
+            this.logListBox.Name = "logListBox";
+            this.logListBox.Size = new System.Drawing.Size(1030, 628);
+            this.logListBox.TabIndex = 0;
+            // 
+            // logButton
+            // 
+            this.logButton.BackColor = System.Drawing.Color.Transparent;
+            this.logButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.logButton.Image = global::StudentScheduleManagementSystem.Properties.Resources.党员日志__ffffff_128_21601025;
+            this.logButton.Location = new System.Drawing.Point(65, 514);
+            this.logButton.Name = "logButton";
+            this.logButton.Size = new System.Drawing.Size(50, 50);
+            this.logButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.logButton.TabIndex = 36;
+            this.logButton.TabStop = false;
+            this.logButton.Click += new System.EventHandler(this.LogButton_Click);
             // 
             // AdminWindow
             // 
@@ -175,6 +202,7 @@
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1300, 770);
+            this.Controls.Add(this.logButton);
             this.Controls.Add(this.mapEditButton);
             this.Controls.Add(this.examButton);
             this.Controls.Add(this.activityButton);
@@ -188,6 +216,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "AdminWindow";
             this.Text = "AdminWindow";
+            this.mainpage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.exitButton)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.courseButton)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.activityButton)).EndInit();
@@ -196,6 +225,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.closeConfirm)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.examButton)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.mapEditButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.logButton)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -211,5 +241,7 @@
         private PictureBox closeConfirm;
         private PictureBox examButton;
         private PictureBox mapEditButton;
+        private ListBox logListBox;
+        private PictureBox logButton;
     }
 }
