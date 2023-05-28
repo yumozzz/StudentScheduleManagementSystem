@@ -34,7 +34,7 @@ namespace StudentScheduleManagementSystem.UI
         protected void GenerateFormData(List<Schedule.SharedData> data)
         {
             scheduleDataTable.Rows.Clear();
-            int[] widths = { 30, 150, 130, 120, 130, 60, 60 };
+            int[] widths = { 30, 155, 130, 135, 110, 60, 60 };
             for (int i = 0; i < widths.Length; i++)
             {
                 scheduleDataTable.Columns[i].Width = widths[i];
