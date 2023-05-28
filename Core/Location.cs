@@ -632,6 +632,7 @@ namespace StudentScheduleManagementSystem.Map
                     if (distanceFromStart[id] > distanceFromStart[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
                         distanceFromStart[id] = distanceFromStart[curId] + dist; //替换从出发点到点[z]的最短距离
+                        route[id].Clear();
                         for(int k = 0; k < route[curId].Count;k++)
                         {
                             route[id].Add(route[curId][k]);
