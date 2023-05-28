@@ -469,7 +469,7 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
-            List<int> points = new(buildings.ConvertAll(building => building.Id));
+            List<int> points = new(buildings.ConvertAll(building => building.Center.Id));
 
             if (points.Count <= 2 || points.Count >= 10) //建筑太多或太少，报错
             {
