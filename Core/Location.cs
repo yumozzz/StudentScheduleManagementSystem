@@ -469,7 +469,7 @@ namespace StudentScheduleManagementSystem.Map
 
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
-            List<int> points = new(buildings.ConvertAll(building => building.Center.Id));
+            List<int> points = new(buildings.ConvertAll(building => building.Id));
 
             if (points.Count <= 2 || points.Count >= 10) //建筑太多或太少，报错
             {
@@ -479,7 +479,23 @@ namespace StudentScheduleManagementSystem.Map
 
             int startCity = 0;
             List<int> shortestPath = SolveTSP(startCity, submap);
-            return new(shortestPath.ConvertAll(id => correspondence[id]));
+            List<int> transferedPath = new(shortestPath.ConvertAll(id => correspondence[id]));
+            List<int> result = new();
+            for (int i = 1; i < transferedPath.Count; i++)
+            {
+                List<int> temp = new();
+                temp = GetClosestPath(transferedPath[i - 1], transferedPath[i]);
+                for (int j = 0; j < temp.Count-1; j++)
+                {
+                    result.Add(temp[j]);
+                }
+                if(i == transferedPath.Count-1)
+                {
+                    result.Add(temp[temp.Count - 1]);
+                }
+
+            }
+            return result;
         }
 
         //寻找两点最短路径的路径长
