@@ -114,7 +114,7 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
-        public struct Building//建筑
+        public struct Building //建筑
         {
             public int Id { get; set; }
             public string Name { get; set; }
@@ -407,33 +407,39 @@ namespace StudentScheduleManagementSystem.Map
         }
 
 
-        public static List<int> SolveTSP(int startCity, int[,] adjacencyMatrix)
+        public static List<int> Solve(int[,] adjacencyMatrix, int startCity)
         {
-            int numberOfCities = adjacencyMatrix.GetLength(0);
+            int count = adjacencyMatrix.GetLength(0);
 
             List<int> cities = new();
-            for (int i = 0; i < numberOfCities; i++)
+            for (int i = 0; i < count; i++)
             {
                 if (i != startCity)
+                {
                     cities.Add(i);
+                }
             }
 
             List<int> shortestPath = new();
             int shortestDistance = int.MaxValue;
-
-            Permute(startCity, adjacencyMatrix, cities, 0, cities.Count - 1, ref shortestPath, ref shortestDistance);
-
+            Permute(adjacencyMatrix, cities, startCity, 0, cities.Count - 1, ref shortestPath, ref shortestDistance);
             shortestPath.Insert(0, startCity);
             shortestPath.Add(startCity);
 
             return shortestPath;
         }
 
-        public static void Permute(int startCity, int[,] adjacencyMatrix, List<int> cities, int left, int right, ref List<int> shortestPath, ref int shortestDistance)
+        public static void Permute(int[,] adjacencyMatrix,
+                                   List<int> cities,
+                                   int startCity,
+                                   int left,
+                                   int right,
+                                   ref List<int> shortestPath,
+                                   ref int shortestDistance)
         {
             if (left == right)
             {
-                int currentDistance = CalculatePathDistance(cities, startCity, adjacencyMatrix);
+                int currentDistance = CalculatePathDistance(adjacencyMatrix, cities, startCity);
                 if (currentDistance < shortestDistance)
                 {
                     shortestDistance = currentDistance;
@@ -445,13 +451,19 @@ namespace StudentScheduleManagementSystem.Map
                 for (int i = left; i <= right; i++)
                 {
                     Swap(cities, left, i);
-                    Permute(startCity, adjacencyMatrix, cities, left + 1, right, ref shortestPath, ref shortestDistance);
+                    Permute(adjacencyMatrix,
+                            cities,
+                            startCity,
+                            left + 1,
+                            right,
+                            ref shortestPath,
+                            ref shortestDistance);
                     Swap(cities, left, i);
                 }
             }
         }
 
-        public static int CalculatePathDistance(List<int> path, int startCity, int[,] adjacencyMatrix)
+        public static int CalculatePathDistance(int[,] adjacencyMatrix, List<int> path, int startCity)
         {
             int distance = 0;
             int previousCity = startCity;
@@ -475,25 +487,23 @@ namespace StudentScheduleManagementSystem.Map
             {
                 throw new ArgumentException("too many or too few items in parameter \"buildings\"");
             }
-            (int[,] submap, int[] correspondence) = CreateSubMap(points);
+            var(submap, correspondentId) = CreateSubMap(points);
 
             int startCity = 0;
-            List<int> shortestPath = SolveTSP(startCity, submap);
-            List<int> transferedPath = new(shortestPath.ConvertAll(id => correspondence[id]));
+            List<int> shortestPath = Solve(submap, startCity);
+            List<int> transferred = new(shortestPath.ConvertAll(id => correspondentId[id]));
             List<int> result = new();
-            for (int i = 1; i < transferedPath.Count; i++)
+            for (int i = 1; i < transferred.Count; i++)
             {
-                List<int> temp = new();
-                temp = GetClosestPath(transferedPath[i - 1], transferedPath[i]);
-                for (int j = 0; j < temp.Count-1; j++)
+                List<int> temp = GetClosestPath(transferred[i - 1], transferred[i]);
+                for (int j = 0; j < temp.Count - 1; j++)
                 {
                     result.Add(temp[j]);
                 }
-                if(i == transferedPath.Count-1)
+                if (i == transferred.Count - 1)
                 {
-                    result.Add(temp[temp.Count - 1]);
+                    result.Add(temp[^1]);
                 }
-
             }
             return result;
         }
@@ -625,14 +635,13 @@ namespace StudentScheduleManagementSystem.Map
 
             for (int i = 0; i < pointCount; i++) //循环len-1次
             {
-                for(int j = 0; j < GlobalMap._adjArray[curId].Count; j++)
+                for (int j = 0; j < GlobalMap._adjArray[curId].Count; j++)
                 {
                     int id = GlobalMap._adjArray[curId][j].pointId;
                     int dist = GlobalMap._adjArray[curId][j].edge.Weight;
                     if (distanceFromStart[id] > distanceFromStart[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
                         distanceFromStart[id] = distanceFromStart[curId] + dist; //替换从出发点到点[z]的最短距离
-                        route[id].Clear();
                         for(int k = 0; k < route[curId].Count;k++)
                         {
                             route[id].Add(route[curId][k]);
@@ -655,7 +664,6 @@ namespace StudentScheduleManagementSystem.Map
                 }
                 visited[curId] = true;
                 curId = tempId;
-
             }
             //  for(int i = 0; i < route[endId].Count; i++)
             //      Console.WriteLine(route[endId][i]);
@@ -690,8 +698,8 @@ namespace StudentScheduleManagementSystem.Map
                 int tempId = startId;
                 for (int j = 0; j < pointCount; j++)
                 {
-                    if (j != curId && distance[j] >= distance[curId] &&
-                        distance[j] < minDistance && visited[j] == false)
+                    if (j != curId && distance[j] >= distance[curId] && distance[j] < minDistance &&
+                        visited[j] == false)
                     {
                         minDistance = distance[j];
                         tempId = j;
@@ -747,7 +755,8 @@ namespace StudentScheduleManagementSystem.Map
                 }
                 if (edge.Value.Type == Location.EdgeType.Line)
                 {
-                    lineEndPointPairs.Add((Location.GlobalMap.GetVertex(prevId), Location.GlobalMap.GetVertex(points[i])));
+                    lineEndPointPairs.Add((Location.GlobalMap.GetVertex(prevId),
+                                           Location.GlobalMap.GetVertex(points[i])));
                 }
                 else
                 {
