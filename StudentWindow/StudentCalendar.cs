@@ -40,7 +40,7 @@ namespace StudentScheduleManagementSystem.UI
 
             int offset = (week - 1) * 7 * 24;
 
-            for (int i = offset + 7; i < offset + 21; i++)
+            for (int i = offset + 5; i < offset + 21; i++)
             {
                 string[] scheduleRecords = new string[7];
                 bool[] alarmEnalbled = new bool[7];
@@ -77,12 +77,12 @@ namespace StudentScheduleManagementSystem.UI
                                             scheduleRecords[4],
                                             scheduleRecords[5],
                                             scheduleRecords[6]);
-                this.scheduleTable.Rows[i - offset - 7].Height = 150;
+                this.scheduleTable.Rows[i - offset - 5].Height = 150;
                 for(int j = 0; j < 7; j++)
                 {
                     if (alarmEnalbled[j])
                     {
-                        this.scheduleTable.Rows[i - offset - 7].Cells[j + 1].Style.ForeColor = Color.FromArgb(50, 168, 128, 194);
+                        this.scheduleTable.Rows[i - offset - 5].Cells[j + 1].Style.ForeColor = Color.FromArgb(50, 168, 128, 194);
                     }
                 }
             }

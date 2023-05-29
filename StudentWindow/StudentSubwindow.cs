@@ -265,6 +265,11 @@ namespace StudentScheduleManagementSystem.UI
             this.dayBox.Text = "";
             this.hourBox.Text = "";
             this.durationBox.Text = "";
+            this.buildingRadioButton.Checked = false;
+            this.onlineLinkRadioButton.Checked = false;
+            this.buildingComboBox.SelectedIndex = -1;
+            this.buildingComboBox.Text = "";
+            this.onlineLinkBox.Text = "";
         }
 
         #endregion
@@ -1433,20 +1438,25 @@ namespace StudentScheduleManagementSystem.UI
         protected void ClearPersonalInformation()
         {
             ClearInformation();
-            if (this.weekComboBox!=null)
+            if(weekComboBox != null)
             {
+                this.weekComboBox.SelectedIndex = -1;
                 this.weekComboBox.Text = "";
             }
-            if (this.dayComboBox != null)
+            if(dayComboBox != null)
             {
+                this.dayComboBox.SelectedIndex = -1;
                 this.dayComboBox.Text = "";
             }
             this.weekSelectBox?.ClearBox();
             this.daySelectBox?.ClearBox();
-            if (this.durationBox != null)
+            this.durationBox.Text = "";
+            if(durationComboBox != null)
             {
-                this.durationBox.Text = "";
+                this.durationComboBox.SelectedIndex = -1;
+                this.durationComboBox.Text = "";
             }
+            this.hourComboBox.SelectedIndex = -1;
             this.hourComboBox.Text = "";
         }
         #endregion
@@ -1661,6 +1671,9 @@ namespace StudentScheduleManagementSystem.UI
             this.daySelectBox.ClearBox();
             this.hourComboBox.Text = "";
             this.durationComboBox.Text = "";
+            this.buildingComboBox.SelectedIndex = -1;
+            this.buildingComboBox.Text = "";
+            this.onlineLinkBox.Text = "";
             ClearPersonalInformation();
             return true;
         }
