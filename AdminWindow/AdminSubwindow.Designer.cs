@@ -310,7 +310,6 @@
             this.searchCancel.TabIndex = 59;
             this.searchCancel.Text = "取消";
             this.searchCancel.UseVisualStyleBackColor = false;
-            this.searchCancel.Click += new System.EventHandler(this.SearchCancel_Click);
             // 
             // searchByIdBox
             // 
