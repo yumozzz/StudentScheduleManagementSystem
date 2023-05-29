@@ -627,9 +627,11 @@ namespace StudentScheduleManagementSystem.Map
                 route[i] = new();
                 visited[i] = false;
             }
-            int[] distanceFromStart = new int[GlobalMap.Size]; //每个点到初始点的距离
-            Array.Fill(distanceFromStart, int.MaxValue);
-            distanceFromStart[startId] = 0;
+            int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
+            Array.Fill(distance, int.MaxValue);
+            distance[startId] = 0;
+            PriorityQueue<int, int> idQueue = new();
+            idQueue.Enqueue(startId, 0);
             route[startId].Add(startId);
             int curId = startId;
 
@@ -639,9 +641,10 @@ namespace StudentScheduleManagementSystem.Map
                 {
                     int id = GlobalMap[curId][j].Item2;
                     int dist = GlobalMap[curId, id]!.Value.Weight;
-                    if (distanceFromStart[id] > distanceFromStart[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
+                    if (distance[id] > distance[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
                     {
-                        distanceFromStart[id] = distanceFromStart[curId] + dist; //替换从出发点到点[z]的最短距离
+                        distance[id] = distance[curId] + dist; //替换从出发点到点[z]的最短距离
+                        idQueue.Enqueue(id, distance[id]);
                         route[id].Clear();
                         for(int k = 0; k < route[curId].Count;k++)
                         {
@@ -652,23 +655,10 @@ namespace StudentScheduleManagementSystem.Map
                 }
 
                 //遍历所有点，寻找下一个距离最近的点
-                int minDistance = int.MaxValue;
-                int tempId = startId;
-                for (int j = 0; j < pointCount; j++)
-                {
-                    if (j != curId && distanceFromStart[j] >= distanceFromStart[curId] &&
-                        distanceFromStart[j] < minDistance && visited[j] == false)
-                    {
-                        minDistance = distanceFromStart[j];
-                        tempId = j;
-                    }
-                }
+                idQueue.Dequeue();
                 visited[curId] = true;
-                curId = tempId;
+                curId = idQueue.Peek();
             }
-            //  for(int i = 0; i < route[endId].Count; i++)
-            //      Console.WriteLine(route[endId][i]);
-
             return route[endId];
         }
 
