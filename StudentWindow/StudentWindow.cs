@@ -17,7 +17,7 @@ namespace StudentScheduleManagementSystem.UI
         public StudentWindow()
         {
             InitializeComponent();
-            Times.Timer.TimeChange += SetLocalTime;
+            Times.Timer.TimeChange += ChangeLocalTime;
             pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
             speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
             Log.LogBase.LogGenerated += (message) =>
@@ -35,7 +35,7 @@ namespace StudentScheduleManagementSystem.UI
             { 
                 if (pauseButton.InvokeRequired)
                 {
-                    pauseButton.Invoke(() => Text = pause ? "继续" : "暂停");
+                    pauseButton.Invoke(() => pauseButton.Text = pause ? "继续" : "暂停");
                 }
                 else
                 {
@@ -169,11 +169,11 @@ namespace StudentScheduleManagementSystem.UI
             hourBox.SelectedIndex = -1;
         }
 
-        public void SetLocalTime(Times.Time time)
+        public void ChangeLocalTime(Times.Time time)
         {
             if (currentTime.InvokeRequired)
             {
-                this.currentTime.Invoke(SetLocalTime, time);
+                this.currentTime.Invoke(ChangeLocalTime, time);
             }
             else
             {

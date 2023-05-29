@@ -674,7 +674,7 @@ namespace StudentScheduleManagementSystem.Times
     public static class Timer
     {
         private const int BaseTimeoutMs = 10000;
-        private static int _acceleration = 1;
+        public static int Acceleration { get; private set; } = 1;
         private static Time _localTime = new();
         private static int _offset = 0;
         private static bool _pause = false;
@@ -719,7 +719,7 @@ namespace StudentScheduleManagementSystem.Times
                     _since += 50;
                 }
                 Thread.Sleep(50);
-                if (_since >= BaseTimeoutMs / _acceleration)
+                if (_since >= BaseTimeoutMs / Acceleration)
                 {
                     _since = 0;
                     _timeChangeEventHandler?.Invoke(_localTime);
@@ -740,22 +740,22 @@ namespace StudentScheduleManagementSystem.Times
 
         public static int SetSpeed()
         {
-            switch (_acceleration)
+            switch (Acceleration)
             {
                 case 1:
-                    _acceleration = 2;
+                    Acceleration = 2;
                     Log.Information.Log("时间流速已设定为2x");
                     return 2;
                 case 2:
-                    _acceleration = 5;
+                    Acceleration = 5;
                     Log.Information.Log("时间流速已设定为5x");
                     return 5;
                 case 5:
-                    _acceleration = 1;
+                    Acceleration = 1;
                     Log.Information.Log("时间流速已设定为1x");
                     return 1;
                 default:
-                    throw new ArgumentException(null, nameof(_acceleration));
+                    throw new ArgumentException(null, nameof(Acceleration));
             }
         }
     }

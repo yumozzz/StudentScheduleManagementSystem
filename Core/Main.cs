@@ -380,15 +380,17 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             if (course.IsOnline)
             {
+                Times.Timer.Pause = true;
                 UI.StudentAlarmWindow alarmWindow = new(course.Name, course.OnlineLink!);
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
+                Times.Timer.Pause = false;
                 GC.Collect();
             }
             else
             {
-                UI.StudentAlarmWindow alarmWindow = new(course.Name, course.OfflineLocation!.Value);
                 Times.Timer.Pause = true;
+                UI.StudentAlarmWindow alarmWindow = new(course.Name, course.OfflineLocation!.Value);
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
                 Times.Timer.Pause = false;
@@ -425,8 +427,8 @@ namespace StudentScheduleManagementSystem.Schedule
                 Log.Warning.Log($"在触发id为{id}的闹钟时不能找到id为{param.scheduleId}的考试");
                 return;
             }
-            UI.StudentAlarmWindow alarmWindow = new(exam.Name, exam.OfflineLocation);
             Times.Timer.Pause = true;
+            UI.StudentAlarmWindow alarmWindow = new(exam.Name, exam.OfflineLocation);
             alarmWindow.ShowDialog();
             alarmWindow.Dispose();
             Times.Timer.Pause = false;
@@ -463,8 +465,8 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             if (activity.IsOnline)
             {
-                UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OnlineLink!);
                 Times.Timer.Pause = true;
+                UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OnlineLink!);
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
                 Times.Timer.Pause = false;
@@ -472,8 +474,8 @@ namespace StudentScheduleManagementSystem.Schedule
             }
             else
             {
-                UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OfflineLocation!.Value);
                 Times.Timer.Pause = true;
+                UI.StudentAlarmWindow alarmWindow = new(activity.Name, activity.OfflineLocation!.Value);
                 alarmWindow.ShowDialog();
                 alarmWindow.Dispose();
                 Times.Timer.Pause = false;
@@ -500,11 +502,13 @@ namespace StudentScheduleManagementSystem.Schedule
                 throw new ArgumentException(null, nameof(obj));
             }
             var affairs = GetAllAt(param.timestamp);
+            Times.Timer.Pause = true;
             UI.StudentAlarmWindow alarmWindow =
                 new(Array.ConvertAll(affairs, affair => affair.Name).Aggregate((str, elem) => str = str + '、' + elem),
                     affairs.Select(affair => affair.OfflineLocation).ToList());
             alarmWindow.ShowDialog();
             alarmWindow.Dispose();
+            Times.Timer.Pause = false;
             GC.Collect();
         }
     }
