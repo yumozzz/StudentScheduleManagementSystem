@@ -6,12 +6,12 @@ namespace StudentScheduleManagementSystem.UI
 {
     public partial class StudentWindow : Form
     {
-        private StudentScheduleTable? _studentScheduleTable;
-        private StudentCourseSubwindow? _studentCourseSubwindow;
-        private StudentExamSubwindow? _studentExamSubwindow;
-        private StudentGroupActivitySubwindow? _studentGroupActivitySubwindow;
-        private StudentPersonalActivitySubwindow? _studentPersonalActivitySubwindow;
-        private StudentTemporaryAffairSubwindow? _studentTemporaryAffairSubwindow;
+        public StudentScheduleTable? StudentScheduleTable { get; private set; }
+        public StudentCourseSubwindow? StudentCourseSubwindow { get; private set; }
+        public StudentExamSubwindow? StudentExamSubwindow { get; private set; }
+        public StudentGroupActivitySubwindow? StudentGroupActivitySubwindow { get; private set; }
+        public StudentPersonalActivitySubwindow? StudentPersonalActivitySubwindow { get; private set; }
+        public StudentTemporaryAffairSubwindow? StudentTemporaryAffairSubwindow { get; private set; }
         public bool ShouldExitProgram { get; private set; } = false;
 
         public StudentWindow()
@@ -70,66 +70,66 @@ namespace StudentScheduleManagementSystem.UI
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
-            _studentScheduleTable = new();
-            _studentScheduleTable.TopLevel = false;
-            mainpage.Controls.Add(_studentScheduleTable);
-            _studentScheduleTable.Show();
+            StudentScheduleTable = new() { MainWindow = this };
+            StudentScheduleTable.TopLevel = false;
+            mainpage.Controls.Add(StudentScheduleTable);
+            StudentScheduleTable.Show();
         }
 
-        private void CourseButton_Click(object sender, EventArgs e)
+        public void CourseButton_Click(object sender, EventArgs e)
         {
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
-            _studentCourseSubwindow = new();
-            _studentCourseSubwindow.TopLevel = false;
-            mainpage.Controls.Add(_studentCourseSubwindow);
-            _studentCourseSubwindow.Show();
+            StudentCourseSubwindow = new();
+            StudentCourseSubwindow.TopLevel = false;
+            mainpage.Controls.Add(StudentCourseSubwindow);
+            StudentCourseSubwindow.Show();
         }
 
-        private void ExamButton_Click(object sender, EventArgs e)
+        public void ExamButton_Click(object sender, EventArgs e)
         {
             logListBox.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
-            _studentExamSubwindow = new();
-            _studentExamSubwindow.TopLevel = false;
-            mainpage.Controls.Add(_studentExamSubwindow);
-            _studentExamSubwindow.Show();
+            StudentExamSubwindow = new();
+            StudentExamSubwindow.TopLevel = false;
+            mainpage.Controls.Add(StudentExamSubwindow);
+            StudentExamSubwindow.Show();
         }
 
-        private void GroupActivityButton_Click(object sender, EventArgs e)
+        public void GroupActivityButton_Click(object sender, EventArgs e)
         {
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
-            _studentGroupActivitySubwindow = new();
-            _studentGroupActivitySubwindow.TopLevel = false;
-            mainpage.Controls.Add(_studentGroupActivitySubwindow);
-            _studentGroupActivitySubwindow.Show();
+            StudentGroupActivitySubwindow = new();
+            StudentGroupActivitySubwindow.TopLevel = false;
+            mainpage.Controls.Add(StudentGroupActivitySubwindow);
+            StudentGroupActivitySubwindow.Show();
         }
 
-        private void PersonalActivityButton_Click(object sender, EventArgs e)
+        public void PersonalActivityButton_Click(object sender, EventArgs e)
         {
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
-            _studentPersonalActivitySubwindow = new();
-            _studentPersonalActivitySubwindow.TopLevel = false;
-            mainpage.Controls.Add(_studentPersonalActivitySubwindow);
-            _studentPersonalActivitySubwindow.Show();
+            StudentPersonalActivitySubwindow = new();
+            StudentPersonalActivitySubwindow.TopLevel = false;
+            mainpage.Controls.Add(StudentPersonalActivitySubwindow);
+            StudentPersonalActivitySubwindow.Show();
         }
 
-        private void TemporaryAffairButton_Click(object sender, EventArgs e)
+        public void TemporaryAffairButton_Click(object sender, EventArgs e)
         {
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
-            _studentTemporaryAffairSubwindow = new();
-            _studentTemporaryAffairSubwindow.TopLevel = false;
-            mainpage.Controls.Add(_studentTemporaryAffairSubwindow);
-            _studentTemporaryAffairSubwindow.Show();
+            StudentTemporaryAffairSubwindow = new();
+            StudentTemporaryAffairSubwindow.TopLevel = false;
+            mainpage.Controls.Add(StudentTemporaryAffairSubwindow);
+            StudentTemporaryAffairSubwindow.Show();
         }
 
         private void SetTimeButton_Click(object sender, EventArgs e)
@@ -184,18 +184,18 @@ namespace StudentScheduleManagementSystem.UI
         private void LogoutConfirm_Click(object sender, EventArgs e)
         {
             MainProgram.Program.Logout();
-            _studentScheduleTable?.Close();
-            _studentCourseSubwindow?.Close();
-            _studentExamSubwindow?.Close();
-            _studentGroupActivitySubwindow?.Close();
-            _studentPersonalActivitySubwindow?.Close();
-            _studentTemporaryAffairSubwindow?.Close();
-            _studentScheduleTable = null;
-            _studentCourseSubwindow = null;
-            _studentExamSubwindow = null;
-            _studentGroupActivitySubwindow = null;
-            _studentPersonalActivitySubwindow = null;
-            _studentTemporaryAffairSubwindow = null;
+            StudentScheduleTable?.Close();
+            StudentCourseSubwindow?.Close();
+            StudentExamSubwindow?.Close();
+            StudentGroupActivitySubwindow?.Close();
+            StudentPersonalActivitySubwindow?.Close();
+            StudentTemporaryAffairSubwindow?.Close();
+            StudentScheduleTable = null;
+            StudentCourseSubwindow = null;
+            StudentExamSubwindow = null;
+            StudentGroupActivitySubwindow = null;
+            StudentPersonalActivitySubwindow = null;
+            StudentTemporaryAffairSubwindow = null;
             this.Close();
         }
 
@@ -207,12 +207,12 @@ namespace StudentScheduleManagementSystem.UI
 
         private void LogButton_Click(object sender, EventArgs e)
         {
-            _studentScheduleTable?.Hide();
-            _studentCourseSubwindow?.Hide();
-            _studentExamSubwindow?.Hide();
-            _studentGroupActivitySubwindow?.Hide();
-            _studentPersonalActivitySubwindow?.Hide();
-            _studentTemporaryAffairSubwindow?.Hide();
+            StudentScheduleTable?.Hide();
+            StudentCourseSubwindow?.Hide();
+            StudentExamSubwindow?.Hide();
+            StudentGroupActivitySubwindow?.Hide();
+            StudentPersonalActivitySubwindow?.Hide();
+            StudentTemporaryAffairSubwindow?.Hide();
             logoutConfirm.Hide();
             closeConfirm.Hide();
             mainpage.Controls.Clear();
@@ -234,12 +234,12 @@ namespace StudentScheduleManagementSystem.UI
         private void ExitButton_Click(object sender, EventArgs e)
         {
             logListBox.Hide();
-            _studentScheduleTable?.Hide();
-            _studentCourseSubwindow?.Hide();
-            _studentExamSubwindow?.Hide();
-            _studentGroupActivitySubwindow?.Hide();
-            _studentPersonalActivitySubwindow?.Hide();
-            _studentTemporaryAffairSubwindow?.Hide();
+            StudentScheduleTable?.Hide();
+            StudentCourseSubwindow?.Hide();
+            StudentExamSubwindow?.Hide();
+            StudentGroupActivitySubwindow?.Hide();
+            StudentPersonalActivitySubwindow?.Hide();
+            StudentTemporaryAffairSubwindow?.Hide();
             logoutConfirm.Show();
             closeConfirm.Show();
         }

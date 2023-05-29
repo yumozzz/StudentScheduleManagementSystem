@@ -87,6 +87,7 @@
             this.scheduleTable.RowTemplate.Height = 32;
             this.scheduleTable.Size = new System.Drawing.Size(1026, 601);
             this.scheduleTable.TabIndex = 42;
+            this.scheduleTable.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ScheduleTable_CellDoubleClick);
             // 
             // hourColumn
             // 

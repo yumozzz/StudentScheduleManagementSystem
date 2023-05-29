@@ -272,6 +272,22 @@ namespace StudentScheduleManagementSystem.UI
             this.onlineLinkBox.Text = "";
         }
 
+        public void SelectScheduleWithId(long id)
+        {
+            if (_subwindowType is SubwindowType.Course or SubwindowType.Exam or SubwindowType.GroupActivity)
+            {
+                SwitchData_Click(this, EventArgs.Empty);
+            }
+            foreach(DataGridViewRow row in scheduleDataTable.Rows)
+            {
+                if (row.Cells[9].Value.ToString() == id.ToString())
+                {
+                    ((DataGridViewCheckBoxCell)row.Cells[0]).Value = true;
+                    row.Selected = true;
+                }
+            }
+        }
+
         #endregion
 
         #region table content generator
@@ -374,7 +390,7 @@ namespace StudentScheduleManagementSystem.UI
                     else
                     {
                         var cell = (DataGridViewCheckBoxCell)scheduleDataTable.Rows[middle].Cells[0];
-                        var row = (DataGridViewRow)scheduleDataTable.Rows[middle];
+                        var row = scheduleDataTable.Rows[middle];
                         for (int j = 0; j < row.Cells.Count; j++)
                         {
                             row.Cells[j].Style.BackColor = Color.LightGray;
