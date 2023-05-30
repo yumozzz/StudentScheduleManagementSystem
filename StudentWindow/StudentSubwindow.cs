@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Diagnostics;
 using System.Reflection;
+using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace StudentScheduleManagementSystem.UI
 {
@@ -1668,10 +1669,13 @@ namespace StudentScheduleManagementSystem.UI
                                           ScheduleOperationType.UserOpration);
             }
             GenerateUserData(_scheduleType);
-            this.weekSelectBox!.ClearBox();
-            this.daySelectBox!.ClearBox();
+            this.weekSelectBox?.ClearBox();
+            this.daySelectBox?.ClearBox();
             this.hourComboBox.Text = "";
-            this.durationComboBox.Text = "";
+            if (durationComboBox != null)
+            {
+                this.durationComboBox.Text = "";
+            }
             this.buildingComboBox.SelectedIndex = -1;
             this.buildingComboBox.Text = "";
             this.onlineLinkBox.Text = "";
@@ -1698,6 +1702,21 @@ namespace StudentScheduleManagementSystem.UI
                                            out string onlineLink);
             if (!confirm)
             {
+                return;
+            }
+
+            bool willCollide = Schedule.Schedule.DetectCollision(repetitiveType,
+                                                                 ScheduleType.Idle,
+                                                                 beginTime,
+                                                                 duration,
+                                                                 activeWeeks,
+                                                                 activeDays,
+                                                                 out _,
+                                                                 out _,
+                                                                 out _);
+            if (willCollide)
+            {
+                MessageBox.Show("您添加的日程有冲突！", "错误");
                 return;
             }
 

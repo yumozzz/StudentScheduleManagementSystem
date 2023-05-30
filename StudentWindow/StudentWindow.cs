@@ -19,7 +19,18 @@ namespace StudentScheduleManagementSystem.UI
             InitializeComponent();
             Times.Timer.TimeChange += ChangeLocalTime;
             pauseButton.Click += (sender, e) => { Times.Timer.Pause = !Times.Timer.Pause; };
-            speedButton.Click += (sender, e) => Times.Timer.SetSpeed();
+            speedButton.Click += (sender, e) =>
+            {
+                Times.Timer.SetSpeed();
+                if (speedButton.InvokeRequired)
+                {
+                    speedButton.Invoke(() => speedButton.Text = $"快进{Times.Timer.Acceleration}x");
+                }
+                else
+                {
+                    speedButton.Text = $"快进{Times.Timer.Acceleration}x";
+                }
+            };
             Log.LogBase.LogGenerated += (message) =>
             {
                 if (logListBox.InvokeRequired)

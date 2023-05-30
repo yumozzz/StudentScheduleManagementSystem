@@ -61,7 +61,6 @@
             this.usernameBox.Name = "usernameBox";
             this.usernameBox.Size = new System.Drawing.Size(301, 40);
             this.usernameBox.TabIndex = 3;
-            this.usernameBox.Text = "2021219999";
             // 
             // passwordBox
             // 
@@ -71,7 +70,6 @@
             this.passwordBox.PasswordChar = '*';
             this.passwordBox.Size = new System.Drawing.Size(301, 35);
             this.passwordBox.TabIndex = 4;
-            this.passwordBox.Text = "administrator";
             // 
             // clear
             // 

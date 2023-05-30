@@ -194,7 +194,7 @@
             this.speedButton.Name = "speedButton";
             this.speedButton.Size = new System.Drawing.Size(100, 35);
             this.speedButton.TabIndex = 17;
-            this.speedButton.Text = "快进";
+            this.speedButton.Text = "快进1x";
             this.speedButton.UseVisualStyleBackColor = false;
             // 
             // setTimeButton
