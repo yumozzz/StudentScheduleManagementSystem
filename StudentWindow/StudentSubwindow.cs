@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Diagnostics;
 using System.Reflection;
-using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace StudentScheduleManagementSystem.UI
 {
@@ -1418,6 +1417,21 @@ namespace StudentScheduleManagementSystem.UI
                                            out string onlineLink);
             if (!confirm)
             {
+                return;
+            }
+
+            bool willCollide = Schedule.Schedule.DetectCollision(repetitiveType,
+                                                                 ScheduleType.Idle,
+                                                                 beginTime,
+                                                                 duration,
+                                                                 activeWeeks,
+                                                                 activeDays,
+                                                                 out _,
+                                                                 out _,
+                                                                 out _);
+            if (willCollide)
+            {
+                MessageBox.Show("您添加的日程有冲突！", "错误");
                 return;
             }
 
