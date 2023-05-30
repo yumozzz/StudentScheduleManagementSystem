@@ -1298,7 +1298,7 @@ namespace StudentScheduleManagementSystem.UI
                 beginTime = new() { Hour = beginHour };
             }
 
-            if (beginHour + duration >= latest)
+            if (beginHour + duration > latest)
             {
                 errorMessage.AppendLine("日程结束时间不得晚于最晚时间！");
             }
