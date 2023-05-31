@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # ReSharper file
 *.DotSettings
 /Core/Dictionary.cs
+/exclude.txt
