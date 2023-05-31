@@ -1308,18 +1308,16 @@ namespace StudentScheduleManagementSystem.UI
                 return false;
             }
 
-            return showMessageBox
-                       ? MessageBox.Show(Shared.GetScheduleDetail(name,
-                                                                  repetitiveType,
-                                                                  activeWeeks,
-                                                                  activeDays,
-                                                                  beginTime,
-                                                                  duration,
-                                                                  buildingComboBox.Text,
-                                                                  onlineLinkBox.Text),
-                                         "确认日程信息",
-                                         MessageBoxButtons.OKCancel) == DialogResult.OK
-                       : true;
+            return !showMessageBox || MessageBox.Show(Shared.GetScheduleDetail(name,
+                                                                               repetitiveType,
+                                                                               activeWeeks,
+                                                                               activeDays,
+                                                                               beginTime,
+                                                                               duration,
+                                                                               buildingComboBox.Text,
+                                                                               onlineLinkBox.Text),
+                                                      "确认日程信息",
+                                                      MessageBoxButtons.OKCancel) == DialogResult.OK;
         }
 
         protected abstract bool AddSchedule(string name,

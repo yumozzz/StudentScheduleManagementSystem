@@ -9,6 +9,10 @@
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <__Dir>$(SolutionDir)</__Dir>
+    <SolutionDirectory>$(__Dir.Substring(0, $([MSBuild]::Add($(__Dir.Length), -1))))</SolutionDirectory>
+    <DocumentDirectory>E:\Code\docs\StudentScheduleManagementSystem\</DocumentDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,7 +51,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(SolutionDir)Core\makecert.exe&quot; &quot;$(SolutionDir)$(OutDir)&quot;&#xD;&#xA;copy &quot;$(SolutionDir)Shared\map.json&quot; &quot;$(SolutionDir)$(OutDir)map\&quot;" />
+    <Exec Command="copy &quot;$(SolutionDir)Core\makecert.exe&quot; &quot;$(SolutionDir)$(OutDir)&quot;&#xD;&#xA;copy &quot;$(SolutionDir)Shared\map.json&quot; &quot;$(SolutionDir)$(OutDir)map\&quot;&#xD;&#xA;xcopy /S /Y &quot;$(SolutionDirectory)&quot; &quot;$(DocumentDirectory)src&quot; /EXCLUDE:$(SolutionDir)exclude.txt" />
   </Target>
 
 </Project>
