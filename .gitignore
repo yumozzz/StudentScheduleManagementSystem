@@ -366,3 +366,4 @@ FodyWeavers.xsd
 *.DotSettings
 /Core/Dictionary.cs
 /exclude.txt
+/.editorconfig
