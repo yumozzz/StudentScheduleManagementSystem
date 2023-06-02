@@ -2,6 +2,9 @@
 
 namespace StudentScheduleManagementSystem.Log
 {
+    /// <summary>
+    /// 日志类的基类，管理文件流
+    /// </summary>
     internal static class LogBase
     {
         public static FileStream Stream { get; private set; }

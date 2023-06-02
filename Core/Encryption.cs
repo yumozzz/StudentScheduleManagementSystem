@@ -5,6 +5,9 @@ using System.Text;
 
 namespace StudentScheduleManagementSystem.Encryption
 {
+    /// <summary>
+    /// 提供加密与解密功能
+    /// </summary>
     public static class Encrypt
     {
         private static RSACryptoServiceProvider _provider = new();

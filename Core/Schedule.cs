@@ -24,11 +24,17 @@ namespace StudentScheduleManagementSystem.Schedule
         [JsonProperty] public int Duration { get; set; }
     }
 
+    /// <summary>
+    /// 日程的基类，提供时间轴等静态字段、日程基础属性、构造函数、个人日程操作、共享日程操作、查询操作、闹钟管理及序列化与反序列化等一些方法
+    /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public abstract partial class Schedule : IComparable
     {
         #region structs and classes
 
+        /// <summary>
+        /// 日程时间轴上的记录类型
+        /// </summary>
         public struct Record : IUniqueRepetitiveEvent
         {
             public long Id { get; set; }
@@ -1019,6 +1025,9 @@ namespace StudentScheduleManagementSystem.Schedule
         #endregion
     }
 
+    /// <summary>
+    /// 课程类
+    /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class Course : Schedule, IJsonConvertible, ISchedule
     {
@@ -1215,6 +1224,9 @@ namespace StudentScheduleManagementSystem.Schedule
         #endregion
     }
 
+    /// <summary>
+    /// 考试类
+    /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class Exam : Schedule, IJsonConvertible, ISchedule
     {
@@ -1345,6 +1357,9 @@ namespace StudentScheduleManagementSystem.Schedule
         #endregion
     }
 
+    /// <summary>
+    /// 活动类
+    /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public partial class Activity : Schedule, IJsonConvertible, ISchedule
     {
@@ -1642,6 +1657,9 @@ namespace StudentScheduleManagementSystem.Schedule
         #endregion
     }
 
+    /// <summary>
+    /// 临时事务类，重写了部分基类方法
+    /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public sealed partial class TemporaryAffair : Activity
     {

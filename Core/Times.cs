@@ -69,14 +69,17 @@ namespace StudentScheduleManagementSystem.Times
             return time;
         }
 
+        /// <summary>
+        /// 时间推进<paramref name="right"/>小时
+        /// </summary>
         public static Time operator +(Time left, int right) => (left.ToInt() + right).ToTimeStamp();
 
+        /// <summary>
+        /// 时间倒退<paramref name="right"/>小时
+        /// </summary>
         public static Time operator -(Time left, int right) => (left.ToInt() - right).ToTimeStamp();
 
-        public override string ToString()
-        {
-            return $"Week {_week}, {Day} {_hour}:00";
-        }
+        public override string ToString() => $"Week {_week}, {Day} {_hour}:00";
 
         public static bool operator ==(Time left, Time right)
         {
@@ -112,7 +115,7 @@ namespace StudentScheduleManagementSystem.Times
     }
 
     /// <summary>
-    /// 时间轴类
+    /// 时间轴类模板，提供向其中添加与删除记录的一些方法
     /// </summary>
     /// <typeparam name="TRecord">时间轴记录的类型</typeparam>
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
@@ -143,9 +146,9 @@ namespace StudentScheduleManagementSystem.Times
         }
 
         /// <summary>
-        /// 从时间轴上删除一个重复事件
+        /// 从时间轴上删除一个重复记录
         /// </summary>
-        /// <param name="removeId">删除事件的ID</param>
+        /// <param name="removeId">删除记录的ID</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemOverrideException">在不存在记录的位置上执行删除</exception>
@@ -217,7 +220,7 @@ namespace StudentScheduleManagementSystem.Times
         }
 
         /// <summary>
-        /// 在时间轴上添加一个重复事件
+        /// 在时间轴上添加一个重复记录
         /// </summary>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
@@ -288,7 +291,7 @@ namespace StudentScheduleManagementSystem.Times
     }
 
     /// <summary>
-    /// 闹钟类
+    /// 闹钟类，提供添加、删除及序列化与反序列化的一些方法
     /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public partial class Alarm : IJsonConvertible
@@ -310,6 +313,9 @@ namespace StudentScheduleManagementSystem.Times
 
         #region structs and classes
 
+        /// <summary>
+        /// 闹钟时间轴上的记录类型
+        /// </summary>
         private struct Record : IUniqueRepetitiveEvent
         {
             public long Id { get; set; }
@@ -402,14 +408,19 @@ namespace StudentScheduleManagementSystem.Times
             Log.Information.Log($"已删除{timestamp}时的闹钟");
         }
 
+
         /// <summary>
-        /// 添加闹钟
+        /// 自动处理闹钟并添加闹钟
         /// </summary>
+        /// <param name="timestamp"></param>
+        /// <param name="repetitiveType"></param>
         /// <param name="alarmTimeUpCallback">闹钟启动时调用的回调函数</param>
         /// <param name="callbackParameter">传入回调函数的回调参数</param>
         /// <param name="callbackReflectedType">回调函数的反射类型</param>
         /// <param name="parameterType">回调参数的类型</param>
         /// <param name="isDailyNotification">是否是每日提醒。若是，则不会保存到文件中</param>
+        /// <param name="activeWeeks"></param>
+        /// <param name="activeDays"></param>
         /// <exception cref="InvalidOperationException">由参数指定的闹钟将会覆盖每日提醒，或者会与另外一个闹钟冲突，且其中一个的重复类型是<see cref="RepetitiveType.Designated"/></exception>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemAlreadyExistedException">由参数指定的闹钟会与另外一个闹钟冲突，且两者的重复类型均是<see cref="RepetitiveType.Single"/></exception>
@@ -694,6 +705,9 @@ namespace StudentScheduleManagementSystem.Times
         #endregion
     }
 
+    /// <summary>
+    /// 计时器类，提供系统的模拟时间
+    /// </summary>
     public static class Timer
     {
         /// <summary>

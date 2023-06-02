@@ -1,5 +1,8 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 闹钟显示窗口，主要管理用户当前位置的获取与导航
+    /// </summary>
     public partial class StudentAlarmWindow : Form
     {
         private List<Map.Location.Building> _targetBuildings;

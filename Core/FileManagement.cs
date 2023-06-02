@@ -6,6 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace StudentScheduleManagementSystem.FileManagement
 {
+    /// <summary>
+    /// 提供文件IO相关方法与常用目录（不含日志记录）
+    /// </summary>
     public static class FileManager
     {
         public static readonly string UserFileDirectory = Environment.CurrentDirectory + "/users";
@@ -37,11 +40,11 @@ namespace StudentScheduleManagementSystem.FileManagement
             }
             #if RWINPLAINTEXT
             if (!File.Exists($"{fileFolder}/{fileName}.json"))
-                #elif RWINENCRYPTION
+            #elif RWINENCRYPTION
             if (!File.Exists($"{fileFolder}/{fileName}.dat"))
-                #else
+            #else
             #error macro_not_defined
-                #endif
+            #endif
             {
                 Log.Error.Log("不存在用户文件", null);
                 throw new FileNotFoundException();

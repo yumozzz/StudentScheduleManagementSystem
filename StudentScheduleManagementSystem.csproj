@@ -12,7 +12,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <__Dir>$(SolutionDir)</__Dir>
     <SolutionDirectory>$(__Dir.Substring(0, $([MSBuild]::Add($(__Dir.Length), -1))))</SolutionDirectory>
-    <DocumentDirectory>E:\Code\docs\StudentScheduleManagementSystem\</DocumentDirectory>
+    <DocumentDirectory>E:\Code\docs\StudentScheduleManagementSystem_docfx\</DocumentDirectory>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

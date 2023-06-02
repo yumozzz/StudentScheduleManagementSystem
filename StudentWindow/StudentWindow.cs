@@ -1,9 +1,10 @@
 ﻿using System.Text;
-using static System.Net.Mime.MediaTypeNames;
-using System.Windows.Forms;
 
 namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 用户主窗口，主要管理时间相关设置与子窗口的显示与隐藏
+    /// </summary>
     public partial class StudentWindow : Form
     {
         public StudentScheduleTable? StudentScheduleTable { get; private set; }

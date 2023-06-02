@@ -3,6 +3,9 @@ using System.Text;
 
 namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 管理员子窗口的基类，提供构造表格的方法、一些事件处理函数与工具函数
+    /// </summary>
     public abstract partial class AdminSubwindowBase : Form
     {
         protected List<Schedule.SharedData> _data;
@@ -602,6 +605,9 @@ namespace StudentScheduleManagementSystem.UI
         #endregion
     }
 
+    /// <summary>
+    /// 管理员课程子窗口
+    /// </summary>
     public sealed class CourseSubwindow : AdminSubwindowBase
     {
         public CourseSubwindow()
@@ -640,6 +646,9 @@ namespace StudentScheduleManagementSystem.UI
         }
     }
 
+    /// <summary>
+    /// 管理员考试子窗口
+    /// </summary>
     public sealed class ExamSubwindow : AdminSubwindowBase
     {
         public ExamSubwindow()
@@ -674,6 +683,9 @@ namespace StudentScheduleManagementSystem.UI
         }
     }
 
+    /// <summary>
+    /// 管理员集体活动子窗口
+    /// </summary>
     public sealed class GroupActivitySubwindow : AdminSubwindowBase
     {
         public GroupActivitySubwindow()

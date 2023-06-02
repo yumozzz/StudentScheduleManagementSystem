@@ -34,8 +34,13 @@ namespace StudentScheduleManagementSystem.MainProgram
 
         internal static CancellationTokenSource Cts { get; set; } = new();
         internal static DataStructure.HashTable<string, (string, string)> _accounts = new();
+        /// <summary>
+        /// 当前用户的ID
+        /// </summary>
         public static string UserId { get; private set; } = string.Empty;
-        public static string Password { get; private set; } = string.Empty;
+        /// <summary>
+        /// 当前用户的身份
+        /// </summary>
         public static Identity @Identity { get; private set; } = Identity.Null;
 
         [STAThread]
@@ -96,21 +101,26 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
         }
 
+        /// <summary>
+        /// 启动控制台
+        /// </summary>
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool AllocConsole();
 
+        /// <summary>
+        /// 关闭控制台
+        /// </summary>
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool FreeConsole();
 
+        /// <summary>
+        /// 以<paramref name="type"/>指定的方式显示窗口
+        /// </summary>
         [DllImport("User32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool ShowWindow(IntPtr hWnd, int type);
-
-        [DllImport("gdi32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.I4)]
-        public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
 
         /// <summary>
         /// 将所有用户数据序列化
@@ -155,7 +165,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                     throw new AuthenticationException();
                 }
                 UserId = inputUserId;
-                Password = inputPassword;
                 Identity = identity;
                 Encryption.Encrypt.PrivateKey = Convert.FromBase64String(privateKey);
                 Times.Timer.Pause = false;
@@ -240,7 +249,6 @@ namespace StudentScheduleManagementSystem.MainProgram
                     throw new FormatException("password format error");
                 }
                 UserId = userId;
-                Password = password;
                 Identity = identity;
                 Encryption.Encrypt.GeneratePrivateKey(password);
                 Times.Timer.Pause = false;

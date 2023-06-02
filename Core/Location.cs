@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 
 namespace StudentScheduleManagementSystem.Map
 {
+    /// <summary>
+    /// 提供地图构造、查找、序列化与反序列化、寻路算法等一些方法
+    /// </summary>
     public static class Location
     {
         private static List<Building> _buildings = new() { Constants.DefaultBuilding };
@@ -815,6 +818,9 @@ namespace StudentScheduleManagementSystem.Map
         #endregion
     }
 
+    /// <summary>
+    /// 在地图上户籍制路径
+    /// </summary>
     public static class Navigate
     {
         /// <summary>

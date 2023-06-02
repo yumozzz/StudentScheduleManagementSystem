@@ -1,5 +1,8 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 管理员主窗口，主要管理子窗口的显示与隐藏
+    /// </summary>
     public partial class AdminWindow : Form
     {
         private CourseSubwindow? _courseSubwindow;

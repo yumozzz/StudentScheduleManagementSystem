@@ -2,6 +2,9 @@
 
 namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 日程表类，提供表格生成的相关方法
+    /// </summary>
     public partial class StudentScheduleTable : Form
     {
         private int _displayedWeek = 1;

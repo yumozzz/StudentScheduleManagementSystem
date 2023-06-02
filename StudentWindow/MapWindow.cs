@@ -1,7 +1,8 @@
-﻿using System.Net;
-
-namespace StudentScheduleManagementSystem.UI
+﻿namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 导航窗口
+    /// </summary>
     public partial class MapWindow : Form
     {
         private List<(Map.Location.Vertex, Map.Location.Vertex)> _lineEndPointPairs;

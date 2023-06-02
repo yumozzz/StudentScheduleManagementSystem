@@ -4,14 +4,17 @@ using System.ComponentModel;
 
 namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 地图编辑窗口
+    /// </summary>
     public partial class MapEditWindow : Form
     {
         private const int SmallCircRad = 5;
         private const int BigCircRad = 6;
 
         private HashSet<(Point, Point)> _lineEndPointPairs;
-        private Dictionary<Point, (string, Label)?> _points;
-        private TextBox _textBox = new() { Name = "TextBox", Size = new Size(100, 30) };
+        private readonly Dictionary<Point, (string, Label)?> _points;
+        private readonly TextBox _textBox = new() { Name = "TextBox", Size = new Size(100, 30) };
 
         private int? _xLock = null, _yLock = null;
         private Point? _mouseOver = null, _selected = null;

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows.Forms;
+﻿using System.Collections;
 
 namespace StudentScheduleManagementSystem.DataStructure
 {
+    /// <summary>
+    /// 可变长数组
+    /// </summary>
     public class Vector<T> : IEnumerable<T>, ICollection<T>
     {
         public struct Enumerator : IEnumerator<T>, IEnumerator
@@ -169,6 +168,9 @@ namespace StudentScheduleManagementSystem.DataStructure
         }
     }
 
+    /// <summary>
+    /// 哈希表
+    /// </summary>
     public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
     {
         private struct Entry

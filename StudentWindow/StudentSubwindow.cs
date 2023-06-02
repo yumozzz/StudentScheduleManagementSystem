@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 用户子窗口的基类，提供构造表格的方法、一些事件处理函数与工具函数
+    /// </summary>
     public abstract partial class StudentSubwindowBase : Form
     {
         protected List<Schedule.SharedData> _sharedData;
@@ -676,6 +679,9 @@ namespace StudentScheduleManagementSystem.UI
         #endregion
     }
 
+    /// <summary>
+    /// 用户公共子窗口的基类
+    /// </summary>
     public abstract class SharedScheduleSubwindowBase : StudentSubwindowBase
     {
         protected SharedScheduleSubwindowBase(ScheduleType scheduleType, SubwindowType subwindowType)
@@ -1139,6 +1145,9 @@ namespace StudentScheduleManagementSystem.UI
         #endregion
     }
 
+    /// <summary>
+    /// 用户个人子窗口的基类
+    /// </summary>
     public abstract class PersonalScheduleSubwinowBase : StudentSubwindowBase
     {
         protected ComboBox? weekComboBox;
@@ -1610,6 +1619,9 @@ namespace StudentScheduleManagementSystem.UI
         #endregion
     }
 
+    /// <summary>
+    /// 用户课程子窗口
+    /// </summary>
     public sealed class StudentCourseSubwindow : SharedScheduleSubwindowBase
     {
         public StudentCourseSubwindow()
@@ -1619,6 +1631,9 @@ namespace StudentScheduleManagementSystem.UI
         }
     }
 
+    /// <summary>
+    /// 用户考试子窗口
+    /// </summary>
     public sealed class StudentExamSubwindow : SharedScheduleSubwindowBase
     {
         public StudentExamSubwindow()
@@ -1630,6 +1645,9 @@ namespace StudentScheduleManagementSystem.UI
         }
     }
 
+    /// <summary>
+    /// 用户集体活动子窗口
+    /// </summary>
     public sealed class StudentGroupActivitySubwindow : SharedScheduleSubwindowBase
     {
         public StudentGroupActivitySubwindow()
@@ -1639,6 +1657,9 @@ namespace StudentScheduleManagementSystem.UI
         }
     }
 
+    /// <summary>
+    /// 用户个人活动子窗口
+    /// </summary>
     public sealed class StudentPersonalActivitySubwindow : PersonalScheduleSubwinowBase
     {
         public StudentPersonalActivitySubwindow()
@@ -1934,7 +1955,9 @@ namespace StudentScheduleManagementSystem.UI
         #endregion
     }
 
-
+    /// <summary>
+    /// 用户临时事务子窗口
+    /// </summary>
     public sealed class StudentTemporaryAffairSubwindow : PersonalScheduleSubwinowBase
     {
         public StudentTemporaryAffairSubwindow()
