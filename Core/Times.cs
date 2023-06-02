@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
 
+//时间管理
 namespace StudentScheduleManagementSystem.Times
 {
     /// <summary>
@@ -121,7 +122,7 @@ namespace StudentScheduleManagementSystem.Times
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
         /// <summary>
-        /// 记录数字
+        /// 记录数组
         /// </summary>
         public TRecord[] RecordArray { get; } = new TRecord[Constants.TotalHours];
 

@@ -449,21 +449,22 @@ namespace StudentScheduleManagementSystem.UI
             };
 
         /// <summary>
-        /// 将<paramref name="activeWeeks"/>转换为其等效的简略形式
+        /// 将<paramref name="arr"/>转换为其等效的简略形式
         /// </summary>
-        /// <example>1,2,3,5 => 1-3,5</example>
-        public static string GetBriefWeeks(int[] activeWeeks)
+        /// <param name="treatAsHour">输入是否是小时的数组。如果是，则输出会添加:00</param>
+        /// <example>1,2,3,5 =&gt; 1-3,5</example>
+        public static string GetBriefArrayRepresentation(int[] arr, bool treatAsHour)
         {
-            if (activeWeeks.Length == 1)
+            if (arr.Length == 1)
             {
-                return activeWeeks[0].ToString();
+                return arr[0].ToString();
             }
 
             int continuity = 0;
             StringBuilder ret = new();
-            for (int i = 1; i < activeWeeks.Length; i++)
+            for (int i = 1; i < arr.Length; i++)
             {
-                if (activeWeeks[i] == activeWeeks[i - 1] + 1)
+                if (arr[i] == arr[i - 1] + 1)
                 {
                     if (continuity == 0)
                     {
@@ -471,7 +472,11 @@ namespace StudentScheduleManagementSystem.UI
                         {
                             ret.Append(", ");
                         }
-                        ret.Append(activeWeeks[i - 1]);
+                        ret.Append(arr[i - 1]);
+                        if (treatAsHour)
+                        {
+                            ret.Append(":00");
+                        }
                     }
                     continuity++;
                 }
@@ -483,11 +488,15 @@ namespace StudentScheduleManagementSystem.UI
                         {
                             ret.Append(", ");
                         }
-                        ret.Append(activeWeeks[i - 1]);
+                        ret.Append(arr[i - 1]);
                     }
                     else
                     {
-                        ret.Append("-" + activeWeeks[i - 1].ToString());
+                        ret.Append("-" + arr[i - 1].ToString());
+                    }
+                    if (treatAsHour)
+                    {
+                        ret.Append(":00");
                     }
                     continuity = 0;
                 }
@@ -495,11 +504,15 @@ namespace StudentScheduleManagementSystem.UI
 
             if (continuity == 0)
             {
-                ret.Append(", " + activeWeeks[^1].ToString());
+                ret.Append(", " + arr[^1].ToString());
             }
             else
             {
-                ret.Append("-" + activeWeeks[^1].ToString());
+                ret.Append("-" + arr[^1].ToString());
+            }
+            if (treatAsHour)
+            {
+                ret.Append(":00");
             }
 
             return ret.ToString();
@@ -535,7 +548,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                builder.Append("\n周次：" + GetBriefWeeks(activeWeeks));
+                builder.Append("\n周次：" + GetBriefArrayRepresentation(activeWeeks, false));
                 builder.Append("\n天次：");
                 foreach (Day activeDay in activeDays)
                 {

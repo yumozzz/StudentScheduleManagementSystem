@@ -1,5 +1,6 @@
 ﻿using System.Text;
 
+//日志管理
 namespace StudentScheduleManagementSystem.Log
 {
     /// <summary>

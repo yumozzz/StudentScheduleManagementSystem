@@ -56,76 +56,6 @@ namespace StudentScheduleManagementSystem.UI
         #region tool methods
 
         /// <summary>
-        /// 将<paramref name="arr"/>转换为其等效的简略形式
-        /// </summary>
-        /// <param name="inputIsHour">输入是否是小时的数组。如果是，则输出会添加:00</param>
-        /// <example>1,2,3,5 => 1-3,5</example>
-        protected static string GetBriefArrayRepresentation(int[] arr, bool inputIsHour)
-        {
-            if (arr.Length == 1)
-            {
-                return arr[0].ToString();
-            }
-
-            int continuity = 0;
-            StringBuilder ret = new();
-            for (int i = 1; i < arr.Length; i++)
-            {
-                if (arr[i] == arr[i - 1] + 1)
-                {
-                    if (continuity == 0)
-                    {
-                        if (i != 1)
-                        {
-                            ret.Append(", ");
-                        }
-                        ret.Append(arr[i - 1]);
-                        if (inputIsHour)
-                        {
-                            ret.Append(":00");
-                        }
-                    }
-                    continuity++;
-                }
-                else
-                {
-                    if (continuity == 0)
-                    {
-                        if (i != 1)
-                        {
-                            ret.Append(", ");
-                        }
-                        ret.Append(arr[i - 1]);
-                    }
-                    else
-                    {
-                        ret.Append("-" + arr[i - 1].ToString());
-                    }
-                    if (inputIsHour)
-                    {
-                        ret.Append(":00");
-                    }
-                    continuity = 0;
-                }
-            }
-
-            if (continuity == 0)
-            {
-                ret.Append(", " + arr[^1].ToString());
-            }
-            else
-            {
-                ret.Append("-" + arr[^1].ToString());
-            }
-            if (inputIsHour)
-            {
-                ret.Append(":00");
-            }
-
-            return ret.ToString();
-        }
-
-        /// <summary>
         /// 计算对列表排序时两个元素的排序结果
         /// </summary>
         private void TableSortCompare(object sender, DataGridViewSortCompareEventArgs e)
@@ -394,7 +324,7 @@ namespace StudentScheduleManagementSystem.UI
                     this.scheduleDataTable.Rows.Add(null,
                                                     false,
                                                     sharedData.Name,
-                                                    GetBriefArrayRepresentation(sharedData.ActiveWeeks, false),
+                                                    Shared.GetBriefArrayRepresentation(sharedData.ActiveWeeks, false),
                                                     days.ToString(),
                                                     sharedData.Timestamp.Hour.ToString() + ":00",
                                                     sharedData.Duration.ToString() + "小时",
@@ -751,7 +681,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 else
                 {
-                    activeWeeks = GetBriefArrayRepresentation(schedule.ActiveWeeks, false);
+                    activeWeeks = Shared.GetBriefArrayRepresentation(schedule.ActiveWeeks, false);
                 }
 
                 scheduleDataTable.Rows.Add(null,
@@ -978,7 +908,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                this.weekBox.Text = GetBriefArrayRepresentation(selected.ActiveWeeks, false);
+                this.weekBox.Text = Shared.GetBriefArrayRepresentation(selected.ActiveWeeks, false);
                 foreach (Day activeDay in selected.ActiveDays)
                 {
                     this.dayBox.Text += activeDay.ToString()[..3] + "; ";
@@ -1040,7 +970,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                this.weekBox.Text = GetBriefArrayRepresentation(selected.ActiveWeeks, false);
+                this.weekBox.Text = Shared.GetBriefArrayRepresentation(selected.ActiveWeeks, false);
                 foreach (Day activeDay in selected.ActiveDays)
                 {
                     this.dayBox.Text += activeDay.ToString()[..3] + "; ";
@@ -1220,7 +1150,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 else
                 {
-                    activeWeeks = GetBriefArrayRepresentation(schedule.ActiveWeeks, false);
+                    activeWeeks = Shared.GetBriefArrayRepresentation(schedule.ActiveWeeks, false);
                 }
 
                 scheduleDataTable.Rows.Add(null,
@@ -1258,7 +1188,7 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (!(weekSelectBox == null ^ weekComboBox == null) || !(daySelectBox != null ^ dayComboBox != null))
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("combo box or select box is null");
             }
 
             StringBuilder errorMessage = new();
@@ -1502,7 +1432,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (availableTime.Count > 0)
             {
-                MessageBox.Show("日程可选起始时间：" + GetBriefArrayRepresentation(availableTime.ToArray(), true), "提示");
+                MessageBox.Show("日程可选起始时间：" + Shared.GetBriefArrayRepresentation(availableTime.ToArray(), true), "提示");
             }
             else
             {

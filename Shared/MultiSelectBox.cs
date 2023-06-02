@@ -1,5 +1,8 @@
 ﻿namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// 下拉多选框
+    /// </summary>
     public partial class MultiSelectBox : UserControl
     {
         private const int GapHeight = 24;

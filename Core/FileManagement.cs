@@ -4,10 +4,11 @@
 using System.Text;
 using Newtonsoft.Json.Linq;
 
+//文件管理
 namespace StudentScheduleManagementSystem.FileManagement
 {
     /// <summary>
-    /// 提供文件IO相关方法与常用目录（不含日志记录）
+    /// 提供文件IO相关方法与常用目录（不含日志记录），可以通过改变宏定义在明文/密文存储之间切换
     /// </summary>
     public static class FileManager
     {

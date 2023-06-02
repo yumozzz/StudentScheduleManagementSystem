@@ -90,7 +90,7 @@ namespace StudentScheduleManagementSystem.UI
                     this.scheduleDataTable.Rows.Add(null,
                                                     sharedData.Name,
                                                     sharedData.ScheduleId,
-                                                    Shared.GetBriefWeeks(sharedData.ActiveWeeks),
+                                                    Shared.GetBriefArrayRepresentation(sharedData.ActiveWeeks, false),
                                                     days.ToString(),
                                                     sharedData.Timestamp.Hour.ToString() + ":00",
                                                     sharedData.Duration.ToString() + "小时");

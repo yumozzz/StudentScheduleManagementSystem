@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 
 [assembly: RequiresPreviewFeatures]
 
+//主程序
 namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
@@ -599,16 +600,25 @@ namespace StudentScheduleManagementSystem.Times
 {
     public partial class Alarm
     {
+        /// <summary>
+        /// 闹钟的回调参数
+        /// </summary>
         public struct GeneralAlarmParam
         {
             public Time timestamp;
         }
 
+        /// <summary>
+        /// 闹钟的回调参数
+        /// </summary>
         public struct SpecifiedAlarmParam
         {
             public long scheduleId;
         }
 
+        /// <summary>
+        /// 闹钟的回调参数
+        /// </summary>
         public struct TemporaryAffairParam
         {
             public Time timestamp;

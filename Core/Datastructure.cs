@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 
+//数据结构
 namespace StudentScheduleManagementSystem.DataStructure
 {
     /// <summary>

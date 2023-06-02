@@ -1,3 +1,4 @@
+//UIΩÁ√Ê
 namespace StudentScheduleManagementSystem.UI
 {
     public partial class MainWindow : Form
