@@ -101,10 +101,13 @@ namespace StudentScheduleManagementSystem
     }
 
     /// <summary>
-    /// 
+    /// 覆盖了记录、日程或闹钟
     /// </summary>
     public class ItemOverrideException : InvalidOperationException { }
 
+    /// <summary>
+    /// Json格式不正确
+    /// </summary>
     public class JsonFormatException : JsonException
     {
         public JsonFormatException(string message)
@@ -114,13 +117,34 @@ namespace StudentScheduleManagementSystem
             : base() { }
     }
 
-    //public class ScheduleInformationMismatchException : Exception { }
+    /// <summary>
+    /// 找不到方法
+    /// </summary>
     public class MethodNotFoundException : ArgumentException { }
+
+    /// <summary>
+    /// 找不到类型或类型不合法
+    /// </summary>
     public class TypeNotFoundOrInvalidException : ArgumentException { }
-    public class ItemAlreadyExistedException : Exception { };
+
+    /// <summary>
+    /// 闹钟操作失败
+    /// </summary>
     public class AlarmManipulationException : InvalidOperationException { }
-    public class AmbiguousLocationMatchException : JsonException { }
+
+    /// <summary>
+    /// 地点不存在或有多个匹配结果
+    /// </summary>
+    public class InvalidLocationException : JsonException { }
+
+    /// <summary>
+    /// 同一时间点的临时日程过多
+    /// </summary>
     public class TooManyTemporaryAffairsException : InvalidOperationException { }
+
+    /// <summary>
+    /// 学期结束
+    /// </summary>
     public class EndOfSemester : Exception { };
 
     /// <summary>
@@ -157,7 +181,7 @@ namespace StudentScheduleManagementSystem
     /// <summary>
     /// 在Json的序列化与反序列化中实现Map.Location.Building结构体的转换
     /// </summary>
-    class BuildingJsonConverter : JsonConverter
+    public class BuildingJsonConverter : JsonConverter
     {
         public override bool CanRead => true;
         public override bool CanWrite => true;
@@ -207,7 +231,7 @@ namespace StudentScheduleManagementSystem
                 }
                 else
                 {
-                    throw new AmbiguousLocationMatchException();
+                    throw new InvalidLocationException();
                 }
             }
             return building;
@@ -276,7 +300,7 @@ namespace StudentScheduleManagementSystem
         /// <summary>
         /// 对<paramref name="array"/>进行排序
         /// </summary>
-        /// <typeparam name="T">数组的元素类型，实现了IComparable接口</typeparam>
+        /// <typeparam name="T">数组的元素类型，实现了IComparable接口。比较的时候会调用IComparable.CompareTo()</typeparam>
         public static void Sort<T>(ref T[] array) where T : IComparable
         {
             Sort(ref array, (t1, t2) => t1.CompareTo(t2));
@@ -285,7 +309,7 @@ namespace StudentScheduleManagementSystem
         /// <summary>
         ///  对<paramref name="array"/>进行排序
         /// </summary>
-        /// <typeparam name="T">数组的元素类型，不实现IComparable接口</typeparam>
+        /// <typeparam name="T">数组的元素类型，可以不实现IComparable接口</typeparam>
         /// <param name="comparer">对两个<typeparamref name="T"/>类型元素的比较函数</param>
         public static void Sort<T>(ref T[] array, Func<T, T, int> comparer)
         {
@@ -305,7 +329,7 @@ namespace StudentScheduleManagementSystem
     }
 
     /// <summary>
-    /// 存放扩展方法
+    /// 扩展方法
     /// </summary>
     public static class Extension
     {

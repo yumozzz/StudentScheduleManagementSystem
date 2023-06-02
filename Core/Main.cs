@@ -12,6 +12,9 @@ using Newtonsoft.Json.Linq;
 //主程序
 namespace StudentScheduleManagementSystem.MainProgram
 {
+    /// <summary>
+    /// 主程序类
+    /// </summary>
     public class Program
     {
         /// <summary>

@@ -1,6 +1,9 @@
 //UI½çÃæ
 namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// µÇÂ¼´°¿Ú
+    /// </summary>
     public partial class MainWindow : Form
     {
         public static StudentWindow? StudentWindow { get; private set; }

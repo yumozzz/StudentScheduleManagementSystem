@@ -424,7 +424,7 @@ namespace StudentScheduleManagementSystem.Times
         /// <param name="activeDays"></param>
         /// <exception cref="InvalidOperationException">由参数指定的闹钟将会覆盖每日提醒，或者会与另外一个闹钟冲突，且其中一个的重复类型是<see cref="RepetitiveType.Designated"/></exception>
         /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="ItemAlreadyExistedException">由参数指定的闹钟会与另外一个闹钟冲突，且两者的重复类型均是<see cref="RepetitiveType.Single"/></exception>
+        /// <exception cref="ItemOverrideException">由参数指定的闹钟会与另外一个闹钟冲突，且两者的重复类型均是<see cref="RepetitiveType.Single"/></exception>
         public static void AddAlarm(Time timestamp,
                                     RepetitiveType repetitiveType,
                                     AlarmCallback alarmTimeUpCallback,
@@ -497,7 +497,7 @@ namespace StudentScheduleManagementSystem.Times
                 case (RepetitiveType.Null, _):
                     break;
                 case (RepetitiveType.Single, RepetitiveType.Single):
-                    throw new ItemAlreadyExistedException();
+                    throw new ItemOverrideException();
                 case (RepetitiveType.Single, RepetitiveType.MultipleDays):
                     Log.Warning.Log($"id为{_timeline[offset].Id}的单次闹钟已被覆盖");
                     RemoveAlarm(timestamp, overrideType, Constants.EmptyIntArray, Constants.EmptyDayArray);

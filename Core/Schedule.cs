@@ -1143,7 +1143,7 @@ namespace StudentScheduleManagementSystem.Schedule
         /// 将所有课程类的数据反序列化
         /// </summary>
         /// <exception cref="JsonFormatException">JSON格式不正确</exception>
-        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
+        /// <exception cref="InvalidLocationException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1177,7 +1177,7 @@ namespace StudentScheduleManagementSystem.Schedule
                             }
                             else
                             {
-                                throw new AmbiguousLocationMatchException();
+                                throw new InvalidLocationException();
                             }
                         }
                         _ = new Course(shared.RepetitiveType,
@@ -1299,7 +1299,7 @@ namespace StudentScheduleManagementSystem.Schedule
         /// 将所有考试类的数据反序列化
         /// </summary>
         /// <exception cref="JsonFormatException">JSON格式不正确</exception>
-        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
+        /// <exception cref="InvalidLocationException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1331,7 +1331,7 @@ namespace StudentScheduleManagementSystem.Schedule
                         }
                         else
                         {
-                            throw new AmbiguousLocationMatchException();
+                            throw new InvalidLocationException();
                         }
                     }
                     _ = new Exam(shared.Name,
@@ -1502,7 +1502,7 @@ namespace StudentScheduleManagementSystem.Schedule
         /// 将所有活动类的数据反序列化
         /// </summary>
         /// <exception cref="JsonFormatException">JSON格式不正确</exception>
-        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
+        /// <exception cref="InvalidLocationException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1548,7 +1548,7 @@ namespace StudentScheduleManagementSystem.Schedule
                                 }
                                 else
                                 {
-                                    throw new AmbiguousLocationMatchException();
+                                    throw new InvalidLocationException();
                                 }
                             }
                             _ = new Activity(shared.RepetitiveType,
@@ -1612,7 +1612,7 @@ namespace StudentScheduleManagementSystem.Schedule
                             }
                             else
                             {
-                                throw new AmbiguousLocationMatchException();
+                                throw new InvalidLocationException();
                             }
                         }
                         _ = new Activity(dobj.RepetitiveType,
@@ -1882,7 +1882,7 @@ namespace StudentScheduleManagementSystem.Schedule
         /// 将所有临时事务类的数据反序列化
         /// </summary>
         /// <exception cref="JsonFormatException">JSON格式不正确</exception>
-        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
+        /// <exception cref="InvalidLocationException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public new static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1912,7 +1912,7 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     else
                     {
-                        throw new AmbiguousLocationMatchException();
+                        throw new InvalidLocationException();
                     }
                 }
                 _ = new TemporaryAffair(dobj.Name, dobj.Timestamp, dobj.Description, building, dobj.ScheduleId);
