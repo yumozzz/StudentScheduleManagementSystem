@@ -33,6 +33,9 @@ namespace StudentScheduleManagementSystem.UI
                                  });
         }
 
+        /// <summary>
+        /// 绘制路径
+        /// </summary>
         protected void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;

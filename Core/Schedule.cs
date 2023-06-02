@@ -5,6 +5,9 @@ using Newtonsoft.Json.Converters;
 
 namespace StudentScheduleManagementSystem.Schedule
 {
+    /// <summary>
+    /// 共享的日程信息
+    /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class SharedData
     {
@@ -233,6 +236,9 @@ namespace StudentScheduleManagementSystem.Schedule
             return Duration.CompareTo(schedule.Duration);
         }
 
+        /// <summary>
+        /// 检测重复信息是否相等
+        /// </summary>
         public static bool IsMatchInTermOfTime((RepetitiveType, Times.Time, Day[]) left,
                                                (RepetitiveType, Times.Time, Day[]) right)
         {
@@ -261,6 +267,9 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on schedule manipulation
 
+        /// <summary>
+        /// 移除一个日程
+        /// </summary>
         public virtual void DeleteSchedule()
         {
             DeleteSchedule(this);
@@ -301,6 +310,15 @@ namespace StudentScheduleManagementSystem.Schedule
             Log.Information.Log($"已删除id为{schedule.ScheduleId}的日程");
         }
 
+        /// <summary>
+        /// 尝试添加一个日程，并检测冲突
+        /// </summary>
+        /// <param name="collisionRepType">冲突日程的重复类型。若没有冲突，则为<see cref="RepetitiveType.Null"/></param>
+        /// <param name="collisionSchType">冲突日程的日程类型。若没有冲突，则为<see cref="ScheduleType.Idle"/></param>
+        /// <param name="collisionIds">所有冲突日程的ID</param>
+        /// <returns>若有冲突，则为<see langword="true"/>，反之为<see langword="false"/></returns>
+        /// <exception cref="InvalidOperationException">尝试添加的日程为临时事务时，该时间点上已存在临时事务。</exception>
+        /// <exception cref="ArgumentException">传入的重复类型参数非法</exception>
         public static bool DetectCollision(RepetitiveType repetitiveType,
                                            ScheduleType scheduleType,
                                            Times.Time beginTime,
@@ -391,6 +409,13 @@ namespace StudentScheduleManagementSystem.Schedule
             return willCollide;
         }
 
+        /// <summary>
+        /// 计算日程的ID
+        /// </summary>
+        /// <param name="specifiedId">要指定的ID。若不需要指定，则为<see langword="null"/></param>
+        /// <param name="beginWith">要指定的第一个数字。若不需要指定，则为<see langword="null"/></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">指定ID不以指定的第一个数字开头或指定ID的位数不为10</exception>
         protected long GenerateId(long? specifiedId, char? beginWith)
         {
             long? preProcessId = (ScheduleType, specifiedId) switch
@@ -417,7 +442,11 @@ namespace StudentScheduleManagementSystem.Schedule
             return id;
         }
 
-        protected void AddSchedule(long? specifiedId, char beginWith, bool addOnTimeline, bool addOnUserTable) //添加日程
+        /// <summary>
+        /// 在时间轴与表中添加日程
+        /// </summary>
+        /// <exception cref="ItemOverrideException">添加的日程与已有日程冲突（临时事务与临时事务冲突除外）</exception>
+        protected void AddSchedule(long? specifiedId, char beginWith, bool addOnTimeline, bool addOnUserTable)
         {
             DetectCollision(RepetitiveType,
                             ScheduleType,
@@ -461,6 +490,87 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 获取某个时间点的时间轴记录
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static Record GetRecordAt(int offset)
+        {
+            if (offset is >= Constants.TotalHours or < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            return _timeline[offset];
+        }
+
+        #endregion
+
+        #region API on shared data manipulation
+
+        /// <summary>
+        /// 获取由日程类型<paramref name="type"/>指定的所有共享日程信息
+        /// </summary>
+        /// <exception cref="ArgumentException">由<paramref name="type"/>指定的类型不存在共享日程信息</exception>
+        public static List<SharedData> GetSharedByType(ScheduleType type)
+        {
+            int i = type switch
+            {
+                ScheduleType.Course => 1, ScheduleType.Exam => 2, ScheduleType.Activity => 3,
+                _ => throw new ArgumentException(null, nameof(type))
+            };
+            List<SharedData> ret = new();
+            foreach (var id in _sharedDictionary.Keys)
+            {
+                if (id / (long)1e9 == i && id % (long)1e9 != 0)
+                {
+                    ret.Add(_sharedDictionary[id]);
+                }
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// 获取由ID<paramref name="id"/>指定的共享日程信息
+        /// </summary>
+        /// <returns>共享日程信息。若没有查到，则为<see langword="null"/></returns>
+        /// <exception cref="FormatException"><paramref name="id"/>的位数不为10</exception>
+        public static SharedData? GetSharedById(long id)
+        {
+            if (id is not (>= 1000000000 and <= 9999999999))
+            {
+                throw new FormatException($"id {id} is invalid");
+            }
+            try
+            {
+                return _sharedDictionary[id];
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取由名字<paramref name="name"/>指定的共享日程信息
+        /// </summary>
+        /// <returns>所有日程名含有<paramref name="name"/>的日程</returns>
+        public static List<SharedData> GetSharedByName(string name)
+        {
+            List<SharedData> ret = new();
+            foreach (var data in _sharedDictionary.Values)
+            {
+                if (data.Name.Contains(name))
+                {
+                    ret.Add(data);
+                }
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// 尝试删除由ID<paramref name="id"/>指定的共享日程信息
+        /// </summary>
+        /// <exception cref="FormatException"><paramref name="id"/>的位数不为10</exception>
         public static void DeleteShared(long id)
         {
             switch (id / (long)1e9)
@@ -498,70 +608,14 @@ namespace StudentScheduleManagementSystem.Schedule
             Log.Information.Log(_sharedDictionary.Remove(id) ? $"已删除id为{id}的共享日程" : $"未删除id为{id}的共享日程，日程不存在");
         }
 
-        public static Record GetRecordAt(int offset)
-        {
-            if (offset is >= Constants.TotalHours or < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-            return _timeline[offset];
-        }
-
-        #endregion
-
-        #region API on shared data search
-
-        public static List<SharedData> GetSharedByType(ScheduleType type)
-        {
-            int i = type switch
-            {
-                ScheduleType.Course => 1, ScheduleType.Exam => 2, ScheduleType.Activity => 3,
-                _ => throw new ArgumentException(null, nameof(type))
-            };
-            List<SharedData> ret = new();
-            foreach (var id in _sharedDictionary.Keys)
-            {
-                if (id / (long)1e9 == i && id % (long)1e9 != 0)
-                {
-                    ret.Add(_sharedDictionary[id]);
-                }
-            }
-            return ret;
-        }
-
-        public static SharedData? GetSharedById(long id)
-        {
-            if (id is not (>= 1000000000 and <= 9999999999))
-            {
-                throw new FormatException($"id {id} is invalid");
-            }
-            try
-            {
-                return _sharedDictionary[id];
-            }
-            catch (KeyNotFoundException)
-            {
-                return null;
-            }
-        }
-
-        public static List<SharedData> GetSharedByName(string name)
-        {
-            List<SharedData> ret = new();
-            foreach (var data in _sharedDictionary.Values)
-            {
-                if (data.Name.Contains(name))
-                {
-                    ret.Add(data);
-                }
-            }
-            return ret;
-        }
-
         #endregion
 
         #region API on schedule search
 
+        /// <summary>
+        /// 获取由日程类型<paramref name="type"/>指定的所有用户个人日程信息
+        /// </summary>
+        /// <exception cref="ArgumentException"><paramref name="type"/>为<see cref="ScheduleType.Idle"/></exception>
         public static List<Schedule> GetScheduleByType(ScheduleType type)
         {
             List<Schedule> ret = new();
@@ -613,6 +667,11 @@ namespace StudentScheduleManagementSystem.Schedule
             throw new ArgumentException(null, nameof(type));
         }
 
+        /// <summary>
+        /// 获取由ID<paramref name="id"/>指定的所有用户个人日程信息
+        /// </summary>
+        /// <returns>个人日程信息。若没有查到，则为<see langword="null"/></returns>
+        /// <exception cref="FormatException"><paramref name="id"/>的位数不为10</exception>
         public static Schedule? GetScheduleById(long id)
         {
             if (id is not (>= 1000000000 and <= 9999999999))
@@ -629,6 +688,10 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 获取由名字<paramref name="name"/>指定的个人日程信息
+        /// </summary>
+        /// <returns>所有日程名含有<paramref name="name"/>的日程</returns>
         public static List<Schedule> GetSchedulesByName(string name)
         {
             List<Schedule> ret = new();
@@ -646,13 +709,25 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on alarm manipulation
 
+        /// <summary>
+        /// 启用闹钟，不含回调参数
+        /// </summary>
+        /// <param name="alarmTimeUpCallback">闹钟启动时调用的回调函数</param>
         public virtual void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
         {
             EnableAlarm<object>(alarmTimeUpCallback, null);
         }
 
-        //alarmTimeUpCallback should be a public method in class "Alarm" or derived classes of "ScheduleBase"
-        //T should be a public nested class in class "Alarm"
+        /// <summary>
+        /// 启用闹钟，含回调参数
+        /// </summary>
+        /// <typeparam name="T">回调参数的类型</typeparam>
+        /// <param name="alarmTimeUpCallback">闹钟启动时调用的回调函数</param>
+        /// <param name="callbackParameter">传入回调函数的回调参数</param>
+        /// <exception cref="AlarmManipulationException">该日程实例的闹钟已经启用</exception>
+        /// <remarks>
+        /// 回调函数必须是一个定义在Alarm类或者Schedule及其派生类中的公共函数，<typeparamref name="T"/>必须是一个定义在Alarm类中的嵌套类型。闹钟的启用时间默认为日程前一小时
+        /// </remarks>
         public virtual void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
         {
             if (AlarmEnabled)
@@ -675,6 +750,10 @@ namespace StudentScheduleManagementSystem.Schedule
             AlarmEnabled = true;
         }
 
+        /// <summary>
+        /// 禁用闹钟
+        /// </summary>
+        /// <exception cref="AlarmManipulationException">该日程实例的闹钟已经禁用</exception>
         public virtual void DisableAlarm()
         {
             if (!AlarmEnabled)
@@ -689,6 +768,9 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on save and create instances to/from JSON
 
+        /// <summary>
+        /// 序列化由日程类型<paramref name="scheduleType"/>指定的所有日程实例
+        /// </summary>
         protected static JArray SaveInstance(ScheduleType scheduleType)
         {
             JArray array = new();
@@ -708,6 +790,10 @@ namespace StudentScheduleManagementSystem.Schedule
             return array;
         }
 
+        /// <summary>
+        /// 将所有共享日程的数据反序列化
+        /// </summary>
+        /// <exception cref="JsonFormatException"></exception>
         public static void ReadSharedData()
         {
             var dic = FileManagement.FileManager.ReadFromUserFile(FileManagement.FileManager.UserFileDirectory,
@@ -790,6 +876,10 @@ namespace StudentScheduleManagementSystem.Schedule
             #endif
         }
 
+        /// <summary>
+        /// 将所有共享日程的数据序列化
+        /// </summary>
+        /// <exception cref="FormatException">某一个共享日程的ID不合法</exception>
         public static void SaveSharedData()
         {
             JArray courses = new(), exams = new(), groupActivities = new(), scheduleCount;
@@ -831,6 +921,11 @@ namespace StudentScheduleManagementSystem.Schedule
                                                       Encryption.Encrypt.AESEncrypt);
         }
 
+        /// <summary>
+        /// 更新共享日程表
+        /// </summary>
+        /// <param name="schedule">新建的共享日程</param>
+        /// <exception cref="ArgumentException"><paramref name="schedule"/>的ID不合法</exception>
         protected static void UpdateSharedData(Schedule schedule)
         {
             SharedData data = new()
@@ -1034,6 +1129,11 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on save and create instances to/from JSON
 
+        /// <summary>
+        /// 将所有课程类的数据反序列化
+        /// </summary>
+        /// <exception cref="JsonFormatException">JSON格式不正确</exception>
+        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1056,11 +1156,11 @@ namespace StudentScheduleManagementSystem.Schedule
                         }
                         else if (locations.Distinct().Count() == locations.Count)
                         {
-                            building = locations.First((building) => building.Name == dobj.OfflineLocation.Value.Name);
+                            building = locations.First(building => building.Name == dobj.OfflineLocation.Value.Name);
                         }
                         else
                         {
-                            locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Value.Name).ToList();
+                            locations = locations.Where(building => building.Name == dobj.OfflineLocation.Value.Name).ToList();
                             if (locations.Count == 1)
                             {
                                 building = locations[0];
@@ -1107,6 +1207,9 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 将所有课程类的数据序列化
+        /// </summary>
         public static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.Course);
 
         #endregion
@@ -1179,6 +1282,11 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on save and create instances to/from JSON
 
+        /// <summary>
+        /// 将所有考试类的数据反序列化
+        /// </summary>
+        /// <exception cref="JsonFormatException">JSON格式不正确</exception>
+        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1199,11 +1307,11 @@ namespace StudentScheduleManagementSystem.Schedule
                     }
                     else if (locations.Distinct().Count() == locations.Count)
                     {
-                        building = locations.First((building) => building.Name == dobj.OfflineLocation.Name);
+                        building = locations.First(building => building.Name == dobj.OfflineLocation.Name);
                     }
                     else
                     {
-                        locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Name).ToList();
+                        locations = locations.Where(building => building.Name == dobj.OfflineLocation.Name).ToList();
                         if (locations.Count == 1)
                         {
                             building = locations[0];
@@ -1229,6 +1337,9 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 将所有课程类的数据序列化
+        /// </summary>
         public static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.Exam);
 
         #endregion
@@ -1371,6 +1482,11 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on save and create instances to/from JSON
 
+        /// <summary>
+        /// 将所有活动类的数据反序列化
+        /// </summary>
+        /// <exception cref="JsonFormatException">JSON格式不正确</exception>
+        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1405,11 +1521,11 @@ namespace StudentScheduleManagementSystem.Schedule
                             }
                             else if (locations.Distinct().Count() == locations.Count)
                             {
-                                building = locations.First((building) => building.Name == dobj.OfflineLocation.Value.Name);
+                                building = locations.First(building => building.Name == dobj.OfflineLocation.Value.Name);
                             }
                             else
                             {
-                                locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Value.Name).ToList();
+                                locations = locations.Where(building => building.Name == dobj.OfflineLocation.Value.Name).ToList();
                                 if (locations.Count == 1)
                                 {
                                     building = locations[0];
@@ -1469,11 +1585,11 @@ namespace StudentScheduleManagementSystem.Schedule
                         }
                         else if (locations.Distinct().Count() == locations.Count)
                         {
-                            building = locations.First((building) => building.Name == dobj.OfflineLocation.Value.Name);
+                            building = locations.First(building => building.Name == dobj.OfflineLocation.Value.Name);
                         }
                         else
                         {
-                            locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Value.Name).ToList();
+                            locations = locations.Where(building => building.Name == dobj.OfflineLocation.Value.Name).ToList();
                             if (locations.Count == 1)
                             {
                                 building = locations[0];
@@ -1518,6 +1634,9 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 将所有活动类的数据序列化
+        /// </summary>
         public static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.Activity);
 
         #endregion
@@ -1557,6 +1676,7 @@ namespace StudentScheduleManagementSystem.Schedule
 
         [JsonProperty, JsonConverter(typeof(BuildingJsonConverter))]
         public new Map.Location.Building OfflineLocation { get; init; }
+
         [JsonProperty]
         public override bool AlarmEnabled
         {
@@ -1678,6 +1798,10 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on alarm manipulation
 
+        /// <summary>
+        /// 启用闹钟，不含回调参数
+        /// </summary>
+        /// <param name="alarmTimeUpCallback">闹钟启动时调用的回调函数</param>
         public override void EnableAlarm(Times.Alarm.AlarmCallback alarmTimeUpCallback)
         {
             TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
@@ -1691,6 +1815,15 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 启用闹钟，含回调参数
+        /// </summary>
+        /// <typeparam name="T">回调参数的类型</typeparam>
+        /// <param name="alarmTimeUpCallback">闹钟启动时调用的回调函数</param>
+        /// <param name="callbackParameter">传入回调函数的回调参数</param>
+        /// <remarks>
+        /// 回调函数必须是一个定义在Alarm类或者Schedule及其派生类中的公共函数，<typeparamref name="T"/>必须是一个定义在Alarm类中的嵌套类型。闹钟的启用时间默认为日程前一小时
+        /// </remarks>
         public override void EnableAlarm<T>(Times.Alarm.AlarmCallback alarmTimeUpCallback, T? callbackParameter)
             where T : default
         {
@@ -1705,6 +1838,10 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 禁用闹钟
+        /// </summary>
+        /// <exception cref="AlarmManipulationException">该日程实例的闹钟已经禁用</exception>
         public override void DisableAlarm()
         {
             TemporaryAffair affair = (TemporaryAffair)_scheduleDictionary[_timeline[BeginTime.ToInt()].Id];
@@ -1722,6 +1859,11 @@ namespace StudentScheduleManagementSystem.Schedule
 
         #region API on save and create instances to/from JSON
 
+        /// <summary>
+        /// 将所有临时事务类的数据反序列化
+        /// </summary>
+        /// <exception cref="JsonFormatException">JSON格式不正确</exception>
+        /// <exception cref="AmbiguousLocationMatchException">某一个日程的线下地点名有多个匹配的建筑</exception>
         public new static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -1740,11 +1882,11 @@ namespace StudentScheduleManagementSystem.Schedule
                 }
                 else if (locations.Distinct().Count() == locations.Count)
                 {
-                    building = locations.First((building) => building.Name == dobj.OfflineLocation.Name);
+                    building = locations.First(building => building.Name == dobj.OfflineLocation.Name);
                 }
                 else
                 {
-                    locations = locations.Where((building) => building.Name == dobj.OfflineLocation.Name).ToList();
+                    locations = locations.Where(building => building.Name == dobj.OfflineLocation.Name).ToList();
                     if (locations.Count == 1)
                     {
                         building = locations[0];
@@ -1764,6 +1906,9 @@ namespace StudentScheduleManagementSystem.Schedule
             }
         }
 
+        /// <summary>
+        /// 将所有临时事务类的数据序列化
+        /// </summary>
         public new static JArray SaveInstance() => Schedule.SaveInstance(ScheduleType.TemporaryAffair);
 
         #endregion

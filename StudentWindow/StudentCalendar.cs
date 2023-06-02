@@ -15,6 +15,9 @@ namespace StudentScheduleManagementSystem.UI
             GenerateScheduleTable(1);
         }
 
+        /// <summary>
+        /// 若<paramref name="time"/>是某一周的第一个小时，则刷新表格
+        /// </summary>
         private void RefreshScheduleTable(Times.Time time)
         {
             if (scheduleTable.InvokeRequired)
@@ -27,6 +30,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 按周数<paramref name="week"/>刷新表格
+        /// </summary>
         private void GenerateScheduleTable(int week)
         {
             showWeekLabel.Text = $"第 {week.ToString()} 周";
@@ -42,7 +48,7 @@ namespace StudentScheduleManagementSystem.UI
             for (int i = offset + 5; i < offset + 21; i++)
             {
                 string[] scheduleRecords = new string[7];
-                bool[] alarmEnalbled = new bool[7];
+                bool[] alarmEnabled = new bool[7];
                 for (int j = 0; j < 7; j++)
                 {
                     scheduleRecords[j] = "";
@@ -68,9 +74,15 @@ namespace StudentScheduleManagementSystem.UI
                         description = scheduleRecord.Description!;
                     }
                     Debug.Assert(scheduleRecord != null);
-                    scheduleRecords[j] = scheduleName + $"\n（{TranslateScheduleType(scheduleRecord.ScheduleType)}）\n" +
+                    string typeName = scheduleRecord.ScheduleType switch
+                    {
+                        ScheduleType.Course => "课程", ScheduleType.Exam => "考试", ScheduleType.Activity => "活动",
+                        ScheduleType.TemporaryAffair => "临时事务",
+                        _ => throw new ArgumentException(null, nameof(scheduleRecord.ScheduleType)),
+                    };
+                    scheduleRecords[j] = scheduleName + $"\n（{typeName}）\n" +
                                          description;
-                    alarmEnalbled[j] = scheduleRecord.AlarmEnabled;
+                    alarmEnabled[j] = scheduleRecord.AlarmEnabled;
                 }
                 this.scheduleTable.Rows.Add($"{(i - offset + 1).ToString()}:00\n-\n{(i - offset + 2).ToString()}:00",
                                             scheduleRecords[0],
@@ -83,28 +95,12 @@ namespace StudentScheduleManagementSystem.UI
                 this.scheduleTable.Rows[i - offset - 5].Height = 150;
                 for(int j = 0; j < 7; j++)
                 {
-                    if (alarmEnalbled[j])
+                    if (alarmEnabled[j])
                     {
                         this.scheduleTable.Rows[i - offset - 5].Cells[j + 1].Style.ForeColor = Color.FromArgb(50, 168, 128, 194);
                     }
                 }
             }
-        }
-
-        string TranslateScheduleType(ScheduleType scheduleType)
-        {
-            switch (scheduleType)
-            {
-                case ScheduleType.Course:
-                    return "课程";
-                case ScheduleType.Exam:
-                    return "考试";
-                case ScheduleType.Activity:
-                    return "活动";
-                case ScheduleType.TemporaryAffair:
-                    return "临时事务";
-            }
-            return "未知";
         }
 
         private void ThisWeekScheduleTable_Click(object sender, EventArgs e)
@@ -113,6 +109,9 @@ namespace StudentScheduleManagementSystem.UI
             GenerateScheduleTable(_displayedWeek);
         }
 
+        /// <summary>
+        /// 用户点击上一周按钮
+        /// </summary>
         private void LastWeekScheduleTable_Click(object sender, EventArgs e)
         {
             if (_displayedWeek - 1 > 0)
@@ -127,6 +126,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 用户点击下一周按钮
+        /// </summary>
         private void NextWeekScheduleTable_Click(object sender, EventArgs e)
         {
             if (_displayedWeek + 1 <= 16)
@@ -141,44 +143,48 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 双击单元格，转到对应日程
+        /// </summary>
         private void ScheduleTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if(e.RowIndex >= 0 && e.ColumnIndex > 0)
             {
                 int doubleClickCell = (_displayedWeek - 1) * 7 * 24 + (e.ColumnIndex - 1) * 24 + e.RowIndex + 6;
                 _selectedId = Schedule.Schedule.GetRecordAt(doubleClickCell).Id;
-                if(_selectedId != 0)
+                if (_selectedId == 0)
                 {
-                    Schedule.Schedule selected = Schedule.Schedule.GetScheduleById(_selectedId)!;
-                    ScheduleType scheduleType = selected!.ScheduleType;
-                    switch (scheduleType)
-                    {
-                        case ScheduleType.Course:
-                            MainWindow.CourseButton_Click(this, EventArgs.Empty);
-                            MainWindow.StudentCourseSubwindow!.SelectScheduleWithId(_selectedId);
-                            break;
-                        case ScheduleType.Exam:
-                            MainWindow.ExamButton_Click(this, EventArgs.Empty);
-                            MainWindow.StudentExamSubwindow!.SelectScheduleWithId(_selectedId);
-                            break;
-                        case ScheduleType.Activity:
-                            Schedule.Activity activity = (Schedule.Activity)selected;
-                            if (activity.IsGroupActivity)
-                            {
-                                MainWindow.GroupActivityButton_Click(this, EventArgs.Empty);
-                                MainWindow.StudentGroupActivitySubwindow!.SelectScheduleWithId(_selectedId);
-                            }
-                            else
-                            {
-                                MainWindow.PersonalActivityButton_Click(this, EventArgs.Empty);
-                                MainWindow.StudentPersonalActivitySubwindow!.SelectScheduleWithId(_selectedId);
-                            }
-                            break;
-                        case ScheduleType.TemporaryAffair:
-                            MainWindow.TemporaryAffairButton_Click(this, EventArgs.Empty);
-                            MainWindow.StudentTemporaryAffairSubwindow!.SelectScheduleWithId(_selectedId);
-                            break;
-                    }
+                    return;
+                }
+                Schedule.Schedule selected = Schedule.Schedule.GetScheduleById(_selectedId)!;
+                ScheduleType scheduleType = selected!.ScheduleType;
+                switch (scheduleType)
+                {
+                    case ScheduleType.Course:
+                        MainWindow.CourseButton_Click(this, EventArgs.Empty);
+                        MainWindow.StudentCourseSubwindow!.SelectScheduleWithId(_selectedId);
+                        break;
+                    case ScheduleType.Exam:
+                        MainWindow.ExamButton_Click(this, EventArgs.Empty);
+                        MainWindow.StudentExamSubwindow!.SelectScheduleWithId(_selectedId);
+                        break;
+                    case ScheduleType.Activity:
+                        Schedule.Activity activity = (Schedule.Activity)selected;
+                        if (activity.IsGroupActivity)
+                        {
+                            MainWindow.GroupActivityButton_Click(this, EventArgs.Empty);
+                            MainWindow.StudentGroupActivitySubwindow!.SelectScheduleWithId(_selectedId);
+                        }
+                        else
+                        {
+                            MainWindow.PersonalActivityButton_Click(this, EventArgs.Empty);
+                            MainWindow.StudentPersonalActivitySubwindow!.SelectScheduleWithId(_selectedId);
+                        }
+                        break;
+                    case ScheduleType.TemporaryAffair:
+                        MainWindow.TemporaryAffairButton_Click(this, EventArgs.Empty);
+                        MainWindow.StudentTemporaryAffairSubwindow!.SelectScheduleWithId(_selectedId);
+                        break;
                 }
             }
         }

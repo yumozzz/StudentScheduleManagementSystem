@@ -52,18 +52,23 @@ namespace StudentScheduleManagementSystem.UI
 
         #region tool methods
 
-        protected static StringBuilder GetBriefWeeks(int[] activeWeeks, bool measureIsHour)
+        /// <summary>
+        /// 将<paramref name="arr"/>转换为其等效的简略形式
+        /// </summary>
+        /// <param name="inputIsHour">输入是否是小时的数组。如果是，则输出会添加:00</param>
+        /// <example>1,2,3,5 => 1-3,5</example>
+        protected static string GetBriefArrayRepresentation(int[] arr, bool inputIsHour)
         {
-            if (activeWeeks.Length == 1)
+            if (arr.Length == 1)
             {
-                return new StringBuilder(activeWeeks[0].ToString());
+                return arr[0].ToString();
             }
 
             int continuity = 0;
-            StringBuilder ret = new("");
-            for (int i = 1; i < activeWeeks.Length; i++)
+            StringBuilder ret = new();
+            for (int i = 1; i < arr.Length; i++)
             {
-                if (activeWeeks[i] == activeWeeks[i - 1] + 1)
+                if (arr[i] == arr[i - 1] + 1)
                 {
                     if (continuity == 0)
                     {
@@ -71,8 +76,8 @@ namespace StudentScheduleManagementSystem.UI
                         {
                             ret.Append(", ");
                         }
-                        ret.Append(activeWeeks[i - 1]);
-                        if (measureIsHour)
+                        ret.Append(arr[i - 1]);
+                        if (inputIsHour)
                         {
                             ret.Append(":00");
                         }
@@ -87,13 +92,13 @@ namespace StudentScheduleManagementSystem.UI
                         {
                             ret.Append(", ");
                         }
-                        ret.Append(activeWeeks[i - 1]);
+                        ret.Append(arr[i - 1]);
                     }
                     else
                     {
-                        ret.Append("-" + activeWeeks[i - 1].ToString());
+                        ret.Append("-" + arr[i - 1].ToString());
                     }
-                    if (measureIsHour)
+                    if (inputIsHour)
                     {
                         ret.Append(":00");
                     }
@@ -103,20 +108,23 @@ namespace StudentScheduleManagementSystem.UI
 
             if (continuity == 0)
             {
-                ret.Append(", " + activeWeeks[^1].ToString());
+                ret.Append(", " + arr[^1].ToString());
             }
             else
             {
-                ret.Append("-" + activeWeeks[^1].ToString());
+                ret.Append("-" + arr[^1].ToString());
             }
-            if (measureIsHour)
+            if (inputIsHour)
             {
                 ret.Append(":00");
             }
 
-            return ret;
+            return ret.ToString();
         }
 
+        /// <summary>
+        /// 计算对列表排序时两个元素的排序结果
+        /// </summary>
         private void TableSortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
             int column = e.Column.Index;
@@ -152,6 +160,10 @@ namespace StudentScheduleManagementSystem.UI
                                                     sharedData1.RepetitiveType == RepetitiveType.Single
                                                         ? new[] { sharedData1.Timestamp.Day.ToInt() }
                                                         : Array.ConvertAll(sharedData2.ActiveDays, day => day.ToInt()));
+                }
+                else if (column == 5)
+                {
+                    e.SortResult = sharedData1.Timestamp.Hour.CompareTo(sharedData2.Timestamp.Hour);
                 }
                 if (e.SortResult == 0)
                 {
@@ -189,6 +201,10 @@ namespace StudentScheduleManagementSystem.UI
                                                         ? new[] { schedule1.BeginTime.Day.ToInt() }
                                                         : Array.ConvertAll(schedule2.ActiveDays, day => day.ToInt()));
                 }
+                else if (column == 5)
+                {
+                    e.SortResult = schedule1.BeginTime.Hour.CompareTo(schedule2.BeginTime.Hour);
+                }
                 if (e.SortResult == 0)
                 {
                     e.SortResult = schedule1.ScheduleId.CompareTo(schedule2.ScheduleId);
@@ -201,6 +217,11 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 检测在表格中选中的日程和已有日程是否冲突
+        /// </summary>
+        /// <param name="showMessageBox"></param>
+        /// <returns>如果有冲突，则为0；反之为该选中日程的ID</returns>
         protected long DetectCollision(bool showMessageBox)
         {
             int[] selectedRows = scheduleDataTable.GetSelectedRowsCount(0);
@@ -258,6 +279,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 清空输入框
+        /// </summary>
         protected void ClearInformation()
         {
             this.nameBox.Text = "";
@@ -272,13 +296,18 @@ namespace StudentScheduleManagementSystem.UI
             this.onlineLinkBox.Text = "";
         }
 
+        /// <summary>
+        /// 在所有用户日程中选择ID为<paramref name="id"/>的项
+        /// </summary>
+        /// <param name="id"></param>
         public void SelectScheduleWithId(long id)
         {
-            if (_subwindowType is SubwindowType.Course or SubwindowType.Exam or SubwindowType.GroupActivity)
+            if (_subwindowType is SubwindowType.Course or SubwindowType.Exam or SubwindowType.GroupActivity &&
+                _showAllData)
             {
                 SwitchData_Click(this, EventArgs.Empty);
             }
-            foreach(DataGridViewRow row in scheduleDataTable.Rows)
+            foreach (DataGridViewRow row in scheduleDataTable.Rows)
             {
                 if (row.Cells[9].Value.ToString() == id.ToString())
                 {
@@ -292,12 +321,18 @@ namespace StudentScheduleManagementSystem.UI
 
         #region table content generator
 
+        /// <summary>
+        /// 将表格内容设置为由日程类型<paramref name="type"/>指定的所有共享日程
+        /// </summary>
         protected void GenerateSharedData(ScheduleType type)
         {
             _sharedData = Schedule.Schedule.GetSharedByType(type);
             GenerateSharedData(_sharedData.ToArray());
         }
 
+        /// <summary>
+        /// 将表格内容设置为由<paramref name="data"/>给出的所有共享日程
+        /// </summary>
         protected void GenerateSharedData(Schedule.SharedData[] data)
         {
             MergeSort.Sort(ref data, (data1, data2) => data1.ScheduleId.CompareTo(data2.ScheduleId));
@@ -356,7 +391,7 @@ namespace StudentScheduleManagementSystem.UI
                     this.scheduleDataTable.Rows.Add(null,
                                                     false,
                                                     sharedData.Name,
-                                                    GetBriefWeeks(sharedData.ActiveWeeks, false).ToString(),
+                                                    GetBriefArrayRepresentation(sharedData.ActiveWeeks, false),
                                                     days.ToString(),
                                                     sharedData.Timestamp.Hour.ToString() + ":00",
                                                     sharedData.Duration.ToString() + "小时",
@@ -402,18 +437,27 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 将表格内容设置为由日程类型<paramref name="type"/>指定的所有用户日程
+        /// </summary>
         protected void GenerateUserData(ScheduleType type)
         {
             _userData = Schedule.Schedule.GetScheduleByType(type);
             GenerateUserData(_userData.ToArray());
         }
 
+        /// <summary>
+        /// 将表格内容设置为由<paramref name="data"/>给出的所有用户日程
+        /// </summary>
         protected abstract void GenerateUserData(Schedule.Schedule[] data);
 
         #endregion
 
         #region envent handler
 
+        /// <summary>
+        /// 切换所有日程界面和个人日程界面
+        /// </summary>
         private void SwitchData_Click(object sender, EventArgs e)
         {
             if (_showAllData)
@@ -454,6 +498,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// /// <summary>
+        /// 用户取消添加或修改日程，清空输入框并重置UI
+        /// </summary>
         protected void CancelButton_Click(object sender, EventArgs e)
         {
             ClearInformation();
@@ -477,6 +524,9 @@ namespace StudentScheduleManagementSystem.UI
             Times.Timer.Pause = false;
         }
 
+        /// <summary>
+        /// 删除日程。在删除之前让用户确认
+        /// </summary>
         protected void DeleteScheduleButton_Click(object sender, EventArgs e)
         {
             Times.Timer.Pause = true;
@@ -514,7 +564,31 @@ namespace StudentScheduleManagementSystem.UI
             Times.Timer.Pause = false;
         }
 
+        /// <summary>
+        /// 处理搜索框的输入，禁止输入非法字符
+        /// </summary>
+        private void SearchByNameBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar is not ((>= (char)0x4e00 and <= (char)0x9fbb) or
+                                  (>= '0' and <= '9') or
+                                  (>= 'A' and <= 'Z') or
+                                  (>= 'a' and <= 'z') or
+                                  '_' or
+                                  '-' or
+                                  ' ' or
+                                  '\b'))
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                this.searchByNameBox.ForeColor = Color.Black;
+            }
+        }
 
+        /// <summary>
+        /// 用户点击搜索，产生搜索结果并显示
+        /// </summary>
         private void SearchOK_Click(object sender, EventArgs e)
         {
             if (this.searchByNameBox.Text.Equals(""))
@@ -549,6 +623,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 用户取消搜索
+        /// </summary>
         private void SearchCancel_Click(object sender, EventArgs e)
         {
             searchByNameBox.Text = "";
@@ -562,6 +639,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 用户更改闹钟状态
+        /// </summary>
         protected void OnSwitchAlarm(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex != 1 || _showAllData)
@@ -665,7 +745,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 else
                 {
-                    activeWeeks = GetBriefWeeks(schedule.ActiveWeeks, false).ToString();
+                    activeWeeks = GetBriefArrayRepresentation(schedule.ActiveWeeks, false);
                 }
 
                 scheduleDataTable.Rows.Add(null,
@@ -847,6 +927,9 @@ namespace StudentScheduleManagementSystem.UI
 
         #region event handler
 
+        /// <summary>
+        /// 用户在全部日程的页面选择日程并进入添加状态
+        /// </summary>
         protected void AddScheduleButton_Click(object sender, EventArgs e)
         {
             Times.Timer.Pause = true;
@@ -889,7 +972,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                this.weekBox.Text = GetBriefWeeks(selected.ActiveWeeks, false).ToString();
+                this.weekBox.Text = GetBriefArrayRepresentation(selected.ActiveWeeks, false);
                 foreach (Day activeDay in selected.ActiveDays)
                 {
                     this.dayBox.Text += activeDay.ToString()[..3] + "; ";
@@ -905,6 +988,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 用户在用户日程的页面选择日程并进入修改状态
+        /// </summary>
         protected void ReviseButton_Click(object sender, EventArgs e)
         {
             Times.Timer.Pause = true;
@@ -948,7 +1034,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             else
             {
-                this.weekBox.Text = GetBriefWeeks(selected.ActiveWeeks, false).ToString();
+                this.weekBox.Text = GetBriefArrayRepresentation(selected.ActiveWeeks, false);
                 foreach (Day activeDay in selected.ActiveDays)
                 {
                     this.dayBox.Text += activeDay.ToString()[..3] + "; ";
@@ -997,6 +1083,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 用户确认添加或修改日程
+        /// </summary>
         protected void OkButton_Click(object sender, EventArgs e)
         {
             Debug.Assert((_subwindowState, _originId) is (SubwindowState.ReviseUserSchedule, > (long)1e9) or
@@ -1122,7 +1211,7 @@ namespace StudentScheduleManagementSystem.UI
                 }
                 else
                 {
-                    activeWeeks = GetBriefWeeks(schedule.ActiveWeeks, false).ToString();
+                    activeWeeks = GetBriefArrayRepresentation(schedule.ActiveWeeks, false);
                 }
 
                 scheduleDataTable.Rows.Add(null,
@@ -1142,6 +1231,10 @@ namespace StudentScheduleManagementSystem.UI
 
         #region tool methods
 
+        /// <summary>
+        /// 获取由当前用户输入指定的日程的详细信息，对其进行合法性检测。若<paramref name="showMessageBox"/>为<see langword="true"/>，则显示提示框以让用户确认
+        /// </summary>
+        /// <returns>若用户的输入不合法或用户取消了确认，则为<see langword="false"/>；反之为<see langword="true"/></returns>
         public bool GetScheduleInfo(bool showMessageBox,
                                     int earliest,
                                     int latest,
@@ -1320,7 +1413,10 @@ namespace StudentScheduleManagementSystem.UI
                                                       MessageBoxButtons.OKCancel) == DialogResult.OK;
         }
 
-        protected abstract bool AddSchedule(string name,
+        /// <summary>
+        /// 添加日程
+        /// </summary>
+        protected abstract void AddSchedule(string name,
                                             RepetitiveType repetitiveType,
                                             int[] activeWeeks,
                                             Day[] activeDays,
@@ -1329,12 +1425,19 @@ namespace StudentScheduleManagementSystem.UI
                                             string offlineLocationName,
                                             string onlineLink);
 
+        /// <summary>
+        /// 获取用户设定的日程周、日、时长
+        /// </summary>
+        /// <returns>用户的输入是否合法</returns>
         protected abstract bool GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration);
 
         #endregion
 
         #region event handler
 
+        /// <summary>
+        /// 获取由参数指定的所有日的公共空闲时间并提示
+        /// </summary>
         protected void GetAvailableTime_Click(object sender, EventArgs e)
         {
             if (!GetTargetTimeDetail(out int[] activeWeeks, out Day[] activeDays, out int duration))
@@ -1390,7 +1493,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             if (availableTime.Count > 0)
             {
-                MessageBox.Show("日程可选起始时间：" + GetBriefWeeks(availableTime.ToArray(), true), "提示");
+                MessageBox.Show("日程可选起始时间：" + GetBriefArrayRepresentation(availableTime.ToArray(), true), "提示");
             }
             else
             {
@@ -1398,6 +1501,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 用户确认修改日程
+        /// </summary>
         protected void ReviseOkButton_Click(object sender, EventArgs e)
         {
             Debug.Assert(_subwindowState is SubwindowState.ReviseUserSchedule && _originId != null);
@@ -1462,17 +1568,29 @@ namespace StudentScheduleManagementSystem.UI
             Times.Timer.Pause = false;
         }
 
+        /// <summary>
+        /// 进入修改日程状态，将选择的用户日程信息呈现到输入框中
+        /// </summary>
         protected abstract void ReviseScheduleButton_Click(object sender, EventArgs e);
 
+        /// <summary>
+        /// 清空输入框
+        /// </summary>
         protected void ClearPersonalInformation()
         {
-            ClearInformation();
+            this.nameBox.Text = "";
+            this.hourBox.Text = "";
+            this.buildingRadioButton.Checked = false;
+            this.onlineLinkRadioButton.Checked = false;
+            this.buildingComboBox.SelectedIndex = -1;
+            this.buildingComboBox.Text = "";
+            this.onlineLinkBox.Text = "";
             if (this.weekComboBox != null)
             {
                 this.weekComboBox.SelectedIndex = -1;
                 this.weekComboBox.Text = "";
             }
-            if(dayComboBox != null)
+            if (dayComboBox != null)
             {
                 this.dayComboBox.SelectedIndex = -1;
                 this.dayComboBox.Text = "";
@@ -1480,7 +1598,7 @@ namespace StudentScheduleManagementSystem.UI
             this.weekSelectBox?.ClearBox();
             this.daySelectBox?.ClearBox();
             this.durationBox.Text = "";
-            if(durationComboBox != null)
+            if (durationComboBox != null)
             {
                 this.durationComboBox.SelectedIndex = -1;
                 this.durationComboBox.Text = "";
@@ -1540,6 +1658,9 @@ namespace StudentScheduleManagementSystem.UI
 
         #region UI generator
 
+        /// <summary>
+        /// 设置UI
+        /// </summary>
         private void GenerateSubwindow()
         {
             weekSelectBox!.BackColor = Color.White;
@@ -1645,7 +1766,7 @@ namespace StudentScheduleManagementSystem.UI
             return true;
         }
 
-        protected override bool AddSchedule(string name,
+        protected override void AddSchedule(string name,
                                             RepetitiveType repetitiveType,
                                             int[] activeWeeks,
                                             Day[] activeDays,
@@ -1692,13 +1813,15 @@ namespace StudentScheduleManagementSystem.UI
             this.buildingComboBox.Text = "";
             this.onlineLinkBox.Text = "";
             ClearPersonalInformation();
-            return true;
         }
 
         #endregion
 
         #region event handler
 
+        /// <summary>
+        /// 尝试添加日程并让用户确认
+        /// </summary>
         private void AddScheduleButton_Click(object sender, EventArgs e)
         {
             bool confirm = GetScheduleInfo(true,
@@ -1833,6 +1956,9 @@ namespace StudentScheduleManagementSystem.UI
 
         #region UI generator
 
+        /// <summary>
+        /// 设置UI
+        /// </summary>
         private void GenerateSubwindow()
         {
             hourComboBox.BackColor = Color.White;
@@ -1944,7 +2070,7 @@ namespace StudentScheduleManagementSystem.UI
             return true;
         }
 
-        protected override bool AddSchedule(string name,
+        protected override void AddSchedule(string name,
                                             RepetitiveType repetitiveType,
                                             int[] activeWeeks,
                                             Day[] activeDays,
@@ -1960,13 +2086,15 @@ namespace StudentScheduleManagementSystem.UI
             GenerateUserData(_scheduleType);
             ClearPersonalInformation();
             this.hourComboBox.Text = "";
-            return true;
         }
 
         #endregion
 
         #region event handler
 
+        /// <summary>
+        /// 尝试添加日程并让用户确认
+        /// </summary>
         private void AddScheduleButton_Click(object sender, EventArgs e)
         {
             bool confirm = GetScheduleInfo(true,

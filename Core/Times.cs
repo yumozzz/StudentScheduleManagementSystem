@@ -2,10 +2,12 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Reflection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace StudentScheduleManagementSystem.Times
 {
+    /// <summary>
+    /// 模拟时间类
+    /// </summary>
     public class Time
     {
         private int _week = 1;
@@ -37,6 +39,10 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
+        /// <summary>
+        /// 时间推进1小时
+        /// </summary>
+        /// <exception cref="EndOfSemester">模拟时间超过允许值</exception>
         public static Time operator ++(Time time)
         {
             if (time.Hour == 23)
@@ -105,14 +111,18 @@ namespace StudentScheduleManagementSystem.Times
         }
     }
 
+    /// <summary>
+    /// 时间轴类
+    /// </summary>
+    /// <typeparam name="TRecord">时间轴记录的类型</typeparam>
     public class Timeline<TRecord> where TRecord : struct, IUniqueRepetitiveEvent
     {
+        /// <summary>
+        /// 记录数字
+        /// </summary>
         public TRecord[] RecordArray { get; } = new TRecord[Constants.TotalHours];
 
-        public ref TRecord this[int index]
-        {
-            get => ref RecordArray[index];
-        }
+        public ref TRecord this[int index] => ref RecordArray[index];
 
         private void RemoveSingleItem(int offset, TRecord defaultValue = default)
         {
@@ -132,6 +142,13 @@ namespace StudentScheduleManagementSystem.Times
             RecordArray[offset] = value;
         }
 
+        /// <summary>
+        /// 从时间轴上删除一个重复事件
+        /// </summary>
+        /// <param name="removeId">删除事件的ID</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ItemOverrideException">在不存在记录的位置上执行删除</exception>
         public void RemoveMultipleItems(Time timestamp,
                                         int duration,
                                         RepetitiveType repetitiveType,
@@ -199,6 +216,12 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
+        /// <summary>
+        /// 在时间轴上添加一个重复事件
+        /// </summary>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ItemOverrideException">在存在记录的位置上执行添加</exception>
         public void AddMultipleItems(Time timestamp, int duration, TRecord record, int[] activeWeeks, Day[] activeDays)
         {
             int offset;
@@ -264,8 +287,11 @@ namespace StudentScheduleManagementSystem.Times
         }
     }
 
+    /// <summary>
+    /// 闹钟类
+    /// </summary>
     [Serializable, JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public partial class Alarm : IJsonConvertible, IComparable
+    public partial class Alarm : IJsonConvertible
     {
         static Alarm()
         {
@@ -363,6 +389,9 @@ namespace StudentScheduleManagementSystem.Times
 
         #region API methods
 
+        /// <summary>
+        /// 删除一个由参数指定的闹钟
+        /// </summary>
         public static void RemoveAlarm(Time timestamp,
                                        RepetitiveType repetitiveType,
                                        int[] activeWeeks,
@@ -373,6 +402,17 @@ namespace StudentScheduleManagementSystem.Times
             Log.Information.Log($"已删除{timestamp}时的闹钟");
         }
 
+        /// <summary>
+        /// 添加闹钟
+        /// </summary>
+        /// <param name="alarmTimeUpCallback">闹钟启动时调用的回调函数</param>
+        /// <param name="callbackParameter">传入回调函数的回调参数</param>
+        /// <param name="callbackReflectedType">回调函数的反射类型</param>
+        /// <param name="parameterType">回调参数的类型</param>
+        /// <param name="isDailyNotification">是否是每日提醒。若是，则不会保存到文件中</param>
+        /// <exception cref="InvalidOperationException">由参数指定的闹钟将会覆盖每日提醒，或者会与另外一个闹钟冲突，且其中一个的重复类型是<see cref="RepetitiveType.Designated"/></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ItemAlreadyExistedException">由参数指定的闹钟会与另外一个闹钟冲突，且两者的重复类型均是<see cref="RepetitiveType.Single"/></exception>
         public static void AddAlarm(Time timestamp,
                                     RepetitiveType repetitiveType,
                                     AlarmCallback alarmTimeUpCallback,
@@ -543,6 +583,9 @@ namespace StudentScheduleManagementSystem.Times
             _timeline.Clear();
         }
 
+        /// <summary>
+        /// 触发某个时间点的闹钟
+        /// </summary>
         internal static void TriggerAlarm(int offset)
         {
             long alarmId = _timeline[offset].Id;
@@ -557,6 +600,13 @@ namespace StudentScheduleManagementSystem.Times
 
         #region API on save and create instances to/from JSON
 
+        /// <summary>
+        /// 将闹钟的数据反序列化
+        /// </summary>
+        /// <param name="instanceList"></param>
+        /// <exception cref="JsonFormatException"></exception>
+        /// <exception cref="MethodNotFoundException">找不到由回调函数名指定的回调函数</exception>
+        /// <exception cref="TypeNotFoundOrInvalidException">找不到由回调参数类型名称指定的回调参数类型</exception>
         public static void CreateInstance(JArray instanceList)
         {
             foreach (JObject obj in instanceList)
@@ -607,6 +657,11 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
+        /// <summary>
+        /// 将闹钟的数据序列化
+        /// </summary>
+        /// <exception cref="MethodNotFoundException">回调函数不在指定类中定义</exception>
+        /// <exception cref="TypeNotFoundOrInvalidException">回调类型不在指定类中定义</exception>
         public static JArray SaveInstance()
         {
             JArray array = new();
@@ -634,52 +689,25 @@ namespace StudentScheduleManagementSystem.Times
             return array;
         }
 
-        public static List<Alarm> GetAll()
-        {
-            List<Alarm> list = new();
-            foreach (var instance in _alarmList)
-            {
-                list.Add(instance.Value);
-            }
-            return list;
-        }
-
-        #endregion
-
-        #region override base mathod
-
-        public int CompareTo(object? obj)
-        {
-            if (obj is Alarm alarm)
-            {
-                if (RepetitiveType.CompareTo(alarm.RepetitiveType) != 0)
-                {
-                    return RepetitiveType.CompareTo(alarm.RepetitiveType);
-                }
-                return BeginTime.ToInt().CompareTo(alarm.BeginTime.ToInt());
-            }
-            else if (obj is int i)
-            {
-                return this.CompareTo(i.ToTimeStamp());
-            }
-            else
-            {
-                throw new ArgumentException(null, nameof(obj));
-            }
-        }
+        public static List<Alarm> GetAll() => _alarmList.Values.ToList();
 
         #endregion
     }
 
     public static class Timer
     {
-        private const int BaseTimeoutMs = 10000;
+        /// <summary>
+        /// 时间推进速度
+        /// </summary>
         public static int Acceleration { get; private set; } = 1;
         private static Time _localTime = new();
         private static int _offset = 0;
         private static bool _pause = false;
         private static int _since = 0;
         public static Time Now => _localTime;
+        /// <summary>
+        /// 设置或获得计时器是否暂停。设置时同时生成日志
+        /// </summary>
         public static bool Pause
         {
             get => _pause;
@@ -693,6 +721,9 @@ namespace StudentScheduleManagementSystem.Times
         
         public delegate void TimeChangeEventHandler(Time t);
         private static TimeChangeEventHandler? _timeChangeEventHandler;
+        /// <summary>
+        /// 时间推进时发生
+        /// </summary>
         public static event TimeChangeEventHandler TimeChange
         {
             add => _timeChangeEventHandler += value;
@@ -707,11 +738,14 @@ namespace StudentScheduleManagementSystem.Times
             remove => _pauseStateChangeEventHandler -= value;
         }
 
+        /// <summary>
+        /// 启动计时器
+        /// </summary>
         public static void Start()
         {
             _localTime = new();
             _offset = 0;
-            _since = BaseTimeoutMs;
+            _since = Constants.TimerTimeoutMs;
             while (!MainProgram.Program.Cts.IsCancellationRequested)
             {
                 if (!Pause && UI.MainWindow.StudentWindow != null)
@@ -719,7 +753,7 @@ namespace StudentScheduleManagementSystem.Times
                     _since += 50;
                 }
                 Thread.Sleep(50);
-                if (_since >= BaseTimeoutMs / Acceleration)
+                if (_since >= Constants.TimerTimeoutMs / Acceleration)
                 {
                     _since = 0;
                     _timeChangeEventHandler?.Invoke(_localTime);
@@ -730,14 +764,22 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
+        /// <summary>
+        /// 设置当前时间，并立刻刷新
+        /// </summary>
         public static void SetTime(Time time)
         {
-            _since = BaseTimeoutMs;
+            _since = Constants.TimerTimeoutMs;
             _localTime = time;
             _offset = time.ToInt();
             Log.Information.Log($"时间已被设定为{_localTime.ToString()}");
         }
 
+        /// <summary>
+        /// 设置当前时间推进速度
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public static int SetSpeed()
         {
             switch (Acceleration)

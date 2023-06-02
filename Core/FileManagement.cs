@@ -18,6 +18,12 @@ namespace StudentScheduleManagementSystem.FileManagement
 
         private static FileStream? _userFileStream;
 
+        /// <summary>
+        /// 读取用户文件
+        /// </summary>
+        /// <param name="monopolize">是否独占用户文件</param>
+        /// <returns>字典，以<see cref="string"></see>作为键，对应用户文件中某个类型的所有数据</returns>
+        /// <exception cref="FileNotFoundException"></exception>
         public static Dictionary<string, JArray> ReadFromUserFile(string fileFolder,
                                                                   string fileName,
                                                                   Func<string, string> decryptFunc,
@@ -63,6 +69,11 @@ namespace StudentScheduleManagementSystem.FileManagement
             return dic;
         }
 
+        /// <summary>
+        /// 保存用户文件
+        /// </summary>
+        /// <param name="objects">字典，以<see cref="string"></see>作为键，对应用户文件中某个类型的所有数据</param>
+        /// <exception cref="FileNotFoundException"></exception>
         public static void SaveToUserFile(Dictionary<string, JArray> objects,
                                           string fileFolder,
                                           string fileName,
@@ -88,6 +99,12 @@ namespace StudentScheduleManagementSystem.FileManagement
             Log.Information.Log($"已保存学号为{fileName}的用户信息");
         }
 
+        /// <summary>
+        /// 读取地图文件
+        /// </summary>
+        /// <returns><see cref="Tuple"></see>，Item1为地图数据，Item2为建筑数据</returns>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
         public static (JArray, JArray) ReadFromMapFile(string fileFolder, string fileName = "map")
         {
             if (!Directory.Exists(fileFolder))
@@ -115,6 +132,9 @@ namespace StudentScheduleManagementSystem.FileManagement
             return ((JArray)root["Map"]!, (JArray)root["Buildings"]!);
         }
 
+        /// <summary>
+        /// 保存地图文件
+        /// </summary>
         public static void SaveToMapFile(JArray map, JArray buildings, string fileFolder, string fileName = "map")
         {
             if (!Directory.Exists(fileFolder))
@@ -131,6 +151,9 @@ namespace StudentScheduleManagementSystem.FileManagement
             Log.Information.Log("已保存地图信息");
         }
 
+        /// <summary>
+        /// 读取账号文件
+        /// </summary>
         public static List<MainProgram.Program.UserInformation> ReadFromUserAccountFile(
             string fileFolder,
             string fileName = "accounts")
@@ -160,6 +183,9 @@ namespace StudentScheduleManagementSystem.FileManagement
             return ret!;
         }
 
+        /// <summary>
+        /// 保存账号信息
+        /// </summary>
         public static void SaveToUserAccountFile(List<MainProgram.Program.UserInformation> information,
                                                  string fileFolder,
                                                  string fileName = "accounts")

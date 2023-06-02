@@ -7,6 +7,9 @@ namespace StudentScheduleManagementSystem.Map
     {
         private static List<Building> _buildings = new() { Constants.DefaultBuilding };
 
+        /// <summary>
+        /// 获取或设置当前所有建筑
+        /// </summary>
         public static List<Building> Buildings
         {
             get
@@ -17,6 +20,10 @@ namespace StudentScheduleManagementSystem.Map
             }
             set => _buildings = new List<Building> { Constants.DefaultBuilding }.Concat(value).ToList();
         }
+
+        /// <summary>
+        /// 当前地图，若未导入则为<see langword="null"/>
+        /// </summary>
         public static AdjacencyTable? GlobalMap { get; set; }
 
         static Location()
@@ -54,10 +61,22 @@ namespace StudentScheduleManagementSystem.Map
 
         #region structs, classes and enums
 
-        public struct Edge //边
+        /// <summary>
+        /// 边，不包含顶点的信息
+        /// </summary>
+        public struct Edge
         {
+            /// <summary>
+            /// 边的类型
+            /// </summary>
             public EdgeType Type { get; set; }
+            /// <summary>
+            /// 控制点，只在<code>Type == EdgeType.BezierCurve</code>时有效
+            /// </summary>
             public (Point, Point)? Controls { get; set; }
+            /// <summary>
+            /// 边的权重
+            /// </summary>
             public int Weight { get; set; }
 
             public Edge(EdgeType type, (Point, Point)? controls, int weight)
@@ -68,10 +87,22 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
-        public struct Vertex //点
+        /// <summary>
+        /// 顶点
+        /// </summary>
+        public struct Vertex
         {
+            /// <summary>
+            /// 点的唯一标识符
+            /// </summary>
             public int Id { get; set; }
+            /// <summary>
+            /// 点的横坐标
+            /// </summary>
             public int X { get; set; }
+            /// <summary>
+            /// 点的纵坐标
+            /// </summary>
             public int Y { get; set; }
 
             public Vertex(int id, int x, int y)
@@ -114,9 +145,18 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
-        public struct Building //建筑
+        /// <summary>
+        /// 建筑
+        /// </summary>
+        public struct Building
         {
+            /// <summary>
+            /// 建筑的唯一标识符
+            /// </summary>
             public int Id { get; set; }
+            /// <summary>
+            /// 建筑的名称
+            /// </summary>
             public string Name { get; set; }
             public Vertex Center { get; set; }
 
@@ -170,18 +210,33 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
+        /// <summary>
+        /// 邻接表类
+        /// </summary>
         public class AdjacencyTable
         {
-            public struct Node
+            private struct Node
             {
                 public int pointId;
                 public Edge edge;
             }
 
+            /// <summary>
+            /// 边数
+            /// </summary>
             public int Size { get; init; }
-            private readonly List<Node>[] _adjArray;
+            /// <summary>
+            /// 顶点的坐标，数组下标对应顶点的ID
+            /// </summary>
             public Point[] Location { get; private set; }
 
+            private readonly List<Node>[] _adjArray;
+
+            /// <summary>
+            /// 以点集、边集初始化邻接表
+            /// </summary>
+            /// <param name="vertices">点集</param>
+            /// <param name="edges">边集</param>
             public AdjacencyTable(List<Vertex> vertices, List<(Vertex, Vertex)> edges)
             {
                 Size = vertices.Count;
@@ -209,6 +264,10 @@ namespace StudentScheduleManagementSystem.Map
                 }
             }
 
+            /// <summary>
+            /// 以<see cref="JArray"/>初始化邻接表
+            /// </summary>
+            /// <exception cref="JsonFormatException"></exception>
             public AdjacencyTable(JArray vertexArray)
             {
                 Size = vertexArray.Count;
@@ -327,6 +386,11 @@ namespace StudentScheduleManagementSystem.Map
 
             #endif
 
+            /// <summary>
+            /// 获取ID为<paramref name="id"/>的顶点的所有邻接点
+            /// </summary>
+            /// <param name="id"></param>
+            /// <returns>ID元组的列表，Item1为<paramref name="id"/>，Item2为邻接点的ID</returns>
             public List<(int, int)> this[int id] => _adjArray[id].Select(node => (id, node.pointId)).ToList();
 
             public Edge? this[int fromId, int toId]
@@ -355,8 +419,14 @@ namespace StudentScheduleManagementSystem.Map
                 }
             }
 
+            /// <summary>
+            /// 获取ID为<paramref name="id"/>的顶点
+            /// </summary>
             public Vertex GetVertex(int id) => new(id, Location[id].X, Location[id].Y);
 
+            /// <summary>
+            /// 序列化邻接表
+            /// </summary>
             public JArray SaveInstance()
             {
                 JArray root = new();
@@ -390,9 +460,18 @@ namespace StudentScheduleManagementSystem.Map
             }
         }
 
+        /// <summary>
+        /// 边的类型
+        /// </summary>
         public enum EdgeType
         {
+            /// <summary>
+            /// 直线
+            /// </summary>
             Line,
+            /// <summary>
+            /// 二次贝塞尔曲线
+            /// </summary>
             QuadraticBezierCurve,
         }
 
@@ -400,85 +479,22 @@ namespace StudentScheduleManagementSystem.Map
 
         #region API on pathfinding
 
-        //重载
+        /// <summary>
+        /// 获取两个建筑之间的最短路径
+        /// </summary>
+        /// <param name="startBuilding">起始建筑</param>
+        /// <param name="endBuilding">结束建筑</param>
+        /// <returns>路径上所有点的ID</returns>
         public static List<int> GetClosestPath(Building startBuilding, Building endBuilding)
         {
             return GetClosestPath(startBuilding.Center.Id, endBuilding.Center.Id);
         }
 
-
-        public static List<int> Solve(int[,] adjacencyMatrix, int startCity)
-        {
-            int count = adjacencyMatrix.GetLength(0);
-
-            List<int> cities = new();
-            for (int i = 0; i < count; i++)
-            {
-                if (i != startCity)
-                {
-                    cities.Add(i);
-                }
-            }
-
-            List<int> shortestPath = new();
-            int shortestDistance = int.MaxValue;
-            Permute(adjacencyMatrix, cities, startCity, 0, cities.Count - 1, ref shortestPath, ref shortestDistance);
-            shortestPath.Insert(0, startCity);
-            shortestPath.Add(startCity);
-
-            return shortestPath;
-        }
-
-        public static void Permute(int[,] adjacencyMatrix,
-                                   List<int> cities,
-                                   int startCity,
-                                   int left,
-                                   int right,
-                                   ref List<int> shortestPath,
-                                   ref int shortestDistance)
-        {
-            if (left == right)
-            {
-                int currentDistance = CalculatePathDistance(adjacencyMatrix, cities, startCity);
-                if (currentDistance < shortestDistance)
-                {
-                    shortestDistance = currentDistance;
-                    shortestPath = new List<int>(cities);
-                }
-            }
-            else
-            {
-                for (int i = left; i <= right; i++)
-                {
-                    Swap(cities, left, i);
-                    Permute(adjacencyMatrix,
-                            cities,
-                            startCity,
-                            left + 1,
-                            right,
-                            ref shortestPath,
-                            ref shortestDistance);
-                    Swap(cities, left, i);
-                }
-            }
-        }
-
-        public static int CalculatePathDistance(int[,] adjacencyMatrix, List<int> path, int startCity)
-        {
-            int distance = 0;
-            int previousCity = startCity;
-
-            foreach (int city in path)
-            {
-                distance += adjacencyMatrix[previousCity, city];
-                previousCity = city;
-            }
-
-            distance += adjacencyMatrix[previousCity, startCity];
-
-            return distance;
-        }
-
+        /// <summary>
+        /// 获取多个建筑之间的最短回路
+        /// </summary>
+        /// <returns>路径上所有点的ID</returns>
+        /// <exception cref="ArgumentException"></exception>
         public static List<int> GetClosestCircuit(List<Building> buildings)
         {
             List<int> points = new(buildings.ConvertAll(building => building.Center.Id));
@@ -508,16 +524,14 @@ namespace StudentScheduleManagementSystem.Map
             return result;
         }
 
-        //寻找两点最短路径的路径长
-        public static int GetClosestPathLength(Building startBuilding, Building endBuilding)
-        {
-            return GetClosestPathLength(startBuilding.Center.Id, endBuilding.Center.Id);
-        }
-
         #endregion
 
         #region API on searching
 
+        /// <summary>
+        /// 获取由名字<paramref name="name"/>指定的建筑
+        /// </summary>
+        /// <returns>所有建筑名含有<paramref name="name"/>的建筑</returns>
         public static List<Building> GetBuildingsByName(string name)
         {
             List<Building> ret = new();
@@ -702,6 +716,81 @@ namespace StudentScheduleManagementSystem.Map
             return distance[endId];
         }
 
+        private static List<int> Solve(int[,] adjacencyMatrix, int startCity)
+        {
+            int count = adjacencyMatrix.GetLength(0);
+
+            List<int> cities = new();
+            for (int i = 0; i < count; i++)
+            {
+                if (i != startCity)
+                {
+                    cities.Add(i);
+                }
+            }
+
+            List<int> shortestPath = new();
+            int shortestDistance = int.MaxValue;
+            Permute(adjacencyMatrix, cities, startCity, 0, cities.Count - 1, ref shortestPath, ref shortestDistance);
+            shortestPath.Insert(0, startCity);
+            shortestPath.Add(startCity);
+
+            return shortestPath;
+        }
+
+        private static void Permute(int[,] adjacencyMatrix,
+                                   List<int> cities,
+                                   int startCity,
+                                   int left,
+                                   int right,
+                                   ref List<int> shortestPath,
+                                   ref int shortestDistance)
+        {
+            if (left == right)
+            {
+                int currentDistance = CalculatePathDistance(adjacencyMatrix, cities, startCity);
+                if (currentDistance < shortestDistance)
+                {
+                    shortestDistance = currentDistance;
+                    shortestPath = new List<int>(cities);
+                }
+            }
+            else
+            {
+                for (int i = left; i <= right; i++)
+                {
+                    Swap(cities, left, i);
+                    Permute(adjacencyMatrix,
+                            cities,
+                            startCity,
+                            left + 1,
+                            right,
+                            ref shortestPath,
+                            ref shortestDistance);
+                    Swap(cities, left, i);
+                }
+            }
+        }
+
+        private static int CalculatePathDistance(int[,] adjacencyMatrix, List<int> path, int startCity)
+        {
+            int distance = 0;
+            int previousCity = startCity;
+
+            foreach (int city in path)
+            {
+                distance += adjacencyMatrix[previousCity, city];
+                previousCity = city;
+            }
+
+            distance += adjacencyMatrix[previousCity, startCity];
+
+            return distance;
+        }
+
+        /// <summary>
+        /// 序列化所有建筑
+        /// </summary>
         public static JArray SaveAllBuildings()
         {
             JArray ret = new();
@@ -728,6 +817,11 @@ namespace StudentScheduleManagementSystem.Map
 
     public static class Navigate
     {
+        /// <summary>
+        /// 在地图上绘制路径
+        /// </summary>
+        /// <param name="points">路径上所有点的ID</param>
+        /// <exception cref="ArgumentException"></exception>
         public static void Show(List<int> points)
         {
             List<(Location.Vertex, Location.Vertex)> lineEndPointPairs = new();

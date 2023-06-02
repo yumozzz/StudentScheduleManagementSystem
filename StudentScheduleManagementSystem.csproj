@@ -15,6 +15,14 @@
     <DocumentDirectory>E:\Code\docs\StudentScheduleManagementSystem\</DocumentDirectory>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1573;1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1573;1591</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Resources\CourseIcon.png" />
     <None Remove="Resources\关闭_#ffffff_128.png" />

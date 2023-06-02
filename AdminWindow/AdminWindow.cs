@@ -6,6 +6,9 @@
         private ExamSubwindow? _examSubwindow;
         private GroupActivitySubwindow? _groupActivitySubwindow;
         private MapEditWindow? _mapEditWindow;
+        /// <summary>
+        /// 标识关闭主窗口时是否也应该关闭登录窗口
+        /// </summary>
         public bool ShouldExitProgram { get; private set; } = false;
 
         public AdminWindow()
@@ -138,6 +141,9 @@
             }
         }
 
+        /// <summary>
+        /// 在日志界面中添加日志
+        /// </summary>
         private void OnLogGenerated(string message)
         {
             Console.WriteLine("add log");

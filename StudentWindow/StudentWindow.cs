@@ -143,6 +143,9 @@ namespace StudentScheduleManagementSystem.UI
             StudentTemporaryAffairSubwindow.Show();
         }
 
+        /// <summary>
+        /// 用户点击设置时间
+        /// </summary>
         private void SetTimeButton_Click(object sender, EventArgs e)
         {
             StringBuilder errorMessage = new();
@@ -180,6 +183,10 @@ namespace StudentScheduleManagementSystem.UI
             hourBox.SelectedIndex = -1;
         }
 
+        /// <summary>
+        /// 从外部设置UI界面的时间
+        /// </summary>
+        /// <param name="time"></param>
         public void ChangeLocalTime(Times.Time time)
         {
             if (currentTime.InvokeRequired)
@@ -255,6 +262,9 @@ namespace StudentScheduleManagementSystem.UI
             closeConfirm.Show();
         }
 
+        /// <summary>
+        /// 在日志界面中添加日志
+        /// </summary>
         private void OnLogGenerated(string message)
         {
             if (logListBox.Items.Count > 100)

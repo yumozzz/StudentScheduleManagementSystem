@@ -6,9 +6,21 @@
         private const int HideHeight = 30;
         private int _showHeight;
 
+        /// <summary>
+        /// 选项的总个数
+        /// </summary>
         public int TotalCount { get; private set; } = 0;
+        /// <summary>
+        /// 选中项的总个数
+        /// </summary>
         public int ValidCount { get; private set; } = 0;
+        /// <summary>
+        /// 每个选项的选中状态
+        /// </summary>
         public bool[] Selects { get; private set; }
+        /// <summary>
+        /// 当前是否展示下拉框
+        /// </summary>
         public bool ShowComboBox { get; set; } = false;
 
         private CheckBox[] _boxes;
@@ -16,6 +28,16 @@
         public MultiSelectBox()
         {
             InitializeComponent();
+            this.selectAll.LinkClicked += (sender, e) => SetAllValid();
+            this.cancel.LinkClicked += (sender, e) => ClearBox();
+            this.textBox.Click += (sender, e) =>
+            {
+                if (ShowComboBox == false)
+                {
+                    pictureBox1_Click(sender, e);
+                }
+            };
+            this.Load += (sender, e) => this.Height = HideHeight;
         }
 
         public void InitializeBox(string[] texts)
@@ -59,29 +81,6 @@
             }
         }
 
-        private void SelectAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            SetAllValid();
-        }
-
-        private void Cancel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            ClearBox();
-        }
-
-        private void MultiSelectBox_Load(object sender, EventArgs e)
-        {
-            this.Height = HideHeight;
-        }
-
-        private void textBox_Click(object sender, EventArgs e)
-        {
-            if (ShowComboBox == false)
-            {
-                pictureBox1_Click(sender, e);
-            }
-        }
-
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             if (ShowComboBox)
@@ -114,6 +113,9 @@
             }
         }
 
+        /// <summary>
+        /// 选中一个选项
+        /// </summary>
         public bool SelectCheckBox(int index)
         {
             if (index >= this.TotalCount || index < 0)
@@ -128,6 +130,9 @@
             return true;
         }
 
+        /// <summary>
+        /// 清空选中
+        /// </summary>
         public void ClearBox()
         {
             foreach (var box in _boxes)
@@ -137,6 +142,9 @@
             UpdateTextBox();
         }
 
+        /// <summary>
+        /// 设置所有项为选中
+        /// </summary>
         public void SetAllValid()
         {
             foreach (var box in _boxes)

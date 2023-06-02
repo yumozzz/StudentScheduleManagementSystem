@@ -17,10 +17,12 @@ namespace StudentScheduleManagementSystem.UI
         private Point? _mouseOver = null, _selected = null;
         private bool _showLabels = false;
         private bool _isInputting = false;
-        private bool _needHelp = false;
         private bool _isAlive = true;
         private static readonly object _lock = new();
 
+        /// <summary>
+        /// 获得当前地图的点和边，设置建筑标签位置，启动刷新线程
+        /// </summary>
         public MapEditWindow()
         {
             _lineEndPointPairs = Map.Location.GetEdges()
@@ -135,6 +137,9 @@ namespace StudentScheduleManagementSystem.UI
             thread.Start();
         }
 
+        /// <summary>
+        /// 在关闭时发生，修改标志变量
+        /// </summary>
         protected override void OnClosing(CancelEventArgs e)
         {
             lock(_lock)
@@ -143,11 +148,14 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
-        private double Distance(Point p1, Point p2)
+        private static double Distance(Point p1, Point p2)
         {
             return Math.Sqrt((p1.X - p2.X) * (p1.X - p2.X) + (p1.Y - p2.Y) * (p1.Y - p2.Y));
         }
 
+        /// <summary>
+        /// 更新界面
+        /// </summary>
         private void UpdateGraphics()
         {
             pictureBox1.Invalidate();
@@ -208,6 +216,9 @@ namespace StudentScheduleManagementSystem.UI
             //Update();
         }
 
+        /// <summary>
+        /// 处理鼠标点击
+        /// </summary>
         private void OnMouseDown(object sender, EventArgs e)
         {
             if (_isInputting)
@@ -253,6 +264,9 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 处理键盘输入
+        /// </summary>
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             Console.WriteLine(e.KeyCode.ToString());
@@ -412,6 +426,9 @@ namespace StudentScheduleManagementSystem.UI
 
         private Dictionary<Point, int> _pointIds;
 
+        /// <summary>
+        /// 生成顶点的ID并构造字典
+        /// </summary>
         private void GenerateIdDictionary()
         {
             _pointIds = new();
@@ -422,12 +439,18 @@ namespace StudentScheduleManagementSystem.UI
             }
         }
 
+        /// <summary>
+        /// 生成顶点列表
+        /// </summary>
         public List<Map.Location.Vertex> GetVertices()
         {
             GenerateIdDictionary();
             return _pointIds.Select(kvPair => kvPair.Key.ToVertex(kvPair.Value)).ToList();
         }
 
+        /// <summary>
+        /// 生成边列表
+        /// </summary>
         public List<(Map.Location.Vertex, Map.Location.Vertex)> GetEdges()
         {
             GenerateIdDictionary();
@@ -436,6 +459,10 @@ namespace StudentScheduleManagementSystem.UI
                                      .ToList();
         }
 
+        /// <summary>
+        /// 生成建筑列表
+        /// </summary>
+        /// <returns></returns>
         public List<Map.Location.Building> GetBuildings()
         {
             GenerateIdDictionary();
@@ -451,21 +478,6 @@ namespace StudentScheduleManagementSystem.UI
                 ret.Add(new(index++, kvPair.Value.Value.Item1, kvPair.Key.ToVertex(_pointIds[kvPair.Key])));
             }
             return ret;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (_needHelp)
-            {
-                helpPictureBox.Hide();
-                _needHelp = false;
-            }
-            else
-            {
-                helpPictureBox.Show();
-                helpPictureBox.BringToFront();
-                _needHelp = true;
-            }
         }
     }
 }

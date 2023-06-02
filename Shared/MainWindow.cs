@@ -44,6 +44,9 @@ namespace StudentScheduleManagementSystem.UI
             MainProgram.Program.Exit();
         }
 
+        /// <summary>
+        /// 新建主窗口，等待其关闭后重新打开登录窗口
+        /// </summary>
         private void LoginButton_Click(object sender, EventArgs e)
         {
             if (usernameBox.Text == "" || passwordBox.Text == "")

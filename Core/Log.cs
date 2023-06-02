@@ -2,7 +2,7 @@
 
 namespace StudentScheduleManagementSystem.Log
 {
-    public static class LogBase
+    internal static class LogBase
     {
         public static FileStream Stream { get; private set; }
 
@@ -39,6 +39,9 @@ namespace StudentScheduleManagementSystem.Log
         }
     }
 
+    /// <summary>
+    /// 记录信息
+    /// </summary>
     public static class Information
     {
         public static void Log(string message)
@@ -49,6 +52,9 @@ namespace StudentScheduleManagementSystem.Log
         }
     }
 
+    /// <summary>
+    /// 记录异常操作
+    /// </summary>
     public static class Warning
     {
         public static void Log(string message)
@@ -59,6 +65,9 @@ namespace StudentScheduleManagementSystem.Log
         }
     }
 
+    /// <summary>
+    /// 记录错误
+    /// </summary>
     public static class Error
     {
         public static void Log(string? message, Exception? ex)

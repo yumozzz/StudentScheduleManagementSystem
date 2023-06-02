@@ -13,10 +13,22 @@ namespace StudentScheduleManagementSystem.MainProgram
 {
     public class Program
     {
+        /// <summary>
+        /// 用户账号信息
+        /// </summary>
         public struct UserInformation
         {
+            /// <summary>
+            /// 用户名
+            /// </summary>
             public string UserId { get; set; }
+            /// <summary>
+            /// 用户密码，以MD5摘要
+            /// </summary>
             public string Password { get; set; }
+            /// <summary>
+            /// 私钥
+            /// </summary>
             public string PrivateKey { get; set; }
         }
 
@@ -100,6 +112,9 @@ namespace StudentScheduleManagementSystem.MainProgram
         [return: MarshalAs(UnmanagedType.I4)]
         public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
 
+        /// <summary>
+        /// 将所有用户数据序列化
+        /// </summary>
         private static Dictionary<string, JArray> CreateInstanceDictionary() =>
             new()
             {
@@ -110,6 +125,10 @@ namespace StudentScheduleManagementSystem.MainProgram
                 { "TemporaryAffairs", Schedule.TemporaryAffair.SaveInstance() }
             };
 
+        /// <summary>
+        /// 将所有用户数据反序列化
+        /// </summary>
+        /// <param name="instanceDictionary"></param>
         private static void ReadFromInstanceDictionary(Dictionary<string, JArray> instanceDictionary)
         {
             Times.Alarm.CreateInstance(instanceDictionary["Alarm"]);
@@ -119,6 +138,13 @@ namespace StudentScheduleManagementSystem.MainProgram
             Schedule.TemporaryAffair.CreateInstance(instanceDictionary["TemporaryAffairs"]);
         }
 
+        /// <summary>
+        /// 登录
+        /// </summary>
+        /// <param name="inputUserId">用户输入的用户名</param>
+        /// <param name="inputPassword">用户输入的密码</param>
+        /// <returns>如果登录成功则为<see langword="true"/>；当用户输入不正确、用户已在其他进程登录或用户文件损坏，则为<see langword="false"/></returns>
+        /// <exception cref="AuthenticationException">鉴权错误</exception>
         public static bool Login(string inputUserId, string inputPassword)
         {
             try
@@ -192,6 +218,13 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
         }
 
+        /// <summary>
+        /// 注册
+        /// </summary>
+        /// <param name="userId">用户输入的用户名</param>
+        /// <param name="password">用户输入的密码</param>
+        /// <param name="identity">用户的身份</param>
+        /// <returns>如果注册成功则为<see langword="true"/>；当用户已存在、用户名或密码格式不正确则为<see langword="false"/></returns>
         public static bool Register(string userId, string password, Identity identity = Identity.User)
         {
             try
@@ -229,6 +262,9 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
         }
 
+        /// <summary>
+        /// 用户登出
+        /// </summary>
         public static void Logout()
         {
             if (Identity == Identity.User)
@@ -245,6 +281,10 @@ namespace StudentScheduleManagementSystem.MainProgram
             Log.Information.Log($"用户{UserId}已登出");
         }
 
+        /// <summary>
+        /// 初始化模块。当读取文件出错时，抛出异常
+        /// </summary>
+        /// <exception cref="Exception"></exception>
         public static void InitModules()
         {
             try
@@ -265,6 +305,9 @@ namespace StudentScheduleManagementSystem.MainProgram
             }
         }
 
+        /// <summary>
+        /// 程序退出
+        /// </summary>
         public static void Exit()
         {
             FileManagement.FileManager.SaveToMapFile(Map.Location.GlobalMap?.SaveInstance() ?? new(),
@@ -289,6 +332,12 @@ namespace StudentScheduleManagementSystem.Schedule
 {
     public abstract partial class Schedule
     {
+        /// <summary>
+        /// 每日提醒
+        /// </summary>
+        /// <param name="id">闹钟ID</param>
+        /// <param name="obj">回调参数</param>
+        /// <exception cref="ArgumentException">不能识别回调参数类型</exception>
         public static void NotifyAllInComingDay(long id, object? obj)
         {
             Times.Alarm.GeneralAlarmParam param;
@@ -352,6 +401,12 @@ namespace StudentScheduleManagementSystem.Schedule
 
     public partial class Course
     {
+        /// <summary>
+        /// 闹钟
+        /// </summary>
+        /// <param name="id">闹钟ID</param>
+        /// <param name="obj">回调参数</param>
+        /// <exception cref="ArgumentException">不能识别回调参数类型</exception>
         public static void Notify(long id, object? obj)
         {
             Times.Alarm.SpecifiedAlarmParam param;
@@ -401,6 +456,12 @@ namespace StudentScheduleManagementSystem.Schedule
 
     public partial class Exam
     {
+        /// <summary>
+        /// 闹钟
+        /// </summary>
+        /// <param name="id">闹钟ID</param>
+        /// <param name="obj">回调参数</param>
+        /// <exception cref="ArgumentException">不能识别回调参数类型</exception>
         public static void Notify(long id, object? obj)
         {
             Times.Alarm.SpecifiedAlarmParam param;
@@ -438,6 +499,12 @@ namespace StudentScheduleManagementSystem.Schedule
 
     public partial class Activity
     {
+        /// <summary>
+        /// 闹钟
+        /// </summary>
+        /// <param name="id">闹钟ID</param>
+        /// <param name="obj">回调参数</param>
+        /// <exception cref="ArgumentException">不能识别回调参数类型</exception>
         public static void Notify(long id, object? obj)
         {
             Times.Alarm.SpecifiedAlarmParam param;
@@ -486,6 +553,12 @@ namespace StudentScheduleManagementSystem.Schedule
 
     public partial class TemporaryAffair
     {
+        /// <summary>
+        /// 闹钟
+        /// </summary>
+        /// <param name="id">闹钟ID</param>
+        /// <param name="obj">回调参数</param>
+        /// <exception cref="ArgumentException">不能识别回调参数类型</exception>
         public new static void Notify(long id, object? obj)
         {
             Times.Alarm.TemporaryAffairParam param;

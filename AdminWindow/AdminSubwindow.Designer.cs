@@ -251,7 +251,7 @@
             this.reviseScheduleButton.TabIndex = 54;
             this.reviseScheduleButton.Text = "修改日程";
             this.reviseScheduleButton.UseVisualStyleBackColor = false;
-            this.reviseScheduleButton.Click += new System.EventHandler(this.ReviseSchedule_Click);
+            this.reviseScheduleButton.Click += new System.EventHandler(this.ReviseScheduleButton_Click);
             // 
             // reviseOK
             // 

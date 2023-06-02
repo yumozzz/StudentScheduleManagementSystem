@@ -1,9 +1,13 @@
-﻿using System.Text;
+﻿using System.Runtime.Serialization;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace StudentScheduleManagementSystem
 {
+    /// <summary>
+    /// 星期
+    /// </summary>
     public enum Day
     {
         Monday,
@@ -15,6 +19,9 @@ namespace StudentScheduleManagementSystem
         Sunday,
     }
 
+    /// <summary>
+    /// 事件的重复类型
+    /// </summary>
     [Flags]
     public enum RepetitiveType
     {
@@ -24,6 +31,9 @@ namespace StudentScheduleManagementSystem
         Designated = 4,
     }
 
+    /// <summary>
+    /// 日程的类型
+    /// </summary>
     [Flags]
     public enum ScheduleType
     {
@@ -34,6 +44,9 @@ namespace StudentScheduleManagementSystem
         TemporaryAffair = 8,
     }
 
+    /// <summary>
+    /// 添加日程时的操作类型
+    /// </summary>
     [Flags]
     public enum ScheduleOperationType
     {
@@ -45,6 +58,9 @@ namespace StudentScheduleManagementSystem
         All = AddOnTimeline | AddOnUserTable | AddOnSharedTable,
     }
 
+    /// <summary>
+    /// 用户身份
+    /// </summary>
     public enum Identity
     {
         Null,
@@ -52,6 +68,9 @@ namespace StudentScheduleManagementSystem
         Administrator
     }
 
+    /// <summary>
+    /// 标明时间轴上的记录需要实现的基本属性和方法
+    /// </summary>
     public interface IUniqueRepetitiveEvent
     {
         public long Id { get; set; }
@@ -59,6 +78,9 @@ namespace StudentScheduleManagementSystem
         public bool Equal(object? other);
     }
 
+    /// <summary>
+    /// 标明类型能够序列化、反序列化
+    /// </summary>
     public interface IJsonConvertible
     {
         public static abstract void CreateInstance(JArray instanceList);
@@ -66,12 +88,21 @@ namespace StudentScheduleManagementSystem
         public static abstract JArray SaveInstance();
     }
 
+    /// <summary>
+    /// 标明日程类需要实现的基本属性
+    /// </summary>
     internal interface ISchedule
     {
+        public string Name { get; }
+        public long ScheduleId { get; }
+        public Times.Time BeginTime { get; }
         public static abstract int Earliest { get; }
         public static abstract int Latest { get; }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class ItemOverrideException : InvalidOperationException { }
 
     public class JsonFormatException : JsonException
@@ -83,7 +114,7 @@ namespace StudentScheduleManagementSystem
             : base() { }
     }
 
-    public class ScheduleInformationMismatchException : Exception { }
+    //public class ScheduleInformationMismatchException : Exception { }
     public class MethodNotFoundException : ArgumentException { }
     public class TypeNotFoundOrInvalidException : ArgumentException { }
     public class ItemAlreadyExistedException : Exception { };
@@ -92,6 +123,9 @@ namespace StudentScheduleManagementSystem
     public class TooManyTemporaryAffairsException : InvalidOperationException { }
     public class EndOfSemester : Exception { };
 
+    /// <summary>
+    /// 以类似字符串的比较方法比较两个int数组
+    /// </summary>
     public class ArrayComparer : IComparer<int[]>
     {
         public int Compare(int[] arr1, int[] arr2)
@@ -120,6 +154,9 @@ namespace StudentScheduleManagementSystem
         }
     }
 
+    /// <summary>
+    /// 在Json的序列化与反序列化中实现Map.Location.Building结构体的转换
+    /// </summary>
     class BuildingJsonConverter : JsonConverter
     {
         public override bool CanRead => true;
@@ -159,11 +196,11 @@ namespace StudentScheduleManagementSystem
             }
             else if (locations.Distinct().Count() == locations.Count)
             {
-                building = locations.First((building) => building.Name == reader.Value!.ToString()!);
+                building = locations.First(building => building.Name == reader.Value!.ToString()!);
             }
             else
             {
-                locations = locations.Where((building) => building.Name == reader.Value!.ToString()!).ToList();
+                locations = locations.Where(building => building.Name == reader.Value!.ToString()!).ToList();
                 if (locations.Count == 1)
                 {
                     building = locations[0];
@@ -187,6 +224,9 @@ namespace StudentScheduleManagementSystem
         }
     }
 
+    /// <summary>
+    /// 实现归并排序
+    /// </summary>
     public static class MergeSort
     {
         private static void Merge<T>(ref T[] array, int L, int R, Func<T, T, int> comparer)
@@ -233,11 +273,20 @@ namespace StudentScheduleManagementSystem
             Merge(ref array, L, R, comparer);
         }
 
+        /// <summary>
+        /// 对<paramref name="array"/>进行排序
+        /// </summary>
+        /// <typeparam name="T">数组的元素类型，实现了IComparable接口</typeparam>
         public static void Sort<T>(ref T[] array) where T : IComparable
         {
             Sort(ref array, (t1, t2) => t1.CompareTo(t2));
         }
 
+        /// <summary>
+        ///  对<paramref name="array"/>进行排序
+        /// </summary>
+        /// <typeparam name="T">数组的元素类型，不实现IComparable接口</typeparam>
+        /// <param name="comparer">对两个<typeparamref name="T"/>类型元素的比较函数</param>
         public static void Sort<T>(ref T[] array, Func<T, T, int> comparer)
         {
             if (array == null)
@@ -255,6 +304,9 @@ namespace StudentScheduleManagementSystem
         }
     }
 
+    /// <summary>
+    /// 存放扩展方法
+    /// </summary>
     public static class Extension
     {
         public static int ToInt(this Enum e)
@@ -279,6 +331,12 @@ namespace StudentScheduleManagementSystem
             return new() { X = p.X, Y = p.Y, Id = id };
         }
 
+        /// <summary>
+        /// 获取一个<see cref="DataGridView"/>实例中指定列为<see langword="true"/>的所有行
+        /// </summary>
+        /// <param name="dataGridView"></param>
+        /// <param name="checkBoxColumn">指定列的列号，要求该列的值能被转换为<see cref="bool"/></param>
+        /// <exception cref="ArgumentException"><paramref name="checkBoxColumn"/>指定列的值不能被转换为<see cref="bool"/></exception>
         public static int[] GetSelectedRowsCount(this DataGridView dataGridView, int checkBoxColumn)
         {
             try
@@ -300,8 +358,12 @@ namespace StudentScheduleManagementSystem
         }
     }
 
+    /// <summary>
+    /// 程序运行中设定的常数
+    /// </summary>
     public static class Constants
     {
+        public const int TimerTimeoutMs = 10000;
         public const int TotalHours = 16 * 7 * 24;
         public static readonly int[] AllWeeks = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
         public static readonly Day[] AllDays =
@@ -318,6 +380,9 @@ namespace StudentScheduleManagementSystem
 
 namespace StudentScheduleManagementSystem.UI
 {
+    /// <summary>
+    /// UI界面的当前操作状态
+    /// </summary>
     public enum SubwindowState
     {
         Viewing,
@@ -326,6 +391,9 @@ namespace StudentScheduleManagementSystem.UI
         ReviseUserSchedule,
     }
 
+    /// <summary>
+    /// UI界面展示的日程类型
+    /// </summary>
     public enum SubwindowType
     {
         Default,
@@ -380,11 +448,15 @@ namespace StudentScheduleManagementSystem.UI
                 "21:00"
             };
 
-        public static StringBuilder GetBriefWeeks(int[] activeWeeks)
+        /// <summary>
+        /// 将<paramref name="activeWeeks"/>转换为其等效的简略形式
+        /// </summary>
+        /// <example>1,2,3,5 => 1-3,5</example>
+        public static string GetBriefWeeks(int[] activeWeeks)
         {
             if (activeWeeks.Length == 1)
             {
-                return new StringBuilder(activeWeeks[0].ToString());
+                return activeWeeks[0].ToString();
             }
 
             int continuity = 0;
@@ -430,17 +502,20 @@ namespace StudentScheduleManagementSystem.UI
                 ret.Append("-" + activeWeeks[^1].ToString());
             }
 
-            return ret;
+            return ret.ToString();
         }
 
+        /// <summary>
+        /// 获取由参数指定的日程的详细信息
+        /// </summary>
         public static string GetScheduleDetail(string name,
-                                                      RepetitiveType repetitiveType,
-                                                      int[] activeWeeks,
-                                                      Day[] activeDays,
-                                                      Times.Time timestamp,
-                                                      int duration,
-                                                      string? offlineLocationName,
-                                                      string? onlineLink)
+                                               RepetitiveType repetitiveType,
+                                               int[] activeWeeks,
+                                               Day[] activeDays,
+                                               Times.Time timestamp,
+                                               int duration,
+                                               string? offlineLocationName,
+                                               string? onlineLink)
         {
             StringBuilder builder = new();
             builder.Append("名称：" + name);

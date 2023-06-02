@@ -410,6 +410,7 @@
             this.searchByNamePictureBox.Size = new System.Drawing.Size(320, 70);
             this.searchByNamePictureBox.TabIndex = 77;
             this.searchByNamePictureBox.TabStop = false;
+            this.searchByNameBox.KeyPress += this.SearchByNameBox_KeyPress;
             // 
             // hideDurationPictureBox
             // 

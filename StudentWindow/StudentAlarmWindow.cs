@@ -45,6 +45,9 @@
             _targetBuildings = targetBuildings;
         }
 
+        /// <summary>
+        /// 处理关键点，调用寻路函数
+        /// </summary>
         private void ShowMapButton_Click(object sender, EventArgs e)
         {
             if (buildingComboBox.Text == "")

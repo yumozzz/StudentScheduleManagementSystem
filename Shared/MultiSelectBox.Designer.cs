@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MultiSelectBox));
-            this.SelectAll = new System.Windows.Forms.LinkLabel();
-            this.Cancel = new System.Windows.Forms.LinkLabel();
+            this.selectAll = new System.Windows.Forms.LinkLabel();
+            this.cancel = new System.Windows.Forms.LinkLabel();
             this.textBox = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -40,25 +40,23 @@
             // 
             // SelectAll
             // 
-            this.SelectAll.AutoSize = true;
-            this.SelectAll.Location = new System.Drawing.Point(3, 30);
-            this.SelectAll.Name = "SelectAll";
-            this.SelectAll.Size = new System.Drawing.Size(86, 24);
-            this.SelectAll.TabIndex = 2;
-            this.SelectAll.TabStop = true;
-            this.SelectAll.Text = "Select all";
-            this.SelectAll.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.SelectAll_LinkClicked);
+            this.selectAll.AutoSize = true;
+            this.selectAll.Location = new System.Drawing.Point(3, 30);
+            this.selectAll.Name = "selectAll";
+            this.selectAll.Size = new System.Drawing.Size(86, 24);
+            this.selectAll.TabIndex = 2;
+            this.selectAll.TabStop = true;
+            this.selectAll.Text = "Select all";
             // 
             // Cancel
             // 
-            this.Cancel.AutoSize = true;
-            this.Cancel.Location = new System.Drawing.Point(201, 30);
-            this.Cancel.Name = "Cancel";
-            this.Cancel.Size = new System.Drawing.Size(67, 24);
-            this.Cancel.TabIndex = 3;
-            this.Cancel.TabStop = true;
-            this.Cancel.Text = "Cancel";
-            this.Cancel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.Cancel_LinkClicked);
+            this.cancel.AutoSize = true;
+            this.cancel.Location = new System.Drawing.Point(201, 30);
+            this.cancel.Name = "cancel";
+            this.cancel.Size = new System.Drawing.Size(67, 24);
+            this.cancel.TabIndex = 3;
+            this.cancel.TabStop = true;
+            this.cancel.Text = "Cancel";
             // 
             // textBox
             // 
@@ -67,7 +65,6 @@
             this.textBox.Name = "textBox";
             this.textBox.Size = new System.Drawing.Size(302, 30);
             this.textBox.TabIndex = 26;
-            this.textBox.Click += new System.EventHandler(this.textBox_Click);
             // 
             // pictureBox1
             // 
@@ -100,11 +97,10 @@
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.textBox);
-            this.Controls.Add(this.Cancel);
-            this.Controls.Add(this.SelectAll);
+            this.Controls.Add(this.cancel);
+            this.Controls.Add(this.selectAll);
             this.Name = "MultiSelectBox";
             this.Size = new System.Drawing.Size(300, 724);
-            this.Load += new System.EventHandler(this.MultiSelectBox_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
@@ -113,8 +109,8 @@
         }
 
         #endregion
-        private LinkLabel SelectAll;
-        private LinkLabel Cancel;
+        private LinkLabel selectAll;
+        private LinkLabel cancel;
         private TextBox textBox;
         private PictureBox pictureBox1;
         private PictureBox pictureBox2;
