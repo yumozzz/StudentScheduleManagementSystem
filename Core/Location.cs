@@ -395,8 +395,8 @@ namespace StudentScheduleManagementSystem.Map
             /// 获取ID为<paramref name="id"/>的顶点的所有邻接点
             /// </summary>
             /// <param name="id"></param>
-            /// <returns>ID元组的列表，Item1为<paramref name="id"/>，Item2为邻接点的ID</returns>
-            public List<(int, int)> this[int id] => _adjArray[id].Select(node => (id, node.pointId)).ToList();
+            /// <returns>元组的列表，Item1为为邻接点的ID，Item2为该边的长度</returns>
+            public List<(int, int)> this[int id] => _adjArray[id].Select(node => (node.pointId, node.edge.Weight)).ToList();
 
             public Edge? this[int fromId, int toId]
             {
@@ -561,12 +561,12 @@ namespace StudentScheduleManagementSystem.Map
             {
                 return ret.ToList();
             }
-            for (int i = 0; i < GlobalMap!.Size; i++)
+            for (int i = 0; i < GlobalMap.Size; i++)
             {
-                foreach (var pair in GlobalMap[i])
+                foreach ((int id, _) in GlobalMap[i])
                 {
-                    var smallerId = pair.Item1 <= pair.Item2 ? pair.Item1 : pair.Item2;
-                    var biggerId = smallerId == pair.Item1 ? pair.Item2 : pair.Item1;
+                    var smallerId = Math.Min(i, id);
+                    var biggerId = i + id - smallerId;
                     if (GlobalMap[smallerId, biggerId]!.Value.Type == EdgeType.Line)
                     {
                         ret.Add((GlobalMap.GetVertex(smallerId).ToPoint(), GlobalMap.GetVertex(biggerId).ToPoint()));
@@ -663,9 +663,8 @@ namespace StudentScheduleManagementSystem.Map
                     continue;
                 }
                 visited[curId] = true;
-                foreach ((_, int id) in GlobalMap[curId])
+                foreach ((int id, int dist) in GlobalMap[curId])
                 {
-                    int dist = GlobalMap[curId, id]!.Value.Weight;
                     if (distance[id] > distance[curId] + dist)
                     {
                         distance[id] = distance[curId] + dist;
