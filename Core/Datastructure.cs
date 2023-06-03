@@ -108,10 +108,6 @@ namespace StudentScheduleManagementSystem.DataStructure
             }
         }
 
-        public IEnumerator<T> GetEnumerator() => new Enumerator(this);
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
         public void Add(T item)
         {
             if (Count == _array.Length)
@@ -122,13 +118,6 @@ namespace StudentScheduleManagementSystem.DataStructure
             }
             _array[Count] = item;
             Count++;
-            _version++;
-        }
-
-        public void Clear()
-        {
-            _array = new T[10];
-            Count = 0;
             _version++;
         }
 
@@ -144,11 +133,6 @@ namespace StudentScheduleManagementSystem.DataStructure
                 }
             }
             return found;
-        }
-
-        public void CopyTo(T[] array, int index)
-        {
-            Array.Copy(_array, 0, array, index, Count);
         }
 
         public bool Remove(T element)
@@ -167,6 +151,22 @@ namespace StudentScheduleManagementSystem.DataStructure
             }
             return found;
         }
+
+        public void CopyTo(T[] array, int index)
+        {
+            Array.Copy(_array, 0, array, index, Count);
+        }
+
+        public void Clear()
+        {
+            _array = new T[10];
+            Count = 0;
+            _version++;
+        }
+
+        public IEnumerator<T> GetEnumerator() => new Enumerator(this);
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     /// <summary>
@@ -410,6 +410,51 @@ namespace StudentScheduleManagementSystem.DataStructure
             Add(keyValuePair.Key, keyValuePair.Value);
         }
 
+        public bool Remove(TKey key)
+        {
+            int hashCode = _comparer.GetHashCode(key) & 0x7FFFFFFF;
+            int bucket = hashCode % _buckets.Length;
+            int last = -1;
+            for (int i = _buckets[bucket]; i >= 0; last = i, i = _entries[i].next)
+            {
+                if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key))
+                {
+                    if (last < 0)
+                    {
+                        _buckets[bucket] = _entries[i].next;
+                    }
+                    else
+                    {
+                        _entries[last].next = _entries[i].next;
+                    }
+                    _entries[i].hashCode = -1;
+                    _entries[i].next = _freeList;
+                    _entries[i].key = default;
+                    _entries[i].value = default;
+                    _freeList = i;
+                    _freeCount++;
+                    _version++;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            int i = FindEntry(key);
+            if (i >= 0)
+            {
+                value = _entries[i].value;
+                return true;
+            }
+            else
+            {
+                value = default;
+                return false;
+            }
+        }
+
         public bool Contains(KeyValuePair<TKey, TValue> keyValuePair)
         {
             int i = FindEntry(keyValuePair.Key);
@@ -423,6 +468,8 @@ namespace StudentScheduleManagementSystem.DataStructure
             }
         }
 
+        public bool ContainsKey(TKey key) => FindEntry(key) >= 0;
+
         public bool Remove(KeyValuePair<TKey, TValue> keyValuePair)
         {
             int i = FindEntry(keyValuePair.Key);
@@ -434,6 +481,18 @@ namespace StudentScheduleManagementSystem.DataStructure
             else
             {
                 return false;
+            }
+        }
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+        {
+            Entry[] entries = this._entries;
+            for (int i = 0; i < _count; i++)
+            {
+                if (entries[i].hashCode >= 0)
+                {
+                    array[index++] = new(entries[i].key, entries[i].value);
+                }
             }
         }
 
@@ -453,8 +512,6 @@ namespace StudentScheduleManagementSystem.DataStructure
             _freeCount = 0;
             _version++;
         }
-
-        public bool ContainsKey(TKey key) => FindEntry(key) >= 0;
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => new Enumerator(this);
 
@@ -545,63 +602,6 @@ namespace StudentScheduleManagementSystem.DataStructure
             }
             _buckets = newBuckets;
             _entries = newEntries;
-        }
-
-        public bool Remove(TKey key)
-        {
-            int hashCode = _comparer.GetHashCode(key) & 0x7FFFFFFF;
-            int bucket = hashCode % _buckets.Length;
-            int last = -1;
-            for (int i = _buckets[bucket]; i >= 0; last = i, i = _entries[i].next)
-            {
-                if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key))
-                {
-                    if (last < 0)
-                    {
-                        _buckets[bucket] = _entries[i].next;
-                    }
-                    else
-                    {
-                        _entries[last].next = _entries[i].next;
-                    }
-                    _entries[i].hashCode = -1;
-                    _entries[i].next = _freeList;
-                    _entries[i].key = default;
-                    _entries[i].value = default;
-                    _freeList = i;
-                    _freeCount++;
-                    _version++;
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool TryGetValue(TKey key, out TValue value)
-        {
-            int i = FindEntry(key);
-            if (i >= 0)
-            {
-                value = _entries[i].value;
-                return true;
-            }
-            else
-            {
-                value = default;
-                return false;
-            }
-        }
-
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
-        {
-            Entry[] entries = this._entries;
-            for (int i = 0; i < _count; i++)
-            {
-                if (entries[i].hashCode >= 0)
-                {
-                    array[index++] = new(entries[i].key, entries[i].value);
-                }
-            }
         }
     }
 }

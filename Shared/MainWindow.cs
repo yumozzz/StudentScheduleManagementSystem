@@ -1,8 +1,8 @@
-//UI½çÃæ
+ï»¿//UIç•Œé¢
 namespace StudentScheduleManagementSystem.UI
 {
     /// <summary>
-    /// µÇÂ¼´°¿Ú
+    /// ç™»å½•çª—å£
     /// </summary>
     public partial class MainWindow : Form
     {
@@ -49,13 +49,13 @@ namespace StudentScheduleManagementSystem.UI
         }
 
         /// <summary>
-        /// ĞÂ½¨Ö÷´°¿Ú£¬µÈ´ıÆä¹Ø±ÕºóÖØĞÂ´ò¿ªµÇÂ¼´°¿Ú
+        /// æ–°å»ºä¸»çª—å£ï¼Œç­‰å¾…å…¶å…³é—­åé‡æ–°æ‰“å¼€ç™»å½•çª—å£
         /// </summary>
         private void LoginButton_Click(object sender, EventArgs e)
         {
             if (usernameBox.Text == "" || passwordBox.Text == "")
             {
-                MessageBox.Show("ÊäÈëÎª¿Õ!");
+                MessageBox.Show("è¾“å…¥ä¸ºç©º!");
                 return;
             }
             if (!MainProgram.Program.Login(usernameBox.Text, passwordBox.Text))
@@ -64,7 +64,7 @@ namespace StudentScheduleManagementSystem.UI
             }
             this.usernameBox.Text = "";
             this.passwordBox.Text = "";
-            MessageBox.Show("µÇÂ¼³É¹¦!");
+            MessageBox.Show("ç™»å½•æˆåŠŸ!");
             this.Hide();
             Thread windowThread, clockThread = new(Times.Timer.Start);
             MainProgram.Program.Cts = new();
@@ -108,14 +108,14 @@ namespace StudentScheduleManagementSystem.UI
         {
             if (usernameBox.Text == "" || passwordBox.Text == "")
             {
-                MessageBox.Show("ÊäÈëÎª¿Õ!");
+                MessageBox.Show("è¾“å…¥ä¸ºç©º!");
                 return;
             }
             if (!MainProgram.Program.Register(usernameBox.Text, passwordBox.Text))
             {
                 return;
             }
-            MessageBox.Show("×¢²á³É¹¦!");
+            MessageBox.Show("æ³¨å†ŒæˆåŠŸ!");
             this.Hide();
             StudentWindow = new();
             Thread thread = new(() => StudentWindow.ShowDialog());

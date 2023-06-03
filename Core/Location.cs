@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 //地图与导航
 namespace StudentScheduleManagementSystem.Map
@@ -491,7 +492,7 @@ namespace StudentScheduleManagementSystem.Map
         /// <returns>路径上所有点的ID</returns>
         public static List<int> GetClosestPath(Building startBuilding, Building endBuilding)
         {
-            return GetClosestPath(startBuilding.Center.Id, endBuilding.Center.Id);
+            return GetClosestPath(startBuilding.Center.Id, endBuilding.Center.Id).Item1;
         }
 
         /// <summary>
@@ -507,7 +508,7 @@ namespace StudentScheduleManagementSystem.Map
             {
                 throw new ArgumentException("too many or too few items in parameter \"buildings\"");
             }
-            var(submap, correspondentId) = CreateSubMap(points);
+            var (submap, correspondentId) = CreateSubMap(points);
 
             int startCity = 0;
             List<int> shortestPath = Solve(submap, startCity);
@@ -515,7 +516,7 @@ namespace StudentScheduleManagementSystem.Map
             List<int> result = new();
             for (int i = 1; i < transferred.Count; i++)
             {
-                List<int> temp = GetClosestPath(transferred[i - 1], transferred[i]);
+                List<int> temp = GetClosestPath(transferred[i - 1], transferred[i]).Item1;
                 for (int j = 0; j < temp.Count - 1; j++)
                 {
                     result.Add(temp[j]);
@@ -628,96 +629,52 @@ namespace StudentScheduleManagementSystem.Map
             {
                 for (int j = 0; j < pointCount; j++)
                 {
-                    subEdges[i, j] = i == j ? int.MaxValue : GetClosestPathLength(criticalPoints[i], criticalPoints[j]);
+                    subEdges[i, j] = i == j ? int.MaxValue : GetClosestPath(criticalPoints[i], criticalPoints[j]).Item2;
                 }
             }
             return (subEdges, correspondence);
         }
 
-        private static List<int> GetClosestPath(int startId, int endId) //传参是出发建筑和终点建筑的中心点的id
+        private static (List<int>, int) GetClosestPath(int startId, int endId) //传参是出发建筑和终点建筑的中心点的id
         {
             //遍历的每一个点i都会有一个route[i],表示到达该点所进过的路线。
             int pointCount = GlobalMap!.Size; //点的数量
+
             List<int>[] route = new List<int>[pointCount];
+            PriorityQueue<int, int> idQueue = new();
+            int[] distance = new int[pointCount]; //每个点到初始点的距离
             bool[] visited = new bool[pointCount];
             for (int i = 0; i < pointCount; i++)
             {
                 route[i] = new();
+                distance[i] = int.MaxValue;
                 visited[i] = false;
             }
-            int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
-            Array.Fill(distance, int.MaxValue);
+
             distance[startId] = 0;
-            PriorityQueue<int, int> idQueue = new();
             idQueue.Enqueue(startId, 0);
             route[startId].Add(startId);
-            int curId = startId;
-
-            for (int i = 0; i < pointCount; i++) //循环len-1次
+            while (idQueue.Count > 0)
             {
-                for (int j = 0; j < GlobalMap[curId].Count; j++)
-                {
-                    int id = GlobalMap[curId][j].Item2;
-                    int dist = GlobalMap[curId, id]!.Value.Weight;
-                    if (distance[id] > distance[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
-                    {
-                        distance[id] = distance[curId] + dist; //替换从出发点到点[z]的最短距离
-                        idQueue.Enqueue(id, distance[id]);
-                        route[id].Clear();
-                        for(int k = 0; k < route[curId].Count;k++)
-                        {
-                            route[id].Add(route[curId][k]);
-                        }
-                        route[id].Add(id); //记录此时的路线在list中,同时temp++
-                    }
-                }
-
-                //遍历所有点，寻找下一个距离最近的点
+                int curId = idQueue.Peek();
                 idQueue.Dequeue();
-                visited[curId] = true;
-                curId = idQueue.Peek();
-            }
-            return route[endId];
-        }
-
-        private static int GetClosestPathLength(int startId, int endId)
-        {
-            int pointCount = GlobalMap!.Size; //点的数量
-            int[] distance = new int[GlobalMap.Size]; //每个点到初始点的距离
-            Array.Fill(distance, int.MaxValue);
-            bool[] visited = new bool[pointCount];
-            Array.Fill(visited, false);
-            distance[startId] = 0;
-            int curId = startId;
-
-            for (int i = 1; i < pointCount; i++)
-            {
-                for (int j = 0; j < GlobalMap[curId].Count; j++)
+                if (visited[curId])
                 {
-                    int id = GlobalMap[curId][j].Item2;
+                    continue;
+                }
+                visited[curId] = true;
+                foreach ((_, int id) in GlobalMap[curId])
+                {
                     int dist = GlobalMap[curId, id]!.Value.Weight;
-                    if (distance[id] > distance[curId] + dist) //如果出发点到点[z]的距离 大于 出发点到某点的距离+某点到点[z]的距离
+                    if (distance[id] > distance[curId] + dist)
                     {
-                        distance[id] = distance[curId] + dist; //替换从出发点到点[z]的最短距离
+                        distance[id] = distance[curId] + dist;
+                        idQueue.Enqueue(id, distance[id]);
+                        route[id] = new(route[curId]) { id };
                     }
                 }
-
-                //遍历所有点，寻找下一个距离最近的点
-                int minDistance = int.MaxValue;
-                int tempId = startId;
-                for (int j = 0; j < pointCount; j++)
-                {
-                    if (j != curId && distance[j] >= distance[curId] && distance[j] < minDistance &&
-                        visited[j] == false)
-                    {
-                        minDistance = distance[j];
-                        tempId = j;
-                    }
-                }
-                visited[curId] = true;
-                curId = tempId;
             }
-            return distance[endId];
+            return (route[endId], distance[endId]);
         }
 
         private static List<int> Solve(int[,] adjacencyMatrix, int startCity)
@@ -743,12 +700,12 @@ namespace StudentScheduleManagementSystem.Map
         }
 
         private static void Permute(int[,] adjacencyMatrix,
-                                   List<int> cities,
-                                   int startCity,
-                                   int left,
-                                   int right,
-                                   ref List<int> shortestPath,
-                                   ref int shortestDistance)
+                                    List<int> cities,
+                                    int startCity,
+                                    int left,
+                                    int right,
+                                    ref List<int> shortestPath,
+                                    ref int shortestDistance)
         {
             if (left == right)
             {
@@ -811,16 +768,14 @@ namespace StudentScheduleManagementSystem.Map
 
         private static void Swap(List<int> list, int i, int j)
         {
-            int temp = list[i];
-            list[i] = list[j];
-            list[j] = temp;
+            (list[i], list[j]) = (list[j], list[i]);
         }
 
         #endregion
     }
 
     /// <summary>
-    /// 在地图上户籍制路径
+    /// 在地图上绘制路径
     /// </summary>
     public static class Navigate
     {

@@ -109,6 +109,9 @@ namespace StudentScheduleManagementSystem.Times
             }
         }
 
+        /// <summary>
+        /// 转换为等效的时间轴偏移量
+        /// </summary>
         public int ToInt()
         {
             return GetHashCode();

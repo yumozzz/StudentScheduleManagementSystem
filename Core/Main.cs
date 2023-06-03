@@ -101,6 +101,7 @@ namespace StudentScheduleManagementSystem.MainProgram
                     Log.Error.Log("无法保存系统文件", ex);
                 }
                 FreeConsole();
+                Log.LogBase.Close();
                 result?.Wait();
             }
         }
