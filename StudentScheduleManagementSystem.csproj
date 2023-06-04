@@ -59,7 +59,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(SolutionDir)Core\makecert.exe&quot; &quot;$(SolutionDir)$(OutDir)&quot;&#xD;&#xA;copy &quot;$(SolutionDir)Shared\map.json&quot; &quot;$(SolutionDir)$(OutDir)map\&quot;&#xD;&#xA;xcopy /S /Y &quot;$(SolutionDirectory)&quot; &quot;$(DocumentDirectory)src&quot; /EXCLUDE:$(SolutionDir)exclude.txt" />
+    <Exec Command="copy &quot;$(SolutionDir)Core\makecert.exe&quot; &quot;$(SolutionDir)$(OutDir)&quot;&#xD;&#xA;copy &quot;$(SolutionDir)Shared\map.json&quot; &quot;$(SolutionDir)$(OutDir)map\&quot;&#xD;&#xA;exit 0&#xD;&#xA;xcopy /S /Y &quot;$(SolutionDirectory)&quot; &quot;$(DocumentDirectory)src&quot; /EXCLUDE:$(SolutionDir)exclude.txt" />
   </Target>
 
 </Project>
