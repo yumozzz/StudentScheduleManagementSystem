@@ -396,17 +396,21 @@ namespace StudentScheduleManagementSystem.Map
             /// </summary>
             /// <param name="id"></param>
             /// <returns>元组的列表，Item1为为邻接点的ID，Item2为该边的长度</returns>
-            public List<(int, int)> this[int id] => _adjArray[id].Select(node => (node.pointId, node.edge.Weight)).ToList();
+            public (int, int)[] this[int id] => _adjArray[id].Select(node => (node.pointId, node.edge.Weight)).ToArray();
 
-            public Edge? this[int fromId, int toId]
+            /// <summary>
+            /// 查询ID为<paramref name="from"/>的顶点是否有邻接到ID为<paramref name="to"/>的边
+            /// </summary>
+            /// <returns>若有，则为该边；反之为<see langword="null"/></returns>
+            public Edge? this[int from, int to]
             {
                 get
                 {
                     Node ans = default;
                     bool find = false;
-                    foreach (var node in _adjArray[fromId])
+                    foreach (var node in _adjArray[from])
                     {
-                        if (node.pointId == toId)
+                        if (node.pointId == to)
                         {
                             find = true;
                             ans = node;
@@ -620,7 +624,7 @@ namespace StudentScheduleManagementSystem.Map
 
         #region other methods
 
-        private static (int[,], int[]) CreateSubMap(List<int> criticalPoints) //生成一个子图，其中子图的节点是所有需要经过的点 + 出发点。
+        private static (int[,], int[]) CreateSubMap(List<int> criticalPoints)
         {
             int pointCount = criticalPoints.Count;
             int[,] subEdges = new int[pointCount, pointCount];
