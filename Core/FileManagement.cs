@@ -1,4 +1,4 @@
-﻿#define RWINPLAINTEXT
+﻿//#define RWINPLAINTEXT
 #define RWINENCRYPTION
 
 using System.Text;
@@ -102,6 +102,7 @@ namespace StudentScheduleManagementSystem.FileManagement
             #endif
             Log.Information.Log($"已保存学号为{fileName}的用户信息");
         }
+
 
         /// <summary>
         /// 读取地图文件
